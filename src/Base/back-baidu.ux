@@ -1,0 +1,106 @@
+<template>
+    <div  class="back-baidu-btn">
+        <div if="{{showBackBtn}}" class="back-baidu {{styletop?'styletop':'stylebot'}}" @click="backBaidu">
+            <image class="back" src="../Common/images/back-baidu.png"></image>
+            <image class="baidu" src="../Common/images/baiduapp.png"></image>
+            <text>返回百度APP</text>
+        </div>
+        <!-- <div class="back-baidu {{styletop?'styletop':'stylebot'}}" @click="clearHeader">
+            <image class="back" src="../Common/images/back-baidu.png"></image>
+            <image class="baidu" src="../Common/images/baiduapp.png"></image>
+            <text>清除缓存</text>
+        </div> -->
+    </div>
+</template>
+<style scoped lang="less">
+    .back-baidu-btn{
+        width: 0px;
+        height: 0px;
+        .back-baidu{
+            height: 60px;
+            background-color: #3388ff;
+            position: fixed;
+            left: 0px;
+            justify-content: center;
+            align-items: center;
+            border-bottom-right-radius: 30px;
+            border-top-right-radius: 30px;
+            padding: 0 20px 0px 10px;
+            .back{
+                width: 26px;
+                height: 26px;
+                margin-right: 5px;
+            }
+            .baidu{
+                width: 30px;
+                height: 30px;
+                margin-right: 10px;
+                border-radius: 5px;
+            }
+            text{
+                font-size: 26px;
+                color: #fff;
+            }
+        }
+        .styletop{
+            bottom: 40px;
+        }
+        .stylebot{
+            bottom: 270px;
+        }
+    }
+</style>
+
+<script>
+import router from '@system.router';
+import prompt from '@system.prompt';
+import storage from '@system.storage';
+import file from '@system.file';
+export default {
+    props:[
+        'styletop'
+    ],
+    data: {
+        showBackBtn:false        
+    },
+    onInit() {
+        if(this.$app.isFromBaidu&&this.$app.isBaiduOpen){
+            this.showBackBtn = true
+        }
+    },
+    backBaidu(){
+        router.push({
+            uri:'baiduboxapp://donothing'
+        })
+    },
+    clearHeader(){
+        let that = this
+        that.$app.$def.deleteStorageFile(that,{
+            key:'headerJson',
+            success:function(){
+                console.log('clear headerJson')
+                 prompt.showToast({
+                    message:'已清除缓存'
+                })                           
+            }
+        })
+        // storage.clear({
+        //     success: function(res) {
+        //         that.fnGetfileList(that.$app.$data.storageFilePath).then(res=>{
+        //             res.forEach((cur,index)=>{
+        //                 file.delete({
+        //                     uri:cur.uri,
+        //                     success:function(){
+        //                         prompt.showToast({
+        //                             message:'已清除缓存'
+        //                         })   
+        //                     }
+        //                 })
+        //             })
+        //         })
+        //     }
+        // })
+    }
+}
+</script>
+

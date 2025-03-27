@@ -1,0 +1,138 @@
+<template>
+  <div class="hanging_holder">
+    <stack class="hanging_holder_stack">
+      <image  class="hanging_img" src="{{readPageWidget.iconUrl}}"  @click="routeHanging"></image>
+      <div class="hanging_close_box"  @click="routeHangingClose">
+        <image class="hanging_close_img" src="https://xsmfdq.kkyd.cn/images/hanging-close.png"></image>
+      </div>
+    </stack>
+  </div>
+</template>
+<style scoped lang="less">
+  .hanging_holder {
+		position: fixed;
+		width: 188px;
+		height: 208px;
+		right: 15px;
+		bottom: 272px;
+    .hanging_holder_stack{
+      width: 188px;
+		  height: 208px;
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: flex-end;
+      .hanging_img{
+        width: 168px;
+        height: 168px;
+        border-radius: 2px;
+        margin-right: 15px;
+      }
+      .hanging_close_box{
+        margin-top: 18px;
+        width: 40px;
+        height: 40px;
+        align-self: flex-start;
+        justify-content: center;
+        align-items: center;
+        .hanging_close_img{
+          width: 40px;
+          height: 40px;
+          resize-mode: contain;
+          object-fit: contain;
+        }
+      }
+    }
+	}
+</style>
+
+<script>
+import router from '@system.router'
+export default {
+    props: ['shenceShowOn','readPageWidget', 'bookId', 'chapterId', 'chapterIndex','operationName','night','userTacticsVo','bookName'],
+    onInit() {
+
+    },
+    routeHanging(){
+      let that = this
+      let hangingClickData = {}
+      if(that.readPageWidget.jumpType == 0){
+        hangingClickData = that.opClickDataFn('去看看', '0') // 活动
+      }else{
+        hangingClickData = that.opClickDataFn('去看看', '1') // 充值页
+      }
+      if(that.userTacticsVo.isDot=='1'){
+        this.$app.shenceLog.log(that, 'track', 'OperationClick', hangingClickData);
+      }
+      this.$dispatch('audioToPage')
+      if(that.readPageWidget.jumpType == 0){
+        router.push({
+            uri:'/Webhuodong',
+            params:{
+                webSrc:that.readPageWidget.jumpUrl,
+                OperationPosition: '阅读页悬浮挂件',
+                OperationName: that.operationName,
+                OperationID: 17,
+                OperationType: '',
+                pageFrom: 'read',
+            }
+        })
+      }else if(that.readPageWidget.jumpType == 1){
+        router.push({
+          uri:'/Recharge',
+          params: {
+              url: '/Read',
+              bookId: that.bookId,
+              chapterId: that.chapterId,
+              pageFrom: 'read',
+              SourcePosition: '阅读页悬浮挂件',
+              bookName: that.bookName
+          }
+        })
+      }else if(that.readPageWidget.jumpType === 2) {
+        router.push({
+            uri: '/Member',
+            params: {
+                pageFrom: 'read',
+                bookId: that.bookId,
+                chapterId: that.chapterId,
+                referrer : '阅读页-悬浮挂件'
+            }
+        });
+      }
+    },
+    routeHangingClose(){
+      let HangingCloseData = this.opClickDataFn('关闭', '')
+      if(this.userTacticsVo.isDot=='1'){
+        this.$app.shenceLog.log(this, 'track', 'OperationClick', HangingCloseData);
+      }
+      this.$emit('routeHangingClose')
+    },
+    opClickDataFn(name, type){
+      let that = this
+      let opClickData = {
+        EndTime: new Date().getTime(),
+        StartTime: new Date().getTime(),
+        ActID: that.readPageWidget.jumpUrl ? that.readPageWidget.jumpUrl.split('id=')[1] ? that.readPageWidget.jumpUrl.split('id=')[1] : '' : '',
+        ActURL: that.readPageWidget.jumpUrl || '',
+        PicURL: that.readPageWidget.iconUrl || '',
+        ButtonName: name || '',
+        OperationType: type || '',
+        OperationID: 17,
+        OperationName: that.operationName || '',
+        OperationPosition: '阅读页悬浮挂件',
+        ChaptersNum: that.chapterIndex || '',
+        TacticsId: that.userTacticsVo.tacticsId || '',
+        TacticsName: that.userTacticsVo.tacticsName || '',
+        SourceId: that.userTacticsVo.sourceId || '',
+        SourceName: that.userTacticsVo.sourceName ||'',
+        ShuntId: that.userTacticsVo.shuntID || '',
+        ShuntName: that.userTacticsVo.shuntName || '',
+        ChaptersID: that.chapterId || '',
+        BookID: that.bookId || '',
+        BookName: that.bookName || ''
+      }
+      return opClickData
+    }
+}
+</script>
+

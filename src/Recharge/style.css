@@ -1,0 +1,339 @@
+
+    .iswxwebpay_box{
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        background-color: rgba(0,0,0,.6);
+        justify-content: center;
+        align-items: center
+    }
+    .iswxwebpay_main{
+        padding: 32px 0 0;
+        width:480px;
+        background-color:#fff;
+        border-radius:12px;
+        font-size:28px;
+        flex-direction: column;
+    }
+    .iswxwebpay_m_tit{
+        padding: 0 32px;
+        height: 60px;
+        font-size: 36px;
+        text-align: center;
+        color: #808080;
+        line-height: 60px;
+    }
+    .iswxwebpay_m_p{
+        padding: 0 32px;
+        height: 160px;
+        font-size: 28px;
+        color: #808080;
+        text-align: center;
+        line-height: 160px;
+        border-bottom-color: #d8d8d8;
+        border-bottom-width: 1px;
+    }
+    .iswxwebpay_but_box{
+        height: 100px;
+    }
+    .iswxwebpay_but_1{
+        height: 100px;
+        width: 50%;
+        text-align: center;
+        font-size: 30px;
+        line-height: 100px;
+        border-right-color: #d8d8d8;
+        border-right-width: 1px;
+        color: #808080;
+    }
+    .iswxwebpay_but_2{
+        height: 100px;
+        width: 50%;
+        text-align: center;
+        font-size: 30px;
+        line-height: 100px;
+        color:#ff6fa2;
+    }
+
+    .rech_pay_type{
+        margin: 15px;
+        flex-direction: column;
+    }
+    .rech_pay_li{
+        padding: 19px 10px;
+        height: 100px;
+        border-top-color: #dcdcdc;
+        border-top-width: 1px;
+        border-bottom-color: #dcdcdc;
+        border-bottom-width: 1px;
+    }
+    .rech_pay_li_img{
+        height: 60px;
+        width: 60px;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        background-size: 60px 60px;
+        flex-wrap: wrap;
+    }
+    .rech_pay_wx_img{
+        background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/3.png);
+    }
+    .rech_pay_ali_img{        
+        background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/4.png);
+    }
+    .rech_pay_li_name{
+        flex: 1;
+        padding: 0 20px;
+        height: 60px;
+        font-size: 36px;
+        color: #000000;
+        line-height: 60px;
+    }
+    .rech_pay_li_icon{
+        height: 60px;
+        width: 60px;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 44px 44px;
+    }
+    .rech_pay_li_icon_1{        
+        background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/1.png);
+    }
+    .rech_pay_li_icon_2{
+        background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/2.png);
+    }
+
+
+
+    .unit_info {
+        font-size: 26px;
+        color: #4a4a4a;
+        line-height: 40px;
+    }
+
+    .unit_text {
+        font-size: 26px;
+        color: #fa2a2d;
+        line-height: 40px;
+    }
+
+    .loading {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, .5);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading text {
+        color: #fff;
+    }
+
+    .recharge_box {
+        flex-direction: column;
+        padding-bottom: 100px;
+    }
+
+    .rech_box {
+        flex-direction: column;
+        padding: 36px 10px 25px;
+        margin: 0 30px;
+    }
+
+    .rech_txt {
+        flex: 1;
+        height: 56px;
+        font-size: 26px;
+        color: #3a4a5a;
+        line-height: 56px;
+    }
+
+    .rech_list_box {
+        margin: 0 15px;
+        padding: 30px 0;
+        flex-direction: column;
+    }
+
+    .rech_list_tit {
+        margin: 0 15px 15px;
+        height: 50px;
+        align-items: center;
+    }
+
+    .rech_list_title {
+        height: 50px;
+        font-size: 38px;
+        color: #000;
+        line-height: 50px;
+    }
+
+    .rech_list_tit_num {
+        padding-top: 12px;
+        height: 50px;
+        padding-left: 20px;
+        font-size: 26px;
+        color: #fa2a2d;
+    }
+
+    .rech_list_main {
+        flex-wrap: wrap;
+    }
+
+    .rech_li {
+        padding: 15px;
+        width: 50%;
+    }
+
+    .rech_li_stack {
+        flex: 1;
+        height: 142px;
+        flex-direction: column;
+    }
+
+    .rech_li_tit {
+        padding: 18px 0 1px 27px;
+        height: 62px;
+        font-size: 44px;
+        color: #3a4a5a;
+        line-height: 52px;
+    }
+
+    .rech_li_tit_2 {
+        padding: 18px 0 1px 27px;
+        height: 62px;
+        font-size: 36px;
+        color: #3a4a5a;
+        line-height: 52px;
+    }
+
+    .rech_li_red {
+        width: 100%;
+        text-align: right;
+        margin-top: 20px;
+        height: 44px;
+    }
+
+    .rech_li_red_l {
+        flex: 1;
+    }
+
+    .rech_li_red_r {
+        padding: 0 26px;
+        height: 44px;
+        background-color: #fa2a2d;
+        font-size: 26px;
+        color: #fff;
+        border-top-left-radius: 44px;
+        border-bottom-left-radius: 44px;
+        line-height: 44px;
+    }
+
+    .rech_li_txt {
+        padding: 80px 0 0 26px;
+    }
+
+    .rech_li_txt_b {
+        font-size: 28px;
+        color: #3a4a5a;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+
+    .rech_li_txt_r {
+        font-size: 28px;
+        color: #fa2a2d;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+
+    .rech_li_select_m {
+        flex: 1;
+        border: 1px solid #dcdcdc;
+    }
+
+    .rech_li_select_b {
+        flex: 1;
+        border: 4px solid #4bf;
+    }
+
+    .rech_li_select {
+        height: 100%;
+        width: 100%;
+        background-image: url(https://xsmfdq.kkyd.cn/images/recarhge_money_select_icon.png);
+        background-position: right bottom;
+        background-repeat: no-repeat;
+        background-size: 38px 38px;
+    }
+
+    .rech_li_stack_200 {
+        height: 200px;
+    }
+
+    .rech_li_txt_2 {
+        padding: 80px 0 0 26px;
+        flex-direction: column;
+    }
+
+    .rech_li_txt_g {
+        margin-bottom: 10px;
+        font-size: 30px;
+        color: #9a9191;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+
+    .rech_li_txt_gr {
+        font-size: 30px;
+        color: #fa2a2d;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+    .rech_list_but_div{position:fixed;bottom:0;left:0;right:0;}
+    .rech_list_but {
+        margin: 0 25px 20px;
+        height: 94px;
+        background-color: #44bbff;
+        font-size: 30px;
+        color: #fff;
+        text-align: center;
+        line-height: 94px;
+        border-radius: 10px;
+    }
+
+    .rech_prompt_box {
+        padding: 30px 30px 60px;
+        flex-direction: column;
+    }
+
+    .rech_prompt_tit {
+        margin: 5px 0;
+        font-size: 38px;
+        color: #000;
+        line-height: 60px;
+    }
+
+    .rech_prompt_li {
+        margin: 5px 0;
+        font-size: 26px;
+        color: #3a4a5a;
+        line-height: 44px;
+    }
+
+    .rech_border {
+        margin: 0 40px;
+        height: 1px;
+        background-color: #dcdcdc;
+    }
+
+    .rech_lack_balance {
+        padding: 20px 38px;
+        flex-direction: column;
+        background-color: #f5f5f5;
+    }

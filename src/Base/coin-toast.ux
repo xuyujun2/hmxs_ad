@@ -1,0 +1,59 @@
+<template>
+    <div class="toast-root" @click="vagueClick">
+        <div class="toast-bg">
+            <image src="https://xsmfdq.kkyd.cn/images/toast-coin.gif"></image>
+            <text>{{message}}</text>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .toast-root{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        justify-content: center;
+        align-items: center;
+        .toast-bg{
+            width:426px;
+            height:110px;
+            background-color:rgba(0,0,0,1);
+            border-radius:12px;
+            justify-content: center;
+            align-items: center;
+            image{
+                width: 62px;
+                height: 65px;
+                margin-right: 9px;
+                background-color: red;
+            }
+            text{
+                font-size:30px;
+                font-weight:400;
+                color:rgba(255,221,162,1);
+                line-height:48px;
+                width: 304px;
+            }
+        }
+    }
+</style>
+
+<script>
+export default {
+    props:[
+        'message',
+        'time'
+    ],
+    data: {
+
+    },
+    onInit() {
+        setTimeout(()=>{
+            this.$emit('closeToast')
+        },this.time)
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    }
+}
+</script>
+

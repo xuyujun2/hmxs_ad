@@ -1,0 +1,589 @@
+<template>
+	<div class="my-wrap">
+		<div class="empty-block"></div>
+		<div class="img-bg">
+			<div class="info-wrap">
+			    <div class="info-img-box">
+				    <image class="info-image" src="{{userHeaderJson.t ? 'https://xsmfdq.kkyd.cn/images/hmxs/img-avatar-default.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/nologin.png'}}"></image>
+			    </div>
+			    <div class="info-box">
+				    <div class="info-login">
+					    <text class="info-name" if="{{userHeaderJson.t}}">{{nikeName}}</text>
+					    <text class="info-login-btn" if="{{!userHeaderJson.t}}" @click="fnRouteToLogin('点击登录')">点击登录</text>
+				    </div>
+				    <div class="info-id-box">
+					    <text class="info-id">ID:{{userid}}</text>
+				    </div>
+			    </div>
+			    <div class="change-info-box" if="{{userHeaderJson.t}}"  @click="fnRouteToLogin('点击登录')">
+                    <image src="https://xsmfdq.kkyd.cn/images/hmxs/switch-user.png"></image>
+				    <text class="info-change">切换用户</text>
+			    </div>
+		    </div>
+		    <stack class="read-vip">
+			    <image src="https://xsmfdq.kkyd.cn/images/vip_card_bg.png" class="vip-bg"></image>
+			    <div class="vip-info">
+				    <image src="https://xsmfdq.kkyd.cn/images/vip_icon.png" class="vip-icon"></image>
+				    <block if="ifVipMember">
+					    <div class="vip-content">
+						    <div class="vip-center">
+							    <text else class="top-topic">{{freeVipName}}套餐</text>
+							    <text else class="vip-validity">有效期至：{{freeEndTime}}</text>
+						    </div>
+						    <div class="vip-btn">
+							    <text class="btn-text" @click="fnRouteToMember">立即续费</text>
+						    </div>
+					    </div>
+				    </block>
+				    <block else>
+					    <div class="vip-content">
+						    <div class="vip-center">
+							    <text else class="top-topic">河马VIP会员</text>
+							    <text else class="vip-validity">畅享无广告阅读等权益</text>
+						    </div>
+						    <div class="vip-btn">
+							    <text class="btn-text" @click="fnRouteToMember">立即开通</text>
+						    </div>
+				    	</div>
+				    </block>
+			    </div>
+		    </stack>
+		</div>	
+		<div class="list-wrap">
+			<div class="list-box">
+				<div class="list-item" @click="fnRoutetoOther('/AboutUs')">
+					<image class="item-img" src="https://xsmfdq.kkyd.cn/images/hmxs/img-about.png"></image>
+					<text class="item-name">关于我们</text>
+				</div>
+				<div class="list-item" @click="fnRoutetoOther('/Setting')">
+					<image class="item-img" src="https://xsmfdq.kkyd.cn/images/hmxs/img-setting.png"></image>
+					<text class="item-name">设置</text>
+				</div>
+				<div class="list-item" if="{{isSupportCustomer}}" @click="fnRoutetoOther('/ZhichiService')">
+					<image class="item-img" src="https://xsmfdq.kkyd.cn/images/hmxs/img-service.png"></image>
+					<text class="item-name">在线客服</text>
+				</div>
+				<stack class="list-item" @click="fnRoutetoOther('/HelpFeedback')">
+					<div class="item-box">
+						<image class="item-img" src="https://xsmfdq.kkyd.cn/images/hmxs/help-feedback.png"></image>
+						<text class="item-name">帮助与反馈</text>
+					</div>
+					<div class="item-dots" show="{{feedbackNum}}"></div>
+				</stack>		
+			</div>
+		</div>
+		<!-- 引导登录弹窗 -->
+		<stack class="collect-phone-dialog" if="{{!userHeaderJson.t && isLoginDialogShow}}" @click="fnClick">
+			<div class="collect-phone-box">
+				<div class="collect-box-text">
+					<text class="text1">提示</text>
+					<text class="text2">你还没有登录，为防止书币丢失，请进行登录</text>
+				</div>
+				<div class="collect-box-button">
+					<text class="button-cancel" @click="fnClose">暂时不</text>
+					<text class="button-tologin" @click="fnToLogin">去登录</text>
+				</div>
+			</div>
+		</stack>
+	</div>
+</template>
+
+<style lang="less" scoped>
+	.my-wrap {
+		flex: 1;
+		width: 100%;
+		flex-direction: column;
+		align-items: center;
+		background-color: #F5F5F8;
+		.empty-block {
+			height: 110px;
+			width: 100%;
+			background-color: #F7F4FF;
+		}
+		.img-bg {
+           background-image: url('https://xsmfdq.kkyd.cn/images/hmxs/top-bg.png');
+		   background-repeat: no-repeat;
+		   flex-direction: column;
+		   width: 100%;
+		   height: 300px;
+		}
+		.info-wrap {
+			padding: 0 32px;
+			width: 100%;
+			height: 148px;
+			.info-img-box {
+				margin-right: 24px;
+				width: 100px;
+				height: 100px;
+				border-radius: 100px;
+				.info-image {
+					height: 100px;
+					width: 100px;
+					border-radius: 100px;
+					margin-top: 8px;
+				}
+			}
+			.info-box {
+				flex: 1;
+				flex-direction: column;
+				.info-login {
+					align-items: center;
+					margin-top: 18px;
+					.info-name {
+						height: 40px;
+						line-height: 40px;
+						font-size: 40px;
+						color: #333333;
+						font-weight: bold;
+					}
+					.info-login-btn {
+						height: 40px;
+						line-height: 40px;
+						text-align: center;
+						font-weight: bold;
+						font-size: 40px;
+						color: #222;
+					}
+				}
+				.info-id-box {
+					margin-top: 16px;
+					.info-id {
+						height: 24px;
+						line-height: 24px;
+						font-size: 24px;
+						color: #8E8E98;
+					}
+				}
+			}
+			.change-info-box {
+				margin-top: 32px;
+				image {
+					height: 32px;
+					width: 32px;
+					margin-right: 4px;
+				}
+				.info-change {
+					height: 33px;
+					line-height: 33px;
+					font-size: 24px;
+					color: #222222;
+				}
+				
+			}
+		}
+		.read-vip {
+			width: 686px;
+			height: 148px;
+			border-radius: 16px;
+			margin-left: 32px;
+			.vip-bg {
+				width: 686px;
+				height: 148px;
+				border-radius: 16px;
+			}
+			.vip-info {
+				width: 686px;
+				height: 148px;
+				padding: 0px 24px;
+				align-items: center;
+				.vip-icon {
+					height: 77px;
+					width: 73px;
+				}
+				.vip-content {
+					justify-content: space-between;
+					flex: 1;
+					.vip-center {
+						flex-direction: column;
+						justify-content: center;
+						margin-left: 24px;
+						.top-topic {
+							height: 32px;
+							font-size: 28px;
+							font-weight: 500;
+							color: #F9CDAF;
+							line-height: 32px;
+						}
+						.vip-validity {
+							margin-top: 10px;
+							height: 24px;
+							font-size: 24px;
+							font-weight: 500;
+							color: #B1937E;
+							line-height: 24px;
+						}
+					}
+					.vip-btn {
+						width: 160px;
+						height: 64px;
+						align-items: center;
+						background-color: #FF631C;
+						border-radius: 36px;
+						.btn-text {
+							width: 100%;
+							height: 64px;
+							font-size: 28px;
+							text-align: center;
+							font-weight: 500;
+							color: #FFFFFF;
+							line-height: 64px;
+						}
+					}
+				}
+			}
+		}
+		.list-wrap {
+			flex-direction: column;
+			margin: 24px 0px 110px;
+			width: 686px;
+			background-color: #FFFFFF;
+			padding: 20px 0px;
+			border-radius: 16px;
+			.list-box {
+				flex-wrap: wrap;
+				align-items: center;
+				.list-item {
+					width: 25%;
+					height: 130px;
+					flex-direction: column;
+					align-items: center;
+					justify-content: flex-end;
+					padding-bottom: 20px;
+					.item-box {
+						flex-direction: column;
+						align-items: center;
+						justify-content: flex-end;
+						width: 100%;
+						height: 130px;
+					}
+					.item-img {
+						margin-bottom: 17px;
+						width: 48px;
+						height: 48px;
+					}
+					.item-name {
+						font-size: 24px;
+						color: #5A5A64;
+						line-height: 24px;
+						height: 24px;
+					}
+					.item-dots {
+						margin-bottom: 74px;
+						margin-left: 40px;
+						width: 18px;
+						height: 18px;
+						border-radius: 18px;
+						background-color: #ff0000;
+						border: 2px solid #fff;
+					}
+				}
+			}
+		}
+		.collect-phone-dialog {
+			position: fixed;
+			z-index: 99;
+			width: 100%;
+			height: 100%;
+			left: 0;
+			top: 0;
+			background-color: rgba(0, 0, 0, 0.7);
+			justify-content: center;
+			align-items: center;
+			.collect-phone-track {
+				width: 100%;
+				height: 100%;
+			}
+			.collect-phone-box {
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				width: 560px;
+				height: 310px;
+				background-color: #FFFFFF;
+				border-radius: 24px;
+				.collect-box-text {
+					flex: 1;
+					padding: 32px 50px 0px;
+					flex-direction: column;
+					align-items: center;
+					.text1 {
+						height: 48px;
+						font-size: 34px;
+						font-weight: 600;
+						color: #444444;
+						line-height: 48px;
+					}
+					.text2 {
+						margin-top: 20px;
+						height: 96px;
+						font-size: 30px;
+						font-weight: 400;
+						color: #444444;
+						line-height: 44px;
+					}
+				}
+				.collect-box-button {
+					height: 84px;
+					flex-direction: row;
+					.button-cancel {
+						width: 50%;
+						height: 84px;
+						background-image: url('https://xsmfdq.kkyd.cn/images/collect-phone-button/cancel.png');
+						line-height: 84px;
+						text-align: center;
+						font-size: 30px;
+						font-weight: 400;
+						color: #BABABA;
+						border-bottom-left-radius: 24px;
+					}
+					.button-tologin {
+						width: 50%;
+						height: 84px;
+						background-image: url('https://xsmfdq.kkyd.cn/images/collect-phone-button/sure.png');
+						line-height: 84px;
+						text-align: center;
+						font-size: 30px;
+						font-weight: 400;
+						color: #FFFFFF;
+						line-height: 42px;
+						border-bottom-right-radius: 24px;
+					}
+				}
+			}
+		}
+	}
+</style>
+
+<script>
+	import router from '@system.router';
+	import storage from '@system.storage';
+	export default {
+		props: {
+			// 首页激活tab项
+			currentIndex: {
+				type: Number,
+				required: false,
+			},
+			// 主页展示次数
+			indexOnshow: {
+				type: Number,
+				required: false
+			},
+			// 是否金币模式
+			isCoin: {
+				type: Boolean,
+				default: false,
+				required: false
+			}
+		},
+		data: {
+			userHeaderJson: '',  // 用户缓存
+			nikeName: '',        // 昵称
+			userid: '',          // 用户id
+			isSupportCustomer: false, // 智齿开关
+			groupNum: '',    // 组织联系方式
+			zhichiWebSrc: '', // 第三方智齿链接
+			currentTab: 4, // 当前TAB值
+			ifVipMember: false,   //是否是免费版会员
+			freeVipName: '',  // 免费版会员套餐名
+			freeEndTime: '',  //免费版会员到期时间
+			isLoginDialogShow: false, // 采集手机号弹窗是否显示
+			feedbackNum: 0, // 未读信息数量	
+		},
+		//表示ViewModel的数据已经准备好，可以开始使用页面中的数据
+		onInit(e) {
+			let that = this;
+			that.currentTab = this.isCoin ? 4 : 3
+			that.fnLoadData();
+			that.$watch('currentIndex', 'watchCurrentIndex');
+			that.$watch('indexOnshow', 'watchIndexOnshow');
+		},
+		watchCurrentIndex(newValue, oldValue) {
+			if (newValue === this.currentTab && !(this.isCoin && oldValue === 2)) {
+				this.fnLoadData();
+			}
+		},
+		watchIndexOnshow() {
+			if (this.currentIndex === this.currentTab) {
+				this.fnLoadData();
+			}
+		},
+		/**
+		 * 获取缓存信息
+		*/
+		fnGetHeaderJson() {
+			return new Promise((resolve, reject) => {
+				this.$app.$def.getStorageFile(this, {
+					key: 'headerJson',
+					success: data => {
+						try {
+							this.userHeaderJson = data ? JSON.parse(data) : {};
+							this.userid = this.userHeaderJson && this.userHeaderJson.userId || '';
+							resolve(data);
+						} catch(e) {
+							resolve();
+						}
+					},
+					fail: function () {
+						resolve();
+					}
+				});
+			});
+		},
+		/**
+		 * 加载数据
+		*/
+		fnLoadData() {
+			let that = this;
+			that.isLoginDialogShow = false;
+			that.fnGetHeaderJson().then(data => {
+				if (!data) {
+					return false;
+				}
+				that.$app.$def.requestData(that, {
+					interface: `/glory/fastapp/2106`,
+					data: {},
+					succ: function (res) {
+						if(res.retCode === 0 && res.data) {
+							const data = res.data
+							that.userid = data.user.userId;
+							that.nikeName = data.user.nickName;
+							that.ifVipMember = data.dzmfVipEndTime ? true : false
+							that.freeVipName = data.dzmfVipTypeCn ? data.dzmfVipTypeCn : ''
+							that.freeEndTime = data.dzmfVipEndTime ? data.dzmfVipEndTime.split(' ')[0] : ''
+							that.feedbackNum = data.feedbackNum || 0
+							that.$app.setAppData('feedbackNum', that.feedbackNum)
+							if (data.groupNum) {
+								that.groupNum = data.groupNum;
+							}
+							if (data.zhiChiUrl) {
+								that.isSupportCustomer = true;											// 智能客服开关
+								that.zhichiWebSrc = data.zhiChiUrl;
+							}
+							if (that.currentIndex === that.currentTab) {
+								if (data.loginPopupFlag) {
+									that.fnNeedShowLoginDialog();									// 需要显示登陆引导弹窗
+								}
+							}
+						}
+					},
+					error: function () {}
+				})
+			}, () => {})
+		},
+		/**
+		 * 是否需要展示登录引导
+		*/
+		fnNeedShowLoginDialog() {
+			new Promise((resolve, reject) => {											// 读取缓存中的弹窗失效时间
+				storage.get({
+					key: 'loginDialogInvalidDate',
+					success: function (data) {
+						if (!data) {
+							reject();
+							return false;
+						}
+						resolve(data);
+					},
+					fail: function () {
+						reject();
+					}
+				});
+			}).then(
+				data => {
+					const nowDate = new Date().getTime()
+					if (nowDate < data) {
+						return ;
+					}
+					this.fnShowLoginDialog();
+				},
+				() => {
+					this.fnShowLoginDialog();
+				}
+			);
+		},
+		/**
+		 * 展示登录弹窗，重置storage的弹窗失效日期
+		*/
+		fnShowLoginDialog() {
+			const invalidDate = new Date().getTime() + 3 * 24 * 60 * 60 * 1000
+			this.isLoginDialogShow = true;
+			this.$app.shenceLog.log(this, 'track', 'PopupExposure', {
+				Title: '个人中心',
+				PositionName: '引导登录弹窗'
+			});
+			storage.set({
+				key: 'loginDialogInvalidDate',
+				value: invalidDate
+			});
+		},
+		/**
+		 * 取消登录引导
+		*/
+		fnClose() {
+			this.isLoginDialogShow = false;
+			this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+				Title: '个人中心',
+				ButtonName: '登录引导取消'
+			});
+		},
+		/**
+		 * 去登录
+		*/
+		fnToLogin() {
+			this.isLoginDialogShow = false;
+			this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+				Title: '个人中心',
+				ButtonName: '登录引导确定'
+			});
+			this.fnRouteToLogin('登陆引导');
+		},
+		/**
+		 * 跳转到其他页
+		 * @param {String}  url  跳转页面url
+		*/
+		fnRoutetoOther(url) {
+			let params = {}
+			if(url === '/ZhichiService') {
+				if(this.zhichiWebSrc) {
+					params.zhichiWebSrc = this.zhichiWebSrc
+				}
+			}
+			if(url === '/AboutUs') {
+				if(this.groupNum) {
+					params.qqNum = this.groupNum
+				}
+			}
+			router.push({
+				uri: url,
+				params: params
+			})
+		},
+		/**
+		 * 跳转到登录页
+		*/
+		fnRouteToLogin(positionName = '') {
+			router.push({
+				uri: '/Login',
+				params: {
+					url: '/My',
+                    positionName: positionName
+				}
+			})
+        },
+		/**
+		 * 跳转到会员页
+		*/
+		fnRouteToMember() {
+			router.push({
+				uri:'/Member',
+				params: {
+					referrer: '个人中心'
+				}	
+			}) 
+		},
+		fnClick() {
+			console.log('my click')
+		},
+	}
+</script>

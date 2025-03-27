@@ -1,0 +1,632 @@
+<template>
+  <div id="getPaid">
+    <text class="top-welcome">
+      <span if="{{timeStatus == 3}}">欢迎使用代付订单，赶快发送给好友吧~</span>
+      <span elif="{{timeStatus == 0}}">订单已创建，可以发送给更多好友呦~</span>
+      <span elif="{{timeStatus == 1}}">订单超过一个小时未支付，已经过期啦~</span>
+      <span elif="{{timeStatus == 2}}">好友已支付，{{complateTop}}已到账。</span>
+    </text>
+    <div class="paid-box">
+      <text class="paid-text">{{paidText}}</text>
+      <text class="paid-money"><span class="span-1">&yen; </span><span class="span-2">{{paidMoney}}</span></text>
+      <div class="time-remaining-box" if="{{(timeStatus != 2 && timeStatus != 3)}}">
+        <text>{{timeRemainingText}}</text>
+        <text class="text-time">{{h}}</text>
+        <text>:</text>
+        <text class="text-time">{{m}}</text>
+        <text>:</text>
+        <text class="text-time">{{s}}</text>
+      </div>
+      <div class="paid-share-btn {{timeStatus == 1 ? 'order-overdue' : ''}}" if="{{timeStatus !== 2}}" @click="SendToFriends">
+        <text if="{{timeStatus == 3}}">发送给微信好友</text>
+        <text elif="{{timeStatus == 0}}">继续发送给微信好友</text>
+        <text elif="{{timeStatus == 1}}">订单已过期</text>
+      </text>
+      </div>
+      <text class="order-complete" if="{{timeStatus == 2}}">订单已完成</text>
+    </div>
+    <div class="paid-detail-box">
+      <div class="paid-goods">
+        <text class="goods-text">{{goodsText}}</text>
+        <text class="goods-detail">
+          <span>{{goodsDetailText}}</span>
+          <!-- <span if="{{type == 1}}">{{goodsDetailGiven}}</span> -->
+        </text>
+      </div>
+      <div class="paid-description">
+        <text class="description-text">{{descriptionText}}</text>
+        <block for="payTipsNew">
+          <text class="description-list description-lists" if="{{!$item.isCur && $idx == 1}}">{{$item.tips}}</text>
+          <text class="description-list" elif="{{!$item.isCur && $idx != 1}}">{{$item.tips}}</text>
+          <text class="description-list" else>
+            <block for="{{(index,value) in $item.tips}}">
+              <span class="{{index == 1 ? 'keywordIscur' : ''}}">{{value}}</span>
+            </block>
+          </text>
+        </block>
+      </div>
+    </div>
+  </div>
+</template>
+<style lang="less">
+  #getPaid{
+    background-image: url("https://xsmfdq.kkyd.cn/images/getPaid-bk-1.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-color:rgba(246,246,246,1);
+    padding: 0px 30px;
+    flex-direction: column;
+    .top-welcome{
+      margin-top: 71px;
+      padding-left: 7px;
+      width: 100%;
+      height:42px;
+      font-size:30px;
+      font-family:PingFangSC-Regular,PingFang SC;
+      font-weight:400;
+      color:rgba(255,255,255,1);
+      line-height:42px;
+    }
+    .paid-box{
+      margin-top: 61px;
+      width:690px;
+      padding: 40px;
+      background-color:rgba(255,255,255,1);
+      border-top-left-radius:12px;
+      border-top-right-radius:12px;
+      border-color:rgba(255,255,255,1);
+      border-width: 1px;
+      flex-direction: column;
+      align-items: center;
+      .paid-text{
+        height:42px;
+        font-size:30px;
+        font-family:PingFangSC-Regular,PingFang SC;
+        font-weight:400;
+        color:rgba(68,68,68,1);
+        line-height:42px;
+      }
+      .paid-money{
+        margin-top: 14px;
+        height:90px;
+        font-family:PingFangSC-Semibold,PingFang SC;
+        font-weight:600;
+        color:rgba(68,68,68,1);
+        line-height:42px;
+        .span-1{
+          font-size: 30px;
+        }
+        .span-2{
+          font-size: 68px;
+        }
+      }
+      .time-remaining-box{
+        margin-top: 30px;
+        align-items: center;
+        .text-time{
+          margin: 0px 19px;
+          width:60px;
+          height: 48px;
+          border-radius:6px;
+          border-color: #e7e7e7;
+          border-width: 1px;
+          text-align: center;
+        }
+      }
+      .paid-share-btn{
+        width:610px;
+        height:84px;
+        margin-top: 40px;
+        background-color:rgba(255,137,112,1);
+        border-radius:42px;
+        justify-content: center;
+        font-family:PingFangSC-Medium,PingFang SC;
+        font-weight:500;
+        text{
+          font-size:34px;
+          color:rgba(255,255,255,1);
+        }
+      }
+      .order-overdue{
+        background-color:rgba(212,211,217,1);
+      }
+      .order-complete{
+        width:610px;
+        height:84px;
+        align-items: center;
+        text-align: center;
+        font-size:30px;
+        font-family:PingFangSC-Medium,PingFang SC;
+        font-weight:500;
+        color:rgba(249,112,83,1);
+      }
+    }
+    .paid-detail-box{
+      width: 100%;
+      margin: 30px 0px 36px;
+      background-color:rgba(255,255,255,1);
+      padding: 30px 40px;
+      flex-direction: column;
+      line-height: 40px;
+      .paid-goods{
+        flex-direction: column;
+        font-family:PingFangSC-Regular,PingFang SC;
+        font-weight:400;
+        .goods-text{
+          font-size:26px;
+          line-height: 40px;
+          color: #444444;
+        }
+        .goods-detail{
+          font-size:26px;
+          line-height: 40px;
+          margin-top: 16px;
+          color: #7F7F7F;
+        }
+      }
+      .paid-description{
+        margin-top: 40px;
+        flex-direction: column;
+        font-family:PingFangSC-Regular,PingFang SC;
+        font-weight:400;
+        .description-text{
+          line-height: 40px;
+          font-size:26px;
+          color: #444444;
+        }
+        .description-list{
+          margin-top: 16px;
+          font-size:26px;
+          line-height: 40px;
+          color: #7F7F7F;
+          .keywordIscur{
+            color: red;
+          }
+        }
+        .description-lists{
+          margin-top:0px;
+        }
+      }
+    }
+  }
+</style>
+<script>
+  import shareSe from '@service.share';
+  import prompt from '@system.prompt';
+  import app from '@system.app';
+  import storage from '@system.storage';
+  import _ from '../Common/js/common.js' 
+  import router from '@system.router';
+  import push from '@service.push';
+export default {
+  private: {
+      complateTop: '', // 好友已支付显示书币数量
+      paidText: '代付金额',
+      paidMoney: 0,
+      goodsText: '代付商品:',
+      goodsDetail: '小说大全',
+      goodsDetailText: '', // 代付商品书币
+      goodsDetailGiven: '', // 赠送
+      descriptionText: '代付说明:',
+      userId: '',
+      payTips: [],
+      payTipsNew:[],
+      tipsKeyWord: '#',
+      timeStatus: 3, // 0 创建成功，1 订单已过期，2 已支付（已完成）3 订单未创建
+      timeRemainingShow: false,
+      timeRemainingText: '剩余支付时间',
+      remainTime: 0, // 剩余时间 单位秒
+      // lefttime: 0, // 对秒数重新赋值
+      h: '00',
+      m: '00',
+      s: '00',
+      paidTimeOut: false, // 倒计时开关
+      obuttomShareVo: {}, // 分享信息
+      products: {}, //代付商品说明
+      headerJson: {}, // 应用内公共请求头
+      type: 1, // 是否为vip
+      summaryShare: '',
+      statusData: 3,
+      isShareSe: false // 是否已分享
+
+  },
+  public: {
+    dataJson: '',
+    logJson: '',
+    payPlistProducts: '',
+    fromPage: '',
+    orderId: 0,
+    payMoney: 0
+  },
+  onInit() {
+    let that = this;
+    console.log('dataJson',that.dataJson);
+    console.log('logJson',that.logJson);
+    console.log('payPlistProducts',that.payPlistProducts);
+    that.goodsDetail = that.$app.$data.name;
+    that.$page.setTitleBar({
+        text: '找微信好友支付'
+    });
+    if(that.orderId == 0){
+      that.type = JSON.parse(that.dataJson).type;
+    }
+      // initFn(){
+    
+    storage.get({
+      key: 'userId',
+      success: function(data) {
+        that.userId = 'ID(' + data + ')；';
+      },
+      fail: function(data, code) {
+        console.log(`handling fail, code = ${code}`)
+      }
+    })
+    storage.get({
+      key: 'headerJson',
+      success: function(data) {
+        that.headerJson = JSON.parse(data);
+      },
+      fail: function(data, code) {
+        console.log(`handling fail, code = ${code}`)
+      }
+    })
+  // },
+  },
+  onShow() {
+    // this.$app.shenceLog.log(this,'pageShow',{
+    //   title: '找微信好友支付'
+    // });
+    this.$app.lastOpenPage = ''
+    let that = this;
+    if(that.timeStatus == 3){
+      that.timeStatus == that.statusData
+    }
+    if(that.isShareSe){
+      that.isShareSe = false;
+      prompt.showToast({
+        message: '已分享'
+      });
+    }
+    clearTimeout(that.paidTimeOut);
+    if(that.fromPage == '/payList' && that.orderId == 0){
+      that.products = that.payPlistProducts ? JSON.parse(that.payPlistProducts) : '';
+      let dataJson = {}
+      if(that.dataJson) {
+        try {
+          dataJson = JSON.parse(that.dataJson)
+        }catch {
+          console.log('dataJson解析失败')
+        }
+      }
+      that.type = that.products.type;
+      that.paidMoney = that.toDecimal(that.payMoney);
+      if(that.type == 1){
+        that.goodsDetailText = (that.products.isModel ? (that.goodsDetail + (100 * dataJson.cusAmount) + '书币') : (that.goodsDetail + that.products.productNum + '书币'));
+        if((that.products.giveNum && that.products.giveNum != 0) || (that.products.isModel && dataJson.modelExtraNumber && dataJson.modelExtraNumber != 0)){
+          that.goodsDetailText = (that.products.isModel ? (that.goodsDetail + (100 * dataJson.cusAmount) + '书币' + ' (送' + dataJson.modelExtraNumber + '书币)') : (that.goodsDetail + that.products.productNum + '书币' + ' (送' + that.products.giveNum + '书币)'));
+        }else{
+          that.goodsDetailGiven = '';
+        }
+      }else if(that.type == 2){
+        that.goodsDetailText = that.goodsDetail + that.products.productNum + '天VIP';
+      }
+      that.getOrderDetail();
+    }else if(that.orderId != 0){
+      that.getOrderDetail();
+    }
+    // this.initFn()
+  },
+  toDecimal(x) {
+    if (x !== '.') {
+        let f = Math.round(x * 100) / 100;
+        let s = f.toString();
+        let rs = s.indexOf('.');
+        if (rs <= 0) {
+            rs = s.length;
+            s += '.';
+        }
+        while (s.length <= rs + 2) {
+            s += '0';
+        }
+        return s;
+    } else {
+        return '0.00';
+    }
+},
+  // 发送给微信好友-按钮
+  SendToFriends:_.debounce(function(){
+    let that = this;
+    if(that.timeStatus == 1){
+      return false
+    }
+    if(that.timeStatus == 3){
+      // 神策打点-发送给微信好友
+      that.$app.shenceLog.log(that,'track','ButtonClick', {
+          ButtonName: '发送给微信好友',
+          ButtonContent: '发送给微信好友'
+      });
+    }else if(that.timeStatus == 0){
+      // 神策打点-发送给微信好友
+      that.$app.shenceLog.log(that,'track','ButtonClick', {
+          ButtonName: '发送给微信好友',
+          ButtonContent: '继续发送给微信好友'
+      });
+    }
+    // that.shareStatus(1)
+    new Promise((res, rej) => {
+      if(that.orderId == 0){
+        that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2132',
+                data:JSON.parse(that.dataJson),
+                succ: function (data) {
+                    if(data.retCode == 0) {
+                        res(data.data.orderNo)
+                      }else{
+                        rej(data.retMsg)
+                    }
+                },
+                error: function () {
+                  console.log('创建订单失败')
+                },
+                notEqualZero(data) {
+                    let message = '创建订单失败'
+                    if(data && data.retMsg) {
+                        message = data.retMsg
+                    }
+                    prompt.showToast({
+                        message: message
+                    })
+                }
+            })
+      }else{
+        res(that.orderId)
+      }
+    }).then((res) => {
+      let bookIdShare = '';
+      if(JSON.parse(that.dataJson).bookId != undefined){
+        bookIdShare = JSON.parse(that.dataJson).bookId
+      }else{
+        bookIdShare = '';
+      }
+      if(that.orderId == 0){
+        that.orderId = res
+      }
+      if(that.timeStatus == 3){
+        that.$app.$def.ajax(that,'2138', {
+          data: {
+            orderId: that.orderId,
+            bookId: bookIdShare
+          },
+          succ(data) {
+            that.type = data.type;
+            let shareData = data.inviteConfigInfo;
+            // that.timeStatus = data.status;
+            that.statusData = data.status;
+            that.remainTime = data.remainTime + new Date().getTime();
+            if(shareData&&shareData!=''&&JSON.stringify(shareData)!='{}'){
+              that.obuttomShareVo.title = shareData.title;
+              that.obuttomShareVo.shareUrl = shareData.shareUrl;
+              if(shareData.content != undefined){
+                that.summaryShare = shareData.content;
+              }else{
+                if(that.type == 2){
+                  that.summaryShare = that.goodsDetailText;
+                }else{
+                  that.summaryShare = that.goodsDetailText + that.goodsDetailGiven;
+                }
+              }
+              let appIcon = '';
+              appIcon = that.$app.$data.pname.split('.').pop();
+              // clearTimeout(that.paidTimeOut);
+              setTimeout(function(){
+                shareSe.share({
+                  shareType: 0,
+                  title: that.obuttomShareVo.title,
+                  summary: that.summaryShare,
+                  imagePath: 'https://xsmfdq.kkyd.cn/images/share_icon/' + appIcon + '.jpg',
+                  targetUrl: that.obuttomShareVo.shareUrl,
+                  platforms: ['WEIXIN'],
+                  success: function (data) {
+                      // that.shareStatus(2)
+                    that.isShareSe = true;
+                  },
+                  fail: function (data, code) {
+                    // that.isShareSe = false;
+                    prompt.showToast({
+                      message: '分享失败'
+                    });
+                  }
+                })
+              },0)
+            }else{
+              prompt.showToast({
+                  message: '分享失败'
+              })
+            }
+          }
+        })
+      }else if(that.timeStatus == 0){
+        let appIcon = '';
+        appIcon = that.$app.$data.pname.split('.').pop();
+        // clearTimeout(that.paidTimeOut);
+        setTimeout(function(){
+          shareSe.share({
+            shareType: 0,
+            title: that.obuttomShareVo.title,
+            summary: that.summaryShare,
+            imagePath: 'https://xsmfdq.kkyd.cn/images/share_icon/' + appIcon + '.jpg',
+            targetUrl: that.obuttomShareVo.shareUrl,
+            platforms: ['WEIXIN'],
+            success: function (data) {
+                // that.shareStatus(2)
+              that.isShareSe = true;
+            },
+            fail: function (data, code) {
+              // that.isShareSe = false;
+              prompt.showToast({
+                message: '分享失败'
+              });
+            }
+          })
+        },0)
+      }
+      
+    },(rej) => {
+      console.log('11111111111111111111')
+       prompt.showToast({
+          message: rej,
+          duration: 0
+      });
+    })
+  },250),
+  // 循环将要拼接到url后面的参数
+  param(data) {
+    let url = ''
+    for (var k in data) {
+      let value = data[k] !== undefined ? data[k] : ''
+      url += '&' + k + '=' + encodeURIComponent(value)
+    }
+    //去除第一个&
+    return url ? url.substring(1) : ''
+  },
+  // 拼接参数
+  urlJoinParam(url,data){
+    // url += (url.indexOf('?') < 0 ? '?' : '&') + this.param(data)
+    url += '&' + this.param(data)
+    return url;
+  },
+
+  shareStatus(status){
+      let that = this
+      that.$app.$def.requestData(that,
+          {
+              interface: '/glory/fastapp/2407',
+              data: { status: status},
+              succ: function (res) {
+                  // console.log(res)
+              }
+          }
+      )
+  },
+  //倒计时计算并赋值
+  paidCountDown(){
+    let that = this;
+    // that.count++;
+    // let offset = new Date().getTime() - (that.startTime + that.count * that.interval);
+    // let nextTime = that.interval - offset;
+    // if (nextTime < 0) { 
+    //   nextTime = 0 
+    // }
+    // that.remainTime -= that.interval;
+    let fangFs = that.remainTime - new Date().getTime();
+    that.h = parseInt(fangFs / 1000 / (60 * 60) % 24);
+    that.m = parseInt(fangFs / 1000 / 60 % 60);
+    that.s = parseInt(fangFs / 1000 % 60);
+    that.h = that.addZero(that.h);
+    that.m = that.addZero(that.m);
+    that.s = that.addZero(that.s);
+    that.timeRemainingText = '剩余支付时间';
+    that.timeRemainingShow = true;
+    // that.remainTime = that.remainTime - 1;
+    if (fangFs <= 0) {
+      that.timeRemainingText = '订单已过期';
+      that.h = '00';
+      that.m = '00';
+      that.s = '00';
+      clearTimeout(that.paidTimeOut);
+      that.timeStatus = 1;
+      return;
+    }
+    that.paidTimeOut = setTimeout(() => {
+      that.paidCountDown()
+    }, 1000);
+  },
+  // 对小于10的数补0
+  addZero(i){
+      return i < 10 ? "0" + i: i + "";
+  },
+  // 过滤关键字
+  tipsFilter(keyword,payTips){
+    let that = this;
+    that.payTipsNew = [];
+    for (let i=0;i<payTips.length;i++) {
+      let tipsItem = {};
+      if(payTips[i].indexOf(keyword) != -1){
+          // tipsItem.tips = payTips[i].replace(new RegExp(keyword, 'g'), '%%' + keyword + '%%').split('%%');
+          tipsItem.tips = payTips[i].split(keyword);
+          tipsItem.isCur = 1
+      }else{
+          tipsItem.tips = payTips[i]
+          tipsItem.isCur = 0
+      }
+      that.payTipsNew.push(tipsItem)
+    }
+  },
+  // 获取订单详情
+  getOrderDetail(){
+    let that = this;
+    that.payTips = [];
+    that.$app.$def.ajax(that,'2138', {
+      data: {
+        orderId: that.orderId == 0 ? '' : that.orderId,
+        bookId: that.dataJson.bookId != undefined ? that.dataJson.bookId : ''
+      },
+      succ(data) {
+        that.payTips = data.tips;
+        that.tipsFilter(that.tipsKeyWord,that.payTips);
+        if(that.orderId != 0){
+          that.products = data;
+          that.timeStatus = data.status;
+          that.paidMoney = data.amountNum;
+          that.type = data.type;
+          that.goodsDetailText = data.productInfo;
+          if(that.timeStatus == 2){
+            that.complateTop = data.tipInfo;
+          }
+          // that.remainTime = data.remainTime / 1000;
+          that.remainTime = data.remainTime + new Date().getTime();
+          // that.startTime = new Date().getTime();
+        }
+        if(that.timeStatus == 0){
+            that.paidCountDown();
+            let shareData = data.inviteConfigInfo;
+             if(shareData&&shareData!=''&&JSON.stringify(shareData)!='{}'){
+              that.obuttomShareVo.title = shareData.title;
+              that.obuttomShareVo.shareUrl = shareData.shareUrl;
+              if(shareData.content != undefined){
+                that.summaryShare = shareData.content;
+              }else{
+                if(that.type == 2){
+                  that.summaryShare = that.goodsDetailText;
+                }else{
+                  that.summaryShare = that.goodsDetailText + that.goodsDetailGiven;
+                }
+              }
+             }
+        }
+        if(that.timeStatus == 1){
+            clearTimeout(that.paidTimeOut);
+            that.h = '00';
+            that.m = '00';
+            that.s = '00';
+        }
+      }
+    })
+  },
+  onBackPress() {
+    setTimeout(function(){
+      let routerlen = router.getLength();
+      if(routerlen <= 1){
+        router.replace({
+          uri:'/Index'
+        })
+      }else{
+        router.back()
+      }
+    },0)
+    return true;
+  }
+
+
+}
+</script>

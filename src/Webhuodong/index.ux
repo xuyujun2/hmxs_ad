@@ -1,0 +1,1048 @@
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+<import name="payLists" src="../Common/sharedComponent/payLists/index"></import>
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div>
+        <div class="dialogh5" show="{{webShow}}">
+            <div class="divweb">
+                <web class="web1" id="web"  @pagefinish="fnWebFinish" @message="fnMessage" @titlereceive="titlereceive" @error="errorHand" src="{{webSrc}}"></web>
+            </div>
+        </div>
+        <div class="dia_loading" show="{{!webShow}}">
+            <text>页面加载中，请耐心等待...</text>
+        </div>
+
+        <div class="paybg" show="{{payShow}}">
+            <div class="paytopdiv" @click="closeDialogPay" show="{{!listStyle}}"></div>
+            <div class="payfootdiv" show="{{!isOppoPay}}">
+                <!-- 支付列单组件 -->
+                <!-- <payLists 
+                    show="{{!isOppoPay}}" 
+                    id='payList' 
+                    pay-show="{{payShow}}" 
+                    pay-way-list="{{payWayList}}" 
+                    pay-index="{{payindex}}" 
+                    rece-params="{{receParams}}" 
+                    is-web-pay-alert="{{isWebPayAlert}}"
+                    @fn-change-alert-show="fnChangeAlertShow"
+                    @ready-jump="jumpToPage"
+                ></payLists> -->
+                <payLists
+                    show="{{!isOppoPay}}"
+                    id='payList' 
+                    list-style="{{listStyle}}" 
+                    pay-way-list="{{payWayList}}" 
+                    pay-index="{{payindex}}"
+                    rece-params="{{receParams}}"
+                    pay-show="{{payShow}}" 
+                    show-paylist-fix="{{payShow}}"
+                    pay-award="{{h5data?h5data.h5Award:''}}"
+                    pay-money="{{h5data?h5data.h5Discount:''}}"
+                    is-web-pay-alert="{{isWebPayAlert}}"
+                    is-book-purchase="{{isBookPurchase}}"
+                    @fn-change-alert-show="fnChangeAlertShow"
+                    @ready-jump="jumpToPage"
+                    @close-pop="closeDialogPay"
+                    @fn-parent-pay="gopay"
+                ></payLists>   
+                <div class="rech_list_but_div" show="{{!listStyle&&payShow}}">
+                    <text style="flex:1;" class="rech_list_but" @click="gopay" >立即充值</text>
+                </div>
+            </div>
+        </div>
+        <!-- 微信分享 -->
+        <div class="share-wrap" if="{{isSharePopShow}}">
+            <div class="share-bg" @click="fnCancleShare"></div>
+            <div class="share-box">
+                <div class="share-title-wrap">
+                    <div class="share-line"></div>
+                    <text class="share-title">分享至</text>
+                    <div class="share-line"></div>
+                </div>
+                <div class="share-btn-wrap">
+                    <div class="share-btn" @click="fnShare('friends')" if="{{shareInfo.type && (shareInfo.type == 'friends' || shareInfo.type == 'all')}}">
+                        <image class="share-icon" src="/Common/images/wx_icon.png"></image>
+                        <text class="share-type">微信好友群</text>
+                    </div>
+                    <div class="share-btn" @click="fnShare('circle')" if="{{shareInfo.type && (shareInfo.type == 'circle' || shareInfo.type == 'all')}}">
+                        <image class="share-icon" src="/Common/images/pyq_icon.jpg"></image>
+                        <text class="share-type">朋友圈</text>
+                    </div>
+                </div>
+                <text class="share-cancle" @click="fnCancleShare">取消分享</text>
+            </div>
+        </div>
+         <!-- 页面加载错误  -->
+        <retry if="{{isShowBtn}}" is-loading="{{isLoading}}" @retry="retryHandler"></retry>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+<style scoped lang="less">
+    .share-wrap {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        .share-bg {
+            width: 100%;
+            flex: 1;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .share-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            background-color: #ffffff;
+            .share-title-wrap {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 48px 0px 40px 0px;
+                padding: 0px 30px;
+                width: 100%;
+                height: 48px;
+                .share-title {
+                    margin: 0px 48px;
+                    color: #a8a8a8;
+                    font-size: 28px;
+                }
+                .share-line {
+                    background-color: rgba(5, 5, 5, 0.1);
+                    flex: 1;
+                    height: 2px;
+                }
+            }
+            .share-btn-wrap {
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                margin-bottom: 48px;
+                padding: 0px 80px;
+                width: 100%;
+                .share-btn {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    .share-icon {
+                        margin-bottom: 10px;
+                        width: 70px;
+                    }
+                    .share-type {
+                        color: #121212;
+                        font-size: 28px;
+                        text-align: center;
+                    }
+                }
+            }
+            .share-cancle {
+                width: 100%;
+                color: #a8a8a8;
+                font-size: 32px;
+                height: 104px;
+                line-height: 104px;
+                text-align: center;
+                background-color: #f9f9f9;
+            }
+        }
+    }
+    .dia_loading {width:100%;text-align: center;}
+    .dia_loading text {width:100%;text-align: center; font-size:34px;}
+    .dialogh5,.divweb,.web1 {width:100%;}
+    .paybg {
+        position: fixed; width:100%;height:100%;left:0;top:0;;
+        flex-direction: column;justify-content: center;align-items: center;
+    }
+    .paytopdiv {
+        width:100%;
+        flex: 1;
+        background-color: rgba(0,0,0,0.6)
+    }
+    .payfootdiv {
+        width:100%;
+        background-color: #ffffff;
+        flex-direction: column;
+    }
+    
+    .rech_list_but {
+        margin: 0 25px 20px;
+        height: 94px;
+        background-color: #44bbff;
+        font-size: 30px;
+        color: #fff;
+        text-align: center;
+        line-height: 94px;
+        border-radius: 10px;
+    }
+</style>
+<script>
+import storage from '@system.storage';
+import router from '@system.router';
+import prompt from '@system.prompt';
+import wxpay from '@service.wxpay';
+import audio from '@system.audio'
+import app from '@system.app'
+import shortcut from '@system.shortcut'
+import account from '@service.account'
+import share from '@service.share';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+export default {
+    private:{
+        headerJson:'',
+        webShow:false,
+        payShow:false,
+        payWayList:[], // webMessage.payWayList 
+        activityId:'',
+        payindex:0, // 当前选中项的index  payWayList[index].cur = 1有bug, 单独payindex控制
+        // nowPayType:'', // 当前选中支付方式
+        // rechargeswitch:true,
+        // loadingtime: null,
+        // loadingnum: 5,
+        // loadingag: false,
+        // rechargeswitchtime:null,
+        // webpayalert:false,
+        // webpayorderno:'',
+        payDataJson:'',
+        logJson:'',
+        webpaytext:'',
+        getwebpay:'',
+        isCloseApp:0,
+        isShowBtn:false,
+        isLoading:false,
+        reloadNum:0,
+        isOppoPay:false,
+        receParams:{},
+        isshow:false,
+        callALiPay:false,
+        goPayClock:false,
+        hidePageTimeout:null,
+        hidePageTimeout1:null,
+        isWebPayAlert: false, // 支付提醒是否显示
+        isSupportVivoPush: false, // 是否支持vivoPush
+        vivoPush: null, // vivoPush实例
+        isPopShow: false, // h5弹窗展示
+        isSharePopShow: false, // 分享弹窗展示
+        shareInfo: {}, // 分享信息
+        isShareAction: false, // 是否在分享中
+        isBookPurchase: false, // 是否是整本书购买
+    },
+    public:{
+        webSrc:'',
+        activity:'',
+        pageFrom:'',
+        jobId:'',
+        cloAppFrOut:0,
+        OperationPosition:'',
+        OperationID:'',
+        OperationName:'',
+        OperationType:'',
+        h5data:'',
+        StartTime:'',
+        EndTime:'',
+        isFollow:false,
+        payUserTacticsVo:{},
+        pageTitle: '',
+        listStyle:'',
+        NotificationTaskId:'',
+        NotificationTime:''
+    },
+    onInit(){
+        // pageEnter(this.$page.path);
+        let that=this;
+        that.$app.lastOpenPage = ''
+        // vivopush支持判断
+        try {
+            if(account.getProvider().toLowerCase() == 'vivo' && that.$app.$def.fnVivoPushSupport(that)) {
+                account.isLogin({
+                    success: function (data) {
+                        if(data.isLogin) {
+							try {
+								that.vivoPush = require('@system.vivopush')
+								if(that.vivoPush && that.vivoPush.getstate) {
+									that.vivoPush.getstate({
+										success: function() {
+											that.isSupportVivoPush = true
+										}
+									})
+								}
+							}catch(e) {}
+                        }
+                    }
+                })
+            }
+        } catch(e) {}
+        this.fnCheckScStart()
+        that.$app.$def.getStorageFile(that,{
+            key:'headerJson',
+            success:function(data){
+                data = data ? JSON.parse(data) : '';
+                that.headerJson = data;
+                // 传送message到网页
+				// that.$element('web').postMessage({message:JSON.stringify(data)})
+            }
+        })
+        // 加随机数防止被缓存
+        let _src = that.webSrc;
+        let bool = _src.indexOf("?")>0;
+        // 非整本书购买活动，显示充值成功提示
+        if(_src && _src.indexOf('book_purchase') > -1) {
+            that.isBookPurchase = 1
+        }
+        if(bool){
+            that.webSrc = _src + '&v=' + that.RndNum();
+        }else{
+            that.webSrc = _src + '?v=' + that.RndNum();
+        }
+        if(that.jobId||that.NotificationTaskId){
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2170`,
+                data: {
+                    jobId:that.jobId?that.jobId:that.NotificationTaskId,
+                    type:that.jobId?1:0
+                },
+                succ: function (data) {
+                    console.log('successsuccess')
+                }
+            })
+             that.$app.$def.quickappLog([703, {
+                qmap:{
+                    jobId:that.jobId?that.jobId:that.NotificationTaskId,
+                    type:that.jobId?1:0,
+                    page:'Webhuodong',
+                    webSrc:that.webSrc
+                }
+            },'Webhuodong'],that);
+        }
+        if(that.NotificationTaskId){
+            that.$app.shenceLog.log(that,'track','NotificationClick', {
+                NotificationId:`${that.NotificationTaskId}#${that.$app.headerJson.userId}#${that.NotificationTime}`,
+                NotificationTaskId:that.NotificationTaskId,
+                NotificationTime:parseInt(that.NotificationTime)
+            }); 
+            that.$app.$def.quickappLog([703, {
+                qmap:{
+                    site: '3'
+                }
+            }, 'notification'], that)
+        }
+        this.$on('checkPayType',this.changePayType);
+        this.$on('checkIsRecharge',this.hundleIsRecharge);
+        this.$on('alipay_Event',this.handleALiPay)
+        this.$on('clickGoPay',this.gopay)
+        
+        that.$app.$def.appSourceinfoLog(that)
+    },
+    onReady(e) {
+		try {
+			audio.getPlayState({
+				success: function(data) {
+					if(data.state=='play'){
+						audio.pause()
+					}
+				},
+				fail: function(data, code) {
+					console.log('handling fail, code=' + code)
+				}
+			})
+		} catch (error) {
+			console.log(error)
+		}
+	},
+    onShow() {
+        this.$app.lastOpenPage = ''
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            Title: '活动页'
+        });
+		let that = this;
+        // router.clear();
+        that.$app.$def.quickappLog([701, {
+            qmap:{
+                id:that.activity,
+                pageFrom:that.pageFrom,
+                webSrc:that.webSrc
+            }
+        }], that)
+        // 支付宝支付回调
+        if (that.isshow) {
+            if(!this.callALiPay){
+                // that.getpaylist();
+                this.$broadcast('initPaySwitch');
+            }
+        }
+        that.isshow = true;
+        if(that.isShareAction) {
+            prompt.showToast({
+                message: '分享成功'
+            })
+            that.$element('web').postMessage({ message: JSON.stringify({
+                type: 'shareSuccess',
+                others: that.shareInfo.others
+            }) })
+        }
+        that.isShareAction = false
+    },
+    onHide() {
+        clearTimeout(this.hidePageTimeout);
+    },
+    //页面被销毁时调用，被销毁的可能原因有：用户从当前页面返回到上一页，或者用户打开了太多的页面，框架自动销毁掉部分页面，避免占用资源
+    onDestroy(e) {
+        // pageLeave(this.$page.path);
+    },
+    fnWebFinish(e){
+        console.log("webFinish",e);
+        this.webShow=true;
+    },
+    titlereceive(res){
+        console.log('titlereceive',res);
+        let that = this;
+        that.webShow=true;
+        if(res.title.indexOf('quickapp')<=0){
+            
+            if(res.title.includes('网页无法打开')){
+                that.$page.setTitleBar({ text:'网络不给力，请重试'})
+                that.isShowBtn = true;
+                that.isLoading = true;
+                that.$app.$def.requestData(that,{
+                    interface: '/glory/fastapp/2174',
+                    data: { page: that.$page.path,event:'net_error',content:JSON.stringify({webSrc:that.webSrc,activity:that.activity,})},
+                    succ: function (res) {
+                        console.log(res)
+                    }
+                })
+                // if (that.reloadNum == 0) {
+                //     that.reloadNum = 1;
+                //     setTimeout(function () {
+                //          router.replace({
+                //             uri:that.$page.uri
+                //         })
+                //     }, 1000)
+                // } else {
+                //     that.isShowBtn = true;
+                //     that.isLoading = true;
+                // }
+            }else{
+                that.$page.setTitleBar({ text: res.title })
+                that.pageTitle = res.title
+                that.isShowBtn = false;
+            }
+        }
+    },
+    fnMessage(res){
+        console.log('接收到message',res);
+        let that = this;
+        // 接收网页请求
+        let json = JSON.parse(res.message);
+
+        // 如果h5传过来数据中有h5data  神策打点
+        // 增加参数isFirstEnter避免多次初始化
+        if(json.h5data && !(json.isFirstEnter && json.isFirstEnter == 2)){
+            that.h5data = json.h5data; // 存上以后也没用到
+            that.payUserTacticsVo=json.h5data.payActUt||{}
+            let _json = json.h5data;
+            let IsEffective = 0; // 是否有效
+                // tip=0 有效，非0   1活动不存在  2活动未开始  3活动已结束  4活动配置异常  5活动错误
+                if(_json.tip == 0){
+                    IsEffective = true;
+                }else{
+                    IsEffective = false;
+                }
+            // let ActID = _json.id ; // 活动ID
+            let ActName = _json.name; // 活动名称
+            let RechargeType = _json.rechargeType; // 充值类型
+            // let  time = new Date().getTime()
+            if(!that.StartTime){
+                if(that.h5data.beginTime){
+                    that.StartTime = new Date(that.h5data.beginTime.replace(/年/g,'-').replace(/月/g,'-').replace(/日/g,''))
+                }else{
+                    that.StartTime = new Date().getTime()
+                }
+            }
+            if(!that.EndTime){
+                if(that.h5data.endTime&&!that.EndTime){
+                    that.EndTime = new Date(that.h5data.endTime.replace(/年/g,'-').replace(/月/g,'-').replace(/日/g,''))
+                }else{
+                    that.EndTime = new Date().getTime()
+                }
+            }
+            if(that.jobId){
+                that.$app.shenceLog.log(that,'track','EnterActivityPage', {
+                    OperationPosition:'push',
+                    OperationID:that.jobId,
+                    OperationName:'push',
+                    OperationType:"2",
+                    ActID:that.h5data.id+''||'',
+                    IsEffective:IsEffective,
+                    ActName:ActName,
+                    StartTime:that.StartTime,
+                    EndTime:that.EndTime,
+                    RechargeType:RechargeType+'',
+                    Duration:0
+                }); 
+            }else{
+                that.$app.shenceLog.log(that,'track','EnterActivityPage', {
+                    OperationPosition:that.OperationPosition,
+                    OperationID:that.OperationID,
+                    OperationName:that.OperationName,
+                    OperationType:that.OperationType,
+                    ActID:that.h5data.id+''||'',
+                    IsEffective:IsEffective,
+                    ActName:ActName,
+                    StartTime:that.StartTime,
+                    EndTime:that.EndTime,
+                    RechargeType:RechargeType+'',
+                    Duration:0
+                }); 
+            }
+            // 神策打点
+        }
+        // 如果有支付列表先渲染列表
+        this.getpaylist(json);
+        // 解构
+        let { bookId,chapterId='',activityId:activity='',pageFrom='',params={},jumpUri } = json;
+        let dateJson = json;
+        switch(json.type){
+            case 1: //书籍阅读页
+                var trigger_time = that.$app.$def.getLogTime()
+                var omap = {
+                    origin:'yy_hd',
+                    action:'2',
+                    channel_id:activity,
+                    channel_name:that.pageTitle,
+                    channel_pos:0,
+                    column_id:activity,
+                    column_name:that.pageTitle,
+                    column_pos:0,
+                    content_id:bookId,
+                    content_pos:0,
+                    content_type:'2',
+                    trigger_time:trigger_time
+                }
+                that.$app.$def.quickappLog([702, {
+                    omap:omap
+                }, 'book_click'], that)
+                router.push({
+                    uri:'/Read',
+                    params:{
+                        // bookId:json.bookId,
+                        // chapterId:json.chapterId ? json.chapterId : '',
+                        // activity:json.activityId ? json.activityId : ''//活动id
+                        bookId,
+                        chapterId,
+                        activity,
+                        SourcePosition:'活动页',
+                        omap:omap
+                    }
+                })
+                break;
+            case 4: //充值页
+                router.push({
+                    uri:'/Recharge',
+                    params:{
+                        // activity:json.activityId ? json.activityId : '' //活动id
+                        activity,
+                        couponId:json.couponId
+                    }
+                })
+                break;
+            case 6: // 显示支付弹层
+                that.payShow = true;
+                // that.activityId = json.activityId;
+                that.activityId = activity;
+                break;
+            case 7: // 直拉支付
+                // that.payShow = true;
+                // that.activityId = json.activityId;
+                that.activityId = activity;
+                that.payindex = json.payindex
+                that.gopay(dateJson.custom ? dateJson.custom : '')
+                break;
+            case 20: // 跳转到其它任意（包括其它 - 快应用）
+                router.clear()
+                router.replace({
+                    uri:jumpUri,
+                    params:params
+                })
+                break;
+            case 200: // 传送message到网页
+                that.headerJson.versionCode = app.getInfo().versionCode
+                that.headerJson.appVer = that.$app.$data.appVer
+                that.headerJson.wxpayType = wxpay.getType() // 判断是否支持微信支付
+                that.$element('web').postMessage({message:JSON.stringify(that.headerJson)})
+                break;
+            case 600: //打点
+                that.$app.$def.quickappLog([703, {
+                    qmap:json.map
+                }, 'activity_'+activity], that)
+                if(that.jobId){
+                    // that.StartTime = new Date(that.h5data.beginTime.replace(/年/g,'-').replace(/月/g,'-').replace(/日/g,''))
+                    // that.EndTime = new Date(that.h5data.endTime.replace(/年/g,'-').replace(/月/g,'-').replace(/日/g,''))
+                    that.$app.shenceLog.log(that,'track','ClickActivityPage', {
+                        OperationPosition:'push',
+                        OperationID:that.jobId,
+                        OperationName:'push',
+                        OperationType:"2",
+                        ActID:that.h5data.id||'',
+                        IsEffective:that.h5data.tip == 0?true:false,
+                        ActName:that.h5data.name,
+                        StartTime:that.StartTime,
+                        EndTime:that.EndTime,
+                        RechargeType:that.h5data.rechargeType,
+                        ButtonName:json.btnName
+                    }); 
+                }else{
+                    that.$app.shenceLog.log(that,'track','ClickActivityPage', {
+                        OperationPosition:that.OperationPosition,
+                        OperationID:that.OperationID,
+                        OperationName:that.OperationName,
+                        OperationType:that.OperationType,
+                        ActID:that.h5data.id||'',
+                        IsEffective:that.h5data.tip == 0?true:false,
+                        ActName:that.h5data.name,
+                        StartTime:that.StartTime,
+                        EndTime:that.EndTime,
+                        RechargeType:that.h5data.rechargeType,
+                        ButtonName:json.btnName
+                    }); 
+                }
+                break;
+            case 900: // 返回
+                var routerleng = router.getLength();
+                console.info(routerleng);
+                if(routerleng <= 1){
+                    router.replace({
+                        uri:'/Index'
+                    })
+                }else{
+                    router.back();                
+                }
+                break;
+            case 'showPop': // 弹窗展示
+                that.isPopShow = true
+                break;
+            case 'closePop': // 弹窗关闭
+                that.isPopShow = false
+                break;
+            case 'routerPush': // 自定义路由跳转
+                router.push({
+                    uri: dateJson.uri,
+                    params: dateJson.params
+                })
+                break;
+            case 'routerClear': // 自定义晴空路由跳转
+                router.clear()
+                router.replace({
+                    uri: dateJson.uri,
+                    params: dateJson.params
+                })
+                break;
+            case 'vivopush': // vivopush消息
+                if(that.isSupportVivoPush) {
+                    that.$app.$def.fnVivoPush(that, '6')
+                }
+                break;
+            case 'sharePop': // 分享
+                that.shareInfo = dateJson.shareInfo
+                that.fnSharePopShow()
+                break;
+            case 'share': // 分享
+                that.shareInfo = dateJson.shareInfo
+                that.fnShare(that.shareInfo.type)
+                break;
+            default: 
+                break;
+        }
+        
+    },
+    getpaylist(json){
+        let that=this;
+        let _payWayList = [];
+        let payType = wxpay.getType();
+        if(json.h5data && json.h5data.isFollow){
+            that.isFollow = true
+        }
+        if(json.payWayList && json.payWayList.length){
+            if(json.h5data.listStyle){
+                that.listStyle = json.h5data.listStyle
+            }
+            if(json.payWayList[0].payWay=='OPPOPAY'){
+                that.isOppoPay = true
+            }
+            for(let i=0; i<json.payWayList.length; i++){
+                if (json.payWayList[i].payWay == 'WECHATPAY_APP'){
+                    if(payType == 'APP'){
+                        _payWayList.push(json.payWayList[i]);
+                    }
+                }
+                else if (json.payWayList[i].payWay == 'WECHATPAY_MWEB') {
+                    if(payType == 'MWEB'){
+                        _payWayList.push(json.payWayList[i]);
+                    }
+                }
+                else if (json.payWayList[i].payWay == 'ALIPAY'){
+                    _payWayList.push(json.payWayList[i]);
+                }else{
+                    _payWayList.push(json.payWayList[i]);
+                }
+            }
+            // if(!that.isOppoPay&&!that.isFollow) {
+            //     let isChecked = false
+            //     _payWayList.forEach(function(item, index) {
+            //         if(item.isChecked == 1 && !isChecked) {
+            //             isChecked = true
+            //             that.payindex = index
+            //         }
+            //     })
+            // }
+            that.payWayList = _payWayList;
+            if(that.isFollow) {
+                // 读取缓存数据
+                that.$app.$def.getStorageFile(that, {
+                    key: 'lastChargeType',
+                    success: function(data) {
+                        console.log('lastChargeType------success------', data)
+                        that.payWayList.forEach(function(item, index) {
+                            if(item.payWay == data) {
+                                that.payindex = index
+                            }
+                        })
+                    }
+                })
+            }
+        }
+    },
+    // 随机数 4位加日期
+    RndNum() {
+		let charactors="1234567890abcdefghijklmnopqrstuvwxyz";
+		let value='',i;
+		let timestamp = new Date().getTime();
+		for(let j=1;j<=4;j++){
+			i = parseInt(36*Math.random());
+			value = value + charactors.charAt(i);
+		}
+		value = value + timestamp;
+		return value;
+    },
+    //切换支付方式
+    changePayType(evt) {
+        let that = this;
+        // that.ispay = num;
+        that.payindex = evt.detail.params;
+        // for(let i=0; i<that.payWayList.length; i++){
+        //     if(i == evt.detail.params){
+        //         that.payWayList[i].cur = 1;
+        //     }else{
+        //         that.payWayList[i].cur = 0;
+        //     }
+        // }
+    },
+    //充值
+    gopay(custom = '') {
+        let that = this;
+        // if(that.goPayClock){
+        //     return;
+        // }
+        // that.goPayClock = true;
+        // that.hidePageTimeout1 = setTimeout(() => {
+        //     that.goPayClock = false;
+        // }, 500);
+        this.$broadcast('initGoPay');      
+        let _payWayList = that.payWayList;
+        let _index = that.payindex;
+        that.payDataJson = {
+            from: _payWayList[_index].from,
+            payWay: _payWayList[_index].payWay,
+            // type: that.plist.products[that.payobj.index].type,
+            id: that.activityId,
+            sourceType: 3,
+            sourceInfo: that.activityId,
+            operId: that.OperationID,
+            utJson:JSON.stringify(that.payUserTacticsVo),
+        }
+        if(custom) {
+            that.payDataJson.custom = JSON.stringify(custom)
+        }
+        that.logJson={
+            from: that.payDataJson.from,
+            payWay: that.payDataJson['payWay'],
+            id: that.payDataJson['id'],
+            sourceType: that.payDataJson['sourceType'],
+            sourceInfo: that.payDataJson['sourceInfo'],
+            brand: that.headerJson['brand'],
+            model: that.headerJson['model'],
+            userId: that.headerJson['userId']
+        };
+        // console.info('datajson',that.payDataJson);
+        
+        // console.info('gopay',_payWayList);
+        switch( _payWayList[that.payindex].payWay ){
+            //oppo支付
+            case 'OPPOPAY':
+            console.info('开始oppozhifu');
+            this.$broadcast('oppoPay',{dataJson:that.payDataJson,logJson:that.logJson});
+            break;
+            // 支付宝支付
+            case 'ALIPAY':
+            this.$broadcast('aLiPay',{ dataJson:that.payDataJson,logJson:that.logJson });
+            break;
+            // 微信APP支付
+            case 'WECHATPAY_APP':
+            this.$broadcast('wxPay',{ payType:'APP', dataJson:that.payDataJson, logJson:that.logJson});
+            break;
+            // 微信WEB支付
+            case 'WECHATPAY_MWEB':
+            this.$broadcast('wxPay',{ payType:'MWEB', dataJson:that.payDataJson, logJson:that.logJson});
+            break;
+            // 现在支付
+            case 'NOWPAY':
+            this.$broadcast('nowPay',{ dataJson:that.payDataJson, logJson:that.logJson });
+            break;
+            default:
+        }
+        // 关闭底部弹层
+        // that.payShow = false; 如果设为false，子组件实例会摧毁
+        if(!_payWayList[that.payindex].payWay){
+            console.info('你点击啦');
+            prompt.showToast({
+                message: '支付错误,请联系客服',
+                duration: 0
+            });
+        }
+    }, 
+    // 关闭充值弹层
+    closeDialogPay(){
+        this.payShow = false;
+    },
+    // 充值成功跳转
+    paysucc(){
+        // prompt.showToast({
+        //     message: '充值成功',
+        //     duration: 0
+        // });
+        let that = this
+        that.$app.isFromWebhuodong = true
+        if(that.h5data.pageStay){
+            setTimeout(function(){
+                let msg={type:1}
+                that.$element('web').postMessage({message:JSON.stringify(msg)})
+            },0)
+            that.payShow = false;
+            return false
+        }
+        if(that.payWayList[that.payindex].from==4){
+            setTimeout(function(){
+                that.headerJson.versionCode = app.getInfo().versionCode
+                that.headerJson.appVer = that.$app.$data.appVer
+                that.headerJson.paySucc = 1
+                that.$element('web').postMessage({message:JSON.stringify(that.headerJson)})
+            },0)
+            that.payShow = false;
+        }else{
+            if(that.pageFrom=='sign'||that.pageFrom=='read'){
+                router.back()
+            }else{
+                router.clear();
+                router.replace({
+                    uri: '/Index',
+                    params: {pageFrom:'Webhuodong'}
+                });
+            }
+        }
+    },
+    onBackPress (e) {
+        let that = this;
+        // if(JSON.parse(this.cloAppFrOut) || this.isCloseApp ==1 ){
+        //     this.$app.exit();
+        // }
+        setTimeout(() => {
+            // 如果打开了支付提示，先关闭
+            if(that.isWebPayAlert) {
+                that.isWebPayAlert = false
+                return true
+            // 关闭底部弹层
+            }else if(that.payShow) {
+                that.payShow = false; 
+                return true
+            }else if(that.isSharePopShow) {
+                that.isSharePopShow = false
+                return true
+            }else if(that.isPopShow) {
+                that.isPopShow = false
+                that.$element('web').postMessage({ message: JSON.stringify({
+                    type: 'closePop'
+                }) })
+                return true
+            }else {
+                let routerlen = router.getLength();
+                console.info(routerlen);
+                if(routerlen <= 1){
+                    router.replace({
+                        uri:'/Index'
+                    })
+                }else{
+                    router.back();                
+                }
+            }
+        }, 0);
+        // 阻止默认行为，等待异步操作
+        return true;
+    },
+    errorHand(msg){
+            console.log('errorshoudao',msg);
+            let that = this
+            // that.$app.$def.requestData(that,{
+            //     interface: '/glory/fastapp/2174',
+            //     data: { page: that.$page.path,event:'webview_error',content:JSON.stringify({webSrc:that.webSrc,msg:msg})},
+            //     succ: function (res) {
+            //         console.log(res)
+            //     }
+            // })
+    },
+    retryHandler(){
+        let that = this;
+        this.isShowBtn= true;
+		this.isLoading = false;
+        that.hidePageTimeout = setTimeout(() => {
+            router.replace({
+                uri:'/Webhuodong',
+                params:{
+                    webSrc:that.webSrc,
+                    activity:that.activity, //活动id
+                    pageFrom:that.pageFrom,
+                    OperationPosition:that.OperationPosition,
+                    OperationID:that.OperationID,
+                    OperationName:that.OperationName,
+                    OperationType:that.OperationType,
+                    StartTime:that.StartTime,
+                    EndTime:that.EndTime
+                }
+            })
+        }, 1000);
+        try {
+            this.$app.$def.quickappLog([703, {
+                    qmap:{
+                        type:'retry',
+                        thisUri:that.$page.uri,
+                    }
+            }, 'lvgoWebuodong'], that)
+        } catch(error){
+            console.log(`重试错误${error}`);
+        }
+    },
+    jumpToPage(evt){
+        if(evt.detail.type){
+            this.$broadcast('initQueryParams');
+            this.paysucc()
+        }
+    },
+    // 支付提醒显示切换
+    fnChangeAlertShow(evt) {
+        if(evt && evt.detail && evt.detail.show) {
+            this.isWebPayAlert = true
+        }else {
+            this.isWebPayAlert = false
+        }
+    },
+    handleALiPay(evt){
+        this.callALiPay = evt.detail.callALiPay;
+    },
+    // 分享弹窗展示
+    fnSharePopShow() {
+        if(!this.shareInfo.type) {
+            prompt.showToast({
+                message: '当前设备不支持分享'
+            })    
+            return
+        }
+        this.isSharePopShow = true
+    },
+    // 分享
+    fnShare(type) {
+        if(!type) {
+            prompt.showToast({
+                message: '当前设备不支持分享'
+            })    
+            return
+        }
+        let that = this;
+        that.fnReportStatus(1)
+        that.fnCancleShare()
+        let shareUrl = that.fnReplaceUrl(that.shareInfo.shareUrl)
+        share.share({
+            shareType: 0,
+            title: that.shareInfo.title,
+            summary: that.shareInfo.content,
+            imagePath: that.shareInfo.imgUrl,
+            targetUrl: shareUrl,
+            platforms: type == 'circle' ? ['WEIXIN_CIRCLE'] : ['WEIXIN'],
+            success: function () {
+                that.fnReportStatus(2)
+                that.isShareAction = true;
+            },
+            fail: function (data, code) {
+                console.log(data, code) 
+                that.isShareAction = false;
+                prompt.showToast({
+                    message: '分享失败'
+                });
+            },
+        })
+    },
+    // 取消分享
+    fnCancleShare() {
+        this.isSharePopShow = false
+    },
+    // 分享上报
+    fnReportStatus(status) {
+        let that = this
+        that.$app.$def.requestData(that, {
+            interface: '/glory/fastapp/2407',
+            data: { status: status },
+            succ: function (res) {
+                console.log(res)
+            }
+        })
+    },
+    // 分享地址宏替换
+    fnReplaceUrl(url) {
+        let time = new Date().getTime()
+        return url.replace('__OPTIME__', time)
+    },
+    fnCheckScStart() {
+        let that = this
+        if(!that.$app.isScStart) {
+            shortcut.hasInstalled({
+                success: function(res) {
+                    let fnGetCreateTime = that.$app.$def.fnGetCreateTime.call(that)
+                    let fnGetInstallTime = that.$app.$def.fnGetInstallTime.call(that)
+                    Promise.all([fnGetCreateTime, fnGetInstallTime]).then(result => {
+                        if(result[0] || result[1]) {
+                            that.$app.shenceLog.fnSetCommonArgs({
+                                RegisterDate: result[0] || result[1] 
+                            })
+                        }
+                    })
+                    let property = {
+                        StartPath: that.$page.uri,
+                        BookID: that.bookId ? that.bookId : '无',
+                        DesktopState: res ? 'Saved' : 'Notsaved',
+                    }
+                    that.$app.shenceLog.log(that, 'appLaunch', '', property);
+                    that.$app.isScStart = true
+                },
+                fail: function() {
+                    that.$app.$def.quickappLog([703, {
+                        site: '7',
+                    }, 'get_shortcut_install_fail'], that);
+                }
+            })
+        }
+    }
+}
+</script>

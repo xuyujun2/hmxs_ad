@@ -1,0 +1,1553 @@
+<import name="dialog-h5" src="../Base/dialog-h5"></import>
+<import name="paid-tag" src="./tag.ux"></import>
+<template>
+<div class="book-shelf">
+    <div class="book-shelf-top">
+        <text class="book-shelf-top-text">河马免费小说</text>
+    </div>
+    <stack class="book-shelf-stack">
+        <image class="swiper-bg" src="https://xsmfdq.kkyd.cn/images/hmxs/top-bg.png"></image>
+        <list id="bookList" class="list" @scrollbottom="fnLoadMore">
+            <list-item type="swiper" class="swiper-box" if="{{ swiperList && swiperList.length }}">
+                <div class="swiper-parent {{ swiperInfo.isNewStyle ? 'new-swiper-parent' : '' }}">
+                    <block if="{{ !swiperInfo.isNewStyle }}">
+                        <swiper class="swiper" autoplay="true" >
+                            <block for={{swiperList}} >
+                                <div class="swiper-item" @appear="fnSwiperExposure($idx, $item, 2)"  @click="fnRouteToHuoDong($item)" if="{{ $item.type==2 }}">
+                                    <image class="huodong" src="{{ $item.coverWap }}"></image>
+                                </div>
+                                <div class="swiper-item" @appear="fnSwiperExposure($idx, $item, 6)" @click="fnRouteToBookDetail($idx, $item)" if="{{ $item.type == 1 }}">
+                                    <div class="cover-txt">
+                                        <stack class="imgcover">
+                                            <image src="{{ $item.coverWap }}"></image>
+                                            <paid-tag tag="{{ $item.iconDesc }}" if="{{ $item.iconType === '10' }}"></paid-tag>
+                                        </stack>
+                                        <div class="txt">
+                                            <text class="book-name">{{ $item.bookName }}</text>
+                                            <text class="intro">{{ $item.introduction }}</text>
+                                        </div>
+                                    </div>
+                                </div>
+                            </block>
+                        </swiper>
+                    </block>
+                    <block else>
+                        <swiper class="swiper" autoplay="true" style="indicator-right: {{ swiperInfo.rightSpace }}px;">
+                            <block for={{swiperList}} >
+                                <div class="swiper-item" @appear="fnSwiperExposure($idx, $item, 2)"  @click="fnRouteToHuoDong($item)" if="{{ $item.type==2 }}">
+                                    <image class="huodong" src="{{ $item.coverWap }}" ></image>
+                                </div>
+                                <div class="swiper-item" @appear="fnSwiperExposure($idx, $item, 6)" @click="fnRouteToBookDetail($idx, $item)" if="{{ $item.type == 1 }}">
+                                    <div class="cover-txt">
+                                        <stack class="imgcover">
+                                            <image src="{{ $item.coverWap }}"></image>
+                                            <div class="new-paid-tag">
+                                                <paid-tag tag="{{ $item.iconDesc }}" if="{{ $item.iconType === '10' }}"></paid-tag>
+                                            </div>
+                                            <div if="{{ swiperInfo.recommendLabel }}" class="label-container">
+                                                <text>{{ swiperInfo.recommendLabel }}</text>
+                                            </div>
+                                        </stack>
+                                        <div class="txt">
+                                            <text class="book-name">{{ $item.bookName }}</text>
+                                            <text class="intro">{{ $item.introduction }}</text>
+                                        </div>
+                                    </div>
+                                </div>
+                            </block>
+                        </swiper>
+                    </block>
+                </div>
+                <block if="{{ swiperInfo.isNewStyle }}">
+                    <div class="right-block" @click="fnRouteToSign">
+                        <div class="line"></div>
+                        <div class="sign-block">
+                            <text class="sign-status">{{ !swiperInfo.isSign ? '今日签到' : '已连签'}}</text>
+                            <div class="text-wrapper">
+                                <text class="sign-num">{{ !swiperInfo.isSign ? ('+' + swiperInfo.signAwardGoldNum) : swiperInfo.continueSignNum }}</text>
+                                <text class="sign-text">{{ !swiperInfo.isSign ? '金币' : '天' }}</text>
+                            </div>
+                            <div class="sign-button">
+                                <text >{{ !swiperInfo.isSign ? '签到' : '更多福利' }}</text>
+                            </div>
+                        </div>
+                    </div>
+                </block>
+            </list-item>
+            <list-item class="recent-read" type="recent-read">
+                <text class="title">书架</text>
+                <div class="right">
+                    <block if="!isEdit">
+                        <div class="icon-box" @click="fnRouteToHistory">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/book-shelf-read-history-icon.png"></image>
+                            <text class="text">浏览记录</text>
+                        </div>
+                        <div if="!isEmpty" class="icon-box icon-box-left" @click="fnEdit">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/img-edit.png"></image>
+                            <text class="text">管理</text>
+                        </div>
+                    </block>
+                    <block else>
+                        <div class="icon-box" @click="fnEditFinish">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/img-edit.png"></image>
+                            <text class="text">完成</text>
+                        </div>
+                    </block>
+                </div>
+            </list-item>
+            <list-item class="book-list" type="bookShelfList{{ loadTimes }}">
+                <block for="bookShelfList">
+                    <div class="book-item" @appear="fnBookAppear($item)" @click="fnBookClick($idx, $item)">
+                        <stack class="book-image-stack {{ $item.bookType === 'add' ? 'book-image-add' : '' }}">
+                            <block if="$item.bookType === 'read'">
+                                <image class="book-cover" src="{{ $item.coverImage }}"></image>
+                                <div show="{{ $item.bookType === 'read' && isEdit }}" class="book-edit" @click="fnDeleteBook($idx, $item)">
+                                    <image class="book-edit-image" src="{{$item.disabled ? 'https://xsmfdq.kkyd.cn/images/icon-close3-disabled.png' : 'https://xsmfdq.kkyd.cn/images/icon-close3.png'}}"></image>
+                                </div>
+                                <div show="{{ $item.bookType === 'read' && !!$item.cindex }}" class="process">
+                                    <text class="process-text">读到第{{ $item.cindex }}章</text>
+                                </div>
+                                <div show="{{ $item.bookType === 'read' && !!$item.iconType && !!$item.iconDesc }}">
+                                    <paid-tag tag="{{ $item.iconDesc }}" icon-style="{{ $item.bookIconStyle }}"></paid-tag>
+                                </div>
+                            </block>
+                            <block else>
+                                <image class="book-cover" src="https://xsmfdq.kkyd.cn/images/hmxs/bookshelf-add.png"></image>
+                            </block>
+                        </stack>
+                        <text if="$item.bookType === 'read'" class="bookname">{{ $item.bookType === 'add' ? '' : $item.bookName }}</text>
+                        <text if="$item.bookType === 'read' && $item.protagonist && $item.protagonist.length && $item.rolename" class="rolename">{{ $item.bookType === 'add' ? '' : $item.rolename }}</text>
+                    </div>
+                </block>
+            </list-item>
+            <list-item type="loadMore">
+                <block if="{{!isEdit && !isEmpty && !isAll && isSucc}}">
+                    <div class="load-more">
+                        <text class="load-text">上拉加载更多</text>
+                    </div>
+                </block>
+            </list-item>
+        </list>
+    </stack>
+    <dialog-h5 if="isPop" location="{{ location }}" onfn-dialog-close="fnDialogClose"></dialog-h5>  
+    <div if="{{ isNotice && isSucc && currentIndex === 0 && bookList && bookList.length }}" class="read-mask" @click="fnHideNotice" @touchend="fnHideNotice">
+        <div class="left"></div>
+        <div class="mid">
+            <div class="{{(swiperList && swiperList.length) ? 'top' : 'top-extra'}}"></div>
+            <div class="{{ bookList && bookList.length && bookList[0].rolename ? 'middle-big' : 'middle'}} "></div>
+            <div class="bottom"></div>
+        </div>
+        <div class="right">
+            <image class="{{(swiperList && swiperList.length) ? 'right-image' : 'right-image-extra' }}" src="../Common/images/read-left.png"></image>
+            <text>最近阅读的书籍</text>
+        </div>
+    </div>
+</div>
+</template>
+
+<style scoped lang="less">
+    .book-shelf {
+        flex-direction: column;
+        width: 100%;
+        flex: 1;
+        .book-shelf-top {
+            align-items: center;
+			width: 100%;
+			height: 110px;
+			background-color: rgba(247, 244, 255, 1);
+            .book-shelf-top-text {
+                margin-left: 32px;
+                height: 62px;
+                line-height: 62px;
+                font-size: 44px;
+                font-weight: bold;
+                color: #222222;
+            }
+        }
+        .book-shelf-stack {
+            width: 100%;
+            flex: 1;
+            align-items: center;
+            flex-direction: column;
+            background-color: #F5F5F8;
+            width: 100%;
+            height: 100%;
+            .swiper-bg {
+                height: 300px;
+                width: 100%;
+            }
+            .list {
+                flex: 1;
+                flex-direction: column;
+                .swiper-box {
+                    .swiper-parent {
+                        width: 100%;
+                        height: 212px;
+                        .swiper {
+                            width: 100%;
+                            height: 100%;
+                            indicator-bottom: 24px;
+                            indicator-size: 12px;
+                            indicator-color: #EAEAEF;
+                            indicator-selected-color: rgba(180, 156, 255, 1);
+                            .swiper-item {
+                                flex-direction: column;
+                                padding: 0px 63px 0px 63px;
+                                .cover-txt {
+                                    width: 100%;
+                                    .huodong {
+                                        width: 100%;
+                                    }
+                                    .imgcover {
+                                        width: 120px;
+                                        margin-right: 24px;
+                                        border-radius: 8px;
+                                        image {
+                                            width: 120px;
+                                            height: 160px;
+                                            border-radius: 8px;
+                                        }
+                                    }
+                                    .txt {
+                                        flex: 1;
+                                        flex-direction: column;
+                                        .book-name {
+                                            height: 42px;
+                                            line-height: 42px;
+                                            color: #5A5A64;
+                                            font-size: 30px;
+                                            lines: 1;
+                                            text-overflow: ellipsis;
+                                            width: 480px;
+                                        }
+                                        .intro {
+                                            line-height: 40px;
+                                            height: 80px;
+                                            padding-top: 8px;
+                                            color: #8E8E98;
+                                            font-size: 28px;
+                                            lines: 2;
+                                            text-overflow: ellipsis;
+                                            width: 480px;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .new-swiper-parent {
+                        width: 494px;
+                        margin-bottom: 16px;
+                        margin-left: 32px;
+                        height: 202px;
+                        background-color: #fff;
+                        border-top-left-radius: 8px;
+                        border-bottom-left-radius: 8px;
+                        .swiper {
+                            width: 494px;
+                            height: 202px;
+                            .swiper-item {
+                                width: 100%;
+                                padding: 24px 0px 0px 16px;
+                                border-radius: 8px;
+                                height: 202px;
+                                .cover-txt {
+                                    width: 100%;
+                                    .huodong {
+                                        width: 100%;
+                                    }
+                                    .imgcover {
+                                        width: 148px;
+                                        margin-right: 16px;
+                                        flex-direction: column;
+                                        align-items: center;
+                                        image {
+                                            width: 104px;
+                                            height: 138px;
+                                            border-radius: 8px;
+                                        }
+                                        .new-paid-tag {
+                                            align-self: flex-start;
+                                            margin-left: 22px;
+                                        }
+                                        .label-container {
+                                            margin-top: 114px;
+                                            width: 100%;
+                                            height: 40px;
+                                            justify-content: center;
+                                            align-items: center;
+                                            background-image: url('https://xsmfdq.kkyd.cn/images/hmxs/recommendlabel-bg.png');
+                                            image {
+                                                height: 40px;
+                                                width: 100%;
+                                            }
+                                            text {
+                                                height: 33px;
+                                                line-height: 33px;
+                                                font-size: 24px;
+                                                color: #ffffff;
+                                                text-align: center;
+                                            }
+                                        }
+                                    }
+                                    .txt {
+                                        width: 289px;
+                                        flex-direction: column;
+                                        .label {
+                                            margin-top: 40px;
+                                            font-size: 28px;
+                                            color: rgba(155,155,155,1);
+                                        }
+                                        .book-name {
+                                            height: 42px;
+                                            line-height: 42px;
+                                            color: #222222;
+                                            font-size: 30px;
+                                            lines: 1;
+                                            font-weight: bold;
+                                            text-overflow: ellipsis;
+                                            width: 289px;
+                                        }
+                                        .intro {
+                                            line-height: 33px;
+                                            height: 66px;
+                                            padding-top: 8px;
+                                            color: #B2B2BD;
+                                            font-size: 24px;
+                                            lines: 2;
+                                            text-overflow: ellipsis;
+                                            width: 289px;
+                                        }
+                                    }
+                    
+                                }
+                            }
+                        }
+                        
+                    }
+                    .right-block {
+                        width: 193px;
+                        height: 202px;
+                        background-color: #ffffff;
+                        .line {
+                            height: 170px;
+                            width: 1px;
+                            align-self: center;
+                            background-color: rgba(178, 178, 189, 0.2);
+                        }
+                        .sign-block {
+                            flex-direction: column;
+                            margin-top: 28px;
+                            align-items: center;
+                            width: 192px;
+                            .sign-status {
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #222222;
+                                height: 33px;
+                                line-height: 33px;
+                                margin-bottom: 4px;
+                            }
+                            .text-wrapper {
+                                align-items: center;
+                            }
+                            .sign-num {
+                                height: 42px;
+                                font-size: 30px;
+                                color: #FF631C;
+                                line-height: 42px;
+                                font-weight: bold;
+                            }
+                            .sign-text {
+                                height: 33px;
+                                font-size: 24px;
+                                color: #222222;
+                                line-height: 33px;
+                                font-weight: bold;
+                            }
+                            .sign-button {
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                background-image: url('https://xsmfdq.kkyd.cn/images/hmxs/signbutton-bg.png');
+                                background-repeat: no-repeat;
+                                background-size: 100% 100%;
+                                width: 176px;
+                                height: 84px;
+                                image {
+                                    width: 176px;
+                                    height: 84px;
+                                }
+                                text {
+                                    font-size: 28px;
+                                    height: 40px;
+                                    line-height: 40px;
+                                    color: #FFFFFF;
+                                    font-weight: bold;
+                                }
+                            }
+                        }
+
+                    }
+                }
+                .recent-read {
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 686px;
+                    padding: 32px 16px 32px 24px;
+                    margin-left: 32px;
+                    border-top-left-radius: 16px;
+                    border-top-right-radius: 16px;
+                    background-color: #fff;
+                    .title {
+                        height: 50px;
+                        color: #222;
+                        font-size: 36px;
+                        font-weight: bold;
+                    }
+                    .right {
+                        align-items: center;
+                        height: 50px;
+                        .icon-box {
+                            .icon {
+                                width: 40px;
+                                height: 40px;
+                                margin-right: 8px;
+                            }
+                            .text {
+                                color: #5A5A64;
+                                font-size: 28px;
+                            }
+                        }
+                        .icon-box-left {
+                            margin-left: 40px;
+                        }
+                    }
+                }
+                .book-list {
+                    flex-wrap: wrap;
+                    margin: 0px 32px 32px;
+                    padding-left: 24px;
+                    width: 686px;
+                    background-color: #fff;
+                    border-bottom-left-radius: 16px;
+                    border-bottom-right-radius: 16px;
+                    .book-item {
+                        flex-direction: column;
+                        margin-right: 24px;
+                        padding-bottom: 40px;
+                        width: 196px;
+                        .book-image-stack {
+                            width: 196px;
+                            height: 258px;
+                            border: 1px solid rgba(234, 234, 239, 0.24);
+                            border-radius: 8px;
+                            .book-cover {
+                                width: 196px;
+                                height: 258px;
+                                border-radius: 8px;
+                            }
+                            .book-edit {
+                                margin-top: 1px;
+                                margin-left: 154px;
+                                width: 40px;
+                                height: 40px;
+                                .book-edit-image {
+                                    width: 40px;
+                                    height: 40px;
+                                    flex-shrink: 0;
+                                }
+                            }
+                            .process {
+                                width: 100%;
+                                justify-content: flex-end;
+                                align-items: flex-end;
+                                align-self: flex-end;
+                                .process-text {
+                                    margin-right: 8px;
+                                    margin-bottom: 8px;
+                                    padding: 0 12px;
+                                    height: 32px;
+                                    line-height: 32px;
+                                    text-align: center;
+                                    background-color: rgba(0, 0, 0, 0.5);
+                                    border-radius: 4px;
+                                    color: #FFFFFF;
+                                    font-size: 22px;
+                                }
+                            }
+                        }
+                        .book-image-add {
+                            border-width: 0px;
+                        }
+                        .bookname {
+                            margin-top: 16px;
+                            width: 196px;
+                            height: 48px;
+                            line-height: 48px;
+                            color: #222222;
+                            font-size: 30px;
+                            lines: 1;
+                            text-overflow: ellipsis;  
+                            font-weight: bold;
+                        }
+                        .rolename {
+                            margin-top: 4px;
+                            width: 196px;
+                            height: 32px;
+                            line-height: 32px;
+                            color: #8E8E98;
+                            font-size: 24px;
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                    }
+                }
+                .load-more {
+                    width: 100%;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 32px;
+                    height: 32px;
+                    .load-text {
+                        text-align: center;
+                        color: #785AF6;
+                        height: 32px;
+                        font-size: 24px;
+                        line-height: 32px;
+                    }
+                }
+            }
+        }
+        .dialogh5 {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background-color: rgba(0,0,0,0.6);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            .divweb {
+                width: 596px;
+                height: 746px;
+            }
+            .close {
+                width: 66px;
+                height: 66px;
+                margin-top: 40px;
+            }
+        }
+        .read-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            .left{
+                width: 40px;
+                background-color: rgba(0,0,0,0.8);
+            }
+            .mid {
+                width: 220px;
+                flex-direction: column;
+                .top {
+                    background-color: rgba(0,0,0,0.8);
+                    height: 434px;
+                }
+                .top-extra {
+                    background-color: rgba(0,0,0,0.8);
+                    height: 202px;
+                }
+                .middle {
+                    height: 360px;
+                }
+                .middle-big {
+                    height: 397px;
+                }
+                .bottom {
+                    flex: 1;
+                    background-color: rgba(0,0,0,0.8);
+                }
+            }
+            .right{
+                background-color: rgba(0,0,0,0.8);
+                flex-direction: column;
+                flex: 1;
+                padding-left: 30px;
+                text {
+                    font-size:36px;
+                    color:rgba(255,255,255,1);
+                    margin-top: 31px;
+                }     
+                .right-image {
+                    width: 151px;
+                    height: 94px;
+                    margin-top: 576px;
+                }
+                .right-image-extra {
+                    width: 151px;
+                    height: 94px;
+                    margin-top: 186px;
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+import storage from '@system.storage';
+import router from '@system.router';
+import prompt from '@system.prompt';
+export default {
+    props: {
+        // 当前激活的tab索引
+        currentIndex: {
+            type: Number,
+            default: 0,
+            required: false,
+        },
+        // 其它页面索引
+        indexOnshow: {
+            type: Number,
+            default: 0,
+            required: false,
+        },
+        // 是否是金币模式
+        isCoin: {
+            type: Boolean,
+            default: false,
+            required: false
+        },
+        // 控制一键加桌成功后展示书架弹窗开关
+        isHoldPop: {
+            type: Boolean,
+            default: false,
+            required: false
+        }
+    },
+    data() {
+        return {
+            swiperList: [],                 // swiper列表
+            swiperOperationInfo: {},        // swiper运营位信息
+            swiperTacticsVo: {},            // swiper策略信息
+            bookList: [],                   // 书籍列表
+            bookShelfList: [],              // 书架列表
+            loadTimes: 0,                   // 加载次数
+            curPage: 1,                     // 当前页数
+            pageSize: 15,                   // 每页请求数
+            bookSize: 0,                    // 总书籍数目
+            isAll: true,                    // 全部完成
+            isEmpty: false,                 // 书架无数据
+            isEdit: false,                  // 编辑状态
+            isLoading: false,               // 加载中
+            isPop: false,                   // 书架弹窗
+            location: '',                   // 弹窗
+            isNotice: false,                // 新手引导
+            isSucc: false,                  // 接口请求成功
+            isPageHide: false,              // 页面隐藏
+            apiFailNum: 0,                  // 接口失败次数
+            isChangeApi: false,             // 切换域名
+            errTimeout: null,               // 错误倒计时
+            isEditing: false,               // 编辑模式切换
+            swiperInfo: {
+                isNewStyle: false,          // 新版Banner样式
+                isSign: false,              // 签到
+                recommendLabel: '', // 推荐文案
+                signAwardGoldNum: 0,        // 签到奖励金币数
+                continueSignNum: 0,         // 连续签到天数
+                rightSpace: 0,             // Banner指示器距右边界距离
+            }
+        }
+    },
+    onInit() {
+        this.fnLoadBookShelf();
+        this.fnGetNoticeCache()
+        this.$watch('currentIndex', 'watchCurrentIndex');
+        this.$watch('indexOnshow', 'watchIndexOnshow');
+        this.$on('closeTimeout', this.fnPagehide);
+        this.$on('pageOnshow', this.fnPageShow);
+        this.$on('freshShelf', this.fnPageRefresh)
+        this.$on('backPress', this.fnBackPress)
+    },
+    /**
+     * 监控currentIndex变化
+     */
+    watchCurrentIndex(newValue, oldValue) {
+        if(newValue == 0 && !(this.isCoin && oldValue === 2)) {
+            this.fnReloadBookShelf()
+        }
+    },
+    /**
+     * 页面onShow
+     */
+    watchIndexOnshow() {
+        if(this.currentIndex == 0) {
+            this.fnReloadBookShelf()
+        }
+    },
+    /**
+     * 刷新书架
+     * @param {Boolean} loadCache 列表回到顶部
+     */
+    fnReloadBookShelf(loadCache = true) {
+        if(loadCache) {
+            this.$element('bookList') && this.$element('bookList').scrollTo({ index: 0 });
+        }
+        this.isEdit = false;
+        this.isAll = true;
+        this.isEmpty = false;
+        this.curPage = 1;
+        this.loadTimes++
+        this.fnLoadBookShelf(false, false)
+    },
+    /**
+     * 加载书架信息
+     * @param {Boolean} isLoadMore 加载更多
+     * @param {Boolean} loadCache 加载缓存
+     */
+    fnLoadBookShelf(isLoadMore = false, loadCache = true) {
+        let that = this;
+        let isGetStorageFail = false
+        let isGetAjaxFail = false
+        if(that.isLoading) {
+            return false;
+        }
+        that.isLoading = true
+        if(!isLoadMore) {
+            that.curPage = 1
+        }
+        let getStorage = new Promise((resolve, reject) => {
+            if(isLoadMore || !loadCache) {
+                resolve()
+                return
+            }
+            storage.get({
+                key: 'bookshelf',
+                success: function(data) {
+                    if(data) {
+                        let res
+                        try {
+                            res = JSON.parse(data);
+                            that.$emit('hasStor', { type: true });
+                            that.fnRenderPage(res, false, false)
+                            that.$app.$def.quickappLog([703, {
+                                qmap: {
+                                    site: '3', 
+                                    cardIndex:0
+                                }
+                            }, 'book_catch'], that)
+                        } catch(e) {
+                            isGetStorageFail = true
+                            that.$app.$def.quickappLog([703, {
+                                qmap: {
+                                    site: '6', 
+                                    cardIndex: 0
+                                }
+                            }, 'book_catch'], that)
+                        }
+                    } else {
+                        isGetStorageFail = true
+                        that.$app.$def.quickappLog([703, {
+                            qmap: {
+                                site: '4', 
+                                cardIndex: 0
+                            }
+                        }, 'book_catch'], that)
+                    }
+                    resolve()
+                },
+                fail: function() {
+                    isGetStorageFail = true
+                    resolve()
+                }
+            })
+        })
+        let getAjax = new Promise((resolve, reject) => {
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2820',
+                data: {
+                    page: that.curPage,
+                    size: that.pageSize,
+                    uuid: that.$app.sourceInfo['uuid'],
+                    pullMode: that.$app.sourceInfo['pullMode'],
+                    isAddBf: 0,
+                },
+                succ: function (res) {
+                    if(res && res.data) {
+                        clearTimeout(that.errTimeout)
+                        that.isSucc = true;
+                        that.apiFailNum = 0
+                        that.$emit('isSucc', { type: true });
+                        that.fnRenderPage(res.data, true, isLoadMore);
+                        if(res.data.quitText || res.data.quitStyle) {
+                            let setData = {}
+                            if(res.data.quitText) { setData.quitText = res.data.quitText }
+                            if(res.data.quitStyle) { setData.quitStyle = res.data.quitStyle }
+                            that.$emit('fnGetMessage', setData)
+                        }
+                    } else {
+                        isGetAjaxFail = true; 
+                    }
+                    that.isLoading = false;
+                    resolve()
+                },
+                fail: function() {
+                    isGetAjaxFail = true;
+                    that.isLoading = false;
+                    resolve()
+                    if(!that.isPageHide) {
+                        if(that.isChangeApi) {
+                            return
+                        }
+                        that.apiFailNum++
+                        if(that.apiFailNum < 3) {
+                            that.fnReTry()
+                        }else if(that.apiFailNum == 3) {
+                            that.apiFailNum = 0
+                            that.isChangeApi = true
+                            that.$app.$def.changeApi(that).then(() => {
+                                that.isChangeApi = false
+                                that.fnLoadBookShelf()
+                            }, () => {
+                                that.isChangeApi = false
+                                that.fnLoadBookShelf()
+                            })
+                        }
+                    }
+                }
+            })
+        })
+        Promise.all([getStorage, getAjax]).then(() => {
+            if(isGetStorageFail && isGetAjaxFail) {
+                router.push({
+                    uri: '/Notfound',
+                    params: {
+                        cardIndex: 0
+                    }
+                })
+            }
+        }, () => {})
+    },
+    /**
+     * 加载更多
+     */
+    fnLoadMore() {
+        if(this.isEdit) {
+            return
+        }
+        if (!this.isAll && !this.isEmpty && !this.isLoading) {
+            this.fnLoadBookShelf(true);
+        }
+    },
+    /**
+     * 页面数据渲染
+     * @param {Object} data 接口返回数据
+     * @param {Boolean} isAjax 接口请求
+     * @param {Boolean} isLoadMore 记载更多
+     */
+    fnRenderPage(data, isAjax = false, isLoadMore = false) {
+        let that = this
+        that.bookSize = data.bookSize;
+        that.location = data.location;
+        that.swiperOperationInfo = data.topOperationInfo || {}
+        that.swiperTacticsVo = data.topUserTacticsVo || {}
+        let swiperList = data.topBookList;
+        if(swiperList && swiperList.length) {
+            that.swiperInfo = {
+                isNewStyle: data.bannerStyleType === 'welfareCenter',
+                isSign: data.isSign === 1,
+                recommendLabel: data.recommendLabel || '热门推荐',
+                signAwardGoldNum: data.signAwardGoldNum || 0,
+                continueSignNum: data.continueSignNum || 0,
+                rightSpace: (289 - swiperList.length * 12 - (swiperList.length - 1 ) * 12) / 2 + 24
+            }
+            swiperList.forEach(bookInfo => {
+                if(bookInfo.desc) {
+                    bookInfo.introduction = bookInfo.desc
+                }
+            })
+            that.swiperList = swiperList
+        }
+        if(isAjax && !that.isHoldPop && !isLoadMore) {
+            that.isPop = false
+        }
+        setTimeout(() => {
+            if(isAjax) {
+                that.isPop = true
+            }
+        }, 0)
+        if(data.bookSize == 0) {
+            that.fnEmptyBookShelf()
+            that.fnCalcBookShelf(isAjax)
+        } else {
+            that.isEmpty = false
+            if(data.content && data.content.length) {
+                that.fnDealBookList(data.content, isAjax, isLoadMore)
+            }
+            if(that.bookList && that.bookList.length && that.bookList.length >= that.bookSize || that.curPage && that.pageSize && that.curPage * that.pageSize >= that.bookSize) {
+                that.isAll = true;
+            } else {
+                that.isAll = false;
+            }
+        }
+        if(isAjax) {
+            that.curPage++;
+            that.isLoading = false;
+        }
+        if(isAjax && !isLoadMore) {
+            that.fnSetBookShelfCache(data)
+        }
+    },
+    /**
+     * 空书架处理
+     */
+    fnEmptyBookShelf() {
+        this.isEmpty = true
+        this.isAll = true
+        this.isEdit = false
+        this.bookList = []
+        this.bookShelfList = []
+    },
+    /**
+     * 书架书籍展示
+     * @param {boolean} isAjax 接口请求
+     */
+    fnCalcBookShelf(isAjax = true) {
+        let bookShelfList = []
+        let bookList = this.bookList
+        bookShelfList = bookShelfList.concat(bookList)
+        bookShelfList.push({
+            bookType: 'add'
+        })
+        if(isAjax) {
+            setTimeout(() => {
+                this.bookShelfList = bookShelfList
+            })
+        } else {
+            this.bookShelfList = bookShelfList
+        }
+    },
+    /**
+     * 书籍信息处理
+     * @param {Object} bookList 书籍列表
+     * @param {boolean} isAjax 接口请求
+     * @param {boolean} isLoadMore 非首次加载
+     */
+    fnDealBookList(bookList = [], isAjax = true, isLoadMore = false) {
+        bookList.forEach(item => {
+            item.bookType = 'read';
+            item.disabled = false;
+            let rolename = '';
+            if(item.protagonist && item.protagonist.length) {
+                if(item.protagonist.length === 1) {
+                    rolename = item.protagonist[0]
+                }
+                if(item.protagonist.length > 1) {
+                    rolename = item.protagonist[0] + ' ' + item.protagonist[1]
+                }
+            }
+            item.rolename = rolename;
+        }) 
+        this.fnSetIconStyle(bookList)
+        if(isLoadMore) {
+            this.bookList = this.bookList.concat(bookList)   
+        } else {
+            this.bookList = bookList
+        }
+        this.fnCalcBookShelf(isAjax)
+    },
+    /**
+     * 书籍状态标签处理
+     * @param {object} bookList [书架书籍信息]
+     */
+    fnSetIconStyle(bookList) {
+        bookList.forEach(item => {
+            // 精品
+            if(item.iconType && item.iconType === '10') {
+                item.bookIconStyle = {
+                    backgroundColor: 'rgba(229, 176, 64, 1)'
+                }                          
+            }
+            // 推荐
+            if(item.iconType && item.iconType === '1') {
+                item.bookIconStyle = {
+                    backgroundColor: 'rgba(255, 99, 28, 1)',
+                }         
+            }
+            // 更新
+            if(item.iconType && item.iconType === '2') {
+                item.bookIconStyle = {
+                    backgroundColor: 'rgba(45, 200, 105, 1)',
+                }             
+            }
+            // 完结
+            if(item.iconType && item.iconType === '3') {
+                item.bookIconStyle = {
+                    backgroundColor: 'rgba(142, 142, 152, 1)',
+                }                     
+            }
+            // 连载
+            if(item.iconType && item.iconType === '4') {
+                item.bookIconStyle = {
+                    backgroundColor: 'rgba(120, 90, 246, 1)',
+                }            
+            }
+        })
+    },
+    /**
+     * 切换接口
+     */
+    fnReTry() {
+        let that = this
+        that.errTimeout = setTimeout(() => {
+            that.fnLoadBookShelf();
+        }, 3000)
+        that.$app.$def.requestData(that, {
+            interface: '/glory/fastapp/2174',
+            data: { 
+                page: that.$page.path,
+                event: 'net_error',
+                content: JSON.stringify({
+                    apiFailNum: that.apiFailNum
+                })
+            },
+        })
+    },
+    /**
+     * 编辑书架
+     */
+    fnEdit() {
+        if(this.isLoading) {
+            prompt.showToast({
+                message: '书架正在刷新，请稍后'
+            })
+            return
+        }
+        if(this.isEditing) {
+            // prompt.showToast({
+            //     message: '操作频繁'
+            // })
+            return
+        }
+        if(this.isEmpty) {
+            return false
+        }
+        this.isEditing = true
+        setTimeout(() => {
+            this.isEditing = false
+        }, 500)
+        this.loadTimes++
+        this.isEdit = true;
+        this.$emit('togglepop', { data: true })
+        this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+            PositionName: '书架功能区',
+            ButtonName: '编辑书架按钮',
+            ButtonContent: '编辑'
+        });
+    },
+    /**
+     * 完成书架编辑
+     */
+    fnEditFinish() {
+        if(this.isEditing) {
+            // prompt.showToast({
+            //     message: '操作频繁'
+            // })
+            return
+        }
+        this.isEditing = true
+        setTimeout(() => {
+            this.isEditing = false
+        }, 500)
+        this.loadTimes++
+        this.isEdit = false;
+        this.$emit('togglepop', { data: false })
+        this.$app.shenceLog.log(this, 'track','ButtonClick', {
+            PositionName: '书架功能区',
+            ButtonName: '完成编辑按钮',
+            ButtonContent: '退出编辑'
+        });
+        this.fnReloadBookShelf(false)
+    },
+    /**
+     * 页面隐藏
+     */
+    fnPagehide() {
+        this.isPageHide = true
+        clearTimeout(this.errTimeout)
+    },
+    /**
+     * 页面展现
+     */
+    fnPageShow() {
+        this.isPageHide = false
+    },
+    /**
+     * 页面刷新
+     */
+    fnPageRefresh() {
+        this.fnLoadBookShelf();
+    },
+    /**
+     * 页面返回
+     */
+    fnBackPress() {
+        this.isNotice = false
+        if(this.isEdit) {
+            this.loadTimes++
+            this.isEdit = false;
+            this.$app.shenceLog.log(this, 'track','ButtonClick', {
+                PositionName: '书架功能区',
+                ButtonName: '完成编辑按钮',
+                ButtonContent: '返回键'
+            });
+            this.fnReloadBookShelf(false)
+        }
+    },
+    /**
+     * 获取新手引导缓存
+     */
+    fnGetNoticeCache() {
+        let that = this
+        storage.get({
+            key: 'useNum',
+            success: function(res) {
+                if(!res) {
+                    that.isNotice = true
+                    that.$emit('togglepop', { data: true })
+                    storage.set({
+                        key: 'useNum',
+                        value: 1
+                    })
+                }
+            }
+        })
+    },
+    /**
+     * 关闭新手引导 
+     */
+    fnHideNotice() {
+        this.isNotice = false
+        this.$emit('togglepop', { data: false })
+    },
+    /**
+     * 关闭弹窗
+     * @param {object} evt 弹窗实例对象
+     */
+    fnDialogClose(evt) {
+        this.$emit('fnGetPopInfo', {
+            isLayerShow: evt.detail.isLayerShow
+        })
+    },
+    /**
+     * 进入福利中心
+     */
+    fnRouteToSign() {
+        this.$app.shenceLog.log(this, 'track', 'OperationClick', {
+            OperationPosition: this.swiperInfo.isNewStyle ? '书架banner-新样式1' : '书架banner',
+            PositionName: '书架banner-福利中心'
+        });
+        router.push({
+            uri: '/Sign',
+            params: {
+                sourcePage: '书架banner'
+            }
+        })
+    },
+    /**
+     * 跳转浏览记录
+     */ 
+    fnRouteToHistory() {
+        this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+            PositionName: '书架功能区',
+            ButtonName: '浏览记录按钮',
+            ButtonContent: '浏览记录'
+        });
+        router.push({
+            uri: '/History'
+        });
+    },
+    /**
+     * 内置书籍处理曝光
+     * @param {object} bookInfo 书籍信息
+     */
+    fnBookAppear(bookInfo) {
+        // 仅内置书籍需要上运营位打点上报
+        if(!(bookInfo.cindex && bookInfo.cindex > 0) && bookInfo.bookType === 'read') {
+            let trigger_time = this.$app.$def.getLogTime()
+            let omap = {}
+            try {
+                omap = JSON.parse(bookInfo.omap)
+            } catch(e) {}
+            omap.trigger_time = trigger_time
+            this.$app.$def.quickappLog([706, {
+                qmap: {
+                    oaid: this.$app && this.$app.oaid || ''
+                },
+                 omap:omap
+            }], this)
+            this.$app.shenceLog.log(this, 'track', 'OperationExposure', {
+                OperationPosition: '内置书',
+                OperationType: '1',
+                BookID: bookInfo.bookId || '',
+                BookName: bookInfo.bookName || '',
+                PicURL: bookInfo.coverImage || '',
+                ChaptersID: bookInfo.chapterId
+            });  
+        }
+    },
+    /**
+     * 书籍点击
+     * @param {Number} index 位序
+     * @param {object} bookInfo 书籍信息
+     */
+    fnBookClick(index, bookInfo) {
+        let that = this
+        if(that.isEdit) {
+            return
+        }
+        let omap = {}
+        if(bookInfo.omap) {
+            omap = JSON.parse(bookInfo.omap)
+        }
+        if(!(bookInfo.cindex && bookInfo.cindex > 0) && bookInfo.bookType === 'read') {
+            that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+                OperationPosition: '内置书',
+                OperationType: '1',
+                BookID: bookInfo.bookId || '',
+                BookName: bookInfo.bookName || '',
+                PicURL: bookInfo.coverImage || '',
+                ChaptersID: bookInfo.chapterId || ''
+            }); 
+        }
+        if(bookInfo.bookType === 'add' || !bookInfo.bookId) {
+            that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                PositionName: '书架加号',
+                ButtonName: '书架加号'
+            });  
+            that.$emit('fnToggleTab')
+        } else {
+            router.push({
+                uri: '/Read',
+                params: {
+                    bookId: bookInfo.bookId,
+                    chapterId: bookInfo.chapterId,
+                    pageFrom: '/Index',
+                    SourcePosition: !(bookInfo.cindex && bookInfo.cindex > 0) ? '内置书' : '书架',
+                    omap: omap,
+                    isUpdateOmap: 0
+                }
+            }); 
+        }
+    },
+    /**
+     * 顶部运营位曝光
+     * @param {Number} index 位序
+     * @param {Object} itemInfo  顶部运营位每项数据对象
+     * @param {Number} operationType 操作位置类型
+     */
+    fnSwiperExposure(index, itemInfo, operationType) {
+        if(itemInfo.type === 1) {
+            let trigger_time = this.$app.$def.getLogTime()
+            let omap = {
+                origin: 'sj',
+                action: '1',
+                channel_id: 'sj',
+                channel_name: '书架',
+                channel_pos: 0,
+                column_id: 'dbyy',
+                column_name: '书架顶部',
+                column_pos: 0,
+                content_id: itemInfo.bookId,
+                content_pos: index,
+                content_type: '1',
+                rec_id: itemInfo.recId ? itemInfo.recId : '',
+                model_id: itemInfo.modelId ? itemInfo.modelId : '',
+                log_id: itemInfo.logId ? itemInfo.logId : '',
+                exp_id: itemInfo.expId ? itemInfo.expId : '',
+                trigger_time: trigger_time
+            }
+            this.$app.$def.quickappLog([706, {
+                qmap: {
+                    oaid: this.$app && this.$app.oaid || ''
+                },
+                omap: omap
+            }], this) 
+            if(this.swiperTacticsVo && this.swiperTacticsVo.isDot === '1') {
+                this.$app.shenceLog.log(this, 'track', 'OperationExposure', {
+                    OperationPosition: this.swiperInfo.isNewStyle ? '书架banner-新样式1' : '书架banner',
+                    OperationID: this.swiperOperationInfo.id,
+                    OperationName: this.swiperOperationInfo.name,
+                    OperationType: operationType,
+                    BookID: itemInfo.bookId,
+                    ActID: '',
+                    PicURL: itemInfo.coverWap,
+                    ActURL: '',
+                    StartTime: this.swiperOperationInfo.startTime,
+                    EndTime: this.swiperOperationInfo.endTime,
+                    TacticsId: this.swiperTacticsVo.tacticsId || '',
+                    TacticsName: this.swiperTacticsVo.tacticsName || '',
+                    SourceId: this.swiperTacticsVo.sourceId || '',
+                    SourceName: this.swiperTacticsVo.sourceName || '',
+                    ShuntId: this.swiperTacticsVo.shuntID || '',
+                    ShuntName: this.swiperTacticsVo.shuntName || '',
+                }); 
+            } 
+        }
+        if(itemInfo.type === 2) {
+            let actUrlSplitArr = itemInfo.actUrl && itemInfo.actUrl.split('id=') || []
+            if(this.swiperTacticsVo && this.swiperTacticsVo.isDot === '1') {
+                this.$app.shenceLog.log(this, 'track', 'OperationExposure', {
+                    OperationPosition:  this.swiperInfo.isNewStyle ? '书架banner-新样式1' : '书架banner',
+                    OperationID: this.swiperOperationInfo.id,
+                    OperationName: this.swiperOperationInfo.name,
+                    OperationType: operationType,
+                    BookID: '',
+                    ActID: actUrlSplitArr[1] || '',
+                    PicURL: itemInfo.imgUrl,
+                    ActURL: itemInfo.actUrl,
+                    StartTime: this.swiperOperationInfo.startTime,
+                    EndTime: this.swiperOperationInfo.endTime,
+                    TacticsId: this.swiperTacticsVo.tacticsId || '',
+                    TacticsName: this.swiperTacticsVo.tacticsName || '',
+                    SourceId: this.swiperTacticsVo.sourceId || '',
+                    SourceName: this.swiperTacticsVo.sourceName || '',
+                    ShuntId: this.swiperTacticsVo.shuntID || '',
+                    ShuntName: this.swiperTacticsVo.shuntName || '',
+                }); 
+            }    
+        }
+    },
+    /**
+     * 跳转到书籍详情
+     * @param {Number} index 位序
+     * @param {Object} bookInfo  书籍对象
+     */
+    fnRouteToBookDetail(index, bookInfo) {
+        let that = this
+		let trigger_time = that.$app.$def.getLogTime()
+		let omap = {
+			origin: 'sj',
+			action: '2',
+			channel_id: 'sj',
+			channel_name: '书架',
+			channel_pos: 0,
+			column_id: 'dbyy',
+			column_name: '书架顶部',
+			column_pos: 0,
+			content_id: bookInfo.bookId,
+			content_pos: index,
+			content_type: '1',
+			trigger_time: trigger_time,
+            rec_id: bookInfo.recId ? bookInfo.recId : '',
+            model_id: bookInfo.modelId ? bookInfo.modelId : '',
+            log_id: bookInfo.logId ? bookInfo.logId : '',
+            exp_id: bookInfo.expId ? bookInfo.expId : '',
+		}
+        router.push({
+            uri: '/BookDetail',
+            params: {
+                bookId: bookInfo.bookId,
+                SourcePosition: '书架顶部运营位',
+                omap: omap,
+                sourcePage: '书架顶部运营位'
+            }
+        })
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                oaid: that.$app && that.$app.oaid || ''
+            },
+			omap: omap
+		}, 'book_click'], that)
+        if(that.swiperTacticsVo && that.swiperTacticsVo.isDot === '1') {
+            that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+                OperationPosition: that.swiperInfo.isNewStyle ? '书架banner-新样式1' : '书架banner',
+                OperationID: that.swiperOperationInfo.id || '',
+                OperationName: that.swiperOperationInfo.name || '',
+                OperationType: '6',
+                BookID: bookInfo.bookId || '',
+                ActID: '',
+                PicURL: bookInfo.coverWap || '',
+                ActURL: '',
+                StartTime: that.swiperOperationInfo.startTime || '',
+                EndTime: that.swiperOperationInfo.endTime || '',
+                TacticsId: that.swiperTacticsVo.tacticsId || '',
+                TacticsName: that.swiperTacticsVo.tacticsName || '',
+                SourceId: that.swiperTacticsVo.sourceId || '',
+                SourceName: that.swiperTacticsVo.sourceName || '',
+                ShuntId: that.swiperTacticsVo.shuntID || '',
+                ShuntName: that.swiperTacticsVo.shuntName || '',
+                PositionName: '书架banner-书籍',
+                BookName: bookInfo.bookName || '',
+                ChaptersID: bookInfo.chapterId || ''
+            }); 
+        }
+    },
+    /**
+     * 跳转到活动页面
+     * @param {Object}  activityInfo  书籍数据对象
+     */
+    fnRouteToHuoDong(activityInfo) {
+        let that = this
+        router.push({
+            uri: '/Webhuodong',
+            params: {
+                webSrc: activityInfo.actUrl,
+                pageFrom: 'shelf_banner',
+                OperationPosition: '书架顶部',
+                OperationID: that.swiperOperationInfo.id,
+                OperationName: that.swiperOperationInfo.name,
+                OperationType: 2,
+                StartTime: that.swiperOperationInfo.startTime,
+                EndTime: that.swiperOperationInfo.endTime
+            }
+        })
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: 'shelf_banner'
+            }
+        }, 'web_huodong'], that)
+        if(that.swiperTacticsVo && that.swiperTacticsVo.isDot === '1'){
+            let actUrlSplitArr = activityInfo.actUrl && activityInfo.actUrl.split('id=') || []
+            that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+                OperationPosition: '书架顶部',
+                OperationID: that.swiperOperationInfo.id || '',
+                OperationName: that.swiperOperationInfo.name || '',
+                OperationType: 2,
+                BookID: '',
+                ActID: actUrlSplitArr || '',
+                PicURL: activityInfo.imgUrl || '',
+                ActURL: activityInfo.actUrl || '',
+                StartTime: that.swiperOperationInfo.startTime || '',
+                EndTime: that.swiperOperationInfo.endTime || '',
+                TacticsId: that.swiperTacticsVo.tacticsId || '',
+                TacticsName: that.swiperTacticsVo.tacticsName || '',
+                SourceId: that.swiperTacticsVo.sourceId || '',
+                SourceName: that.swiperTacticsVo.sourceName || '',
+                ShuntId: that.swiperTacticsVo.shuntID || '',
+                ShuntName: that.swiperTacticsVo.shuntName || '',
+            }); 
+        }
+    },
+
+    /**
+     * 移除书籍
+     * @param {Number} index 位序
+     * @param {Object} bookInfo  书籍对象
+     */
+    fnDeleteBook(index, bookInfo) {
+        let that = this;
+        if(that.bookList[index].disabled) {
+            return false;
+        }
+        that.bookList[index].disabled = true;
+        let deleteBook = new Promise((resolve, reject) => {
+            prompt.showDialog({
+                title: '',
+                message: '确定删除选中书籍',
+                buttons: [
+                    {
+                        text: '确定',
+                        color: '#ff0000'
+                    },
+                    {
+                        text: '取消',
+                        color: '#999999'
+                    }
+                ],
+                success: function(data) {
+                    if(data.index === 0) {
+                        resolve();
+                    } else {
+                        that.bookList[index].disabled = false;
+                        reject()
+                    }
+                },
+                cancel: function() {
+                    that.bookList[index].disabled = false;
+                    reject()
+                },
+                fail: function(data, code) {
+                    that.bookList[index].disabled = false;
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            source: "prompt_showDialog_fail",
+                            thisUri: that.$page.uri,
+                            thisPage: "book-shelf-nine",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+                    reject()
+                }
+            })
+        })
+        deleteBook.then(() => {
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2121',
+                data: { bookIds: bookInfo.bookId },
+                succ: function (res) {
+                    that.bookList[index].disabled = false;
+                    if(res.retCode === 6) {
+                        router.push({
+                            uri: '/Login',
+                            params: {
+                                url: '/BookShelf',
+                                positionName: '登陆拦截'
+                            }
+                        });
+                        return false
+                    }
+                    that.loadTimes++
+                    that.bookList.splice(index, 1);
+                    that.bookShelfList.splice(index, 1);
+                    prompt.showToast({ message: '删除成功' });
+                    if(that.bookList.length === 0) {
+                        that.fnReloadBookShelf(false)
+                    }
+                },
+                fail: function (code) {
+                    that.bookList[index].disabled = false;
+                    prompt.showToast({ message: '删除失败' })
+                }
+            })
+        }, () => {
+            that.bookList[index].disabled = false;
+        })
+    },
+    /**
+     * 设置书架缓存
+     * * @param {object} cache 接口返回数据
+     */
+    fnSetBookShelfCache(cache) {
+        let that = this
+        storage.set({
+            key: 'bookshelf',
+            value: JSON.stringify(cache),
+            success: function(data) {
+                that.$app.$def.quickappLog([703, {
+                    qmap:{
+                        site: '1', 
+                        cardIndex: 0
+                    }
+                }, 'book_catch'], that)
+            },
+            fail: function(data, code) {
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '2', 
+                        cardIndex: 0,
+                        source: 'storage_set_bookshelf_fail',
+                        thisUri: that.$page.uri,
+                        thisPage: 'book-shelf-nine',
+                        data,
+                        code
+                    }
+                }, 'catch_error'], that)
+            }
+        })
+    },
+}
+</script>

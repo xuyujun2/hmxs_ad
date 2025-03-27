@@ -1,0 +1,118 @@
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+<template>
+    <div class="feedback-answer">
+        <div class="web-wrap" show="isWebLoad">
+            <web id="web" class="web" @pagefinish="fnWebFinish" @message="fnMessage" @titlereceive="fnTitleReceive" src="{{webSrc}}"></web>
+        </div>
+        <div if="!isWebLoad" class="isLoadng-wrap">
+            <text class="isLoadng-text">页面加载中，请耐心等待...</text>
+        </div>
+        <retry if="{{ isError }}" is-loading="{{ isBtnShow }}" @retry="fnRetryHandler"></retry>
+    </div>
+</template>
+<style lang="less" scoped>
+  .feedback-answer{
+      flex-direction: column;
+      .web-wrap{
+          flex: 1;
+      }
+      .web{
+         height: 100%; 
+      }
+      .isLoadng-wrap{
+          height: 100%;
+          .isLoadng-text{
+              width: 100%;
+              text-align: center;
+              font-size: 30px;
+          }
+       }
+  }
+</style>
+
+<script>
+    import router from '@system.router';
+    export default {
+        protected: {
+            webSrc: '',
+            problem: '' // 帮助与反馈问题
+        },
+        private: {
+            isWebLoad: false,
+            isError: false,
+            isBtnShow: false,
+            autoReplaceTimeout: null,
+            headerJson: '',
+        },
+        onInit() {
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '帮助与反馈-详情'
+            });
+            this.headerJson = this.$app.headerJson
+            let webSrc = this.webSrc;
+            let hasQuery = webSrc.indexOf("?") > 0;
+            if (hasQuery) {
+                webSrc = webSrc + '&t=' + new Date().getTime();
+            } else {
+                webSrc = webSrc + '?t=' + new Date().getTime();
+            }
+            this.webSrc = webSrc
+        },
+        onShow() {
+            this.$app.lastOpenPage = ''
+        },
+        onHide() {
+            clearTimeout(this.autoReplaceTimeout);
+        },
+        fnWebFinish(e) {
+            this.isWebLoad = true;
+        },
+        fnTitleReceive(res) {
+            this.isWebLoad = true;
+            if (res.title.indexOf('quickapp') <= 0) {
+                if (res.title.includes('网页无法打开')) {
+                    this.$page.setTitleBar({ text: '网络不给力，请重试' })
+                    this.isError = true;
+                    this.isBtnShow = true;
+                } else {
+                    this.$page.setTitleBar({ text: res.title })
+                    this.isError = false;
+                }
+            }
+        },
+        fnMessage(res) {
+            let messageInfo
+            try {
+                messageInfo = res && res.message && JSON.parse(res.message);
+            } catch (e) { }
+            if (messageInfo && messageInfo.type) {
+                switch (messageInfo.type) {
+                    case 'init':
+                        this.headerJson.appVer = this.$app.$data.appVer;
+                        let data = {
+                            headerJson: this.headerJson,
+                            problem: this.problem
+                        }
+                        this.$element('web') && this.$element('web').postMessage({
+                            message: JSON.stringify(data),
+                        })
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        },
+        fnRetryHandler() {
+            this.isBtnShow = false;
+            this.autoReplaceTimeout = setTimeout(() => {
+                router.replace({
+                    uri: '/HelpAnswer',
+                    params: {
+                        webSrc: this.webSrc
+                    }
+                })
+            }, 1000);
+        },
+    }
+</script>

@@ -1,0 +1,43 @@
+{
+  "name": "lxt1",
+  "version": "1.0.0",
+  "subversion": {
+    "toolkit": "0.2.2"
+  },
+  "description": {
+    "node": ">=8.10"
+  },
+  "scripts": {
+    "start": "hap server --watch",
+    "build": "hap build",
+    "release": "hap release",
+    "server": "hap server",
+    "watch": "hap watch",
+    "postinstall": "hap postinstall",
+    "debug": "hap debug",
+    "hap-update": "hap update",
+    "fa-build": "node node_modules/webpack/bin/webpack.js --config ./node_modules/fa-toolkit/webpack.config.js",
+    "fa-watch": "node node_modules/webpack/bin/webpack.js --watch --config ./node_modules/fa-toolkit/webpack.config.js"
+  },
+  "devDependencies": {
+    "@types/quickapp": "git+https://github.com/vivoquickapp/quickapp-types.git",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.12.1",
+    "eslint-plugin-hybrid": "0.0.5",
+    "esprima": "^4.0.1",
+    "fa-toolkit": "file:fa-toolkit-1.2.1-Stable.300.tgz",
+    "hap-toolkit": "^1.9.4"
+  },
+  "dependencies": {
+    "@babel/preset-typescript": "^7.12.7",
+    "@hmscore/hms-js-hbt": "^1.0.301",
+    "js-base64": "^2.5.0",
+    "less": "^3.9.0",
+    "less-loader": "^4.1.0",
+    "md5": "^2.2.1",
+    "union-quick-app-ad": "1.0.30"
+  },
+  "browserslist": [
+    "chrome 65"
+  ]
+}

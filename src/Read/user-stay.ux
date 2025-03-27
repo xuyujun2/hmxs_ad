@@ -1,0 +1,295 @@
+<import name="paid-tag" src="../Component/tag.ux"></import>
+<template>
+    <div class="user-stay" @click="vagueClick">
+        <image class="close" src="https://xsmfdq.kkyd.cn/html/images/new_my/icon_10.png" @click="closePop"></image>
+        <div class="list-content">
+            <image class="recommend-img" src="https://xsmfdq.kkyd.cn/html/images/new_my/recommend-top.png"></image>
+            <list @scrollbottom="scrollBottom">
+                <list-item class="book-list" type="book-list" for="{{bookList}}" @click="toReadBook($item.bookId,$item.coverWap,$item.bookName,$idx)">
+                    <stack>
+                        <image class="book-img" src="{{$item.coverWap}}"></image>
+                        <paid-tag if="$item.iconType === '10'" tag="{{ $item.iconDesc }}"></paid-tag>
+                    </stack>
+                    <div class="detail">
+                        <text class="book-title">{{$item.bookName}}</text>
+                        <div class="book-rating">
+                            <text>推荐指数：</text>
+                            <rating numstars="5" rating="5" indicator="true"></rating>
+                        </div>
+                        <text class="book-des">{{$item.introduction}}</text>
+                    </div>
+                </list-item>
+                <list-item class="more" type="more" @click="toBookStore">
+                    <text>更多精选好书</text>
+                    <image src="https://xsmfdq.kkyd.cn/html/images/new_my/more-arrow-orange.png"></image>            
+                </list-item>
+            </list>
+            <div class="arrow-down" if="{{!isBottom}}">
+                <image src="https://xsmfdq.kkyd.cn/images/arrow-down.gif"></image>
+            </div>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+.user-stay{
+    position: fixed;
+    z-index: 99;
+    width:100%;
+    height:100%;
+    left:0;
+    top:0;
+    background-color: rgba(0,0,0,0.7);
+    flex-direction: column;
+    align-items: flex-end;
+    padding-top: 200px;
+    .close{
+        width: 54px;
+        height: 64px;
+        margin-right: 25px;
+        margin-bottom: 25px;
+    }
+    .list-content{
+        flex-direction: column;
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
+        background-color: #ffffff;
+        .arrow-down{
+            width: 100%;
+            height: 93px;
+            /* background-color: rgba(0, 0, 0, .6); */
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            image{
+                width: 54px;
+                height: 93px;
+            }
+        }
+        .recommend-img{
+            width:750px;
+            height:150px;
+            background-color: #dedede;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+        }
+        .book-list{
+            margin-top: 33px;
+            padding: 0 30px;
+            height: 218px;
+            .book-img{
+                width: 165px;
+                height: 218px;
+                border-radius: 5px;
+                margin-right: 30px;
+                background-color: #dedede;
+            }
+            .detail{
+                width: 490px;
+                flex-direction: column;
+                height: 218px;
+                .book-title{
+                    font-size:36px;
+                    font-weight:bold;
+                    color:rgba(0,0,0,1);
+                    margin-top: 15px;
+
+                }
+                .book-rating{
+                    margin-top: 8px;
+                    text{
+                        font-size:24px;
+                        color:rgba(0,0,0,1);
+                        line-height:33px;
+                    }
+                    rating{
+                        width: 192px;
+                        /* star-background:url(../Common/star-gary.png);
+                        star-secondary:url(../Common/star-half.png);
+                        star-foreground:url(../Common/star.png); */
+                    }
+                }
+                .book-des{
+                    margin-top: 20px;
+                    font-size:26px;
+                    color:rgba(0,0,0,1);
+                    line-height:37px;
+                    lines: 2;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
+        .more{
+            height: 64px;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            text{
+                font-size:26px;
+                color:rgba(255,128,43,1);
+            }
+            image{
+                width: 30px;
+                height: 30px;
+            }
+        }
+    }
+}
+</style>
+
+<script>
+import storage from '@system.storage';
+import router from '@system.router';
+export default {
+    props:[
+        'stayOperation',
+        'bookId',
+        'bookList',
+        'chapterId',
+        'stayTacticsVo',
+        'bookName'
+    ],
+    data:{
+        isBottom:false
+    },
+    scrollBottom(){
+        this.isBottom = true
+    },
+    bookAppear(bookId,coverWap,content_name,content_pos){
+        let that = this
+        let trigger_time = that.$app.$def.getLogTime()
+        let omap = {
+                origin:'ydq',
+                action:'1',
+                channel_id:'ydq',
+                channel_name:'阅读器',
+                channel_pos:0,
+                column_id:'ydq_yhwlsj',
+                column_name:'阅读器用户挽留书籍',
+                column_pos:1,
+                content_id:bookId,
+                content_pos:content_pos,
+                content_type:'2',
+                trigger_time:trigger_time
+            }
+        that.$app.$def.quickappLog([706, {
+            omap:omap
+        }], that)
+    },
+    toReadBook(bookId,coverWap,content_name,content_pos){
+        let that = this
+        let trigger_time = that.$app.$def.getLogTime()
+        let omap = {
+                origin:'ydq',
+                action:'2',
+                channel_id:'ydq',
+                channel_name:'阅读器',
+                channel_pos:0,
+                column_id:'ydq_yhwlsj',
+                column_name:'阅读器用户挽留书籍',
+                column_pos:1,
+                content_id:bookId,
+                content_pos:content_pos,
+                content_type:'2',
+                trigger_time:trigger_time
+            }
+        that.$app.$def.quickappLog([702, {
+            omap:omap
+        }, 'book_click'], that)
+
+        if(that.stayTacticsVo.isDot=='1'){
+            that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: '用户挽留',
+                OperationID: that.stayOperation.id || '',
+                OperationName: that.stayOperation.name || '',
+                OperationType : '1',
+                BookID: bookId || '',
+                ActID: '',
+                PicURL: coverWap || '',
+                ActURL: '',
+                StartTime: that.stayOperation.startTime || '',
+                EndTime: that.stayOperation.endTime || '',
+                TacticsId: that.stayTacticsVo.tacticsId || '',
+                TacticsName: that.stayTacticsVo.tacticsName || '',
+                SourceId: that.stayTacticsVo.sourceId || '',
+                SourceName: that.stayTacticsVo.sourceName || '',
+                ShuntId: that.stayTacticsVo.shuntID || '',
+                ShuntName: that.stayTacticsVo.shuntName || '',
+                BookName: that.bookName || '',
+                ChaptersID: that.chapterId || ''
+            });
+        }
+        router.replace({
+            uri:'/Read',
+            params:{
+                bookId:bookId,
+                pageFrom:'/Read',
+                fromUserStayPop:true,
+                SourcePosition:'用户挽留运营位',
+                omap:omap
+            }
+        })
+    },
+    toBookStore(){
+        let that = this
+        router.clear()
+        router.replace({
+            uri:'/Index',
+            params:{
+                cardIndex:1
+            }
+        })
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: '4',
+                bid: that.bookId,
+                cid: that.chapterId
+            }
+        }, 'user_stay_pop'], that)
+    },
+    closePop(){
+        let that = this
+        that.$emit('closeuserstay')
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: '3',
+                bid: that.bookId,
+                cid: that.chapterId
+            }
+        }, 'user_stay_pop'], that)
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    },
+    onInit(){
+        let that = this
+        console.log( that.bookList)
+        console.log(that.stayOperation)
+        if(that.stayTacticsVo.isDot=='1'){
+            that.bookList.forEach(element => {
+                that.$app.shenceLog.log(that,'track','OperationExposure', {
+                    OperationPosition:'用户挽留',
+                    OperationID:that.stayOperation.id,
+                    OperationName:that.stayOperation.name,
+                    OperationType:1,
+                    BookID:element.bookId,
+                    ActID:'',
+                    PicURL:element.coverWap,
+                    ActURL:'',
+                    StartTime:that.stayOperation.startTime,
+                    EndTime:that.stayOperation.endTime,
+                    TacticsId:that.stayTacticsVo.tacticsId||'',
+                    TacticsName:that.stayTacticsVo.tacticsName||'',
+                    SourceId:that.stayTacticsVo.sourceId||'',
+                    SourceName:that.stayTacticsVo.sourceName||'',
+                    ShuntId:that.stayTacticsVo.shuntID||'',
+                    ShuntName:that.stayTacticsVo.shuntName||'',
+                    ChaptersID: that.chapterId,
+                });
+            });
+        }
+        
+    }
+}
+</script>

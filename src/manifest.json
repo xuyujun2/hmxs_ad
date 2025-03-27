@@ -1,0 +1,397 @@
+{
+  "package": "com.dianzhong.hmxs",
+  "name": "河马免费小说",
+  "versionName": "5.5.2.751",
+  "versionCode": 5502751,
+  "minPlatformVersion": 1040,
+  "icon": "/Common/logo.png",
+  "appId": "53",
+  "appKey": "1bbe6a61-11d7-493b-9d17-09fa3c533dbc",
+  "huaweiSplashAdSlotId": "u44dt6e1bz",
+  "features": [
+    {
+      "name": "system.prompt"
+    },
+    {
+      "name": "system.router"
+    },
+    {
+      "name": "system.shortcut"
+    },
+    {
+      "name": "system.fetch"
+    },
+    {
+      "name": "system.device"
+    },
+    {
+      "name": "system.storage"
+    },
+    {
+      "name": "system.file"
+    },
+    {
+      "name": "service.alipay"
+    },
+    {
+      "name": "system.network"
+    },
+    {
+      "name": "system.webview"
+    },
+    {
+      "name": "system.clipboard"
+    },
+    {
+      "name": "system.request"
+    },
+    {
+      "name": "system.package"
+    },
+    {
+      "name": "service.pay"
+    },
+    {
+      "name": "service.wxpay",
+      "params": {
+        "url": "https://kpay.hzage.cn/wxpay/index.html"
+      }
+    },
+    {
+      "name": "system.share"
+    },
+    {
+      "name": "service.share",
+      "params": {
+        "appSign": "MIIDoDCCAogCCQDHDpIZ/Ls7IjANBgkqhkiG9w0BAQsFADCBkTELMAkGA1UEBhMCY24xEDAOBgNVBAgMB0JlaWppbmcxEDAOBgNVBAcMB0hhaWRpYW4xEDAOBgNVBAoMB2NvbXBhbnkxEjAQBgNVBAsMCWRpYW56aG9uZzEXMBUGA1UEAwwOeHNtZmRxLmtreWQuY24xHzAdBgkqhkiG9w0BCQEWEExpeHRAaXNodWd1aS5jb20wHhcNMTgxMjI4MTIyOTExWhcNMjgxMjI1MTIyOTExWjCBkTELMAkGA1UEBhMCY24xEDAOBgNVBAgMB0JlaWppbmcxEDAOBgNVBAcMB0hhaWRpYW4xEDAOBgNVBAoMB2NvbXBhbnkxEjAQBgNVBAsMCWRpYW56aG9uZzEXMBUGA1UEAwwOeHNtZmRxLmtreWQuY24xHzAdBgkqhkiG9w0BCQEWEExpeHRAaXNodWd1aS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDUzjCmTd1CC8iymGpIYGXIFDSoV94rNI1KJbC9pTv4dqIlVivS/XVA+8Rzg1GahX9tNCasDTnALLix0pozNjHAVAVfcBdmnsDSBzVDSe3OGlhQRaJ9Q6UWl7oFjR9olrdTXTPugO/c0biE609N49oVksnXdPjuLYNYy3eXiQabwPIg0z0lCi2HAt8Rv4bOaSBWOaMUt96NCkKe73MfEfBb6MKDh80oe2vjlLp2xWGccgvQhwOQr8b9U8MXP+0nYqf/0CQj5GLnKb98+Tru5YoaX/HMCNfO0EZCknHQDaNU7A6DbDbDI0HD6yshJCxB5FTlkQESiIVmqcac0lEziLOZAgMBAAEwDQYJKoZIhvcNAQELBQADggEBABZX9mKW/Mef9fg0FbWiSvSGTV4kztUfC5z5ALh9a1EGGul2jCbAQ3Bs0YTgHT+4z2qOEAjoOhotM4dDmndJ+ou5R8Sc2QAGsPCN8sl8hGH+542iYE7OEAxWEmbXEpyOIwrWWyfVAs+dYsSzL6j8X/BlqOnqqlZd2Q6gHmGWhzU3hBjHRY7fDGd1igye0LpAVJab+kWq/at4Lnci8dg6QgA0KgGTE/5XHk2U0UX7z7RDVXVeyHnyO9Jv6zdy6zQXeE7LRpDI6AjvkOp75874M1gjNO87flWDEq0ca96/pMKB0DqeARiVM7hcefzl2NNweht0z91ghx2Qg0qUKKYFgN0=",
+        "wxKey": "wx4e00af38b9e1336e"
+      }
+    },
+    {
+      "name": "service.push"
+    },
+    {
+      "name": "system.notification"
+    },
+    {
+      "name": "system.audio"
+    },
+    {
+      "name": "system.resident"
+    },
+    {
+      "name": "system.calendar"
+    },
+    {
+      "name": "service.ad"
+    },
+    {
+      "name": "service.account"
+    },
+    {
+      "name": "system.vivopush"
+    },
+    {
+      "name": "system.animate"
+    },
+    { 
+      "name": "system.sensor" 
+    },
+    {
+      "name": "system.cipher" 
+    },
+    {
+      "name": "system.configuration"
+    },
+    {
+      "name": "system.geolocation"
+    },
+    {
+      "name": "system.volume"
+    },
+    {
+      "name": "system.brightness"
+    },
+    {
+      "name": "system.wifi"
+    },
+    {
+      "name": "system.app"
+    },
+    {
+      "name": "system.battery"
+    },
+    {
+      "name": "system.image"
+    }
+  ],
+  "permissions": [
+    {
+      "origin": "*"
+    }
+  ],
+  "config": {
+    "logLevel": "debug",
+    "designWidth": 750,
+    "background": {
+      "features": [
+        "system.audio"
+      ]
+    },
+    "data": {
+      "api": "https://dzmfxs.kkyd.cn",
+      "appVer": "ver=5502751&appVer=5.5.2.751",
+      "logapi": "https://kyylog.hzage.cn/kyylog.php",
+      "domain": 3,
+      "pname": "com.dianzhong.hmxs",
+      "name": "河马免费小说",
+      "umeng_appkey": "5c1cce8ef1f55678c90002b7",
+      "storageFilePath": "internal://files/storage/",
+      "channelCode": "dz_hmxs"
+    }
+  },
+  "router": {
+    "entry": "LoginVisitor",
+    "pages": {
+      "About": {
+        "component": "index"
+      },
+      "Preference": {
+        "component": "index"
+      },
+      "Index": {
+        "component": "index"
+      },
+      "MoreList": {
+        "component": "index"
+      },
+      "BookDetail": {
+        "component": "index"
+      },
+      "LoginVisitor": {
+        "component": "index"
+      },
+      "Impower": {
+        "component": "index"
+      },
+      "Openscreen": {
+        "component": "index"
+      },
+      "Sign": {
+        "component": "index"
+      },
+      "Recharge": {
+        "component": "index"
+      },
+      "RechargeNowpay": {
+        "component": "index"
+      },
+      "Read": {
+        "component": "index"
+      },
+      "ReadEnd": {
+        "component": "index"
+      },
+      "Directory": {
+        "component": "index"
+      },
+      "Login": {
+        "component": "index"
+      },
+      "Rank": {
+        "component": "index"
+      },
+      "Notfound": {
+        "component": "index"
+      },
+      "FeedBack": {
+        "component": "index"
+      },
+      "Setting": {
+        "component": "index"
+      },
+      "AboutUs": {
+        "component": "index"
+      },
+      "Webhuodong": {
+        "component": "index"
+      },
+      "PushSwitch": {
+        "component": "index"
+      },
+      "MoreTimbre": {
+        "component": "index"
+      },
+      "Schedule": {
+        "component": "index"
+      },
+      "Search": {
+        "component": "index"
+      },
+      "Renew": {
+        "component": "index"
+      },
+      "GetPaid": {
+        "component": "index"
+      },
+      "ZhichiService": {
+        "component": "index"
+      },
+      "Pop": {
+        "component": "index"
+      },
+      "SubRank": {        
+        "component": "index"
+      },
+      "AdvancePay": {
+        "component": "index"
+      },
+      "AdWall": {
+        "component": "index"
+      },
+      "UnionAd/AdPage": {
+        "component": "index"
+      },
+      "UnionAd/AdLanding": {
+        "component": "index"
+      },
+      "DespositWithdraw": {
+        "component": "index"
+      },
+      "Member": {
+        "component": "index"
+      },
+      "Withdraw": {
+        "component": "index"
+      },
+      "WithdrawRecord": {
+        "component": "index"
+      },
+      "WebView": {
+        "component": "index"
+      },
+      "HelpFeedback": {
+        "component": "index"
+      },
+      "MyFeedbackList": {
+        "component": "index"
+      },
+      "MyFeedbackContent": {
+        "component": "index"
+      },
+      "HelpAnswer": {
+        "component": "index"
+      },
+      "History": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "orientation": "portrait",
+    "themeMode": 0,
+    "titleBarBackgroundColor": "#ffffff",
+    "titleBarTextColor": "#2f3043",
+    "menu": false,
+    "menuBarData": {
+      "menuBar": true
+    },
+    "fitWidthScreenMode": "fillScreen",
+    "pages": {
+      "Index": {
+        "titleBar": false
+      },
+      "Read": {
+        "titleBar": false,
+        "fullScreen": true,
+        "menuBarData": {
+          "menuBar": false
+        },
+        "fitCutout": "portrait"
+      },
+      "BookDetail": {
+        "titleBarText": " ",
+        "titleBarTextColor": "#FFF",
+        "titleBarBackgroundColor": "#5A5A64"
+      },
+      "Openscreen": {
+        "titleBar": false,
+        "fullScreen": true,
+        "menuBarData": {
+          "menuBar": false
+        },
+        "fitCutout": "portrait"
+      },
+      "Preference": {
+        "titleBar": false,
+        "fullScreen": true,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "LoginVisitor": {
+        "titleBar": false,
+        "fullScreen": true,
+        "menuBarData": {
+          "menuBar": false
+        },
+        "fitCutout": "portrait"
+      },
+      "Impower": {
+        "titleBar": false,
+        "fullScreen": true,
+        "menuBarData": {
+          "menuBar": false
+        },
+        "fitCutout": "portrait"
+      },
+      "Sign": {
+        "titleBar": false,
+        "menuBarData": {
+          "menuBar": false
+        }
+      },
+      "Pop": {
+        "titleBar": false,
+        "fullScreen": true,
+        "menuBarData": {
+          "menuBar": false
+        },
+        "fitCutout": "portrait"
+      },
+      "Schedule": {
+        "titleBarText": "看书日历"
+      },
+      "AdWall": {
+        "titleBar": false,
+        "menuBarData": {
+          "menuBar": false
+        },
+        "fullScreen": true
+      },
+      "UnionAd/AdPage": {
+        "titleBar": false,
+        "fullScreen": true,
+        "menu": false,
+        "menuBarData": {
+            "menuBar": false
+        }
+      },
+      "DespositWithdraw": {
+        "titleBarText": "提现",
+        "titleBarTextColor": "#ffffff",
+        "titleBarBackgroundColor": "#F97053"
+      },
+      "Member": {
+        "titleBarText": "VIP会员", 
+        "titleBarBackgroundColor": "#FFE7CD"
+      },
+      "Withdraw": {
+        "titleBar": false,
+        "menuBarData": {
+          "menuBar": false
+        }
+      }
+    }
+  }
+}

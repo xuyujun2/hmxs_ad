@@ -1,0 +1,2739 @@
+<import name="book-shelf-nine" src="../Component/book-shelf-nine"></import>
+<import name="book-store" src="../Component/book-store"></import>
+<import name="sort" src="../Component/sort"></import>
+<import name="my" src="../Component/my"></import>
+<import name="shortcut-btn" src="../Base/shortcut-btn"></import>
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="shortcut-success" src="../Base/shortcut-success"></import>
+<import name="coin-toast" src="../Base/coin-toast"></import>
+<import name="ad-union" src="../AdUnion/index"></import>
+<import name="onekey-shortcut" src="../Base/onekey-shortcut"></import>
+<import name="to-sign" src="./to-sign"></import>
+<import name="onekey-shortcut-new" src="../Base/onekey-shortcut-new"></import>
+
+<template>
+	<div class="root">
+		<tabs class="tabs1" if="{{hasGetJump||!isStartToIndex}}" index="{{currentIndex}}" onchange="onChangeTabIndex">
+			<tab-content class="tab-content1" scrollable="false">
+				<div class="tab-content-item" for="{{tabHeadList}}">
+					<div if="{{$item.render}}" class="wrap" style="height:100%;">
+						<book-shelf-nine onis-succ="renderShelfData" onhas-stor="checkStorage" if="{{ $idx === 0 && bookshelf == '1' }}" current-index="{{ currentIndex }}" index-onshow="{{ indexOnshow }}" @togglepop="togglePop" onfn-get-pop-info="fnGetPopInfo" is-hold-pop="{{ isHoldPop }}" is-coin="{{ isCoin }}" onfn-get-message='fnGetMessage' onfn-toggle-tab ="fnToggleTab"></book-shelf-nine>
+						<book-store id="book-store" if="{{$idx === 1}}" is-dot-show="{{ $item.redDot }}" rank-update-time="{{ rankUpdateTime }}" @hide-red-dot="hideRedDot" read-pref="{{ readPref }}" current-index="{{ currentIndex }}" index-onshow="{{ indexOnshow }}" is-search-open="{{ isSearchOpen }}" is-coin="{{ isCoin }}" onfn-to-sort="fnToSort" is-shortcut="{{ isShortcut }}"></book-store>
+						<sort id='sort' elif="{{!isCoin && $idx === 2 || isCoin && $idx === 3}}" current-index="{{currentIndex}}" clo-loading="{{cloLoading}}" is-search-open="{{isSearchOpen}}" is-coin="{{isCoin}}" is-fold="{{isFold}}"></sort>
+						<my id="my" elif="{{!isCoin && $idx === 3 || isCoin && $idx === 4}}" current-index="{{currentIndex}}" index-onshow="{{indexOnshow}}" is-sign-open="{{isSignOpen}}" is-coin="{{isCoin}}" no-ad-vip-switch="{{noAdVipSwitch}}"></my>
+						<to-sign id="toSign" elif="{{isCoin && $idx === 2}}" current-index="{{currentIndex}}" index-onshow="{{indexOnshow}}"></to-sign>
+					</div>
+				</div>
+			</tab-content>
+			<tab-bar class="tab-bar1">
+				<stack for="{{tabHeadList}}" class="tab-stack">
+					<div class="tab-bar-item">
+						<image class="{{$item.isToSign && $item.isToSign == 1 ? 'tab-bar-icon-extra' : 'tab-bar-icon'}}" src="{{currentIndex==$idx ? $item.curIcon : $item.icon}}"></image>
+						<text>{{$item.title}}</text>
+					</div>
+					<div class="tab-red-dots" show="{{$item.redDot&&!(isJumpStore&&$idx==1)}}"></div>
+				</stack>
+			</tab-bar>
+		</tabs>
+		<stack class="signbtn" @click="routeSign" if="{{isSignOpen && !isCoin && currentIndex==0 && !editing && onIndex && userId && hasGetSetting}}">
+			<image class="gif-bg" src="https://xsmfdq.kkyd.cn/images/gift-background-1.png"></image>		
+			<image class="rotate" src="https://xsmfdq.kkyd.cn/images/gift-rotate-1.png"></image>
+		</stack>
+		<div class="float-layer-wrap {{isShortcut ? '' : (isCoin ? 'float-layer-wrap-bt-280' : 'float-layer-wrap-bt-240') }}" if="isFloatLayerShow && floatLayerInfo && floatLayerInfo.type">
+			<stack class="float-layer-stack">
+				<image class="float-layer-bg" src="https://xsmfdq.kkyd.cn/images/float-layer-bg-new.png"></image>
+				<div class="float-layer-content {{ floatLayerInfo.type == 3 ? 'float-layer-content-book' : ''}}" @click="fnClickFloatLayer">
+					<stack>
+						<image class="float-layer-img {{ floatLayerInfo.type == 3 ? 'float-layer-img-book' : ''}}" src="{{ floatLayerInfo.type == 3 ? floatLayerInfo.cover : 'https://xsmfdq.kkyd.cn/images/float-layer-coupon-icon.png' }}"></image>
+					</stack>
+					<div class="float-layer-column {{ floatLayerInfo.type == 3 ? 'float-layer-column-book' : ''}}">
+						<text class="float-layer-title">{{ floatLayerInfo.title }}</text>
+						<text class="float-layer-desc">{{ floatLayerInfo.desc }}</text>
+					</div>
+					<div class="float-layer-row {{ floatLayerInfo.type == 3 ? 'float-layer-row-book' : ''}}">
+						<stack class="float-layer-row">
+							<image class="float-layer-btn-img" src="https://xsmfdq.kkyd.cn/images/float-layer-btn-new.png"></image>
+							<text class="float-layer-btn">{{ floatLayerInfo.type == 3 ? '继续阅读' : '立即使用' }}</text>
+						</stack>
+					</div>
+				</div>
+				<image class="float-layer-close" src="https://xsmfdq.kkyd.cn/images/float-layer-close-new.png" @click="fnCloseFloatLayer"></image>
+			</stack>
+		</div>
+		<block if="{{ipbt&&ipbt.length&&(cutSupport.vivoSupport||cutSupport.oppoSupport||cutSupport.huaweiSupport)}}">
+			<onekey-shortcut is-add-desk-btn-close="{{isAddDeskBtnClose}}" cut-support="{{cutSupport}}" frompage="index" systemtext="{{systemOutText}}" destext="{{onekeyDestext}}" if="{{!isCloseAddDesk && (!editing || currentIndex != 0) && isDataSucc&&!hasShowSuccess&&hasGetSetting}}" isshortcutshow="{{isshortcutshow}}" buttext = "{{onekeyBtnText}}" @togglebtn="toggleBtn" @showshortsuccess="showShortSuccess" @vivopush="fnVivoPush('shortcut')" @close-add-desk="fnCloseAddDesk"></onekey-shortcut>
+		</block>
+		<block else>
+			<shortcut-btn is-add-desk-image-close="{{isAddDeskImageClose}}" shortbtntype="{{shortbtnType}}" frompage="index" systemtext="{{systemOutText}}" if="{{!isCloseAddDesk && (!editing || currentIndex != 0) && isDataSucc&&!hasShowSuccess&&hasGetSetting}}" isshortcutshow="{{isshortcutshow}}" buttext = "{{btnText}}" @togglebtn="toggleBtn" @showshortsuccess="showShortSuccess" @vivopush="fnVivoPush('shortcut')" @close-add-desk="fnCloseAddDesk"></shortcut-btn>
+		</block>
+		<div class="back-mask" if="visible" @click="fnClick">
+			<div class="mask-one" if="{{quitStyle==2}}">
+				<stack class="logo-stack">
+					<image class="logo" src="../Common/logo.png"></image>
+					<image class="light" src="https://xsmfdq.kkyd.cn/images/icon-lighting.png"></image>
+				</stack>
+				<text class="tips">{{quitText?quitText:('记住'+appName+'，下次看书不迷路')}}</text>
+				<div class="btn-con">
+					<text class="btn-close" @click="exitApp">确定退出</text>
+					<text class="btn-goon" @click="closeBackMask">继续阅读</text>
+				</div>
+			</div>
+			<div class="mask-two" if="{{quitStyle==1}}">
+				<text class="tit">确定退出{{appName}}吗？</text>
+				<div class="tips" @click="quitSign">
+					<image class="red-bag" src="https://xsmfdq.kkyd.cn/images/back-sign-red.png"></image>
+					<text>{{quitText?quitText:('签到免费领取' + (isCoin ? '金币' : '书币') + '，好书看不停')}}</text>
+					<!-- <image class="arrow" src="https://xsmfdq.kkyd.cn/images/back-sign-right.png"></image> -->
+				</div>
+				<div class="btn-con">
+					<text class="btn-close" @click="exitApp">确定退出</text>
+					<text class="btn-sign" @click="quitSign">去领取</text>
+				</div>
+			</div>
+		</div>
+		<stack class="back-shortcut-pop" if="{{isBackShortcutPopShow}}" @click="fnCloseBackShortcutPop">
+            <div class="exit-content">
+                <image class="exit-logo" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-icon-corner.png.png"></image>
+				<text class="exit-desc">{{backShortcutConfig.popTip}}</text>
+                <div class="exit-btn">
+                    <onekey-shortcut-new
+                        btnwidth="686px"
+                        btnheight="90px" 
+                        btnfontsize="32px" 
+                        btnradius="44px" 
+                        btncolor="#FFFFFF" 
+                        btnbgcolor="#6D28F4"
+                        buttexto="{{backShortcutConfig.popAdTip}}"
+                        buttextv="{{backShortcutConfig.popAdTip}}"
+                        cut-support="{{cutSupport}}" 
+                        position="exitapp"
+                        @oneshortcomplete="{{oneshortComplete}}">
+                    </onekey-shortcut-new>
+                </div>
+            </div>
+			<image if="isBackShortcutCloseShow" @click="fnBackShortcutClose" class="exit-close" src="https://xsmfdq.kkyd.cn/images/short-pop-close.png"></image>
+        </stack>
+		<!-- 网环境加载中弹层 updat by prh 10.10-->
+        <stack class="dialog_loading" if="{{diaLoadingShow}}">
+            <div class="dia_txt">
+                <div class="load_img_div">
+                    <image class="load_img" src="../Common/images/loading-chapter.png"></image>
+                </div>
+                <div class="dia_reload_con">
+                    <text>网络不给力,正在加载中......</text>
+                </div>
+                <div if="{{diaLoadBtn}}" class="dia_reload_btn" @click="clickreload"><text>重试</text></div>
+            </div>
+        </stack>
+		<back-baidu></back-baidu>
+        <shortcut-success if="{{isShortpop && !isLayerShow}}" type="{{shortType}}" @closeshortpop='closeshortpop'></shortcut-success>
+        <coin-toast if="{{isShowToast}}" message="{{toastMessage}}" time="{{toastTime}}" @close-toast='closeToast'></coin-toast>
+		<ad-union
+			ad-unit-id=""
+			ad-type="open"
+			ad-alias="localOpen"
+			is-warm="normal"
+			is-local-info="{{ isLocalInfo }}"
+		></ad-union>
+		<block if="canReadVideoShow">
+			<ad-union
+				ad-unit-id=""
+				ad-type="video"
+				ad-alias="localVideo"
+				is-local-info="{{ isLocalInfo }}"
+			></ad-union>
+		</block>
+		<div class="fixed-bottom" if="isCoin && !isFold" @click="fnToSign">
+			<image src="https://xsmfdq.kkyd.cn/images/index-to-sign.png"></image>
+			<text>领红包</text>
+		</div>
+		<div class="back_ad_pop" if="backAdSwitch && isBackAdPopShow">
+            <ad-union
+                ad-unit-id="{{ backAdId }}"
+                ad-type="back"
+                ad-alias="indexBack"
+                other-info="{{ backAdTactics }}"
+				back-loading="{{ isBackAdLoad }}"
+				brand-ad-switch="{{ brandAdSwitch }}"
+				cut-support="{{ cutSupport }}"
+				ad-shortcut-config="{{ adShortcutConfig }}"
+				is-shortcut="{{ isShortcut }}"
+				is-vertical-button="{{ isVerticalBackButton }}"
+				onad-back="fnBackAdPopClose"
+            ></ad-union>
+        </div>
+	</div>
+</template>
+<style lang="less">
+	@keyframes ListShow {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+	.back-shortcut-pop {
+		position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        align-items: flex-end;
+        justify-content: flex-end;
+		.exit-content {
+			flex-direction: column;
+            align-items: center;
+            width: 100%;
+            background-color: #FFFFFF;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            animation-name: ListShow;
+            animation-duration: 400ms;
+            animation-timing-function: ease-out;
+			padding-bottom: 30px;
+			.exit-logo {
+				margin-top: 36px;
+				margin-bottom: 6px;
+                width: 176px;
+				height: 176px;
+				border-radius: 28px;
+			}
+			.exit-desc {
+				margin-bottom: 48px;
+				height: 45px;
+				font-size: 32px;
+				color: #333333;
+				line-height: 45px;
+				lines: 1;
+				text-overflow: ellipsis;
+				text-align: center;
+			}
+			.exit-btn {
+				margin-bottom: 32px;
+			}
+		}
+		.exit-close {
+			margin-bottom: 380px;
+			margin-right: 20px;
+			width: 54px;
+			height: 54px;
+		}
+	}
+	.back_ad_pop {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, .7);
+    }
+	.fixed-bottom {
+		flex-direction: column;
+		align-items: center;
+		position: fixed;
+		bottom: 0px;
+		left: 300px;
+		width: 150px;
+		height: 110px;
+		background-color: #fff;
+		border-top-width: 1px;
+		border-style: solid;
+		border-top-color: rgba(142, 142, 152, 0.2);
+		image {
+			width: 64px;
+			height: 64px;
+			margin-bottom: 4px;
+		}
+		text {
+			/* flex: 1; */
+			text-align: center;
+			color: #5A5A64;
+			font-size: 22px;
+			height: 30px;
+			line-height: 30px;
+		}
+	}
+	@keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+	.float-layer-wrap {
+		position: fixed;
+		bottom: 140px;
+		left: 30px;
+		width: 690px;
+		height: 120px;
+		animation-name: fadeOut;
+		animation-delay: 9500ms;
+        animation-duration: 600ms;
+        animation-timing-function: ease-out;
+		.float-layer-bg {
+			width: 690px;
+			height: 120px;
+		}
+		.float-layer-content {
+			/* align-items: center;	 */
+			width: 690px;
+			height: 120px;
+			padding: 15px 15px 15px 30px;
+		}
+		.float-layer-content-book {
+			padding: 10px 15px 10px 12px;
+		}
+		.float-layer-column {
+			flex: 1;
+			flex-direction: column;
+			justify-content: space-between;
+			margin-top: 5px;
+			height: 72px;
+		}
+		.float-layer-column-book {
+			margin-top: 10px;
+		}
+		.float-layer-img {
+			margin-top: 9px;
+			margin-right: 20px;
+			width: 103px;
+			height: 62px;
+		}
+		.float-layer-img-book {
+			margin-top: 0px;
+			width: 80px;
+			height: 100px;
+		}
+		.float-layer-title {
+			margin-bottom: 12px;
+			font-size: 36px;
+			color: #FFFFFF;
+			font-weight: bold;
+			width: 360px;
+			text-overflow: ellipsis;
+			lines: 1;
+		}
+		.float-layer-desc {
+			font-size: 24px;
+			color: #FFFFFF;
+			width: 360px;
+			text-overflow: ellipsis;
+			lines: 1;
+		}
+		.float-layer-row {
+			align-items: center;
+			justify-content: center;
+			width: 212px;
+			height: 90px;
+		}
+		.float-layer-row-book {
+			margin-top: 5px;
+		}
+		.float-layer-btn-img {
+			width: 212px;
+			height: 90px;
+		}
+		.float-layer-btn {
+			font-size: 30px;
+			font-weight: bold;
+			color: #E84B36;
+			text-align: center;
+		}
+		.float-layer-close {
+			margin-top: 4px;
+			margin-right: 4px;
+			width: 32px;
+			height: 32px;
+			align-self: flex-end;
+		}
+	}
+	.float-layer-stack {
+		width: 100%;
+		flex-direction: column;
+	}
+	.float-layer-wrap-bt-280 {
+		bottom: 280px;
+	}
+	.float-layer-wrap-bt-240 {
+		bottom: 240px;
+	}
+	/* 弱网loading加载 */
+	.dialog_loading {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 126px;
+		background-color:rgba(255,255,255,1);
+        flex-direction: column;
+        align-items: center;
+		justify-content: center;
+    }
+    .dia_txt {
+        flex-direction: column;       
+        align-items: center;
+		.load_img_div{
+			width:210px;
+			height:210px;
+		}
+    }
+    .dia_txt {
+        .dia_reload_con {
+            margin-top: 30px;
+			width:690px;
+			height:110px;
+            flex-direction: column;
+            align-items: center;
+			text{
+				color:rgba(79,79,81,1);
+			}
+        }
+    }
+    .dia_reload_btn {
+        margin: 0 15px;
+        justify-content: center;
+		width:360px;
+        height: 80px;
+        border-radius: 40px;
+		border:1px solid rgba(212,211,217,1);
+    }
+    .dia_reload_btn text {
+        font-size: 30px;
+        color: rgba(186,186,186,1);
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+
+	.clearstorage {
+		margin: 0px 15px;
+		justify-content: center;
+		height: 80px;
+		background-color: rgba(224, 67, 69, 1);
+		border-radius: 40px;
+		position: fixed;
+		left: 15px;
+		right: 15px;
+		bottom: 226px;
+		flex: 1;
+	}
+	.clearstorage text {
+		font-size: 30px;
+		color: rgba(255, 255, 255, 1);
+	}
+
+	.signbtn {
+		position: fixed;
+		width: 185px;
+		height: 100px;
+		right: 0;
+		bottom: 500px;
+	}
+	.gif-bg{
+		width: 185px;
+		height: 100px;
+		/* margin-left: 22px; */
+	}
+	.rotate{
+		width: 86px;
+		height: 100px;
+		transform-origin: 43px 50px;
+		animation-name: rotate;
+		animation-duration: 600ms;
+		animation-iteration-count:infinite;
+		animation-timing-function:linear ;
+	}
+	@keyframes rotate {
+		0% {
+			transform: rotate(0deg);
+		}
+		25% {
+			transform: rotate(20deg);
+		}
+		50% {
+			transform: rotate(0deg);
+		}
+		75% {
+			transform: rotate(-20deg);
+		}
+		100% {
+			transform: rotate(0deg);
+		}
+	}
+
+
+	.tab-bar1 {
+		height: 98px;
+		background-color: #f7f7fa;
+	}
+	.tab-stack{
+		justify-content: flex-end;
+		height: 80px;
+	}
+	.tab-red-dots{
+		margin-top: 18px;
+		width: 18px;
+		height: 18px;
+		border-radius: 18px;
+		background-color: #ff0000;
+		border: 2px solid #fff;
+	}
+	.tab-bar-item {
+		flex-direction: column;
+		align-items: center;
+		/* justify-content: center; */
+		width: 70px;
+	}
+
+	.tab-bar-item text {
+		/* text-align: center; */
+		/* flex: 1; */
+		height: 30px;
+		line-height: 30px;
+		font-size: 22px;
+		color: #444444;
+	}
+
+	.tab-bar-item text:active {
+	    color: #F97053;
+	}
+
+	.tab-content-item {
+		flex-direction: column;
+	}
+
+	.back-mask{
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, .7);
+		position: fixed;
+		flex-direction: column;
+		justify-content: flex-end;
+		.mask-one{
+			height: 488px;
+			background-color: #FFFFFF;
+			border-top-left-radius: 24px;
+			border-top-right-radius: 24px;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-between;
+			.logo-stack{
+				width: 146px;
+				height: 146px;
+				margin-top: 70px;
+				.logo{
+					width: 140px;
+					height: 140px;
+					border-radius: 20px;
+				}
+				.light{
+					width: 45px;
+					height: 45px;
+					margin-left: 106px;
+					margin-top:106px;
+				}
+			}
+			.tips{
+				font-size: 34px;
+				color: #444444;
+				line-height: 40px;
+				text-align: center;
+				margin-top: -50px;
+				padding: 0 30px;
+			}
+			.btn-con{
+				width: 100%;
+				height: 90px;
+				.btn-close{
+					flex: 1;
+					height: 90px;
+					background: linear-gradient(90deg, #FFB673 0%, #FE705A 100%);
+					text-align: center;
+					font-size: 30px;
+					color: #FFFFFF;
+				}
+				.btn-goon{
+					flex: 1;
+					height: 90px;
+					background-color: #F2F2F2;
+					text-align: center;
+					font-size: 30px;
+					color: #BABABA;
+				}
+			}
+		}
+		.mask-two{
+			height: 488px;
+			background-color: #FFFFFF;
+			border-top-left-radius: 24px;
+			border-top-right-radius: 24px;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-between;
+			.tit{
+				width: 100%;
+				text-align: center;
+				border-bottom-width: 1px;
+				border-bottom-color: #E7E7E7;
+				height: 100px;
+				font-size: 34px;
+				color: #444444;
+			}
+			.tips{
+				align-items: center;
+				width: 100%;
+				justify-content: center;
+				margin-top: -17px;
+				padding: 0 30px;
+				.red-bag{
+					width: 85px;
+					height: 102px;
+					margin-right: 24px;
+				}
+				text{
+					font-size: 30px;
+					color: #F97053;
+				}
+				.arrow{
+					width: 40px;
+					height: 40px;
+					margin-right: 40px;
+				}
+			}
+			.btn-con{
+				width: 100%;
+				height: 90px;
+				.btn-close{
+					flex: 1;
+					height: 90px;
+					background-color: #F2F2F2;
+					text-align: center;
+					font-size: 30px;
+					color: #BABABA;
+				}
+				.btn-sign{
+					flex: 1;
+					height: 90px;
+					background: linear-gradient(90deg, #FFB673 0%, #FE705A 100%);
+					text-align: center;
+					font-size: 30px;
+					color: #FFFFFF;
+				}
+			}
+		}
+	}
+	/** 河马阅读 start **/
+	.tab-bar1 {
+		height: 110px;
+		background-color: #fff;
+		border-top-width: 1px;
+		border-style: solid;
+		border-top-color:rgba(142, 142, 152, 0.2);
+		.tab-stack {
+			height: 110px;
+		}
+	}
+	.tab-bar-item {
+		.tab-bar-icon-extra {
+			width: 64px;
+			height: 64px;
+		}
+		.tab-bar-icon {
+			margin-top: 18px;
+			width: 44px;
+			height: 44px;
+			margin-bottom: 4px;	
+		}
+		text {
+			color: #5A5A64;
+			font-size: 22px;
+		}
+		text:active {
+			color: #785AF6;
+			font-weight: bold;
+		}
+	}
+	/** 河马阅读 end **/
+</style>
+<script>
+// import configuration from '@system.configuration';
+import notification from '@system.notification';
+import router from '@system.router';
+import prompt from '@system.prompt';
+import device from '@system.device';
+import fetch from '@system.fetch';
+import storage from '@system.storage';
+import file from '@system.file';
+import shortcut from '@system.shortcut';
+import app from '@system.app';
+import audio from '@system.audio'
+import account from '@service.account'
+export default {
+	protected: {
+		myshow: true,
+		currentIndex: 0,
+		readPref: '0',
+		isShortcut: false,
+		systemOutText:'',
+		readOutText:'',
+		isshortcutshow:true,
+		pageFrom:'',
+		bookshelf:'1',
+		frome:'',
+		onIndex:true,
+		visible:false,
+		backtimer:null,
+		cloLoading:false,
+		isShortpop:false,
+		shortType:'1',
+		hasShowSuccess:false,
+		isShowToast:false,
+		toastMessage:'已发放至您的账户',
+		toastTime:3000,
+		ugRed: 0,// 用户等级待领取红点,
+		quitStyle:0,
+		quitText:'',
+		cutSupport: {},//是否支持意见加桌组件，因为有多个厂商 所以用对象表示
+		onekeyDestext:'', //vivo加桌组件描述文案
+		onekeyBtnText:''//一键加桌组件按钮文案
+	},
+	private: {
+		config:null,
+		device:{
+			brand: '',
+			model: '',
+			utdid: '',
+			utdidTmp:''
+		},
+		userId:'',
+		ctime:'',
+		t:'',
+		tabHeadList: [
+			{
+				title: '书架',
+				render: false,
+				icon: 'https://xsmfdq.kkyd.cn/images/hmxs/bookshelf-default.png',
+				curIcon: 'https://xsmfdq.kkyd.cn/images/hmxs/bookshelf-selected.png',
+				titbackground: '#F7F4FF',
+				titcolor: '#222222',
+				redDot:false
+			},
+			{
+				title: '书城',
+				render: false,
+				icon: 'https://xsmfdq.kkyd.cn/images/hmxs/bookstore-default.png',
+				curIcon: 'https://xsmfdq.kkyd.cn/images/hmxs/bookstore-selected.png',
+				titbackground: '#F7F4FF',
+				titcolor: '#222222',
+				redDot:false
+			},
+			{
+				title: '分类',
+				render: false,
+				icon: 'https://xsmfdq.kkyd.cn/images/hmxs/category-default.png',
+				curIcon: 'https://xsmfdq.kkyd.cn/images/hmxs/category-selected.png',
+				titbackground: '#F7F4FF',
+				titcolor: '#222222',
+				redDot:false
+			},
+			{
+				title: '我的',
+				render: false,
+				icon: 'https://xsmfdq.kkyd.cn/images/hmxs/my-default.png',
+				curIcon: 'https://xsmfdq.kkyd.cn/images/hmxs/my-selected.png',
+				titbackground: '#F7F4FF',
+				titcolor: '#222222',
+				redDot:false
+			}
+		],
+		indexOnshow: 0,
+		editing:false,
+		appName:'',
+		diaLoadingShow:false,
+		isDataSucc:true,
+		diaLoadBtn:false,
+		isStorSucc:false,
+		hasChangeTab: false, // tab是否完成切换
+		floatLayerInfo: {}, // 浮动弹框信息
+		floatLayerShowTimes: 0, // 浮层已展示的次数
+		isFloatLayerShow: false, // 浮动弹框显示控制
+		canFloatLayerShow: false, // 是否应该展示浮动弹框
+		hasFloatLayerShow: false, // 浮层是否已经展示
+		isGetPopInfo: false, // 是否获取弹框信息
+		isGettingServer: false, // 是否获取系统配置
+		dynamicFloatingLayerUt: {}, // 动态浮层策略
+		isLayerShow: false, // 书架弹窗展示状态
+		isLocalInfo: true, // 是否是本地信息
+		canReadVideoShow: false,
+		needPlayAudio: false, // 是否需要播放空白MP3
+		isSupportVivoPush: false, // 是否支持vivoPush
+		vivoPush: null, // vivoPush实例
+		hasVivoPush: false, // 是否提醒过vivopush
+		isSignOpen: true, // 签到开关
+		isSearchOpen: true, // 搜索开关
+		ipbt:[], //一键加桌文案
+		isCoin: false, // 金币模式
+        isBackAdPopShow: false, // 退出应用广告弹窗
+		isBackAdLoad: false, // 退出应用广告加载中
+		backAdSwitch: false, // 退出应用广告开关
+		backAdLoadTime: 3000, // 退出应用广告加载时间
+		isVerticalBackButton: false, // 返回按钮样式是否为竖版上下排列
+		installTimes: 0, // 退出阅读加桌展示次数
+		maxInstallTimes: -1, // 退出阅读加桌最大展示次数
+		backAdId: '5001240700', // 退出阅读广告广告位id
+		backAdTactics: {}, // 退出阅读广告策略
+		noAdVipSwitch: false, // 免广告开关
+		brandAdSwitch: false, // 支持新版厂商广告开关
+		/**
+		 * backShortcutConfig 退出一键加桌配置
+		 * popTip 内容文案
+		 * popAdTip 按钮文案
+		 * isClose 是否显示关闭按钮
+		 * closeAction 关闭后行为 1 仅关闭弹窗 2 退出应用 3 关闭弹窗不再拦截
+		*/
+		backShortcutConfig: {},
+		isBackShortcutPopShow: false, // 退出加桌弹窗
+		isBackShortcutCloseShow: false, // 退出加桌弹窗关闭按钮
+		needExit: false, // 是否需要退出应用
+		lastExitTime: 0, // 最近一次的退出时间
+		shortcutSpaceTime: 0, // 加桌间隔时间
+		adShortcutConfig: {}, // 退出广告配置
+		isFold: false, // 折叠屏展开状态
+		isCloseAddDesk: false,
+		isAddDeskBtnClose: false,
+        isAddDeskImageClose: false,
+	},
+	public: {
+		userHeaderJson: '',
+		cardIndex: 0,
+        config: '',
+        clearstorageTxt:'清空缓存',
+		isFirsInt:true,
+		
+		channelCode:'dz_hmxs',
+        jumpPage:'Index',
+        chapterName:'',
+		uuid:'',
+		bookshelfStyle:'',
+		frompage:'',
+		hasShowSuccess:false,
+		ortt:[],
+		shortbtnType:0,
+		btnText:'',
+		hasGetSetting:false,
+		sourcePage: '',
+		isStartToIndex:0,
+		hasSetTimeout:false,
+		hasGetJump:false,
+		authTips:'',
+		isHoldPop:false,
+		rankUpdateTime:'',//排行榜更新时间,
+		isJumpStore: 0,
+		huaweiBack:0,
+		jobId:''
+	},
+	addShortcutHandle(){
+		this.isshortcutshow = false;
+		this.isShortcut = true;
+		this.$app.$def.quickappLog([703, {
+			qmap:{
+				site: '2',
+				sorce:'util_back_shortcut'
+			}
+		}, 'shortcut'], this)
+		this.$app.exit()
+	},
+	togglePop(data){
+		this.editing = data.detail.data
+	},
+    fnClearStorage(){
+        let that = this;
+        storage.clear({
+            success: function(data) {
+                that.clearstorageTxt='清空缓存success'
+                console.log(data);
+                console.log('清空缓存success 清空缓存success 清空缓存success 清空缓存success 清空缓存success 清空缓存success')
+            },
+            fail: function(data, code) {
+                that.clearstorageTxt='清空缓存fail'
+                console.log(data, code)
+				console.log('清空缓存fail 清空缓存fail 清空缓存fail 清空缓存fail 清空缓存fail 清空缓存fail 清空缓存fail ')
+				that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:"storage_clear_fail",
+                            thisUri:that.$page.uri,
+                            thisPage:"index",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+            }
+        })
+    },
+	onInit() {
+		let that = this;
+		try {
+			const configuration = require('@system.configuration')
+			const foldableState = configuration.getFoldableState && configuration.getFoldableState() || false;
+			if(foldableState) {
+				that.isFold = foldableState === 1
+			}
+		} catch(e) {}
+		that.$app.$def.fnCreateAd.call(that);            // 创建当前页面的广告存储对象
+		that.$on('fnSignToIndex', that.fnSignToIndex);
+		that.isCoin = that.$app.isCoin
+		that.$app.lastOpenPage = ''
+		// 一键加桌判断
+		that.cutSupport = that.$app.$def.fnCheckOnekeycutSup(that)
+		that.fnGetInstallTimes()
+		// vivopush支持判断
+		try {
+			if(account.getProvider().toLowerCase() == 'vivo' && that.$app.$def.fnVivoPushSupport(that)) {
+				account.isLogin({
+					success: function (data) {
+						if(data.isLogin) {
+							try {
+								that.vivoPush = require('@system.vivopush')
+								if(that.vivoPush && that.vivoPush.getstate) {
+									that.vivoPush.getstate({
+										success: function() {
+											that.isSupportVivoPush = true
+										}
+									})
+								}
+							}catch(e) {}
+						}
+					}
+				})
+			}
+		} catch(e) {}
+		that.$app.$def.appSourceinfoLog(that)
+		that.config = that.$app.$data;
+		that.currentIndex = +that.cardIndex;
+        that.$app.$def.getStorageFile(that,{
+            key:'headerJson',
+            success:function(data){
+                data = data ? JSON.parse(data) : '';
+				that.userHeaderJson = data;
+				//1 九宫格样式  2 信息流样式
+				if(that.userHeaderJson.bookshelfStyle){
+					if(that.userHeaderJson.bookshelfStyle=='2'){
+						that.bookshelf = '2'
+					}else{
+						that.bookshelf = '1'
+					}
+				}else{
+					that.bookshelf = '1'
+				}
+				if(that.userHeaderJson.readPref!='0'&&that.readPref=='0'){
+					that.readPref=that.userHeaderJson.readPref
+				}
+            }
+        })
+
+		let ogetinfo = app.getInfo();
+		this.appName = ogetinfo.name;
+		//获取来源
+		if(that.uuid){
+			that.$app.$def.quickappLog([703, {
+				qmap:{
+				uuid:that.uuid,
+				sorce:'index'
+				}
+			}, 'uuid'], that)
+		}
+		that.$app.$def.quickappLog([703, {
+			qmap:{
+				page:'1',
+				infotype:ogetinfo.source.type,
+				extra:ogetinfo.source.extra
+			}
+		}, 'source'], that)
+
+        //发送pushCid  2107
+		that.getIsShortcut();
+		that.exitshortcut();
+		//新增2154
+		that.getServerInit()
+		that.getSetTimeout()
+		
+		//纪录退出时间
+		storage.get({
+			key: 'exittime',
+			success: (data) => {
+				if(data){
+					that.lastExitTime = data;
+				}
+			}
+		})
+		if(that.jobId){
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2170`,
+                data: {
+                    jobId:that.jobId
+                },
+                succ: function (data) {
+                    console.log('successsuccess')
+                }
+            })
+             that.$app.$def.quickappLog([703, {
+                qmap:{
+					jobId:that.jobId,
+					cardIndex:that.cardIndex
+                }
+            },'push_report'],that);
+        }
+		that.$on('showshortsuccess',that.showShortSuccess)
+		that.$on('holdpop',that.holdPop)
+		that.$on('showtoast',that.showToast)
+		that.$on('showstartshort',that.appStartShortcut)
+	},
+	onDestroy() {
+        this.$app.$def.fnDestoryAd.call(this);           // 销毁当前页面的广告实例
+    },
+	showNotification(localPush,localPushUt){
+		let that = this
+		if(that.$app.isNeedHuaweiAudio) {
+			return
+		}
+		storage.get({
+			key:'isPush',
+			success(res){
+				if(res!=1){
+					let NotificationTime = new Date().getTime()
+					notification.show({
+						contentTitle: localPush.title,
+						contentText: localPush.content,
+						clickAction: {
+							uri: `/LoginVisitor?jumpPage=Read&bookId=${localPush.bookId}&NotificationTaskId=${localPush.jobId}&NotificationTime=${NotificationTime}`
+						}
+					})
+					that.$app.hasShowNote = true
+					that.$app.shenceLog.log(that,'track','NotificationShow', {
+						NotificationId: `${localPush.jobId}_${that.$app.headerJson.userId}_${NotificationTime}`,
+						NotificationTaskId: localPush.jobId,
+						NotificationTitle: localPush.title,
+						NotificationContent: localPush.content,
+						NotificationLink: `/LoginVisitor?jumpPage=Read&bookId=${localPush.bookId}&NotificationTaskId=${localPush.jobId}&NotificationTime=${NotificationTime}`,
+						NotificationTiming: '2'
+					}); 
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							site: '1'
+						}
+					}, 'notification'], that)
+				}
+					
+			}
+		})
+    },
+	// 获取系统配置
+	getServerInit(){
+		let that = this;
+		that.ajax('2154', {
+			data: {
+				isRead: 0,
+				sceneVal: 1,
+				readTip: 1,
+			},
+			succ(data) {
+				that.isGettingServer = true
+				if(data.dynamicFloatingLayerUt) {
+					that.dynamicFloatingLayerUt = data.dynamicFloatingLayerUt
+				}
+				// 华为启动时直接推送，推送声音一直开启，先播放MP3使推送静默
+				if(data.hwvs) {
+					if(that.$app.isNeedHuaweiAudio && that.$app.headerJson && that.$app.headerJson.brand && (that.$app.headerJson.brand.toLowerCase() == 'huawei' || that.$app.headerJson.brand.toLowerCase() == 'honor')) {
+						that.needPlayAudio = true
+						that.$app.isNeedHuaweiAudio = false		
+						audio.onended = function() {
+							audio.stop()
+						}
+						audio.src = '../Common/test.mp3'
+						audio.play()
+					}else {
+						that.$app.isNeedHuaweiAudio = false
+					}
+				}else {
+					that.$app.isNeedHuaweiAudio = false
+				}
+				//本地常驻通知栏
+				if(data.localPush&&JSON.stringify(data.localPush)!='{}'){
+					if(!that.$app.hasShowNote){
+						if(that.needPlayAudio) {
+							that.needPlayAudio = false
+							setTimeout(() => {
+								that.showNotification(data.localPush,data.localPushUt)
+							}, 1000)
+						}else {
+							that.showNotification(data.localPush,data.localPushUt)
+						}
+					}
+				}
+				// 判断是否有浮层下发
+				let dynamicFloatingLayer = data.dynamicFloatingLayer
+				if(that.isStartToIndex && dynamicFloatingLayer) {
+					let floatLayerInfo = {}
+					floatLayerInfo.type = dynamicFloatingLayer.type
+					floatLayerInfo.times = dynamicFloatingLayer.frequency
+					// 判断浮层是否有类型及数据
+					if(!floatLayerInfo.type || (floatLayerInfo.type == 1 && !dynamicFloatingLayer.fastAppCouponVo) || (floatLayerInfo.type == 3 && !dynamicFloatingLayer.readBookVo)) {
+						return
+					}
+					if(floatLayerInfo.type == 1) {
+						let couponInfo = dynamicFloatingLayer.fastAppCouponVo
+						floatLayerInfo.lastId = couponInfo.lastId ? couponInfo.lastId : ''
+						floatLayerInfo.title = couponInfo.type == 2 ? couponInfo.discount + '元现金券' : (couponInfo.discount / 10) + '折折扣券'
+						floatLayerInfo.desc = '将于' + that.fnChangeExpiryDate(couponInfo.expiryDate) + '到期'
+					}
+					if(floatLayerInfo.type == 3) {
+						let bookInfo = dynamicFloatingLayer.readBookVo
+						floatLayerInfo.bookId = bookInfo.bookId
+						floatLayerInfo.chapterId = bookInfo.chapterId ? bookInfo.chapterId : ''
+						floatLayerInfo.cover = bookInfo.coverImage ? bookInfo.coverImage : ''
+						floatLayerInfo.title = bookInfo.bookName
+						floatLayerInfo.desc = bookInfo.cname ? '上次阅读到：' + bookInfo.cname : ''
+						floatLayerInfo.omap = bookInfo.omap
+					}
+					that.floatLayerInfo = floatLayerInfo
+					let date = that.fnGetCurrentDate()
+					that.fnGetLayerTimes(floatLayerInfo.type).then(res => {
+						// console.log('-----index-----fnGetLayerTimes-----success------')
+						if(res) {
+							res = JSON.parse(res)
+						}
+						if(res && res.date && res.date != date) {
+							that.floatLayerShowTimes = 0
+						}else {
+							that.floatLayerShowTimes = res.times ? res.times : 0
+						}
+						if(res && res.date == date && that.floatLayerShowTimes >= that.floatLayerInfo.times && that.floatLayerInfo.times != -1) {
+							return
+						}
+						that.canFloatLayerShow = true
+						// console.log('-----index-----canFloatLayerShow------')
+						that.fnCanShowFloatLayer()
+					}, rej => {
+						// console.log('-----index-----fnGetLayerTimes-----fail------')
+					})
+				}
+				// 用户等级待领取红点
+				if(data.ugRed){
+					that.ugRed = data.ugRed
+				}else{
+					that.ugRed = 0
+				}
+			},
+			err(data) {
+				
+			}
+		})
+	},
+	hideRedDot(){
+		this.tabHeadList[1].redDot = false
+	},
+	//退出多少分钟之后再弹退出
+	exitshortcut(){
+		let that = this;
+		that.ajax('2150', {
+			data: {isRead:0},
+			succ(data) {
+				that.$app.isApiCache = !!data.apiAdCacheSwitch
+				// 加桌关闭按钮开关
+				if(data.addDesk) {
+					if(data.addDesk.addDeskPosition.indexOf('homePage') > -1) {
+						if(data.addDesk.addDeskStyle.indexOf('button') > -1) {
+							that.isAddDeskBtnClose = true
+						}
+						if(data.addDesk.addDeskStyle.indexOf('img') > -1) {
+							that.isAddDeskImageClose = true
+						}
+					}
+				}
+				// 初始化数美sdk
+				if (!that.$app.isSmSDKCreated && data.smInitFlag) {
+					that.$app.fnSmFlagInit(data);        // 数美开关初始化
+					that.$app.fnSmSDKCreate();           // 数美SDK创建
+				}
+				// 百度SDK开关
+				if(data.baiduSDKFlag){
+					that.$app.fnInitBaiduSDK();			 // 初始化百度SDK
+				}
+				// 广告点击偏移量开关
+				if(data.xmDeviation) {
+                    that.$app.setAppData('adClickOffsetConfInfo', data.xmDeviation); // 初始化广告偏移量配置
+                }
+				that.$app.brandAdPreloadSwitch = !!data.brandAdPreloadSwitch
+				// 签到开关
+				if(data.ssydSign) {
+					that.isSignOpen = false
+					that.$app.isSignOpen = false
+				}
+				// 金币模式
+				if(that.isSignOpen && data.isGlod && data.isGlod == 1) {
+					that.isCoin = true
+					that.$app.isCoin = true
+				} else {
+					that.isCoin = false
+					that.$app.isCoin = false
+				}
+				// 免广告VIP开关
+				if(data.dzmfVIPShowFlag) {
+					that.noAdVipSwitch = true
+				}else {
+					that.noAdVipSwitch = false
+				}
+				if(data.brandAdSwitch) {
+					that.brandAdSwitch = true
+				}
+				// 应用退出广告
+				if(data.exitAppSwitch) {
+					if(data.exitAppSwitch.userTactics) {
+						that.backAdTactics = {
+							userTacticsVo: data.exitAppSwitch.userTactics
+						}
+					}
+					if(data.exitAppSwitch.adPositionId) {
+						that.backAdId = data.exitAppSwitch.adPositionId
+					}
+					if(data.exitAppSwitch.continueTime) {
+						that.backAdLoadTime = data.exitAppSwitch.continueTime
+					}
+					if(data.exitAppSwitch.switchValue) {
+						that.backAdSwitch = data.exitAppSwitch.switchValue == 1 ? true : false
+					}
+					if(data.exitAppSwitch.switchValue == 1 && (data.exitAppSwitch.addDeskLimit || data.exitAppSwitch.addDeskLimit === 0)) {
+						that.maxInstallTimes = data.exitAppSwitch.addDeskLimit
+					}
+					// 退出按钮样式
+					if(data.exitAppSwitch.buttonStyle === 'up-down') {
+						that.isVerticalBackButton = true;
+					}
+				}
+				// that.isCoin = true
+				// that.$app.isCoin = true
+				// 搜索开关
+				if(data.searchSwitch) {		
+					that.$app.isSearchOpen = false			
+					that.isSearchOpen = false
+				}
+				//加密方式
+				if(data.hmSwParam){
+					that.$app.swParam = data.hmSwParam
+				}else{
+					that.$app.swParam = ''
+				}
+				if(data.bsbl && data.bsbl == 1) {
+					that.$app.isLandStyle = true
+				}else {
+					that.$app.isLandStyle = false
+				}
+				if(data.qah){
+					that.huaweiBack = 1
+				}
+				if(data.rankDataUpdateTime){
+					that.rankUpdateTime = data.rankDataUpdateTime
+					storage.get({
+						key:'rankUpdateTime',
+						success: function(res){
+							if(res){
+								if(that.rankUpdateTime!=res){
+									that.tabHeadList[1].redDot = true
+								}
+							}else{
+								that.tabHeadList[1].redDot = true
+							}
+						}
+					})
+				}
+				that.$app.isAddDesktop = !!data.isAddDesktop
+				// 登录勾选开关
+				if(data.checkAgree) {
+					that.$app.isCheckAgreeOpen = true
+				}
+				//提前加桌提示
+				if(data.brtt){
+					that.authTips = data.brtt
+				}
+				// 热启动开关
+				if(data.isWarmBoot) {
+					that.$app.isOpenPageSwitch = data.isWarmBoot
+				}
+				// 热启动间隔时间
+				if(data.spaceTime) {
+					that.$app.openPageSpace = data.spaceTime * 1000
+				}
+				// 离开页面间隔时间
+				if(data.leaveTime) {
+					that.$app.leavePageSpace = data.leaveTime * 1000
+				}
+				that.hasGetSetting = true
+				// 退出应用加桌
+				if(data.ioaa) {
+					try {
+						let ioaa = JSON.parse(data.ioaa)
+						if(ioaa.length && Object.prototype.toString.call(ioaa).slice(8, -1) === 'Array') {
+							that.backShortcutConfig = ioaa[0]
+							if(ioaa[0].unitTime) {
+								that.shortcutSpaceTime = ioaa[0].unitTime * 60 * 1000 || 0
+							}
+						}
+					} catch(e) {}
+				}
+				if(data.ioaaAdvert) {
+					try {
+						let ioaaAdvert = JSON.parse(data.ioaaAdvert)
+						if(ioaaAdvert.length && Object.prototype.toString.call(ioaaAdvert).slice(8, -1) === 'Array') {
+							that.adShortcutConfig = ioaaAdvert[0]
+							that.adShortcutConfig.ready = true
+						}
+					} catch(e) {}
+				}
+				// 一键加桌
+				if(data.ipbt){
+					that.ipbt = JSON.parse(data.ipbt)
+					if(that.ipbt.length){
+						that.onekeyBtnText = that.ipbt[0].tip
+						that.onekeyDestext = that.ipbt[0].descTip?that.ipbt[0].descTip:''
+					}
+				}
+				if(data.ortt){
+					that.ortt = JSON.parse(data.ortt)
+					if(that.ortt.length){
+						that.btnText = that.ortt[0].tip
+						that.shortbtnType = that.ortt[0].style
+					}else{
+						that.btnText='立即保存万本好书到手机'
+					}
+				}else{
+					that.btnText='立即保存万本好书到手机'
+				}
+				if(data.systemOutText){
+					that.systemOutText = data.systemOutText;
+				}else{
+					that.systemOutText = '将【'+that.$app.$data.name+'】添加到桌面，方便再次使用！';
+				}
+				if(data.readOutText){
+					that.readOutText = data.readOutText;
+				}else{
+					that.readOutText = '立即保存万本好书到手机';
+				}
+				if(data.canclePrelad=='1'){
+					storage.set({
+						key:'canclePrelad',
+						value:1
+					})
+				}else{
+					storage.set({
+						key:'canclePrelad',
+						value:0
+					})
+				}
+				that.changeTabs()
+				if(data.sjInfo&&that.isStartToIndex){
+					let sjInfo = JSON.parse(data.sjInfo)
+					storage.get({
+						key:'sjId',
+						success:function(res){
+							if(!that.hasSetTimeout){
+								if(res){
+									if(res==sjInfo.sjId){
+										if(sjInfo.sjNum!=1){
+											that.jumpTab(sjInfo.sjUrl)
+										}else{
+											that.hasGetJump = true
+											that.fnCanShowFloatLayer()
+										}
+									}else{
+										that.jumpTab(sjInfo.sjUrl)
+										storage.set({
+											key:'sjId',
+											value:sjInfo.sjId
+										})
+									}
+								}else{
+									that.jumpTab(sjInfo.sjUrl)
+									storage.set({
+										key:'sjId',
+										value:sjInfo.sjId
+									})
+								}
+							}
+						}
+					})
+				}else{
+					that.hasGetJump = true
+					that.fnCanShowFloatLayer()
+				}
+			},
+			err(data) {
+				that.hasGetSetting = true
+				that.hasGetJump = true
+				console.log(data);
+				that.btnText='立即保存万本好书到手机'
+				that.systemOutText = '将【'+that.$app.$data.name+'】添加到桌面，方便再次使用！';
+				that.readOutText = '立即保存万本好书到手机';
+				that.changeTabs()
+			}
+		})
+	},
+	// 判断是否获取到弹层信息
+	fnGetPopInfo(evt) {
+		this.isLayerShow = !evt.detail.isLayerShow
+		//  判断是否需要展示浮层
+		if(evt.detail.isLayerShow) {
+			this.isGetPopInfo = true
+			this.fnCanShowFloatLayer()
+		}
+	},
+	// 判断是否显示浮层
+	fnCanShowFloatLayer() {
+		// vivopush消息 从首页启动且完成tab跳转且弹窗判断完成且获取配置信息
+		if(this.isStartToIndex && this.hasGetJump && this.isGetPopInfo && this.isGettingServer && !this.hasVivoPush) {
+			this.hasVivoPush = true
+			this.fnVivoPush('start')
+		}
+		// console.log('-----index-----fnCanShowFloatLayer-----')
+		if(this.hasGetJump && this.isGetPopInfo && this.canFloatLayerShow && !this.hasFloatLayerShow && this.isGettingServer) {
+			this.fnShowFloatLayer()
+		}
+	},
+	// 显示浮层
+	fnShowFloatLayer() {
+		let that = this
+		// console.log('-----index-----fnShowFloatLayer------')
+		let date = that.fnGetCurrentDate()
+		let times = that.floatLayerShowTimes + 1
+		that.hasFloatLayerShow = true
+		that.isFloatLayerShow = true
+		let OperationID = ''
+		if(that.floatLayerInfo.type == 1) {
+			OperationID = that.floatLayerInfo.lastId ? that.floatLayerInfo.lastId.toString() : ''
+		}
+		if(that.floatLayerInfo.type == 3) {
+			OperationID = that.floatLayerInfo.bookId ? that.floatLayerInfo.bookId.toString() : ''
+		}
+		if(that.dynamicFloatingLayerUt.isDot == '1') {
+			that.$app.shenceLog.log(that, 'track', 'OperationExposure', {
+				OperationPosition: '浮窗展示',
+				OperationName: '浮窗展示',
+				OperationID: OperationID,
+				OperationType: that.floatLayerInfo.type == 2 ? 'VIP提醒' : that.floatLayerInfo.type == 3 ? '阅读提醒' : '优惠券提醒',
+				TacticsId: that.dynamicFloatingLayerUt.tacticsId || '',
+				TacticsName: that.dynamicFloatingLayerUt.tacticsName || '',
+				SourceId: that.dynamicFloatingLayerUt.sourceId || '',
+				SourceName: that.dynamicFloatingLayerUt.sourceName || '',
+				ShuntId: that.dynamicFloatingLayerUt.ShuntID || '',
+				ShuntName: that.dynamicFloatingLayerUt.ShuntName || ''
+			})
+		}
+		setTimeout(function() {
+			if(that.isFloatLayerShow) {
+				that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+					ButtonName: '5秒后自动关闭'
+				})
+			}
+			that.isFloatLayerShow = false
+		}, 10000)
+		that.fnSetLayerTimes(JSON.stringify({
+			times: times,
+			date: date
+		}))
+	},
+	// 点击浮层
+	fnClickFloatLayer() {
+		let that = this
+		if(that.dynamicFloatingLayerUt.isDot == '1') {
+			let OperationID = ''
+			if(that.floatLayerInfo.type == 1) {
+				OperationID = that.floatLayerInfo.lastId ? that.floatLayerInfo.lastId.toString() : ''
+			}
+			if(that.floatLayerInfo.type == 3) {
+				OperationID = that.floatLayerInfo.bookId ? that.floatLayerInfo.bookId.toString() : ''
+			}
+			that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+				OperationPosition: '浮窗展示',
+				OperationName: '浮窗展示',
+				ButtonName: '点击浮窗',
+				OperationID: OperationID,
+				OperationType: that.floatLayerInfo.type == 2 ? 'VIP提醒' : that.floatLayerInfo.type == 3 ? '阅读提醒' : '优惠券提醒',
+				TacticsId: that.dynamicFloatingLayerUt.tacticsId || '',
+				TacticsName: that.dynamicFloatingLayerUt.tacticsName || '',
+				SourceId: that.dynamicFloatingLayerUt.sourceId || '',
+				SourceName: that.dynamicFloatingLayerUt.sourceName || '',
+				ShuntId: that.dynamicFloatingLayerUt.ShuntID || '',
+				ShuntName: that.dynamicFloatingLayerUt.ShuntName || ''
+			})
+		}
+		that.isFloatLayerShow = false
+		if(that.floatLayerInfo.type == 1) {
+			router.push({
+				uri: '/Recharge',
+				params: {
+					url: '/Index',
+					couponId: that.floatLayerInfo.lastId
+				}
+			});
+		}
+		if(that.floatLayerInfo.type == 3) {
+			router.push({
+				uri: '/Read',
+				params:{
+					bookId: that.floatLayerInfo.bookId,
+					chapterId: that.floatLayerInfo.chapterId,
+					pageFrom: '/Index',
+					SourcePosition: '动态浮窗',
+					omap: that.floatLayerInfo.omap,
+					isUpdateOmap: 0,
+				}
+			});		
+		}
+	},
+	// 关闭浮层
+	fnCloseFloatLayer() {
+		let that = this
+		that.isFloatLayerShow = false
+		that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+			ButtonName: '浮窗点击关闭'
+		})
+	},
+	// 获取浮层次数
+	fnGetLayerTimes(type) {
+		return new Promise((res, rej) => {
+			// 读取缓存数据
+			storage.get({
+				key: type == 3 ? 'bookLayerShowTimes' : 'layerShowTimes',
+				success: function(data) {
+					if(data) {
+						res(data)
+					}else {
+						res(0)
+					}
+				},
+				fail: function() {
+					rej()
+				}
+			})
+		})
+	},
+	// 设置浮层次数
+	fnSetLayerTimes(data) {
+		let that = this
+		storage.set({
+			key: that.floatLayerInfo.type == 3 ? 'bookLayerShowTimes' : 'layerShowTimes',
+			value: data,
+		})
+	},
+	// 获取当前时间 yyyymmdd
+	fnGetCurrentDate() {
+		// 格式20200708
+		let date = new Date()
+		let year = date.getFullYear()
+		let month = date.getMonth()
+		let day = date.getDate()
+		let ret = year + '' + ((month + 1) >= 10 ? (month + 1) : '0' + (month + 1)) + '' + (day >= 10 ? day : '0' + day)
+		return ret
+	},
+	// 改变过期时间格式
+	fnChangeExpiryDate(expiryDate) {
+		let date = new Date(expiryDate)
+		let year = date.getFullYear()
+		let month = date.getMonth()
+		let day = date.getDate()
+		let ret = year + '年' + (month + 1) + '月' + day + '日'
+		return ret
+	},
+	jumpTab(url){
+		let that = this
+		switch(url) {
+			case 1:
+				that.currentIndex = 0
+				break;
+			case 2:
+				that.isJumpStore = 1
+				that.currentIndex = 1
+				break;
+			case 3:
+				that.currentIndex = 0
+				break;
+			default:
+				that.currentIndex = 0
+		}
+		that.hasGetJump = true
+		that.fnCanShowFloatLayer()
+	},
+	getSetTimeout(){
+		let that = this
+		setTimeout(function(){
+			if(!that.hasGetSetting){
+				console.log('get setting timeout,jump to bookshelf')
+				that.hasGetSetting = true 
+				that.hasSetTimeout = true
+				that.hasGetJump = true
+			}
+		},1000)
+	},
+	changeTabs() {
+		if(this.isCoin) {
+			this.tabHeadList.splice(2, 0, {
+				title: '领红包',
+				render: false,
+				icon: 'https://xsmfdq.kkyd.cn/images/index-to-sign.png',
+				curIcon: 'https://xsmfdq.kkyd.cn/images/images/index-to-sign.png',
+				titbackground: '#FFFFFF',
+				titcolor: '#222222',
+				redDot:false,
+				isToSign: 1,
+			})
+		}
+		this.onChangeTabIndex({index:this.currentIndex})
+	},
+	onReady(e) {
+		try {
+			if(this.$app.isNeedHuaweiAudio) {
+				return
+			}
+			audio.getPlayState({
+				success: function(data) {
+					if(data.state=='play'){
+						audio.pause()
+					}
+				},
+				fail: function(data, code) {
+					console.log('handling fail, code=' + code)
+				}
+			})
+		} catch (error) {
+			console.log(error)
+		}
+	},
+	onShow() {
+		// 开屏判断
+		let currentOpenTime = new Date().getTime()
+		if(this.$app.isOpenPageSwitch == 1 && this.$app.lastOpenPage == 'index' && currentOpenTime - this.$app.lastOpenTime > this.$app.openPageSpace && currentOpenTime - this.$app.leavePageTime > this.$app.leavePageSpace) {
+	        this.$app.lastOpenTime = currentOpenTime
+            this.$app.lastOpenPage = ''
+			router.push({
+				uri: 'Pop',
+				params: {
+					fromPage: '/Index',
+				}
+			})
+			return
+		}
+		this.$app.lastOpenPage = 'index'
+		this.canReadVideoShow = true
+		this.$broadcast('pageOnshow')
+		// try {
+        //     pageEnter(this.$page.path);
+        // } catch (error) {
+        //     console.log(error)
+		// }
+		let that = this;
+		// 是否展示 我的 红点
+		// that.fnCanShowMyDot()
+		that.fnCanShowFloatLayer()
+		if(this.cardIndex ===0){
+			setTimeout(() => {
+				if(!this.isDataSucc && !this.isStorSucc){
+					this.diaLoadingShow = true;
+					this.diaLoadBtn = true;
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							type:'loading_show',
+							site:1,
+							thisPage:'Index',
+						}
+					}, 'low_network_no_storage'], that)
+				}
+			}, 3000);
+		}
+		that.onIndex = true;
+		that.indexOnshow++;
+
+		shortcut.hasInstalled({
+			success: function (res) {
+				if (res) {
+					that.isshortcutshow = false;
+					that.isShortcut = true;
+				}else{
+					that.isShortcut = false;
+					// 解决返回到首页红条不消失的bug
+					if(that.$app.readbackOnekey == 1) {
+						that.isshortcutshow = false;
+						that.$app.readbackOnekey = 0
+						that.isShortcut = true;
+					}
+					that.$app.shenceLog.log(that,'track','PopupExposure', {
+						PositionName:'首页加桌浮窗',
+						DesktopState:that.$app.isAddDesktop?'Deleted':that.$app.isAddDesktop===false?'Neversaved':'Noresults'
+					});
+				}
+			}
+		})
+		
+		if(that.indexOnshow>1){
+			that.$app.$def.quickappLog([701, {
+				qmap:{
+					cardIndex:that.currentIndex
+				}
+			}],that)
+		}
+
+		// 注册用户
+		that.getUserIdLogic();
+	},
+	// 是否展示 我的 红点
+	fnCanShowMyDot(){
+		let that = this
+		storage.get({
+			key: 'showdot',
+			success: function(data) {
+				if(data){
+					storage.get({
+						key:'isShowDotAll',
+						success:function(res){
+							if(res && res == 'true'){
+								that.tabHeadList[3].redDot = false
+							}else if(res && res == 'false' || that.ugRed){
+								that.tabHeadList[3].redDot = true
+							}
+						},
+						fail: function(data, code) {
+							console.log(`handling fail, code = ${code}`)
+						}
+					})
+				}else{
+					that.tabHeadList[3].redDot = true
+				}
+			},
+			fail: function(red, code) {
+			}
+		})
+	},
+	onHide() {
+		this.$app.leavePageTime = new Date().getTime()
+		this.canReadVideoShow = false
+		this.onIndex = false
+		this.$broadcast('closeTimeout')
+		this.isFloatLayerShow = false
+		this.$broadcast('fnReportDeepLink')
+	},
+	onChangeTabIndex(evt) {
+		let that = this
+		// console.log('-----index-----hasChangeTab----' +evt.index)
+		if(that.hasChangeTab) {
+			that.isFloatLayerShow = false
+		}
+		if(that.hasGetSetting && that.hasGetJump) {
+			that.hasChangeTab = true
+		}
+		that.currentIndex = evt.index;
+		let $title = ''
+		switch (that.currentIndex) {
+			case 0:
+				$title = '首页-书架'
+				break;
+			case 1:
+				$title = '首页-书城'
+				break;
+			case 3:
+				$title = '首页-分类'
+				break;
+			case 4:
+				$title = '首页-我的'
+				break;
+		}
+		that.$app.shenceLog.log(that, 'pageShow', '', {
+			cardIndex: that.currentIndex,
+			Title: $title
+		});
+		that.tabHeadList[that.currentIndex].render = true;
+		that.$app.$def.quickappLog([701, {
+			qmap:{
+				cardIndex:that.currentIndex
+			}
+		}],that)
+		// let text = this.$app.$data.name.replace("免费","")
+		let text = this.$app.$data.name
+		this.$page.setTitleBar({
+			text: that.currentIndex==0?text:this.tabHeadList[this.currentIndex].title,
+			textColor: this.tabHeadList[this.currentIndex].titcolor,
+			backgroundColor: this.tabHeadList[this.currentIndex].titbackground
+		})
+		if(evt.index !== 3){
+			if(that.$child('my') && that.$child('my').isCollectShow){
+				that.$child('my').isCollectShow = false;
+				that.$app.shenceLog.log(that,'track','ButtonClick', {
+					Title: '个人中心页',
+					ButtonName: '登录引导取消'
+				});
+			}
+		}
+	},
+	routeSign() {
+		router.push({
+			uri: '/Sign',
+			params: {
+                sourcePage: '首页-去签到'
+            }
+		})
+	},
+	quitSign(){
+		this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+			Title: '书架拦截去签到',
+			ButtonName: '去领取'
+		});
+		this.routeSign()
+		this.visible = false
+		this.quitStyle = 0
+		this.quitText = ''
+	},
+	fnGetMessage(evt) {
+        if(evt.detail.quitText) {
+			this.quitText = evt.detail.quitText
+		}
+		if(evt.detail.quitStyle) {
+			this.quitStyle = evt.detail.quitStyle
+		}
+	},
+	closeBackMask(){
+		this.visible = false
+		this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+			Title: '书架拦截退出',
+			ButtonName: '继续阅读'
+		});
+	},
+	exitApp(){
+		this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+			Title: this.quitStyle==2?'书架拦截退出':'书架拦截去签到',
+			ButtonName: '确定退出'
+		});
+		this.$app.exit()
+	},
+	onMenuPress() {
+		let that = this;
+		//拉起自定义菜单
+		that.$app.$def.showMenu(that);
+	},
+	onBackPress() {
+		let that = this;
+		if(that.editing) {
+			that.$broadcast('backPress')
+			that.editing = false
+			return true
+		}
+		if(that.isShortpop) {
+			that.isShortpop = false
+			return true
+		}
+		if(that.currentIndex != 0 && !that.huaweiBack) {
+			that.currentIndex = 0
+			if(that.$child('sort')) {
+				that.$child('sort').isShowBtn = false;
+			}
+			if(that.$child('my')) {
+				that.$child('my').isCollectShow = false;
+			}
+			return true
+		}
+		// 退出应用挽留拦截
+		if(that.visible) {
+			return true
+		}
+		// 退出应用广告加载拦截
+		if(that.isBackAdPopShow) {
+			return true
+		}
+		// 退出一键加桌拦截
+		if(that.isBackShortcutPopShow) {
+			return true
+		}
+		// 纪录退出时间
+		storage.set({
+			key: 'exittime',
+			value: Date.parse(new Date())
+		});
+		if(that.needExit) {
+			that.$app.exit()
+			return true
+		}
+		// 判断加桌
+		if(that.isShortcut) {
+			if(that.backAdSwitch) {
+				that.fnBackAdPopShow()
+				return true
+			} else {
+				that.fnUserStay()
+				return true
+			}
+		} else {
+			if(that.maxInstallTimes > 0 && that.installTimes >= that.maxInstallTimes && that.backAdSwitch) {
+				that.fnBackAdPopShow()
+				return true
+			} else {
+				if(that.shortcutSpaceTime && (Date.parse(new Date()) - that.lastExitTime) > that.shortcutSpaceTime) {
+					let date = that.fnGetCurrentDate()
+					that.installTimes++
+					that.fnSetStorage('installTimes', JSON.stringify({
+						times: that.installTimes,
+						date: date
+					}))
+					if(that.cutSupport && (that.cutSupport.vivoSupport || that.cutSupport.oppoSupport || that.cutSupport.huaweiSupport) && that.backShortcutConfig && that.backShortcutConfig.popAdTip) {
+						that.isBackShortcutPopShow = true
+						if(that.backShortcutConfig.isClose) {
+							setTimeout(() => {
+								that.isBackShortcutCloseShow = true
+							}, 400)
+						}
+						that.$app.shenceLog.log(that, 'track', 'PopupExposure', {
+							PositionName: '加桌引导-首页-退出应用一键加桌'
+						});
+					} else {
+						that.$app.$def.backShortcut(that);
+					}
+					return true
+				} else {
+					if(that.backAdSwitch) {
+						that.fnBackAdPopShow()
+						return true
+					}
+				}
+			}
+		}
+	},
+    getIsShortcut(){
+        let that = this;
+		shortcut.hasInstalled({
+			success: function (ret) {
+				//是否添加到桌面   0否  1是
+				let isas = 0;
+				if (ret) {
+					isas = 1;
+					that.$app.$def.requestData(that,{
+						interface: `/glory/fastapp/2107`,
+						data: {
+							isas:isas
+						},
+						succ: function (data) {
+						},
+						error: function (code) {
+						}
+					})
+					that.$app.$def.quickappLog([703, {
+						qmap: {
+							site: '2',
+							page: that.frompage,
+							sorce:'system_shortcut'
+						}
+					}, 'shortcut'], that)
+				}
+			}
+		})
+    },
+	ajax(routercode, obj) {
+		let that = this;
+		that.$app.$def.requestData(that,
+			{
+				interface: `/glory/fastapp/${routercode}`,
+				data: obj.data,
+				succ: function (res) {
+					if (res.retCode == 0) {
+						obj.succ(res.data);
+					}
+				},
+				error: function (code) {
+					obj.err(code);
+				}
+			}
+		)
+	},
+
+	// 以下为注册新用户 star
+	getUserIdLogic(){
+		let that = this;
+		
+		let p = that.getHeaderJson();
+
+		p.then(data=>{ //读取headerJson成功
+
+			if(data){
+				let headerJson=JSON.parse(data);
+				that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+					ChannelCode: headerJson.channelCode || ''
+				})
+				headerJson.appStartScene = that.$app.startScene || 'other'
+				headerJson.sourceChannel = that.$app.sourceInfo && that.$app.sourceInfo.sourceCid || ''
+				headerJson.sourcePackageName = that.$app.sourcePackageName || ''
+				shortcut.hasInstalled({
+                    success: function(res) {
+                        if(res){
+							that.channelCode = headerJson.channelCode;
+							
+                        }else{
+                            if(headerJson.channelCode && (that.channelCode=='' || that.channelCode==that.$app.$data.channelCode)){
+								that.channelCode = headerJson.channelCode;
+                            }
+						}
+						if(headerJson.bookshelfStyle&&(that.bookshelfStyle=='')){
+							that.bookshelfStyle = headerJson.bookshelfStyle;							
+						}
+                        headerJson.bookshelfStyle = that.bookshelfStyle;                           
+						headerJson.channelCode = that.channelCode;
+						that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+							ChannelCode: headerJson.channelCode || ''
+						})
+						that.$app.$def.setStorageFile(that,{
+							key:'headerJson',
+							value:headerJson
+						})
+						that.$app.headerJson = headerJson
+						if(headerJson.utdid){
+							that.device.utdid = headerJson.utdid;
+							if(headerJson.userId){ //有userId && 有真实的utdid 进入首页
+								that.userId = headerJson.userId;
+								
+								// that.fnLodeChapterInfo(that.bookId, that.chapterId)
+								return;
+							}else{  //没有userId，用真实的utdid生成userId
+								that.getUserId(that.device.utdid);
+							}
+						}else{
+							if(headerJson.userId){
+								that.userId = headerJson.userId;
+								if(headerJson.utdidTmp){ //没有真实的utdid && 有userId && 有临时utdid 进入首页
+									// that.fnLodeChapterInfo(that.bookId, that.chapterId)
+									
+									return;
+								}else{ //没有真实的utdid && 有userId && 没有临时utdid 生成临时的utdid 重新生成userId
+									let utdidTmp = that.createUtdidTmp();
+									that.getUserId(utdidTmp);
+								}
+							}else{ //没有真实的utdid && 没有userId && 没有真实的utdid 生成临时的utdid 生成userId
+								if(headerJson.utdidTmp){
+									that.getUserId(headerJson.utdidTmp);
+								}else{
+									let utdidTmp = that.createUtdidTmp();
+									that.getUserId(utdidTmp);
+								}
+							}
+						}
+                    }
+				})
+				
+			}else{ //data为空字符串
+				let utdidTmp = that.createUtdidTmp();
+				that.getUserId(utdidTmp); //如果缓存没有headerJson数据，则生成临时的utdid去生成userId
+			}
+		},(data)=>{//读取headerJson失败
+			let utdidTmp = that.createUtdidTmp();
+			that.getUserId(utdidTmp); //如果读取headerJson失败，则生成临时的utdid去生成userId
+		})
+	},
+	getHeaderJson(){
+		let that = this;
+		return new Promise((resolve,reject)=>{
+			that.$app.$def.getStorageFile(that,{
+				key:'headerJson',
+				success:function(data){
+					if(!that.$valid){return;}
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							page:'1',
+							site:'1',
+							headerJson:data
+						}
+					}, 'getHeaderJson'], that)
+					resolve(data);
+				},
+				fail:function(data, code){
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							page:'1',
+							site:'2',
+							headerJson:data,
+							source: 'getStorage_headerJson_fail',
+							thisUri: that.$page.uri,
+							thisPage: 'index',
+							data,code
+						}
+					}, 'catch_error'], that)
+					reject(code);
+				}
+			})
+
+		})
+	},
+	createUtdidTmp(){ //生成临时的utdid
+		let utdidTmp = this.getUtdidTmp();
+		this.device.utdidTmp = this.$app.$def.hex_md5(utdidTmp);
+		return utdidTmp;
+	},
+	getUserId(utdidTmp){
+		let that = this;
+		let oGetAndroidId = new Promise((resolve,reject)=>{
+			device.getUserId({
+				success: function(data) {
+					that.device.androidId = data.userId
+					resolve()
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							// id:data.userId,
+							site:'1'
+						}
+					}, 'getAndroidId'], that)
+				},
+				fail: function(data, code) {
+					resolve()
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							code:code,
+							data:data,
+							site:'2'
+						}
+					}, 'getAndroidId'], that)
+				}
+			})
+		})
+		let oGetInfo = new Promise((resolve, reject) => {
+			device.getInfo({
+				success: function (res) {
+					that.device.brand = res.brand;
+					that.device.model = res.model;
+					that.device.osvn = res.osVersionName
+                    that.device.osvc = res.osVersionCode
+                    that.device.scw = res.screenWidth
+                    that.device.sch = res.screenHeight
+                    that.device.pfvn = res.platformVersionName
+                    that.device.pfvc = res.platformVersionCode
+					resolve(res);
+					//获取用户信息成功打点
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							page:'10',
+							site:'1',
+							channelCode:that.channelCode,
+							jumpPage:that.jumpPage,
+							bookId:that.bookId,
+							chapterId:that.chapterId,
+							chapterName:that.chapterName,
+							uuid:that.uuid
+						}
+					}, 'device_getinfo'], that)
+				},
+				fail:function(data,code){
+					//获取用户信息失败打点
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							page:'10',
+							site:'2',
+							channelCode:that.channelCode,
+							jumpPage:that.jumpPage,
+							bookId:that.bookId,
+							chapterId:that.chapterId,
+							chapterName:that.chapterName,
+							uuid:that.uuid,
+							source:'device_getInfo_fail',
+							thisUri: that.$page.uri,
+							thisPage: 'index',
+							data,
+							code
+						}
+					}, 'catch_error'], that)
+				}
+			})
+		})
+		Promise.all([oGetAndroidId,oGetInfo]).then((result) => {
+			let headerJson = {}
+			if(JSON.stringify(that.$app.headerJson) != "{}"&&(that.$app.headerJson.utdidTmp != ''||that.$app.headerJson.utdid != '')){
+				headerJson = that.$app.headerJson
+				that.$app.$def.quickappLog([703, {
+					qmap:{
+						site:'1',
+						headerJson:headerJson
+					}
+				}, 'app_herderJson'], that)
+			}else{
+				headerJson={
+					brand:that.device.brand || 'empty',
+					model:that.device.model || 'empty',
+					osvn:that.device.osvn || 'empty',
+					osvc:that.device.osvc || 'empty',
+					scw:that.device.scw || 'empty',
+					sch:that.device.sch || 'empty',
+					pfvn:that.device.pfvn || 'empty',
+					pfvc:that.device.pfvc || 'empty',
+					utdidTmp: utdidTmp,
+					utdid: that.device.utdid,
+					domain: that.config.domain,
+					userId: that.userId,
+					t: that.t,
+					pname: that.config.pname,
+					channelCodeFee:that.channelCode, 
+					channelCode:that.channelCode, //新增和充值都用它标记
+					uuid:that.uuid,
+					readPref:'0',
+					bookshelfStyle:that.bookshelfStyle
+				}
+				headerJson.scDistinctId = that.$app.$def.sGetDistinctId()?that.$app.$def.sGetDistinctId():''
+				headerJson.triggerTime = that.$app.$def.getLogTime()
+				that.$app.$def.setStorageFile(that,{
+					key:'headerJson',
+					value:headerJson
+				})
+				headerJson.appStartScene = that.$app.startScene || 'other'
+				headerJson.sourceChannel = that.$app.sourceInfo && that.$app.sourceInfo.sourceCid || ''
+				headerJson.sourcePackageName = that.$app.sourcePackageName || ''
+				that.$app.headerJson = headerJson
+			}
+			that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+				ChannelCode: headerJson.channelCode || ''
+			})
+			if(that.device.utdid){
+				headerJson.utdid = that.device.utdid
+			}
+			if(!headerJson.pname){
+                 return false;
+             }	 
+			
+			let dataJson={
+				ei: that.device.ei,
+				domain: that.config.domain,
+				utdid: that.device.utdid || utdidTmp, //上行用utdid接收，有正式的传正式的 没有正式的传临时的
+				brand: that.device.brand,
+				model: that.device.model,
+				channelCode: that.channelCode,
+				blackList:1,
+				androidId:that.device.androidId||'',
+				uuid:that.$app.sourceInfo['uuid'],
+				pullMode:that.$app.sourceInfo['pullMode'],
+				isAddBf: 0,
+			};	
+			fetch.fetch({
+				method: "POST",
+				url:that.$app.api+"/glory/fastapp/2101?"+that.config.appVer,
+				header: headerJson,
+				data: JSON.stringify(dataJson),
+				success: function (ret) {
+					if(ret.code==200){
+						if(!that.$valid){
+							return;
+						}
+						let res=JSON.parse(ret.data);
+						if(res.retCode==0){
+							that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+								RegisterDate: (res.data && res.data.ctime) || new Date().getTime()
+							})
+							res.data && res.data.ctime && that.$app.$def.setStorageFile(that, {
+								key: 'createTime',
+								value: res.data.ctime,
+							})
+							that.$app.isNewUser = !!res.data.isNewUser;                          // 是否新用户
+							that.userId=res.data.userId;
+							that.ctime=res.data.ctime;
+							headerJson.userId=res.data.userId;
+							headerJson.channelCode=res.data.channelCode||that.$app.$data.channelCode;
+							that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+								ChannelCode: headerJson.channelCode || ''
+							})
+							that.$app.sensors.login(headerJson.userId);
+							that.getUserNum = 0;
+							if(res.data.isBlack){
+								headerJson.utdid = ''
+							}
+							let p1 = new Promise((resolve,reject)=>{
+								that.$app.$def.setStorageFile(that,{
+									key:'headerJson',
+									value:headerJson,
+									complete:function(){
+										resolve();
+									}
+								})
+							})
+							that.$app.headerJson = headerJson
+							let p2 = new Promise((resolve,reject)=>{
+								that.$app.$def.setStorageFile(that,{
+									key:'userId',
+									value:res.data.userId,
+									complete:function(){
+										resolve();
+									}
+								})
+							})	
+							let p3 = new Promise((resolve,reject)=>{ //储存用户创建时间
+								let oDate = new Date();
+								let oTime = oDate.getTime();
+								that.$app.$def.setStorageFile(that,{
+									key:'installationTime',
+									value:oTime,
+									complete:function(){
+										resolve();
+									}
+								})
+							})	
+							Promise.all([p1,p2,p3]).then(()=>{
+								// that.routeIndex('/Preference');
+								// that.fnLodeChapterInfo(that.bookId, that.chapterId);
+								// 获取桌面按钮文字  2150
+								// that.getServerUtil();
+								//发送pushCid  2107
+								// that.getpustid();
+								let {source} = app.getInfo()
+								that.$app.$def.quickappLog([703, {
+									qmap:{
+										is2101:1,
+										getUserNum:that.getUserNum,
+										sourceType: source.type
+									}
+								}, 'index_2101_success'], that)
+								that.$broadcast('freshShelf')
+							}).catch((error) => {
+								that.$app.$def.quickappLog([703, {
+									qmap:{
+										error:error,
+										m:'Promise'
+									}
+								}, 'index_2101_error'], that)
+							})
+						}else{
+							// that.routeIndex('/Preference');
+							that.$app.$def.quickappLog([703, {
+								qmap:{
+									retCode:res.retCode,
+									getUserNum:that.getUserNum
+								}
+							}, 'index_2101_retCode'], that)
+							that.getUserNum = that.getUserNum+1;
+						}
+					}else{
+						// that.routeIndex('/Preference');
+						that.$app.$def.quickappLog([703, {
+							qmap:{
+								code:ret.code
+							}
+						}, 'index_2101_code'], that)
+						that.getUserNum = that.getUserNum+1;
+					}						
+				},
+				fail: function (data, code) {
+					that.$app.$def.quickappLog([703, {
+						qmap:{
+							fail:1,
+							getUserNum:that.getUserNum,
+							source: 'fetch_2101data_fail',
+							thisUri: that.$page.uri,
+							thisPage: 'index',
+							data,
+							code
+						}
+					}, 'catch_error'], that);
+					that.getUserNum = that.getUserNum+1;
+
+					// that.routeIndex('/Preference');
+				}
+			})
+		},()=>{
+			// that.routeIndex('/Preference');
+		})
+	},
+	getUtdidTmp(){
+		var sChar = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		var aChar = sChar.split('');
+		aChar.sort(function() {
+			return (0.5-Math.random());
+		})
+		sChar = aChar.join('');
+		var oDate = new Date();
+		var r = this.rnd(0,sChar.length-5);
+		var str = sChar.substr(r,5);
+		var utdidTmp = "tmp_"+oDate.getTime()+str;
+		return utdidTmp;        
+	},
+	rnd(n,m){
+		return parseInt(Math.random()*(m-n+1))+n;
+	},
+	clickreload(){
+		let that = this;
+		that.$app.$def.quickappLog([703, {
+            qmap:{
+				type:'retry_click',
+				site:2,
+                thisPage:'Index',
+            }
+        }, 'low_network_no_storage'], that)
+		router.replace({
+			uri:'/Index'
+		})
+	},
+	renderShelfData(evt){
+		this.isDataSucc = evt.detail.type;
+		this.diaLoadingShow = false;
+	},
+	checkStorage(evt) {
+		this.isStorSucc = evt.detail.type;
+		this.diaLoadingShow = false;
+	},
+	closeshortpop(){
+		this.isShortpop = false
+		this.fnVivoPush('shortcut')
+	},
+	holdPop(){
+		this.isHoldPop = true
+	},
+	showShortSuccess(){
+		this.isShortcut = true
+		if(!this.hasShowSuccess){
+			this.isHoldPop = false
+			this.shortType = '1'
+			this.isShortpop = true
+			this.hasShowSuccess = true
+		}
+	},
+	toggleBtn() {
+		this.isShortcut = true
+	},
+	clearCaches(){
+		let that = this
+		console.log('正在扫描缓存文件')
+		that.fnGetfileList(`internal://cache/`).then(bres=>{
+			bres.forEach((cur,index)=>{
+				that.fnDeleteFile(cur.uri,index)
+			})
+		},err=>{
+			console.log('无缓存')
+		})
+    },
+    fnDeleteFile(url){
+        file.delete({
+			uri: url,
+			success: function(data) {
+				console.log('删除缓存成功')
+			},
+			fail: function(data, code) {
+				console.log(`handling fail, code = ${code}`)
+			}
+        })
+    },
+    fnGetfileList(url){
+        return new Promise((resolve,reject)=>{
+			file.list({
+				uri:url,
+				success: function(data) {
+					console.log('==========caches=======')
+					console.log(data.fileList)
+					if(data.fileList.length){
+						resolve(data.fileList)
+					}else{
+						reject()
+					}
+				},
+				fail: function(data, code) {
+					console.log(`handling fail, code = ${code}`)
+					reject(code)
+				}
+			})
+        })
+	},
+	showToast(res){
+		this.toastMessage = res.detail.msg
+		this.isShowToast = true
+	},
+	closeToast(){
+		this.isShowToast = false
+	},
+	appStartShortcut(evt){
+		let that = this
+		if(!that.authTips){
+			return
+		}
+		if(!evt.detail.isShow){
+			that.$app.hasStartShortcut = true
+			return
+		}
+		if(that.isStartToIndex&&!that.$app.hasStartShortcut){
+			that.$app.hasStartShortcut = true
+			shortcut.hasInstalled({
+				success: function (ret) {
+					if (!ret) {
+						shortcut.install({
+							message: that.authTips?that.authTips:`添加【${that.appName}】到手机桌面图标`,
+							success: function () {
+								that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+									IsSuccess: true,
+									PositionName: '书架页面拉起后添桌',
+									Instruction: that.authTips ? that.authTips : `添加【${that.appName}】到手机桌面图标`,
+									StateCode: 'return'
+								}); 
+								//来源写入变量
+								that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+								prompt.showToast({
+									message: '成功创建桌面图标'
+								});
+								that.$app.$def.quickappLog([703, {
+									qmap:{
+										site: '2',
+										page: '3',
+										sorce:'afterauth_shortcut'
+									}
+								}, 'shortcut'], that)
+								that.$app.$def.requestData(that,{
+									interface: `/glory/fastapp/2107`,
+									data: {
+										isas:1
+									},
+									succ: function (data) {
+									},
+									error: function (code) {
+									}
+								})
+								that.hasShowSuccess = true
+								that.fnTellServer(1);
+							},
+							fail: function (data, code) {
+								that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+									IsSuccess: false,
+									PositionName: '书架页面拉起后添桌',
+									Instruction: that.authTips ? that.authTips : `添加【${that.appName}】到手机桌面图标`,
+									StateCode: 'return',
+									MsgSendCode: code,
+									MsgSendContent: data,
+								}); 
+								// prompt.showToast({
+								//     message: '创建桌面图标失败'
+								// })
+								that.$app.$def.quickappLog([703, {
+									qmap:{
+										site: '3',
+										page: '3',
+										data,
+										code,
+										sorce:'afterauth_shortcut',
+									}
+								}, 'shortcut'], that)
+							},
+							complete(errmsg){
+								that.$app.$def.quickappLog([703, {
+									qmap:{
+										site: '5',
+										page: '3',
+										errmsg:`${errmsg}`,
+										sorce:'afterauth_shortcut'
+									}
+								}, 'shortcut'], that)
+							}
+						})
+						that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+							PositionName: '书架页面拉起后添桌',
+							Instruction: that.authTips ? that.authTips : `添加【${that.appName}】到手机桌面图标`,
+							StateCode: 'submit',
+							DesktopState: that.$app.isAddDesktop ? 'Deleted' : 'Neversaved'
+						}); 
+						that.$app.$def.quickappLog([703, {
+							qmap:{
+								site: '1',
+								page: '3',
+								sorce:'afterauth_shortcut'
+							}
+						}, 'shortcut'], that)
+					}
+				}
+			}) 
+		}
+	},
+    fnTellServer(taskAction) {
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2146',
+                data: { action: taskAction },
+                succ: function (res) {
+                }
+            }
+        )
+	},
+	fnClick() {
+		console.log('backMask click')
+	},
+	// vivopush消息
+	fnVivoPush(tag) {
+		let that = this
+		if(tag == 'shortcut' && that.isSupportVivoPush) {
+			that.$app.$def.fnVivoPush(that, '1')
+		}
+		if(tag == 'start' && that.isSupportVivoPush) {
+			that.$app.$def.fnVivoPush(that, '7')
+		}
+	},
+    /**
+     * 跳转TAB
+     * @param {Number} evt 参数值
+     */
+	fnSignToIndex(evt) {
+		this.currentIndex = evt && evt.detail ? +evt.detail : 0
+	}, 
+	/**
+     * 跳转任务
+     */
+	fnToSign() {
+		router.push({
+			uri: '/Sign',
+			params: {
+                sourcePage: '首页-领红包'
+            }
+		})
+	},
+	/**
+	 * 退出应用广告弹窗显示
+	 */
+	fnBackAdPopShow() {
+		let backAdLoadTime = +this.backAdLoadTime
+		this.isBackAdPopShow = true
+		this.isBackAdLoad = true
+		this.backAdTimeout = setTimeout(() => {
+			this.isBackAdLoad = false
+		}, backAdLoadTime)
+	},
+	/**
+	 * 退出应用广告弹窗关闭
+	 */
+	fnBackAdPopClose(evt) {
+		clearTimeout(this.backAdTimeout)
+		this.isBackAdPopShow = false
+		this.isBackAdLoad = false
+		if(!(evt && evt.detail && evt.detail.type === 'close')) {
+			this.$app.exit()
+		}
+	},
+	/**
+	 * 退出应用广告弹窗关闭
+	 */
+	fnUserStay() {
+		let that = this
+		if(that.quitStyle != 0) {
+			that.visible = true;
+			that.$app.shenceLog.log(that, 'track', 'PopupExposure', {
+				PositionName: that.quitStyle == 2 ? '书架拦截退出' : '书架拦截去签到'
+			});
+		} else {
+			that.$app.exit();
+		}
+	},
+	/**
+	 * 退出应用加桌次数
+	 */
+	fnGetInstallTimes() {
+		let that = this
+		let date = that.fnGetCurrentDate()
+		that.fnGetStorage('installTimes').then(res => {
+			try {
+				if(res && (res + '' !== '0')) {
+					res = JSON.parse(res)
+				}
+			} catch(err) { console.log(err) }
+			if(res && res.date == date && res.times) {
+				that.installTimes = +res.times
+			}
+		})
+	},
+	// 读取缓存
+	fnGetStorage(name = '') {
+		return new Promise((res, rej) => {
+			if(!name) {
+				rej()
+			}
+			// 读取缓存数据
+			storage.get({
+				key: name,
+				success: function(data) {
+					if(data) {
+						res(data)
+					}else {
+						res(0)
+					}
+				},
+				fail: function() {
+					rej()
+				}
+			})
+		})
+	},
+	// 设置缓存
+	fnSetStorage(name, data) {
+		if(!name || !data) {
+			return
+		}
+		storage.set({
+			key: name,
+			value: data,
+		})
+	},
+	/**
+	 * 关闭判断
+	 */
+	fnExitSwitch() {
+		if(this.backAdSwitch) {
+			this.fnBackAdPopShow()
+		} else {
+			this.$app.exit();
+		}
+	},
+	/**
+	 * 一键加桌弹窗关闭
+	 */
+	fnCloseBackShortcutPop() {
+		// const isClose = this.backShortcutConfig && this.backShortcutConfig.isClose
+		// const closeAction = this.backShortcutConfig && this.backShortcutConfig.closeAction
+		this.isBackShortcutPopShow = false
+		this.isBackShortcutCloseShow = false
+		// if(isClose && closeAction === 3) {
+		// 	this.needExit = true
+		// }
+	},
+	/**
+	 * 一键加桌成功处理
+	 */
+	oneshortComplete(evt) {
+		let position = evt.detail.position
+		// let result = evt.detail.result
+		switch (position) {
+			case 'exitapp':
+				this.$app.exit()
+				break;
+		}
+	},
+	// 退出应用一键加桌关闭按钮
+	fnBackShortcutClose() {
+		const isClose = this.backShortcutConfig && this.backShortcutConfig.isClose
+		const closeAction = this.backShortcutConfig && this.backShortcutConfig.closeAction
+		if(!isClose || !closeAction || closeAction === 1) {
+			this.isBackShortcutPopShow = false
+			this.isBackShortcutCloseShow = false
+			return
+		}
+		if(closeAction === 2) {
+			this.$app.exit()
+		}
+		if(closeAction === 3) {
+			this.isBackShortcutPopShow = false
+			this.isBackShortcutCloseShow = false
+			this.needExit = true
+		}
+	},
+	fnToSort() {
+		let currentIndex = this.isCoin ? 3 : 2
+		this.currentIndex = currentIndex
+	},
+	fnCloseAddDesk() {
+		this.isCloseAddDesk = true
+	},
+	// 切换tab到书城
+	fnToggleTab() {
+		this.currentIndex = 1;
+	}
+}
+</script>

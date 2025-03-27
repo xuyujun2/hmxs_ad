@@ -1,0 +1,443 @@
+<import name="paid-tag" src="../Component/tag.ux"></import>
+<template>
+    <div class="user-stay" @click="vagueClick">
+        <div class="user-stay-detail">
+            
+            <div class="usd-main">
+
+                <div class="usd-top">
+                    <stack class="cls-box">
+                        <text class="not-good-title">
+                            对本书没兴趣?
+                        </text>
+                        <div class="close" @click="closePop">
+                            <image src="https://xsmfdq.kkyd.cn/images/read-recommend-close.png" ></image>
+                        </div>
+                    </stack>
+                    <stack style="justify-content: center;">
+                        <div class="usd-line"></div>
+                        <text class="usd-introduce">向你推荐以下热门书籍</text>
+                    </stack>
+                </div>
+
+                <list class="usd-ss">
+
+                    <list-item type="usd-book" class="usd-book" @appear="bookAppear(bookInfo.bookId, bookInfo.coverWap ,bookInfo.bookName ,0 ,bookInfo.nextChapterId)">
+
+                        <stack class="usd-bookcover">
+                            <image src="{{bookInfo.coverWap}}" alt=""></image>
+                            <paid-tag if="bookInfo.iconType === '10'" tag="{{ bookInfo.iconDesc }}"></paid-tag>
+                        </stack>
+
+                        <div class="usd-name">
+
+                            <text class="bookname">{{bookInfo.bookName}}</text>
+
+                            <div class="usd-tags">
+                                <text class="tag" if="bookInfo.twoTypeName">{{bookInfo.twoTypeName}}</text>
+                                <text class="tag" if="bookInfo.threeTypeName">{{bookInfo.threeTypeName}}</text>
+                            </div>
+
+                            <div class="read-times">
+                                <image class="time-icon" src="https://xsmfdq.kkyd.cn/images/read-recommend-num.png" alt=""></image>
+                                <text class="time-detail">{{ handleReadNum(bookInfo.clickNum) }}人阅读</text>
+                            </div>
+                        </div>
+                    </list-item>
+
+                    <list-item type="border-dotted" class="border-dotted"></list-item>
+
+                    <list-item type="usd-detail-title" class="usd-detail-title" if="bookInfo.chapterName"> <text>{{bookInfo.chapterName}}</text> </list-item>
+
+                    <list-item type="usd-detail-content" class="usd-detail-content" for="{{bookInfo.content}}" > <text>{{$item}}</text> </list-item>
+                </list>
+
+            </div>
+
+            <div class="usd-handler">
+                <div class="usd-store"  @click="toBookStore">
+                    <text>
+                        去书城挑书
+                    </text> 
+                </div>
+                <div class="usd-store usd-next" @click="toReadBook(bookInfo.bookId, bookInfo.coverWap ,bookInfo.bookName ,0 ,bookInfo.nextChapterId)">
+                    <text>
+                        阅读下一章
+                    </text> 
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+.user-stay{
+    position: fixed;
+    z-index: 99;
+    width:100%;
+    height:100%;
+    left:0;
+    top:0;
+    background-color: rgba(0,0,0,0.7);
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    /* padding-top: 664px; */
+
+    .user-stay-detail{
+        width: 100%;
+        flex-direction: column;
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
+        background-color: #ffffff;
+
+        .usd-main{
+            width: 100%;
+            padding: 36px 30px 20px;
+            flex-direction: column;
+            
+            .usd-top{
+                width: 100%;
+                flex-direction: column;
+                margin-bottom: 30px;
+                .cls-box{
+                    width: 100%;
+                    justify-content: flex-end;
+                }
+                .close{
+                    width: 60px;
+                    height: 60px;
+                    align-self:flex-start;
+                    image{
+                        background-color:rgba(242, 242, 242, 1);
+                        margin-top: 18px;
+                        margin-left:18px;
+                        width: 21px;
+                        height: 21px;
+                    }
+                }
+                .not-good-title{
+                    width: 100%;
+                    height: 56px;
+                    text-align: center;
+                    font-size: 40px;
+                    font-weight: 600;
+                    color: #444444;
+                    line-height: 56px;
+                    margin-bottom: 8px;
+                }
+                .usd-line{
+                    width: 438px;
+                    height: 2px;
+                    background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(143, 143, 143, 1), rgba(255, 255, 255, 1) );
+                    margin-top:18.5px;
+                }
+                .usd-introduce{
+                    width: 292px;
+                    height: 37px;
+                    font-size: 26px;
+                    font-weight: 400;
+                    color: rgba(68, 68, 68, .6);
+                    line-height: 37px;
+                    text-align: center;
+                    background-color:#fff;
+                }
+            }
+
+            .usd-ss{
+                flex-direction: column;
+                height: 683px;
+
+                .usd-book{
+                    flex-direction: row;
+                    align-items: center;
+                    margin-bottom: 30px;
+                    .usd-bookcover{
+                        width: 140px;
+                        height: 186px;
+                        border-radius: 6px;
+                        margin-right: 20px;
+                        background-color:rgba(242,242,242,1);
+                        image{
+                            border-radius: 6px;
+                            width: 100%;
+                            height: 100%;
+                        }
+
+                    }
+                    .usd-name{
+                        flex-direction:column;
+                        flex: 1;
+                        .bookname{
+                            width: 100%;
+                            height: 42px;
+                            font-size: 30px;
+                            font-weight: bold;
+                            color: rgba(0, 0, 0, 0.9);
+                            line-height: 42px;
+                            lines: 1;
+                            text-overflow: ellipsis;
+                            margin-top: 16px;
+                            margin-bottom: 10px;
+                        }
+                        .usd-tags{
+                            width: 100%;
+                            height: 30px;
+                            margin-bottom: 32px;
+                            flex-direction: row;
+                            flex-wrap: wrap ;
+                            align-items: flex-start;
+                            .tag{
+                                height: 30px;
+                                font-size: 22px;
+                                font-weight: 400;
+                                color: #666666;
+                                line-height: 30px;
+                                margin-right: 18px;
+                                padding:5px;
+                                border-radius: 4px;
+                                background-color:rgba(234, 238, 230, .5);
+                            }
+                        }
+                    }
+                    .read-times{
+                        flex-direction: row;
+                        align-items: center;
+                        .time-icon{
+                            width: 40px;
+                            height: 40px;
+                            margin-right: 2px;
+                        }
+                        .time-detail{
+                            height: 40px;
+                            font-size: 26px;
+                            font-weight: 400;
+                            color: #ED9E13;
+                            line-height: 37px;
+                        }
+                    }
+                }
+
+                .border-dotted{
+                    width: 100%;
+                    height: 1px;
+                    border: 1px dashed rgba(68, 68, 68, .5);
+                    border-style: dotted;
+                    border-right-width: 0px;
+                    border-left-width: 0px;
+                    margin-bottom: 30px;
+                }
+
+                .usd-detail-title{
+                    text{
+                        width: 100%;
+                        color:rgba(51, 47, 62, 1);
+                        font-size: 34px;
+                        font-weight: 600;
+                        line-height: 56px;
+                        text-align: center;
+                        margin-bottom:30px;
+                    }
+                }
+
+                .usd-detail-content{
+                    text{
+                        color:rgba(51, 47, 62, 1);
+                        font-size: 34px;
+                        font-weight: normal;
+                        line-height: 56px;
+                        text-indent: 2em;
+                        margin-bottom:30px;
+                    }
+                }
+
+            }
+        }
+        .usd-handler{
+            width: 100%;
+            height: 90px;
+            flex-direction: row;
+            .usd-store {
+                flex: 1;
+                height: 100%;
+                background-color: rgba(242, 242, 242, 1);
+
+                text{
+                    width: 100%;
+                    color: #BABABA;
+                    text-align: center;
+                    font-size: 30px;
+                    font-weight: 400;
+                }
+
+            }
+            .usd-next{
+                background: linear-gradient(90deg, #FFB673 0%, #FE705A 100%);
+                text{
+                    color:rgba(255, 255, 255, 1);
+                }
+            }
+        }
+    }
+}
+</style>
+
+<script>
+import storage from '@system.storage';
+import router from '@system.router';
+export default {
+    props:[
+        'stayOperation',
+        'bookId',
+        'bookInfo',
+        'chapterId',
+        'stayTacticsVo',
+        'bookName'
+    ],
+    data:{
+        isBottom:false
+    },
+    bookAppear(bookId,coverWap,content_name,content_pos ,nextChapterId){
+        let that = this
+        let trigger_time = that.$app.$def.getLogTime()
+        let omap = {
+                origin:'ydq',
+                action:'1',
+                channel_id:'ydq',
+                channel_name:'阅读器',
+                channel_pos:0,
+                column_id:'ydq_yhwlsj',
+                column_name:'阅读器用户挽留书籍',
+                column_pos:1,
+                content_id:bookId,
+                content_pos:content_pos,
+                content_type:'2',
+                trigger_time:trigger_time
+            }
+        that.$app.$def.quickappLog([706, {
+            omap:omap
+        }], that)
+    },
+    toReadBook(bookId,coverWap,content_name,content_pos ,nextChapterId){
+        let that = this
+        let trigger_time = that.$app.$def.getLogTime()
+        let omap = {
+                origin:'ydq',
+                action:'2',
+                channel_id:'ydq',
+                channel_name:'阅读器',
+                channel_pos:0,
+                column_id:'ydq_yhwlsj',
+                column_name:'阅读器用户挽留书籍',
+                column_pos:1,
+                content_id:bookId,
+                content_pos:content_pos,
+                content_type:'2',
+                trigger_time:trigger_time
+            }
+        that.$app.$def.quickappLog([702, {
+            omap:omap
+        }, 'book_click'], that)
+
+        if(that.stayTacticsVo.isDot=='1'){
+            that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: '用户挽留',
+                OperationID: that.stayOperation.id || '',
+                OperationName: that.stayOperation.name || '',
+                OperationType: '1',
+                BookID: bookId || '',
+                ActID: '',
+                PicURL: coverWap || '',
+                ActURL: '',
+                StartTime: that.stayOperation.startTime || '',
+                EndTime: that.stayOperation.endTime || '',
+                TacticsId: that.stayTacticsVo.tacticsId || '',
+                TacticsName: that.stayTacticsVo.tacticsName || '',
+                SourceId: that.stayTacticsVo.sourceId || '',
+                SourceName: that.stayTacticsVo.sourceName || '',
+                ShuntId: that.stayTacticsVo.shuntID || '',
+                ShuntName: that.stayTacticsVo.shuntName || '',
+                BookName: that.bookName || '',
+                ChaptersID: that.chapterId || ''
+            });
+        }
+        router.replace({
+            uri:'/Read',
+            params:{
+                bookId:bookId,
+                chapterId:nextChapterId,
+                pageFrom:'/Read',
+                fromUserStayPop:true,
+                SourcePosition:'用户挽留运营位',
+                omap:omap
+            }
+        })
+    },
+    toBookStore(){
+        let that = this
+        router.clear()
+        router.replace({
+            uri:'/Index',
+            params:{
+                cardIndex:1
+            }
+        })
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: '4',
+                bid: that.bookId,
+                cid: that.chapterId
+            }
+        }, 'user_stay_pop'], that)
+    },
+    closePop(){
+        let that = this
+        that.$emit('closeuserstay')
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: '3',
+                bid: that.bookId,
+                cid: that.chapterId
+            }
+        }, 'user_stay_pop'], that)
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    },
+    onInit(){
+        let that = this
+        console.log( that.bookInfo)
+        console.log(that.stayOperation)
+        if(that.stayTacticsVo.isDot=='1'){
+            // that.bookInfo.forEach(element => {
+            that.$app.shenceLog.log(that,'track','OperationExposure', {
+                OperationPosition:'用户挽留',
+                OperationID:that.stayOperation.id,
+                OperationName:that.stayOperation.name,
+                OperationType:1,
+                BookID:that.bookInfo.bookId,
+                ActID:'',
+                PicURL:that.bookInfo.coverWap,
+                ActURL:'',
+                StartTime:that.stayOperation.startTime,
+                EndTime:that.stayOperation.endTime,
+                TacticsId:that.stayTacticsVo.tacticsId||'',
+                TacticsName:that.stayTacticsVo.tacticsName||'',
+                SourceId:that.stayTacticsVo.sourceId||'',
+                SourceName:that.stayTacticsVo.sourceName||'',
+                ShuntId:that.stayTacticsVo.shuntID||'',
+                ShuntName:that.stayTacticsVo.shuntName||'',
+                ChaptersID: that.chapterId,
+            });
+            // });
+        }
+        
+    },
+    handleReadNum(num){
+        if(num >= 10000){
+            return num/10000 + '万'
+        }else{
+            return num
+        }
+    }
+}
+</script>

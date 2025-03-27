@@ -1,0 +1,132 @@
+<template>
+    <div class="word-wrap">
+        <text class="{{type}}" if="isWordSplit">
+            <block for="wordArr">
+                <span class="{{type}} {{$item.equal ? 'word-hight' : ''}}">{{$item.text}}</span>
+            </block>
+        </text>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .word-wrap {
+        flex: 1;
+    }
+    .associate-name {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;
+        height: 32px;
+        font-size: 28px;
+        font-weight: bold;
+        color: rgba(51,51,51,1);
+    }
+    .associate-book-alias {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;
+        height: 32px;
+        font-size: 24px;
+        color: #444444;
+    }
+    .associate-role {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;
+        height: 32px;
+        font-size: 24px;
+        color: rgba(178,182,183,1);
+    }
+    .associate-author {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;
+        height: 32px;
+        font-size: 28px;
+        font-weight: bold;
+        color: rgba(51,51,51,1);
+    }
+    .search-name {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;    
+        height: 40px;
+        font-size: 28px;
+        font-weight: bold;
+        color: rgba(51,51,51,1);
+    }
+    .search-role {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;
+        height: 32px;
+        font-size: 24px;
+        color: rgba(85,85,85,1);
+    }
+    .search-book-alias {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;
+        height: 32px;
+        font-size: 24px;
+        color: rgba(85,85,85,1);
+    }
+    .search-author {
+        flex: 1;
+        lines: 1;
+        text-overflow: ellipsis;
+        height: 32px;
+        font-size: 24px;
+        color: rgba(175,175,175,1);
+    }
+    .word-hight {
+        color: #FB761F;
+    }
+</style>
+
+<script>
+    export default {
+        props: [
+            'keyword',
+            'word',
+            'type'
+        ],
+        data() {
+            return {
+                wordArr: [],
+                isWordSplit: false
+            }
+        },
+        onInit() {
+            this.fnSplitWord();
+            this.$watch('keyword', 'fnSplitWord')
+            this.$watch('word', 'fnSplitWord')
+        },
+        fnSplitWord() {
+            if(!this || !this.$valid) {
+                return
+            }
+            this.isWordSplit = false
+            this.wordArr = []
+            let keyword = this.keyword
+            let word = this.word
+            if(!keyword || !word) {
+                return
+            }
+            // keyword = keyword.replace(new RegExp('[^a-zA-Z0-9\u4e00-\u9fa5]', 'g'), '')
+            keyword = keyword.replace(new RegExp('[%.()]', 'g'), '')
+            let arr = word.replace(new RegExp(`${keyword}`, 'g'), `%%${keyword}%%`).split('%%')
+            let wordArr = []
+            arr.forEach(item => {
+                if(item) {
+                    wordArr.push({
+                        equal: item == keyword ? true : false,
+                        text: item
+                    })
+                }
+            })
+            this.wordArr = wordArr
+            this.isWordSplit = true
+        },
+    }
+</script>

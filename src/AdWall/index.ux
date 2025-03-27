@@ -1,0 +1,1524 @@
+<import name="ad-union" src="../AdUnion/index.ux"></import>
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+<import name="retain-popup" src="./RetainPopup.ux"></import>
+ 
+<template>
+    <div class="ad-wall-wrap  {{ this.adSetup.bNight ? 'night' : '' }}" style="background-color: {{ backgroundColor }}">
+        <div class="top-box" if="adWallInfo.awardType === 5">
+            <stack class="coin-box">
+                <image class="img" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-top-bg.png" if="award.allNoAdCount"></image>
+                <image class="img" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-top-bg-coin.png" if="award.allCoinCount && !award.allNoAdCount"></image>
+                <text class="coin-content" if="award.allCoinCount && award.allNoAdCount">当前金币：{{ award.gotCoinCount }}</text>
+                <div class="back-icon-wrap" if="isComplete" @click="fnBackPressHandle">
+                    <image class="back" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-back-icon.png"></image>
+                </div>
+            </stack>
+            <!-- 只有免广或者免广和金币都有时，显示免广进度条 -->
+            <div class="no-ad-box" if="award.allNoAdCount">
+                <text class="desc">点击浏览资讯详情即可获得免广告时长{{ award.allCoinCount ? '和金币' : '' }}</text>
+                <div class="no-ad-content">
+                    <stack class="left">
+                        <div class="progress-bg"></div>
+                        <div class="progress" style="width: {{ award.completePercent }}%;"></div>
+                        <text class="text">已领取免广告时长{{ award.gotNoAdCount }}分钟</text>
+                    </stack>
+                    <text class="right">已领({{ award.gotNoAdCount }}/{{ award.allNoAdCount }})</text>
+                </div>
+            </div>
+            <!-- 只有金币，没有免广时，显示金币进度条 -->
+            <div class="no-ad-box" if="award.allCoinCount && !award.allNoAdCount">
+                <text class="desc">点击浏览资讯详情即可获得更多金币奖励</text>
+                <div class="no-ad-content">
+                    <stack class="left">
+                        <div class="progress-bg"></div>
+                        <div class="progress" style="width: {{ award.completePercent }}%;"></div>
+                        <text class="text">已领取{{ award.gotCoinCount }}金币</text>
+                    </stack>
+                    <text class="right">已领({{ award.gotCoinCount }}/{{ award.allCoinCount }})</text>
+                </div>
+            </div>
+        </div>
+        <div class="ad-list-box">
+            <list class="ad-list ad-list-{{ adWallInfo.awardType }}" if="!isLoadError" @scrollbottom="loadMore">
+                <!-- 广告墙列表 -->
+                <list-item type="ad-wall-ad-union-{{ $idx }}" class="ad-wall-ad-union" for="ads" @click="adClick($idx)">
+                    <ad-union
+                        ad-unit-id="{{ $item.slot_id }}"
+                        ad-type="wall"
+                        ad-alias="adWallLocal"
+                        ad-setup="{{ adSetup }}"
+                        ad-wall-info="{{ adWallInfo }}"
+                        ad-index="{{ +$idx + 1 }}"
+                        chapter-index="{{ bookInfo.chapterIndex }}"
+                        book-id="{{ bookInfo.id }}"
+                        book-name="{{ bookInfo.name }}"
+                        other-info="{{ adWallInfo }}"
+                        ad-wall-token="{{ adWallToken }}"
+                        brand-ad-switch="{{ brandAdSwitch === '1' ? true : false }}"
+                        onChangeWebShow="fnChangeWebShow"
+                        onChangeAppShow="fnChangeAppShow"
+                        onstart-count="fnStartCount"
+                        onstop-count="fnStopCount"
+                        onad-wall-click="fnAdWallClick"
+                    ></ad-union>
+                </list-item>
+                <list-item type="ad-wall-load-more" class="load-more">
+                    <div class="text-box load-btn" if="loadCount < 2 && !isLoad && ads.length" @click="loadMore">
+                        <text>加载更多</text>
+                    </div>
+                    <div class="text-box" if="isLoad">
+                        <progress type="circular"></progress>
+                        <text>正在加载中</text>
+                    </div>
+                    <div class="text-box" if="loadCount > 1 && !isLoad">
+                        <text>上拉加载更多</text>
+                    </div>
+                </list-item>
+            </list>
+        </div>
+        <!-- 浮层提示信息 -->
+        <div class="ad-wall-task-tip" if="isTaskTipShow">
+            <text if="adWallInfo.operType === 1">点击不同内容<span class="operate-time"> {{ totalOperTimes }} </span>次，继续阅读</text>
+            <text if="adWallInfo.operType === 2">浏览内容<span class="operate-time"> {{ totalOperTimes }} </span>秒，继续阅读</text>
+        </div>
+        <!-- 底部任务和按钮区域 -->
+        <div class="footer" if="adWallInfo.awardType !== 5">
+            <div class="left">
+                <!-- <block if="isComplete">
+                    <text class="text">您已完成任务<span if="adWallInfo.awardType !== 1">，请您领取奖励</span></text>
+                </block> -->
+                <block>
+                    <text class="text" if="adWallInfo.operType === 1">点击不同内容{{ currOperTimes }}/{{ totalOperTimes }}次，继续阅读</text>
+                    <text class="text" if="adWallInfo.operType === 2">浏览内容{{ currOperTimes }}/{{ totalOperTimes }}秒，继续阅读</text>
+                </block>
+                <div class="btns">
+                    <block if="!isComplete">
+                        <text class="btn exit-btn" @click="fnExit">退出</text>
+                        <!-- skipFlag -- 1：可跳过，2：不可跳过 -->
+                        <!-- <text class="btn skip-btn-time" if="adWallInfo.skipFlag === 1 && currSkipTimes > 0">{{ currSkipTimes }}s可跳过</text>
+                        <text class="btn skip-btn" if="adWallInfo.skipFlag === 1 && currSkipTimes === 0" @click="skip">{{ adWallInfo.skipText || '跳过此页' }}</text> -->
+                        <text class="btn disable-btn">继续阅读</text>
+                    </block>
+                    <block else>
+                        <text class="btn continue-reading-btn" @click="fnContinueReading">继续阅读</text>
+                        <!-- <div class="btn receive-btn has-award" if="adWallInfo.awardType !== 1" @click="receiveAward">
+                            <image class="icon" if="!isReceive" src="https://xsmfdq.kkyd.cn/images/hmxs/img-gift.png"></image>
+                            <progress type="circular" else></progress>
+                            <text>点我领取</text>
+                        </div>
+                        <text class="btn receive-btn" else @click="back">继续阅读</text> -->
+                    </block>
+                </div>
+            </div>
+            <div class="right" if="noAdVipSwitch === '1'">
+                <text class="text">订购VIP免广告</text>
+                <div class="btns">
+                    <text class="btn" @click="goVipPage">去订购</text>
+                </div>
+            </div>
+        </div>
+        <div class="click-pop-wrap" if="isClickShow" @click="fnOtherClick">
+            <image class="click-pop-close" src="https://xsmfdq.kkyd.cn/images/ad-close-extra.png" @click="fnCancleClick"></image>
+            <div class="click-pop-box">
+                <text class="click-pop-content">即将跳转到第三方页面或应用</text>
+                <div class="click-pop-btn">
+                    <text class="click-pop-cancel" @click="fnCancleClick">取消</text>
+                    <text class="click-pop-confirm" @click="fnConfirmClick">确认</text>
+                </div>
+            </div>
+        </div>
+        <div class="download-pop-wrap" if="isDownloadShow" @click="fnOtherClick">
+            <image class="download-pop-close" src="https://xsmfdq.kkyd.cn/images/ad-close-extra.png" @click="fnCancleDownload"></image>
+            <div class="download-pop-box" if="currentAdInfo.app_info_url && currentAdInfo.app_info_url != ''">
+                <text class="download-pop-title">应用详情</text>
+                <web class="download-pop-web" src="{{currentAdInfo.app_info_url}}"></web>
+                <text class="download-pop-confirm" @click="fnConfirmDownload">立即下载</text>
+                <text class="download-pop-cancle" @click="fnCancleDownload">放弃下载</text>
+            </div>
+            <div class="download-pop-box" else>
+                <text class="download-pop-title">应用详情</text>
+                <div class="download-pop-item" if="currentAdInfo.brand_name">
+                    <text class="download-pop-item-title">应用程序：</text>
+                    <text class="download-pop-item-content">{{currentAdInfo.brand_name}}</text>
+                </div>
+                <div class="download-pop-item" if="currentAdInfo.app_size">
+                    <text class="download-pop-item-title">大小：</text>
+                    <text class="download-pop-item-content">{{currentAdInfo.app_size}}</text>
+                </div>
+                <div class="download-pop-item" if="currentAdInfo.app_version">
+                    <text class="download-pop-item-title">版本：</text>
+                    <text class="download-pop-item-content">{{currentAdInfo.app_version}}</text>
+                </div>
+                <div class="download-pop-item" if="currentAdInfo.publisher">
+                    <text class="download-pop-item-title">开发者：</text>
+                    <text class="download-pop-item-content">{{currentAdInfo.publisher}}</text>
+                </div>
+                <div class="download-pop-item" @click="fnChangeWebShow" if="currentAdInfo.privacy_link">
+                    <text class="download-pop-item-title">隐私政策：</text>
+                    <image class="download-pop-arrow {{isWebShow ? 'download-pop-arrow-default' : 'download-pop-arrow-turn'}}" src="https://xsmfdq.kkyd.cn/images/ad-web-arrow.png"></image>
+                </div>
+                <web class="download-pop-web" if="isWebShow && currentAdInfo.privacy_link" src="{{currentAdInfo.privacy_link}}"></web>
+                <div class="download-pop-item" @click="fnChangeAppShow" if="currentAdInfo.permission_link">
+                    <text class="download-pop-item-title">应用权限：</text>
+                    <image class="download-pop-arrow {{isAppShow ? 'download-pop-arrow-default' : 'download-pop-arrow-turn'}}" src="https://xsmfdq.kkyd.cn/images/ad-web-arrow.png"></image>
+                </div>
+                <web class="download-pop-web" if="isAppShow && currentAdInfo.permission_link" src="{{currentAdInfo.permission_link}}"></web>
+                <text class="download-pop-confirm" @click="fnConfirmDownload">立即下载</text>
+                <text class="download-pop-cancle" @click="fnCancleDownload">放弃下载</text>
+            </div>
+        </div>
+        <retry if="isLoadError" is-loading="{{ isLoadError }}" @retry="retry"></retry>
+        <div class="guide-wrap" if="isGuideShow" @click="fnGuideClick">
+            <div class="guide-item guide-top"></div>
+            <div class="guide-item guide-right"></div>
+            <div class="guide-item guide-bottom"></div>
+            <div class="guide-item guide-left"></div>
+            <div class="guide-box"></div>
+            <image class="guide-img" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-guide-img.png" if="award.allNoAdCount"></image>
+            <image class="guide-img" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-guide-img-coin.png" if="!award.allNoAdCount && award.allCoinCount"></image>
+            <image class="guide-hand" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-hand.png"></image>
+        </div>
+        <retain-popup
+            if="popupData.show"
+            title="{{ popupData.title }}"
+            btns="{{ popupData.btns }}"
+            @btn-click="fnRetainPopupBtnClick"
+        ></retain-popup>
+    </div> 
+</template>
+<style lang="less" scoped>
+    @btn-color: #EE6506;
+    .ad-wall-wrap {
+        flex-direction: column;
+        align-items: center;
+        .top-box {
+            flex-direction: column;
+            .coin-box {
+                flex-direction: column;
+                width: 100%;
+                .img {
+                    width: 100%;
+                }
+                .coin-content {
+                    align-self: flex-end;
+                    height: 33px;
+                    line-height: 33px;
+                    margin-top: 100px;
+                    margin-right: 24px;
+                    color: #FFFDE0;
+                    font-size: 24px;
+                }
+                /* 按钮区域适当增大，更容易点击 */
+                .back-icon-wrap {
+                    width: 72px;
+                    height: 100%;
+                    .back {
+                        width: 24px;
+                        height: 44px;
+                        margin-top: 75px;
+                        margin-left: 24px;
+                    }
+                }
+            }
+            .no-ad-box {
+                flex-direction: column;
+                height: 119px;
+                padding: 0 24px;
+                .desc {
+                    height: 40px;
+                    line-height: 40px;
+                    margin-top: 22px;
+                    color: #FA5805;
+                    font-size: 28px;
+                    font-weight: 500;
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+                .no-ad-content {
+                    align-items: center;
+                    margin-top: 17px;
+                    .left {
+                        align-items: center;
+                        width: 527px;
+                        height: 33px;
+                        .progress-bg,
+                        .progress {
+                            border-radius: 16px;
+                            height: 32px;
+                        }
+                        .progress-bg {
+                            width: 100%;
+                            background-color: #E5E5E5;
+                        }
+                        .progress {
+                            background: linear-gradient(90deg, #FFC330 0%, #FFAE24 100%);
+                        }
+                        .text {
+                            padding: 0 16px;
+                            color: #000;
+                            font-size: 22px;
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                    }
+                    .right {
+                        flex: 1;
+                        padding-left: 6px;
+                        color: #000;
+                        font-size: 24px;
+                        text-align: right;
+                        text-overflow: ellipsis;
+                        lines: 1;
+                    }
+                }
+            }
+        }
+        .ad-list-box {
+            flex: 1;
+            width: 702px;
+            .ad-list {
+                width: 100%;
+                margin-bottom: 180px;
+            }
+            .ad-list-5 {
+                margin-bottom: 0;
+            }
+        }
+        .ad-wall-ad-union {
+            flex-direction: column;
+        }
+        .load-more {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px;
+            height: 64px;
+            .text-box {
+                justify-content: center;
+            }
+            text {
+                font-size: 28px;
+                color: @btn-color;
+            }
+            progress {
+                margin-right: 5px;
+                color: @btn-color;
+            }
+        }
+        .ad-wall-task-tip {
+            justify-content: center;
+            position: fixed;
+            top: 700px;
+            left: 77px;
+            width: 596px;
+            height: 104px;
+            border-radius: 16px;
+            background-color: rgba(0, 0, 0, 0.7);
+            text {
+                lines: 1;
+                color: #ffffff;
+                font-size: 34px;
+                .operate-time {
+                    color: @btn-color;
+                    font-size: 40px;
+                }
+            }
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 750px;
+            height: 180px;
+            padding: 0 24px;
+            background-color: #ffffff;
+            .btn {
+                align-items: center;
+                justify-content: center;
+                width: 160px;
+                height: 56px;
+                color: @btn-color;
+                font-size: 28px;
+                text-align: center;
+                border-radius: 32px;
+            }
+            .left {
+                flex-direction: column;
+                flex-grow: 1;
+                .text {
+                    height: 40px;
+                    line-height: 40px;
+                    margin-top: 20px;
+                    color: #000000;
+                    font-size: 28px;
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+                .btns {
+                    /* 高度增大，显示领取按钮动画 */
+                    flex: 1;
+                    padding-top: 16px;
+                    .exit-btn {
+                        margin-right: 24px;
+                        background-color: #FFF1E8;
+                    }
+                    .skip-btn-time {
+                        width: 180px;
+                        background-color: #E9E9E9;
+                    }
+                    .skip-btn {
+                        background-color: #FFF1E8;
+                    }
+                    .receive-btn {
+                        background: linear-gradient(270deg, #FF612B 0%, #FF8D13 100%);
+                        .icon,
+                        progress {
+                            width: 32px;
+                            height: 32px;
+                            margin-right: 7px;
+                        }
+                        text {
+                            color: #fff;
+                            font-size: 28px;
+                        }
+                        progress {
+                            color: #fff;
+                        }
+                    }
+                    .has-award {
+                        width: 200px;
+                        margin-left: 10px;
+                        animation-name: breathe;
+                        animation-duration: 1200ms;
+                        animation-iteration-count: infinite;
+                        animation-timing-function: linear;
+                    }
+                    .continue-reading-btn {
+                        color: #fff;
+                        background-color: @btn-color;
+                    }
+                    .disable-btn {
+                        color: #999999;
+                        background-color: #E9E9E9;
+                    }
+                }
+            }
+            .right {
+                flex-direction: column;
+                flex-shrink: 0;
+                width: 230px;
+                .text {
+                    height: 33px;
+                    line-height: 33px;
+                    margin-top: 24px;
+                    color: @btn-color;
+                    font-size: 24px;
+                    lines: 1;
+                    text-align: center;
+                    text-overflow: ellipsis;
+                }
+                .btns {
+                    margin-top: 19px;
+                    .btn {
+                        width: 230px;
+                        color: #ffffff;
+                        background-color: @btn-color;
+                    }
+                }
+            }
+        }
+        .guide-wrap {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            .guide-item {
+                position: fixed;
+                background-color: rgba(0, 0, 0, 0.75);
+            }
+            .guide-top {
+                top: 0;
+                right: 0;
+                left: 0;
+                height: 294px;
+            }
+            .guide-right {
+                top: 293px;
+                right: 0;
+                width: 24px;
+                height: 395px;
+            }
+            .guide-bottom {
+                top: 688px;
+                right: 0;
+                bottom: 0;
+                left: 0;
+            }
+            .guide-left {
+                top: 293px;
+                left: 0;
+                width: 24px;
+                height: 395px;
+            }
+            .guide-box {
+                position: fixed;
+                top: 285px;
+                right: 16px;
+                left: 16px;
+                height: 412px;
+                border-radius: 8px;
+                border: 1px dashed #fff;
+            }
+            .guide-img {
+                position: fixed;
+                top: 75px;
+                left: 75px;
+                width: 595px;
+            }
+            .guide-hand {
+                position: fixed;
+                top: 466px;
+                right: 314px;
+                width: 120px;
+                height: 120px;
+                animation-name: breathe;
+                animation-duration: 1200ms;
+                animation-iteration-count: infinite;
+                animation-timing-function: linear;
+            }
+        }
+    }
+    .night {
+        .top-box {
+            .no-ad-box {
+                .no-ad-content {
+                    .right {
+                        color: #fff;
+                    }
+                }
+            }
+        }
+        .footer {
+            background-color: #46464B;
+            .left {
+                .text {
+                    color: rgba(255, 255, 255, 0.8);
+                }
+                .btns {
+                    .exit-btn,
+                    .disable-btn {
+                        color: rgba(255, 255, 255, 0.8);
+                        background-color: #636367;
+                    }
+                    .continue-reading-btn {
+                        color: rgba(255, 255, 255, 0.8);
+                    }
+                }
+            }
+            .right {
+                .btns {
+                    .btn {
+                        color: rgba(255, 255, 255, 0.8);
+                    }
+                }
+            }
+        }
+        .ad-wall-task-tip {
+            text {
+                color: rgba(255, 255, 255, 0.8);
+            }
+        }
+    }
+    .click-pop-wrap {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 750px;
+        flex: 1;
+        height: 100%;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, .6);
+        .click-pop-close {
+            margin-right: 106px;
+            margin-bottom: 24px;
+            width: 54px;
+            height: 54px;
+            resize-mode: stretch;
+            object-fit: fill;
+        }
+        .click-pop-box {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-right: 106px;
+            width: 538px;
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            .click-pop-content {
+                margin-top: 108px;
+                margin-bottom: 96px;
+                width: 445px;
+                font-size: 34px;
+                font-weight: 400;
+                color: #444444;
+                line-height: 48px;
+            }
+            .click-pop-btn {
+                width: 490px;
+                height: 88px;
+                margin-bottom: 40px;
+                justify-content: space-around;
+                .click-pop-cancel {
+                    width: 236px;
+                    height: 88px;
+                    background-color: #F2F2F2;
+                    border-radius: 8px;
+                    text-align: center;
+                    line-height: 88px;
+                    font-size: 32px;
+                    font-weight: 500;
+                    color: #888888;
+                }
+                .click-pop-confirm {
+                    width: 236px;
+                    height: 88px;
+                    background-color: @btn-color;
+                    border-radius: 8px;
+                    text-align: center;
+                    line-height: 88px;
+                    font-size: 32px;
+                    font-weight: 500;
+                    color: #FFFFFF;
+                }
+            }
+        }
+    }
+    .download-pop-wrap {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 750px;
+        flex: 1;
+        height: 100%;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, .6);
+        .download-pop-close {
+            margin-right: 106px;
+            margin-bottom: 24px;
+            width: 54px;
+            height: 54px;
+            resize-mode: stretch;
+            object-fit: fill;
+        }
+        .download-pop-box {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-right: 106px;
+            width: 538px;
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            padding: 0px 32px;
+            .download-pop-title {
+                margin-top: 40px;
+                margin-bottom: 40px;
+                height: 50px;
+                font-size: 36px;
+                font-weight: 500;
+                color: #444444;
+                line-height: 50px;
+            }
+            .download-pop-item {
+                margin-bottom: 24px;
+                width: 100%;
+                /* height: 37px; */
+                align-items: center;
+                justify-content: space-between;
+                .download-pop-item-title {
+                    flex-shrink: 0;
+                    margin-right: 24px;
+                    height: 37px;
+                    font-size: 26px;
+                    color: #888888;
+                    line-height: 37px;
+                }
+                .download-pop-item-content {
+                    /* height: 37px; */
+                    font-size: 26px;
+                    font-weight: 500;
+                    color: #444444;
+                    line-height: 37px;
+                    /* lines: 1;
+                    text-overflow: ellipsis; */
+                    text-align: right;
+                }
+                .download-pop-arrow {
+                    width: 26px;
+                    height: 12px;
+                    resize-mode: stretch;
+                    object-fit: fill;
+                }
+                .download-pop-arrow-default {
+                    transform: rotate(0deg);
+                }
+                .download-pop-arrow-turn {
+                    transform: rotate(180deg);
+                }
+            }
+            .download-pop-web {
+                width: 474px;
+                height: 266px;
+                border: 1px solid #C7C7C7;
+                background-color: #ffffff;
+            }
+            .download-pop-confirm {
+                margin-top: 40px;
+                margin-bottom: 16px;
+                width: 454px;
+                height: 88px;
+                background-color: @btn-color;
+                border-radius: 8px;
+                font-size: 32px;
+                font-weight: 500;
+                color: #FFFFFF;
+                line-height: 88px;
+                text-align: center;
+            }
+            .download-pop-cancle {
+                margin-bottom: 40px;
+                height: 37px;
+                font-size: 26px;
+                font-weight: 400;
+                color: #888888;
+                line-height: 37px;  
+            }
+        }
+    }
+    @keyframes breathe {
+        from {
+            transform: scale(1);
+        }
+        25% {
+            transform: scale(1.1);
+        }
+        50% {
+            transform: scale(1);
+        }
+        75% {
+            transform: scale(0.9);
+        }
+        to {
+            transform: scale(1);
+        }
+    }
+</style>
+<script>
+import router from '@system.router';
+import storage from '@system.storage';
+import fetch from '@system.fetch';
+import prompt from '@system.prompt';
+
+const AD_TOKEN = 'ut22402g';                            // 广告APP标识
+
+export default {
+    private: {
+        ads: [],
+        isLoad: false,                                  // 是否正在加载
+        isLoadWall: false,                              // 是否正在加载墙数据
+        isComplete: false,                              // 任务是否完成
+        isReceive: false,                               // 是否正在领取
+        isReceiveSuccess: false,                        // 是否领取成功
+        isLoadError: false,                             // 是否加载错误（网络、配置原因等）
+        loadCount: 0,                                   // 加载次数
+        taskTimer: null,                                // 任务完成条件计时器
+        skipTimer: null,                                // 跳过按钮计时器
+        totalOperTimes: 0,                              // 完成任务所需点击的总次数，或者所需页面停留的总时长
+        currOperTimes: 0,                               // 当前任务已点击次数，或者页面已浏览时长
+        currSkipTimes: -1,                              // 跳过按钮倒计时
+        clickedArr: [],                                 // 存放已经点击过的广告的索引
+        isAdPopShow: false,                             // 广告弹窗显示
+        isClickShow: false,                             // 广告点击提示
+        isDownloadShow: false,                          // 广告下载提示
+        isWebShow: false,                               // 隐私协议
+        isAppShow: false,                               // 应用权限
+        currentAdInfo: {},                              // 当前缓存广告信息
+        nightColor: 'rgba(29,29,31,1)',                 // 夜间模式背景色
+        backgroundColor: '#fff',                        // 背景色
+        isCoin: false,                                  // 金币模式
+        adWallToken: 'hmxswall01',                      // 广告墙Token
+        isTaskTipShow: false,                           // 是否展示浮层提示信息
+        isGuideShow: false,                             // 是否展示引导蒙层
+        award: {                                        // 奖励信息
+            allCoinCount: 0,                            // 全部阶段金币奖励总数
+            gotCoinCount: 0,                            // 已获得金币数
+            allNoAdCount: 0,                            // 全部阶段免光时长总数
+            gotNoAdCount: 0,                            // 已获得免费时长
+            completePercent: 0,                         // 完成的百分比
+        },
+        popupData: {                                    // 弹窗数据
+            show: false,                                // 是否展示
+            title: '',                                  // 标题
+            btns: [],                                   // 按钮组
+        },
+        imei: '',                                       // imei
+        adWallInfo: {},                                 // 墙数据
+        preLoadAds: [],                                 // 预加载的广告位id列表
+        bookInfo: {},                                   // 书籍信息
+        adSetup: {},                                    // 广告配置
+        noAdVipSwitch: '0',                             // 免广告开关
+        brandAdSwitch: '0',                             // 支持新版厂商广告开关
+    },
+    onInit() {
+        this.isCoin = this.$app.isCoin;                                         // 是否金币模式
+        this.$app.$def.quickappLog([701], this);                                // 大数据打点
+        this.$app.shenceLog.log(this, 'pageShow' , '', {
+            Title: '广告墙'
+        });
+        this.$app.fnInitBrandSlotIds();                                         // 初始化厂商广告位id列表
+        this.$app.$def.fnCreateAd.call(this);                                   // 创建当前页面的广告存储对象
+        this.fnGetAdWallData();                                                 // 获取app.ux中的墙数据
+        if (!this.fnCheckParams()) {                                            // 参数校验错误
+            this.back();
+            return false;
+        }
+        this.fnAdWallReport('wall_imp');                                        // 墙曝光
+        if (!this.preLoadAds.length) {                                          // 不是预加载，直接请求墙的广告位id
+            this.loadSlotId();                                                  // 加载广告位id列表
+            return false;
+        }
+        this.init();                                                            // 页面初始化
+    },
+    onDestroy() {
+        this.$app.fnInitBrandSlotIds();                                         // 初始化厂商广告位id列表
+        this.$app.$def.fnDestoryAd.call(this);                                  // 销毁当前页面的广告实例
+    },
+    onShow() {
+        this.$app.lastOpenPage = '';                                            // 防止开屏
+    },
+    onBackPress() {
+        this.fnBackPressHandle();
+        return true;
+    },
+    // 页面初始化
+    init () {
+        this.fnGuideHandle();                                                   // 引导是否显示处理
+        this.loadMore();                                                        // 首次加载广告
+        this.taskInit();                                                        // 墙任务初始化
+        this.skipInit();                                                        // 跳过按钮初始化
+        this.$watch('currOperTimes', 'currOperTimesChange');                    // 监听当前操作次数改变
+    },
+    // 重新加载
+    retry () {
+        this.loadSlotId();                                                      // 加载墙数据
+    },
+    // 加载更多
+    loadMore () {
+        if (this.isLoad || !this.preLoadAds.length) {
+            return ;
+        }
+        this.isLoad = true;
+        this.ads.push(...this.preLoadAds);
+        this.loadCount ++;
+        setTimeout(() => {
+            this.isLoad = false;
+        }, 1000);
+    },
+    // 墙任务初始化
+    taskInit () {
+        let { operType, operTimes, awardType } = this.adWallInfo;
+        this.totalOperTimes = operTimes || 0;                                   // 完成任务所需点击的总次数，或者所需页面停留的总时长
+        if (!this.totalOperTimes) {
+            this.isComplete = true;                                             // 后台没有返回任务操作次数，变为已完成
+            return ;
+        }
+        if (awardType === 5) {                                                  // 5: 阶段任务奖励，免光 + 金币
+            return ;
+        }
+        if ([1, 2].indexOf(operType) > -1) {                                    // 显示提示浮层，2s关闭
+            this.isTaskTipShow = true;
+            let timer = setTimeout(() =>{
+                 this.isTaskTipShow = false;
+                 clearTimeout(timer);
+                 timer = null;
+            }, 3000);
+        }
+        if (operType === 2 && operTimes > 0) {                                  // 2：计时
+            this.createTaskTimer();
+        }
+    },
+    // 创建墙任务定时器（停留时长）
+    createTaskTimer () {
+        if (this.currOperTimes >= this.totalOperTimes) {
+            clearTimeout(this.taskTimer);
+            this.taskTimer = null;
+            return false;
+        }
+        this.taskTimer = setTimeout(() => {
+            this.currOperTimes ++;
+            this.createTaskTimer();
+        }, 1000);
+    },
+    // 跳过按钮初始化
+    skipInit () {
+        if (this.adWallInfo.skipFlag !== 1) {
+            return ;
+        }
+        if (!this.adWallInfo.skipTimes || this.adWallInfo.skipTimes < 0) {
+            this.currSkipTimes = 0;                                             // 跳过按钮倒计时置为0
+            return ;
+        }
+        this.currSkipTimes = this.adWallInfo.skipTimes;
+        this.createSkipTimer();
+    },
+    // 创建跳过时长定时器
+    createSkipTimer () {
+        if (this.currSkipTimes < 1) {
+            clearTimeout(this.skipTimer);
+            this.skipTimer = null;
+            return ;
+        }
+        this.skipTimer = setTimeout(() => {
+            this.currSkipTimes --;
+            this.createSkipTimer();
+        }, 1000);
+    },
+    // 监听当前操作次数改变
+    currOperTimesChange (newVal, oldVal) {
+        this.isComplete = newVal >= this.totalOperTimes;
+        if (this.isComplete) {
+            if (this.adWallInfo.awardType === 5) {
+                this.receiveAward();                                            // 免广奖励时，自动领取
+                return false;
+            }
+            this.fnDeleteStorage('EnterAdWall_' + this.bookInfo.id);            // 删除缓存，免广奖励时，不需要删除
+        }
+    },
+    // 广告点击
+    adClick (val) {
+        if (this.adWallInfo.operType !== 1) {
+            return ;
+        }
+        if (this.isComplete) {
+            return ;
+        }
+        if (this.clickedArr.indexOf(val) > -1) {
+            prompt.showToast({
+                message: '多次点击同一内容，只计1次哦',
+                duration: 1
+            });
+            return ;
+        }
+        this.clickedArr.push(val);
+        this.currOperTimes ++;
+        this.fnStageTaskHandle();                                               // 阶段任务处理
+    },
+    // 领取奖励
+    receiveAward () {
+        if (this.isReceive || this.isReceiveSuccess) {
+            return ;
+        }
+        this.isReceive = true;
+        let result = new Promise((resolve, reject) => {
+            this.$app.$def.requestData(this, {
+                interface: `/glory/fastapp/2141`,
+                data: {
+                    type: 6,                                                    // 6: 广告墙
+                    bookId: this.bookInfo.id,
+                    adId: this.adWallInfo.id
+                },
+                succ: function (data) {
+                    resolve(data);
+                },
+                fail: function () {
+                    resolve(false);
+                }
+            });
+        });
+        result.then(data => {
+            if (!data || data.retCode !== 0 || !data.data || data.data.code !== 0) {
+                prompt.showToast({
+                    message: '领取失败，请重试'
+                });
+                this.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '2',
+                        wallId: this.adWallInfo.id,
+                        bookId: this.bookInfo.id,
+                        bookName: this.bookInfo.name,
+                        chapterIndex: this.bookInfo.chapterIndex,
+                    }
+                }, 'adwall_error'], this);
+                this.isReceive = false;
+                return false;
+            }
+            let awardType = this.adWallInfo.awardType;                          // 奖励类型，1：无， 2：书币，3：免广告时长 4： 金币，5：免广 + 金币（阶段奖励）
+            if ([2, 3, 4, 5].indexOf(awardType) > -1 && data.data.message) {
+                prompt.showToast({
+                    message: this.fnReplaceToast(data.data.message),
+                    duration: 1
+                });
+            }
+            this.isReceive = false;
+            this.isReceiveSuccess = true;
+
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                PositionName: '激励墙奖励领取',
+                BookID: this.bookInfo.id,
+                BookName: this.bookInfo.name,
+                ChaptersNum: this.bookInfo.chapterIndex,
+                ButtonName: '激励墙奖励领取',
+                ButtonContent: '领取奖励',
+                TaskType: awardType,
+            });
+            if (awardType === 5) {                                              // 免广任务自动领取后，不需要自动返回阅读器
+                this.fnSetStorage('AdWallId_NoAd', this.adWallInfo.id);         // 存储免广激励墙id
+                return false;
+            }
+            setTimeout(() => {
+                this.back();
+            });
+        });
+    },
+    /**
+     * 读取storage缓存
+     * @param   {String}    key     [key]
+     * @return  {Promise}           [读取结果promise]
+    */
+    fnGetStorage (key) {
+        return new Promise((resolve, reject) => {
+            if (!key) {
+                resolve(false);
+            }
+            storage.get({
+                key,
+                success: function (data) {
+                    resolve(data);
+                },
+                fail: function () {
+                    resolve(false);
+                }
+            });
+        });
+    },
+    // 设置缓存
+    fnSetStorage (key, value) {
+        return new Promise((resolve, reject) => {
+            if(!key || !value) {
+                resolve(false);
+            }
+            if (Object.prototype.toString.call(value).slice(8, -1) === 'Object') {
+                value = JSON.stringify(value);
+            }
+            storage.set({
+                key,
+                value,
+                success: function () {
+                    resolve(true);
+                },
+                fail: function () {
+                    resolve(false);
+                }
+            });
+        });
+    },
+    // 删除缓存
+    fnDeleteStorage (key) {
+        return new Promise((resolve, reject) => {
+            if (!key) {
+                resolve(false);
+            }
+            storage.delete({
+                key,
+                success: function () {
+                    resolve(true);
+                },
+                fail: function () {
+                    resolve(false);
+                }
+            });
+        });
+    },
+    // 跳过
+    skip () {
+        if (this.adWallInfo.awardType === 1) {                                  // 当前墙任务没有奖励
+            this.back();
+            return ;
+        }
+        prompt.showDialog({
+            title: '跳过不可领取奖励',
+            buttons: [
+                { text: '继续浏览', color: '#ff0000' },
+                { text: '跳过', color: '#999999' }
+            ],
+            success: data => {
+                if (data.index === 1) {
+                    this.back();
+                }
+            }
+        });
+    },
+    // 返回上一页
+    back () {
+        router.back();
+    },
+    // 退出激励墙 - 任务未完成时
+    fnExit () {
+        this.back();
+    },
+    // 是否返回前一页
+    errorHandle () {
+        this.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '1',
+                wallId: this.adWallInfo.id,
+                bookId: this.bookInfo.id,
+                bookName: this.bookInfo.name,
+                chapterIndex: this.bookInfo.chapterIndex,
+                isError: this.isLoadError,                                      // 是否已经错误
+            }
+        }, 'adwall_error'], this);
+
+        if (this.isLoadError) {                                                 // 加载失败，重试后仍然失败，如果是非免广类型的墙，需要清除墙缓存，否则会一直进入墙拦截
+            if (this.adWallInfo.awardType !== 5) {
+                this.fnDeleteStorage('EnterAdWall_' + this.bookInfo.id);
+            }
+            setTimeout(() => {
+                this.back();
+            }, 500);
+            return ;
+        }
+        this.isLoadError = true;
+    },
+    // 请求墙的广告位id
+    loadSlotId () {
+        if(this.isLoadWall) {
+            return ;
+        }
+        this.isLoadWall = true;
+        let timeStart = Date.now();
+        this.fnAdWallReport('call_wall');
+        let that = this;
+        fetch.fetch({
+            url: this.$app.adWallUrl,
+            data: {
+                app_key: AD_TOKEN,
+                wall_id: this.adWallToken,
+            },
+            header: Object.assign({}, this.$app.headerJson, {
+                'Content-Type': 'application/json; charset=utf-8'
+            }),
+            method: 'POST',
+            success: function(res) {
+                let timeEnd = new Date().getTime();
+                that.isLoadWall = false;
+                if(!res || !res.data) {
+                    that.fnAdWallReport('call_wall_fail', {
+                        error: 'no data'
+                    })
+                    that.errorHandle();
+                    return ;
+                } 
+                try {
+                    let resData = JSON.parse(res.data);
+                    if(resData.code !== 0) {
+                        that.fnAdWallReport('call_wall_fail', {
+                            error: resData.msg || ''
+                        });
+                        that.errorHandle();
+                        return ;
+                    }
+                    if(resData.data && resData.data.ads && resData.data.ads.length && typeof resData.data.ads === 'object' && resData.data.ads !== null) {
+                        that.preLoadAds = resData.data.ads;
+                        that.init();                                            // 初始化页面
+                        that.fnAdWallReport('call_wall_loaded', {
+                            times: timeEnd - timeStart,
+                            count: resData.data.first_load_num ? resData.data.first_load_num : '',
+                        })
+                        that.isLoadError = false;
+                        return ;
+                    }
+                    that.fnAdWallReport('call_wall_fail', {
+                        error: 'no ads data'
+                    });
+                    that.errorHandle();
+                } catch(err) { console.log(err) }
+            },
+            fail: function(data, code) {
+                that.fnAdWallReport('call_wall_fail');
+                that.errorHandle();
+                that.isLoadWall = false;
+            }
+        });
+    },
+    // 广告墙打点上报
+    fnAdWallReport(event, params = {}) {
+        let nowTime = Date.now();
+        let logId = 'kyy' + (this.$app.headerJson.userId || '');
+        logId = logId + (nowTime + '').slice(logId.length - 16);
+        if (!this.adWallInfo.rwi) {
+            this.adWallInfo.rwi = this.$app.headerJson.userId + nowTime;
+        }
+        let imeiPromise = Promise.resolve(this.imei);
+        if (!this.imei) {
+            imeiPromise = this.fnGetStorage('imei');
+        }
+        imeiPromise.then(imei => {
+            this.imei = imei || '';
+            fetch.fetch({
+                url: this.$app.adWallReportUrl,
+                data: encodeURI('json=' + JSON.stringify({
+                    log_id: logId,
+                    bline: 'hkx_kyy',
+                    pline: 'business',
+                    pkna: this.$app.headerJson.pname,
+                    cts: nowTime,
+                    app_version: this.$app.$data.appVer,
+                    chid: this.$app.headerJson.channelCode,
+                    uid: this.$app.headerJson.userId,
+                    imei: this.imei,
+                    oaid: this.$app.oaid || '',
+                    type: 'wall',
+                    event,                                                      // wall_imp/call_wall/call_wall_fail/call_wall_loaded/ad_imp/ad_clk
+                    data: {
+                        wall_id: this.adWallToken,	 
+                        chapter_num: this.bookInfo.chapterIndex, 
+                        sdk_version: '1.0.0', 
+                        error_msg: params.error || '',
+                        response_time: params.times || '',
+                        ad_count: params.count || '',
+                        rwi: this.adWallInfo.rwi
+                    }
+                })),
+                header: Object.assign({}, this.$app.headerJson, { 'Content-Type': 'application/x-www-form-urlencoded' }),
+                method: 'POST',
+                success: function () {
+                    console.log(`-----adWall-----上报成功-----${event}-----`)
+                },
+            });
+        });
+    },
+    fnChangeWebShow() {
+        this.isWebShow = !this.isWebShow
+        if(this.isWebShow) {
+            this.isAppShow = false
+        }
+    },
+    fnChangeAppShow() {
+        this.isAppShow = !this.isAppShow
+        if(this.isAppShow) {
+            this.isWebShow = false
+        }
+    },
+    fnStartCount() {
+        this.isAdPopShow = false
+    },
+    fnStopCount(evt) {
+        let that = this
+        if(evt && evt.detail && evt.detail.adType == 'wall') {
+            if(evt.detail.type == 'download') {
+                that.isDownloadShow = true
+            }
+            if(evt.detail.type == 'click') {
+                that.isClickShow = true
+            }
+            that.currentAdInfo = evt.detail.adInfo
+        }
+        that.isAdPopShow = true
+    },
+    fnCancleClick() {
+        this.isAdPopShow = false
+        this.isClickShow = false
+        this.$broadcast('closeExtra')
+    },
+    fnConfirmClick() {
+        let that = this
+        that.isAdPopShow = false
+        that.isClickShow = false
+        that.$broadcast('closeExtra')
+        if(that.currentAdInfo && that.currentAdInfo.adAlias && that.currentAdInfo.randomTime && that.currentAdInfo.adIndex) {
+            that.$broadcast('confirmClick', {
+                adAlias: that.currentAdInfo.adAlias,
+                randomTime: that.currentAdInfo.randomTime,
+                adIndex: that.currentAdInfo.adIndex,
+            })
+        }
+    },
+    fnCancleDownload() {
+        this.isAdPopShow = false
+        this.isDownloadShow = false
+        this.$broadcast('closeExtra')
+    },
+    fnConfirmDownload() {
+        let that = this
+        that.isAdPopShow = false
+        that.isDownloadShow = false
+        that.$broadcast('closeExtra')
+        if(that.currentAdInfo && that.currentAdInfo.adAlias && that.currentAdInfo.randomTime && that.currentAdInfo.adIndex) {
+            that.$broadcast('confirmDownload', {
+                adAlias: that.currentAdInfo.adAlias,
+                randomTime: that.currentAdInfo.randomTime,
+                adIndex: that.currentAdInfo.adIndex,
+            })
+        }
+    },
+    // 无用点击
+    fnOtherClick() {},
+    /**
+     * 金币替换书币
+     * @param {String} message 弹窗文案
+     */
+    fnReplaceToast(message) {
+        if(this.isCoin && message) {
+            message = message.replace(/书币/g, '金币')
+        }
+        return message
+    },
+    // 去vip页面
+    goVipPage () {
+        router.push({
+            uri: '/Member',
+            params: {
+                pageFrom: 'read',
+                referrer: '阅读页-广告墙',
+                bookId: this.bookInfo.id,
+                chapterId: this.bookInfo.chapterId,
+            }
+        });
+    },
+    // 继续阅读
+    fnContinueReading () {
+        if (this.adWallInfo.awardType === 1) {                                  // 没有奖励，直接退出
+            this.back();
+            return ;
+        }
+        this.receiveAward();                                                    // 领取奖励
+    },
+    /**
+     * VIVO2.0点击计数
+     * @param {Object} evt  参数信息
+     */
+    fnAdWallClick(evt) {
+        if(evt && evt.detail && evt.detail.index) {
+            let index = evt.detail.index - 1;
+            this.adClick(index);
+        }
+    },
+    // 引导蒙层点击
+    fnGuideClick () {
+        this.isGuideShow = false;                                               // 隐藏引导蒙层
+    },
+    // 引导缓存处理
+    fnGuideHandle () {
+        if (this.adWallInfo.awardType !== 5) {                                  // 非免广奖励，不展示引导蒙层
+            return false;
+        }
+        this.fnGetStorage('AdWallGuideCount').then(data => {
+            data = parseInt(data) || 0;
+            let maxShowCount = 3;                                               // 引导蒙层最大展示次数
+            if (data >= maxShowCount) {
+                return false;
+            }
+            this.isGuideShow = true;                                            // 显示引导蒙层
+            this.fnSetStorage('AdWallGuideCount', ++data);                      // 存储引导次数
+        });
+    },
+    // 阶段任务处理
+    fnStageTaskHandle () {
+        if (this.adWallInfo.awardType !== 5) {                                  // 5: 阶段任务，免广 + 金币
+            return false;
+        }
+        let currentStageAward = this.adWallInfo.stageAwardList[this.currOperTimes - 1];
+        if (!currentStageAward) {
+            return false;
+        }
+        this.award.gotCoinCount += currentStageAward.goldCoinNum || 0;
+        this.award.gotNoAdCount += currentStageAward.reduceAdMinute || 0;
+        this.award.completePercent = Math.ceil(this.currOperTimes / this.adWallInfo.stageAwardList.length * 10000) / 100;
+    },
+    // 挽留弹窗按钮点击回调
+    fnRetainPopupBtnClick (event) {
+        let type = event.detail;                                                // -1: 关闭弹窗，0：放弃奖励，1：领取奖励。详见组件props参数说明
+        this.popupData.show = false;                                            // 挽留弹窗是否显示
+        if (type === 0) {
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                PositionName: '激励墙放弃奖励',
+                BookID: this.bookInfo.id,
+                BookName: this.bookInfo.name,
+                ChaptersNum: this.bookInfo.chapterIndex,
+                ButtonName: '激励墙放弃奖励',
+                ButtonContent: '放弃奖励',
+                TaskType: this.adWallInfo.awardType,
+            });
+            this.fnExit();                                                      // 退出
+            return false;
+        }
+        if (type === 1) {
+            this.receiveAward();                                                // 领取奖励，领取成功后返回阅读器
+            return false;
+        }
+    },
+    // 获取app.ux中的墙数据
+    fnGetAdWallData () {
+        let adWallData = this.$app.adWallData || {}
+        this.adWallInfo = adWallData.adWallInfo || {};
+        this.preLoadAds = adWallData.preLoadAds || [];
+        this.bookInfo = adWallData.bookInfo || {}
+        this.adSetup = adWallData.adSetup || {}
+        this.noAdVipSwitch = adWallData.noAdVipSwitch || this.noAdVipSwitch;    // 免广开关
+        this.brandAdSwitch = adWallData.brandAdSwitch || this.brandAdSwitch;    // 支持新版厂商广告开关
+        this.adWallToken = this.adWallInfo.adWallToken || this.adWallToken;     // 墙id
+        this.backgroundColor = this.adSetup.bNight ? this.nightColor : (this.adSetup.isMember ? (this.adSetup.memberBg == 'parchment' ? '#F3E3BE' : '#dfedd6') : this.adSetup.bgColor) || this.backgroundColor;
+        this.fnDeleteWallInfoCache();                                           // 删除storage中缓存的墙信息
+        let { awardType } = this.adWallInfo;
+        if (awardType === 5) {
+            let stageAwardList = this.adWallInfo.stageAwardList = this.adWallInfo.stageAwardList || [],
+                allCoinCount = 0,
+                allNoAdCount = 0;
+            stageAwardList.map(item => {
+                if (!item) {
+                    return false;
+                }
+                allCoinCount += item.goldCoinNum || 0;                          // 总金币数量奖励
+                allNoAdCount += item.reduceAdMinute || 0;                       // 总免广时长奖励
+            });
+            this.award = Object.assign({}, this.award, {
+                allCoinCount,
+                allNoAdCount,
+            })
+            this.adWallInfo.operTimes = stageAwardList.length;                  // 操作次数，阶段任务奖励的点击次数，等于阶段数
+            this.adWallInfo.operType = 1;                                       // 操作类型，1：点击，阶段奖励只支持点击，防止配错，先写死操作类型为点击
+            return false;
+        }
+        this.fnSaveWallIdAndBookId();                                           // 存储墙Id和书籍Id至storage，免广奖励不需要存储
+    },
+    /**
+     * 存储墙Id和书籍Id至storage，阅读器读取进入墙
+     * @return  {Promise}    [存储结果的promise]
+    */
+    fnSaveWallIdAndBookId () {
+        if (!this.bookInfo.id || !this.adWallInfo.id) {
+            return Promise.resolve(false);
+        }
+        return this.fnSetStorage(
+            'EnterAdWall_' + this.bookInfo.id,
+            {
+                bookId: this.bookInfo.id,
+                wallId: this.adWallInfo.id,
+                awardType: this.adWallInfo.awardType,
+            }
+        );
+    },
+    // 校验参数是否错误
+    fnCheckParams () {
+        if (!this.adWallInfo.id || !this.bookInfo.id) {
+            this.$app.$def.quickappLog([703, {
+                qmap: {
+                    site: '3',
+                    wallId: this.adWallInfo.id,
+                    bookId: this.bookInfo.id,
+                    bookName: this.bookInfo.name,
+                    chapterIndex: this.bookInfo.chapterIndex,
+                }
+            }, 'adwall_error'], this);
+            return false;
+        }
+        return true;
+    },
+    /**
+     * 删除storage中缓存的墙信息
+     * 奖励类型为5：免广时，需删除非免广的墙拦截缓存信息
+     * 奖励类型为非免广时，说明是免广已过期，弹窗进入的，需删除免广的墙缓存信息，阅读页顶部不再展示按钮
+    */
+    fnDeleteWallInfoCache () {
+        if (this.adWallInfo.awardType !== 5) {
+            this.fnDeleteStorage('AdWallId_NoAd');                              // 删除缓存的免广墙id
+            return false;
+        }
+        let bookId = this.bookInfo.id;
+        if (!bookId) {
+            return false;
+        }
+        this.fnDeleteStorage('EnterAdWall_' + bookId);                          // 删除缓存的非免广墙id
+    },
+    // 页面返回拦截处理
+    fnBackPressHandle () {
+        if (this.isGuideShow) {
+            this.isGuideShow = false;                                           // 引导蒙层
+            return true;
+        }
+        if (this.isAdPopShow) {
+            this.isAdPopShow = false;
+            this.isClickShow = false;
+            this.isDownloadShow = false;
+            this.$broadcast('closeExtra');
+            return true;
+        }
+        let { awardType } = this.adWallInfo;
+        if (!this.isComplete) {                                                 // 如果任务未完成，缓存墙数据，再退出
+            /*
+            if (this.adWallInfo.skipFlag === 1 && this.currSkipTimes === 0) {   // 可跳过，且跳过倒计时结束
+                this.skip();
+                return true;
+            }
+            */
+            if (awardType === 5) {                                              // 5: 阶段任务奖励
+                this.popupData = {                                              // 拦截弹窗
+                    show: true,
+                    title: `点击${ this.totalOperTimes || 0 }次内容可获得全部奖励`,
+                    btns: [
+                        {
+                            text: '放弃奖励',
+                            value: 0,                                           // 0： 放弃奖励，详见组件参数props参数说明
+                            style: 'color: #666; background-color: #F6F7F7;'
+                        },
+                        {
+                            text: '继续奖励',
+                            value: -1,                                          // -1：关闭弹窗，详见组件参数props参数说明
+                        }
+                    ]
+                }
+                return true;
+            }
+            this.fnExit();
+            return true;
+        }
+        if (this.isReceive) {                                                   // 正在领取
+            prompt.showToast({
+                message: '正在领取奖励，请稍等'
+            });
+            return true;
+        }
+        if (awardType !== 1 && !this.isReceiveSuccess) {                        // 任务已完成，且有奖励，且没有领取
+            this.popupData = {                                                  // 拦截弹窗
+                show: true,
+                title: '还有奖励未领取哦',
+                btns: [
+                    {
+                        text: '放弃奖励',
+                        value: 0,                                               // 0：放弃奖励，详见组件参数props参数说明
+                        style: 'color: #666; background-color: #F6F7F7;'
+                    },
+                    {
+                        text: '领取奖励',
+                        value: 1,                                               // 1：领取奖励，详见组件参数props参数说明
+                    }
+                ]
+            }
+            return true;
+        }
+        if (awardType === 5) {                                                  // 免广任务，需要清掉路由，重新进入阅读器
+            router.clear();
+            router.replace({
+                uri: '/Read',
+                params: this.$app.adWallData.routerParams || {}
+            });
+            return true;
+        }
+        this.back();
+    },
+}
+</script>

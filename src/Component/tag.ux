@@ -1,0 +1,36 @@
+<template>
+    <text class="paid-tag"  style="{{ iconStyle }} ">{{ tag }}</text>
+</template>
+
+<style lang="less" scoped>
+    .paid-tag {
+        height: 32px;
+        padding: 0 12px;
+        color: #fff;
+        font-size: 22px;
+        background-color: rgba(120, 90, 246, 1);
+        border-top-left-radius: 8px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 0;
+    }
+</style>
+
+<script>
+    export default {
+        props: {
+            // 标签描述
+            tag: {
+                type: String,
+                required: false,
+                default: '精品'
+            },
+            // 标签样式对象
+            iconStyle: {
+                type: Object,
+                required: false,
+                default: {}
+            }
+        }
+    }
+</script>

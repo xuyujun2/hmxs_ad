@@ -1,0 +1,218 @@
+<template>
+    <div>
+        <div class="award-task-2" if="{{shortShow}}" @click="vagueClick">
+            <stack class="award-stack">
+                <image class="top-bg" @click="fnAddShortcut" src="https://xsmfdq.kkyd.cn/images/short-award.png"></image>
+                <div class="award-w" @click="fnAddShortcut">
+                    <text class="title">添加到手机桌面</text>
+                    <text class="content">领取书币奖励</text>
+                </div>
+                <image class="close" src="../Common/images/normal-close.png" onclick="fnCloseAward"></image>
+            </stack>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .award-task-2{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.8);
+        justify-content: center;
+        align-items: center;
+        .award-stack{
+            width:750px;
+            justify-content: center;
+            margin-top: 20px;
+            .top-bg{
+                width: 524px;
+                height: 494px;
+                margin-top: 61px;
+            }
+            .award-w{
+                width:524px;
+                margin-top: 61px;
+                flex-direction: column;
+                align-items: center;
+                .title{
+                    margin-top: 65px;
+                    font-size:36px;
+                    color:#444444;
+                    line-height:48px;
+                    margin-top: 72px;
+                    text-align: center;
+                }
+                .content{
+                    font-size:40px;
+                    color:#FF0300;
+                    line-height:72px;
+                    text-align: center;
+                }
+            }
+            .close{
+                margin-left: 600px;
+                width: 54px;
+                height: 54px;
+            }
+        }
+    }
+
+</style>
+
+<script>
+import shortcut from '@system.shortcut'
+import prompt from '@system.prompt'
+export default {
+    props: ['chapterIndex','systemtext','isCoin','chapterId','bookId','bookName'],
+    data: {
+        shortShow:false
+    },
+    onInit() {
+        let that = this
+        shortcut.hasInstalled({
+            success: function (res) {
+                if (!res) {
+                    that.shortShow = true
+                    that.$app.shenceLog.log(that,'track','OperationExposure', {
+                        OperationName:'N+1加桌奖励弹窗',
+                        OperationPosition:'N+1加桌奖励弹窗',
+                        BookID: that.bookId || '',
+                        ChaptersID: that.chapterId || ''
+                    }); 
+                }
+            }
+        })
+    },
+    fnAddShortcut(){
+        let that = this
+        shortcut.install({
+            message: that.systemtext,
+            success: function () {
+                console.log('shortcut_install success');
+                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                    IsSuccess: true,
+                    PositionName: '阅读页奖励弹窗',
+                    ChaptersNum: that.chapterIndex,
+                    Instruction: that.systemtext,
+                    StateCode: 'return'
+                }); 
+                //来源写入变量
+                that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+                prompt.showToast({
+                    message: '创建桌面图标成功'
+                })
+                that.fnTellServer(1);
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '2',
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        sorce:'award_shortcut'
+                    }
+                }, 'shortcut'], that)
+                that.$app.$def.requestData(that,{
+                    interface: `/glory/fastapp/2107`,
+                    data: {
+                        isas:1,
+                        isAward:1
+                    },
+                    succ: function (res) {
+                        if(res.data.atTip){
+                            that.$app.shortSuccessText = res.data.atTip
+                        }
+                        if(res.data.freeLimitAll){
+                            that.$app.shortSuccessText = res.data.freeLimitAll
+                        }
+                        that.$emit('showshortsuccess')
+                        that.fnCloseAward()
+                    },
+                    error: function (code) {
+                        that.$emit('showshortsuccess')
+                        that.fnCloseAward()
+                    }
+                })
+            },
+            fail: function (data, code) {
+                console.log('shortcut_install fail')
+                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                    IsSuccess: false,
+                    PositionName: '阅读页奖励弹窗',
+                    ChaptersNum: that.chapterIndex,
+                    Instruction: that.systemtext,
+                    StateCode: 'return',
+                    MsgSendCode: code,
+                    MsgSendContent: data,
+                }); 
+                prompt.showToast({
+                    message: '创建桌面图标失败'
+                })
+                that.fnCloseAward()
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '3',
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        source:'award_shortcut',
+                        thisUri: that.$page.uri,
+                        thisPage: 'award_shortcut',
+                        data,
+                        code
+                    }
+                }, 'shortcut'], that)
+            },
+            complete(errmsg) {
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '5',
+                        errmsg: `${errmsg}`,
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        sorce:'award_shortcut'
+                    }
+                }, 'shortcut'], that)
+            }
+        })
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            PositionName: '阅读页奖励弹窗',
+            ChaptersNum: that.chapterIndex,
+            Instruction: that.systemtext,
+            StateCode: 'submit',
+            DesktopState: that.$app.isAddDesktop ? 'Deleted' : 'Neversaved'
+        });
+        that.$app.shenceLog.log(that,'track','OperationClick', {
+            OperationName: 'N+1加桌奖励弹窗',
+            OperationPosition: 'N+1加桌奖励弹窗',
+            ButtonName: '加桌面领取',
+            BookID: that.bookId || '',
+            BookName: that.bookName || '',
+            ChaptersID: that.chapterId || ''
+        }); 
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                page: that.systemtext,
+                cIndex:that.chapterIndex,
+                sorce:'award_shortcut'
+            }
+        }, 'shortcut'], that)
+    },
+    fnCloseAward(){
+        this.$emit('closeAward')
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    },
+    fnTellServer(taskAction) {
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2146',
+                data: { action: taskAction },
+                succ: function (res) {
+                }
+            }
+        )
+    },
+}
+</script>
+

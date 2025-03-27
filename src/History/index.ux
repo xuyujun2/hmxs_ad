@@ -1,0 +1,547 @@
+<template>
+    <div class="history">
+        <div if="isEmpty" class="empty">
+            <image class="empty-img" src="https://xsmfdq.kkyd.cn/images/hmxs/history-empty.png"></image>
+            <text class="empty-text">浏览记录空空如也～</text>
+            <text class="empty-btn" @click="fnToStore">挑选免费好书</text>
+        </div>
+        <block else>
+            <div class="edit" @click="fnEdit">
+                <image class="edit-img" src="{{ isEdit ? 'https://xsmfdq.kkyd.cn/images/hmxs/history-edit-cancel.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/history-edit.png' }}"></image>
+                <text class="edit-text">{{ isEdit ? '退出管理' : '管理记录' }}</text>
+            </div>
+            <list class="list {{ isEdit ? 'list-bottom' : 'list-normal' }}" @scrollbottom="fnLoadHistoryDetail">
+                <block for="currentBookList">
+                    <list-item type="bookItem{{ $item.bookId }}">
+                        <div class="book {{ $idx == 0 ? 'book-first' : '' }}" @click="fnBookClick($item, $idx)">
+                            <image class="book-cover" src="{{ $item.coverWap }}"></image>
+                            <div class="book-info">
+                                <text class="book-title">{{ $item.bookName }}</text>
+                                <text class="book-chapter">{{ '第' + $item.chapterIndex + '章' }}</text>
+                                <text class="book-role">{{ $item.rolename }}</text>
+                            </div>
+                            <text if="!isEdit" @click="fnBtnClick($item, $idx)" class="book-btn {{ $item.inBookshelf === 1 ? 'book-in' : '' }}">{{ $item.inBookshelf === 1 ? '继续阅读' : '加入书架'}}</text>
+                            <image if="isEdit" class="book-select" src="{{ $item.isSelect ? 'https://xsmfdq.kkyd.cn/images/hmxs/history-edit-selected.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/history-select-cancel.png' }}"></image>
+                        </div>
+                    </list-item>
+                </block>
+            </list>
+            <div if="isEdit" class="btns">
+                <div class="btn" @click="fnSelectAll">
+                    <image class="btn-img" src="{{ isSelectAll ? 'https://xsmfdq.kkyd.cn/images/hmxs/history-all-cancel.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/history-all-select.png' }}"></image>
+                    <text class="btn-text">{{ isSelectAll ? '取消全选' : '全选' }}</text>
+                </div>
+                <div class="btn" @click="fnDelete">
+                    <image class="btn-img" src="https://xsmfdq.kkyd.cn/images/hmxs/history-delete.png"></image>
+                    <text class="btn-text">删除</text>
+                </div>
+            </div>
+        </block>
+    </div>
+</template>
+<style lang="less" scoped>
+    .history {
+        flex-direction: column;
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        .empty {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding-bottom: 216px;
+            .empty-img {
+                width: 320px;
+                height: 200px;
+            }
+            .empty-text {
+                margin-top: 24px;
+                height: 40px;
+                line-height: 40px;
+                font-size: 28px;
+                color: #8E8E98;
+            }
+            .empty-btn {
+                width: 558px;
+                height: 80px;
+                line-height: 80px;
+                margin-top: 48px;
+                font-size: 32px;
+                color: #785AF6;
+                text-align: center;
+                border-radius: 48px;
+                background-color: rgba(120, 90, 246, 0.08);
+            }
+        }
+        .edit {
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 72px;
+            background-color: #F5F5F8;
+            .edit-img {
+                width: 32px;
+                height: 32px;
+            }
+            .edit-text {
+                height: 40px;
+                line-height: 40px;
+                margin-left: 8px;
+                color: #222;
+                font-size: 28px;
+            }
+        }
+        .list {
+            flex: 1;
+            width: 100%;
+            padding: 0px 32px;
+            .book {
+                align-items: center;
+                margin-bottom: 40px;
+                height: 146px;
+                .book-cover {
+                    width: 110px;
+                    height: 146px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(166, 166, 172, .24);
+                }
+                .book-info {
+                    flex-direction: column;
+                    width: 322px;
+                    height: 146px;
+                    margin-left: 24px;
+                    .book-title {
+                        width: 322px;
+                        height: 40px;
+                        line-height: 40px;
+                        margin-top: 8px;
+                        color: #222;
+                        font-size: 32px;
+                        font-weight: bold;
+                        text-overflow: ellipsis;
+                        lines: 1;
+                    }
+                    .book-chapter {
+                        height: 33px;
+                        line-height: 33px;
+                        margin-top: 16px;
+                        color: #8E8E98;
+                        font-size: 24px;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .book-role {
+                        height: 33px;
+                        line-height: 33px;
+                        margin-top: 8px;
+                        color: #8E8E98;
+                        font-size: 24px;
+                        text-overflow: ellipsis;
+                        lines: 1;
+                    }
+                }
+                .book-btn {
+                    width: 168px;
+                    height: 64px;
+                    margin-left: 62px;
+                    line-height: 64px;
+                    color: #785AF6;
+                    font-size: 28px;
+                    font-weight: bold;
+                    text-align: center;
+                    border-radius: 32px;
+                    background-color: rgba(120, 90, 246, 0.08);
+                }
+                .book-in {
+                    color: #8E8E98;
+                    background-color: #F5F5F8;
+                }
+                .book-select {
+                    flex-shrink: 0;
+                    margin-left: 186px;
+                    width: 44px;
+                    height: 44px;
+                }
+            }
+            .book-first {
+                margin-top: 40px;
+            }
+        }
+        .list-bottom {
+            margin-bottom: 120px;
+        }
+        .list-normal {
+            margin-bottom: 0px;
+        }
+        .btns {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+            height: 120px;
+            background-color: #FFFFFF;
+            border-top-width: 1px;
+            border-top-color: rgba(170, 170, 170, .2);
+            .btn {
+                align-items: center;
+                justify-content: center;
+                width: 50%;
+                .btn-img {
+                    width: 44px;
+                    height: 44px;
+                }
+                .btn-text {
+                    margin-left: 16px;
+                    height: 45px;
+                    font-size: 32px;
+                    color: #333333;
+                    line-height: 45px;
+                }
+            }
+        }
+    }
+</style>
+<script>
+    import storage from '@system.storage';
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    import common from '../Common/js/common.js';
+
+    export default {
+        private: {
+            cacheBookList: [], // 备份浏览记录
+            bookList: [], // 浏览记录
+            currentBookList: [], // 当前显示浏览记录
+            isEdit: false, // 编辑
+            isSelectAll: false, // 选择全部
+            isEmpty: true, // 浏览记录为空
+            isAll: false, //  浏览记录全部加载完成
+            currentPage: 1, // 当前页数
+            pageSize: 15, // 每页请求条数
+        },
+        onInit() {
+            this.$page.setTitleBar({ text: '浏览记录' });
+        },
+        onShow() {
+            this.$app.lastOpenPage = '';
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '浏览记录'
+            });
+            this.$app.$def.quickappLog([701], this);
+            this.fnInit();
+        },
+        onBackPress() {
+            if(this.isEdit) {
+                this.isEdit = false
+                this.currentBookList.forEach(currentBookInfo => {
+                    currentBookInfo.isSelect = false
+                })
+                this.isSelectAll = false
+                return true
+            }
+        },
+        /**
+         * 初始化页面
+         */
+        fnInit() {
+            this.bookList = []
+            this.currentBookList = []
+            this.cacheBookList = []
+            this.isEmpty = true
+            this.isAll = false
+            this.isEdit = false
+            this.isSelectAll = false
+            this.currentPage = 1
+            this.fnGetHistoryStorage()
+        },
+        /**
+         * 获取浏览记录缓存
+         */
+        fnGetHistoryStorage() {
+            console.log('获取浏览记录缓存')
+            let that = this
+            storage.get({
+                key: 'bookHistory',
+                success: function(cacheBookList) {
+                    let bookList = []
+                    if(cacheBookList) {
+                        try {
+                            bookList = JSON.parse(cacheBookList)
+                        } catch(err) { console.log(err) }
+                        if(bookList && bookList.length) {
+                            bookList.forEach(bookInfo => {
+                                bookInfo.isSelect = false
+                                if(!bookInfo.rolename) {
+                                    bookInfo.rolename = ''
+                                }
+                                if(!bookInfo.coverWap) {
+                                    bookInfo.coverWap = ''
+                                }
+                            })
+                            that.cacheBookList = bookList
+                            that.bookList = bookList
+                            that.isEmpty = false
+                            that.fnLoadHistoryDetail()  
+                        }
+                    }
+                }
+            })
+        },
+        /**
+         * 获取浏览记录详情
+         */
+        fnLoadHistoryDetail() {
+            console.log('获取浏览记录详情')
+            let that = this
+            if(that.isEmpty || that.isAll) {
+                return
+            }
+            let bookList = that.bookList.slice((that.currentPage - 1) * that.pageSize, that.currentPage * that.pageSize)
+            if(bookList.length != that.pageSize) {
+                that.isAll = true
+            }
+            let bookIds = []
+            bookList.forEach(bookInfo => {
+                if(that.isSelectAll) {
+                    bookInfo.isSelect = true
+                }
+                bookIds.push(bookInfo.bookId)
+            })
+            that.currentBookList.push(...bookList)
+            that.currentPage ++
+            if(bookIds.length) {
+                that.$app.$def.requestData(that, {
+                    interface: '/glory/fastapp/2823',
+                    data: {
+                        bookIds: bookIds.join(',')
+                    },
+                    succ: function (res) {
+                        if (res.retCode == 0 && res.data && res.data.list && res.data.list.length) {
+                            let bookInfoList = res.data.list
+                            that.currentBookList.forEach(currentBookInfo => {
+                                if(bookIds.indexOf(currentBookInfo.bookId) > -1) {
+                                    let bookInfo = bookInfoList.find(bookInfo => currentBookInfo.bookId == bookInfo.bookId)
+                                    if(bookInfo.protagonist && bookInfo.protagonist.length) {
+                                        if(bookInfo.protagonist.length == 1) {
+                                            bookInfo.rolename = bookInfo.protagonist[0]
+                                        }
+                                        if(bookInfo.protagonist.length > 1) {
+                                            bookInfo.rolename = bookInfo.protagonist[0] + ' ' + bookInfo.protagonist[1]
+                                        }
+                                    }
+                                    if(bookInfo.chapterId) {
+                                        currentBookInfo.chapterId = bookInfo.chapterId
+                                    }
+                                    if(bookInfo.chapterIndex) {
+                                        currentBookInfo.chapterIndex = bookInfo.chapterIndex
+                                    }
+                                    if(bookInfo.rolename) {
+                                        currentBookInfo.rolename = bookInfo.rolename
+                                    }
+                                    if(bookInfo.coverWap) {
+                                        currentBookInfo.coverWap = bookInfo.coverWap
+                                    }
+                                    if(bookInfo.inBookshelf) {
+                                        currentBookInfo.inBookshelf = bookInfo.inBookshelf
+                                    }
+                                    if(bookInfo.omap) {
+                                        currentBookInfo.omap = bookInfo.omap
+                                    }
+                                }
+                            })
+                            that.fnSetHistoryStorage()
+                        }
+                    }
+                })
+            }
+        },
+        /**
+         * 编辑模式
+         */
+        fnEdit() {
+            this.isEdit = !this.isEdit
+            // 退出编辑模式，重置书籍选中状态
+            if (!this.isEdit) {
+                this.isSelectAll = false;
+                this.currentBookList.forEach(currentBookInfo => {
+                    currentBookInfo.isSelect = false;
+                });
+            }
+        },
+        /**
+         * 单次选中
+         * @param {Object} bookInfo 书籍信息
+         */
+        fnSelect(bookInfo) {
+            if(!this.isEdit) {
+                return
+            }
+            let selectNums = 0
+            this.currentBookList.forEach(currentBookInfo => {
+                if(currentBookInfo.bookId == bookInfo.bookId) {
+                    currentBookInfo.isSelect = !currentBookInfo.isSelect
+                }
+                if(currentBookInfo.isSelect) {
+                    selectNums ++
+                }
+            })
+            this.isSelectAll = selectNums === this.cacheBookList.length;
+        },
+        /**
+         * 选中全部
+         */
+        fnSelectAll() {
+            this.isSelectAll = !this.isSelectAll
+            this.currentBookList.forEach(currentBookInfo => {
+                currentBookInfo.isSelect = this.isSelectAll ? true : false
+            })
+        },
+        /**
+         * 删除浏览记录
+         */
+        fnDelete: common.fnThrottle(function() {
+            let deleteArray = []
+            this.currentBookList.forEach(currentBookInfo => {
+                if(currentBookInfo.isSelect) {
+                    deleteArray.push(currentBookInfo.bookId)
+                }
+            })
+            if(deleteArray.length) {
+                this.currentBookList = this.currentBookList.filter(item => deleteArray.indexOf(item.bookId) == -1 );
+                this.cacheBookList = this.cacheBookList.filter(item => deleteArray.indexOf(item.bookId) == -1 );
+                if(this.currentBookList.length === 0 && this.cacheBookList.length !== 0) {
+                    this.fnLoadHistoryDetail()
+                }
+                if(this.cacheBookList.length === 0) {
+                    this.isEmpty = true
+                    this.isEdit = false
+                    this.isSelectAll = false
+                }
+                prompt.showToast({
+                    message: '删除成功'
+                })
+                this.fnSetHistoryStorage()
+            } else {
+                prompt.showToast({
+                    message: '请选中您要删除的记录'
+                })  
+            }
+        }, 500),
+        /**
+         * 去书城
+         */
+        fnToStore: common.fnThrottle(function() {
+            router.push({
+                uri: '/Index',
+                params: {
+                    cardIndex: 1,
+                }
+            })
+        }),
+        /**
+         * 书籍按钮点击
+         * @param {Object} bookInfo 书籍信息
+         * @param {Object} index 书籍索引
+         * @param {Object} evt 事件参数
+         */
+        fnBtnClick(bookInfo, index, evt) {
+            evt && evt.stopPropagation && evt.stopPropagation()
+            if(bookInfo.inBookshelf === 1) {
+                this.fnToRead(bookInfo, index)
+            } else {
+                this.fnAddToBookShelf(bookInfo)
+            }
+        },
+        /**
+         * 书籍阅读
+         * @param {Object} bookInfo 书籍信息
+         * @param {Object} index 书籍索引
+         */
+        fnToRead(bookInfo, index) {
+            let omap = {}
+            try {
+                if(bookInfo.omap){
+                    omap = JSON.parse(bookInfo.omap)
+                }
+            } catch(err) { console.log(err) }
+            router.push({
+                uri: '/Read',
+                params: {
+                    bookId: bookInfo.bookId,
+                    chapterId: bookInfo.chapterId,
+                    pageFrom: '/History',
+                    SourcePosition: index,
+                    omap: omap,
+                    isUpdateOmap: 0,
+                }
+            })
+        },
+        /**
+         * 书籍加入书架
+         * @param {Object} bookInfo 书籍信息
+         */
+        fnAddToBookShelf(bookInfo) {
+            if (bookInfo.isAddingBookShelf) {
+                return false;
+            }
+            bookInfo.isAddingBookShelf = true;
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                PositionName: '加入书架-浏览记录',
+                ButtonName: '浏览记录加入书架',
+                ButtonContent: '加入书架',
+                BookID: bookInfo.bookId || '',
+            });
+            let result = common.fnAddBookToBookShelf.call(this, {
+                bookId: bookInfo.bookId,
+                chapterId: bookInfo.chapterId,
+                omap: this.omap ? JSON.stringify(this.omap) : '',
+                title: '浏览记录'
+            });
+            result.then(res => {
+                bookInfo.isAddingBookShelf = false;
+                if (!res) {
+                    prompt.showToast({
+                        message: '加入书架失败'
+                    });
+                    return false;
+                }
+                bookInfo.inBookshelf = 1;
+                prompt.showToast({
+                    message: '已加入书架'
+                });
+                this.fnSetHistoryStorage();
+                this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                    PositionName: '加入书架-浏览记录',
+                    ButtonName: '浏览记录加入书架成功',
+                    ButtonContent: '加入书架',
+                    BookID: bookInfo.bookId || ''
+                });
+            });
+        },
+        /**
+         * 更新浏览记录缓存
+         */
+        fnSetHistoryStorage() {
+            console.log('更新浏览记录缓存')
+            let cacheBookList = this.cacheBookList.map(({ bookId, bookName, chapterId, chapterIndex, rolename, coverWap, inBookshelf, omap }) => ({ bookId, bookName, chapterId, chapterIndex, rolename, coverWap, inBookshelf, omap }))
+            storage.set({
+                key: 'bookHistory',
+                value: JSON.stringify(cacheBookList),
+            })
+        },
+        /**
+         * 书籍点击
+         * @param {Object} bookInfo 书籍信息
+         * @param {Object} index 书籍索引
+         */
+        fnBookClick(bookInfo, index) {
+            if(this.isEdit) {
+                this.fnSelect(bookInfo)
+            } else {
+                this.fnToRead(bookInfo, index)
+            }
+        },
+    }
+</script>

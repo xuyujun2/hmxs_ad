@@ -1,0 +1,263 @@
+<template>
+    <div class="pay-advance" @click="vagueClick">
+        <div class="pay-pop">
+            <div class="vague"></div>
+            <stack class="pay">
+                <div class="pay-content">
+                    <div class="tit">
+                        <image src="https://xsmfdq.kkyd.cn/images/advance-tit-left.png"></image>
+                        <text>应作者要求，后续章节需付费</text>
+                        <image src="https://xsmfdq.kkyd.cn/images/advance-tit-right.png"></image>
+                    </div>
+                    <stack class="tag">
+                        <block if="{{beforePayVo.corner}}">
+                            <image src="https://xsmfdq.kkyd.cn/images/advance-tag.png"></image>
+                            <text>{{beforePayVo.corner}}</text>
+                        </block>
+                    </stack>
+                    <text class="btn" @click="toPay">{{beforePayVo.price}}{{beforePayVo.type==2?'书币':'元'}}订购</text>
+                    <text class="tips">第{{beforePayVo.beginChapter}}-{{beforePayVo.endChapter}}章 共{{beforePayVo.endChapter-beforePayVo.beginChapter+1}}章</text>
+                </div>
+                <div class="bg-night" if="{{bgNight}}"></div>
+                <image class="pay-close" src="https://xsmfdq.kkyd.cn/images/advance-close.png" @click="pageBack"></image>
+            </stack>
+        </div>
+        <div class="sign-pop" if="{{showSign}}">
+            <stack class="sign">
+                <div class="sign-content">
+                   <text class="tit">{{beforePayVo.retentionVO.title}}</text>
+                   <text class="tips">{{beforePayVo.retentionVO.desc}}</text>
+                   <text class="btn" @click="toSign">去做任务</text>
+                </div>
+                <image class="sign-close" @click="closeSignpop" src="https://xsmfdq.kkyd.cn/images/advance-close.png"></image>
+            </stack>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .pay-advance{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        .pay-pop{
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            .vague{
+                width: 100%;
+                flex: 1;
+                background-color: rgba(0, 0, 0, .7);
+                /* background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%,rgba(0, 0, 0, 0) 70%, rgba(246, 204, 158, 0.89) 90%, rgba(246, 204, 158, 1) 100%) */
+            }
+            .pay{
+                width: 100%;
+                height: 608px;
+                background-color: rgba(0, 0, 0, .7);
+                .bg-night{
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, .5);
+                }
+                .pay-content{
+                    width: 100%;
+                    height: 100%;
+                    background-color: #ffffff;
+                    flex-direction: column;
+                    align-items: center;
+                    border-top-left-radius: 24px;
+                    border-top-right-radius: 24px;
+                    .tit{
+                        justify-content: center;
+                        align-items: center;
+                        margin-top: 98px;
+                        image{
+                            width: 60px;
+                            height: 2px;
+                        }
+                        text{
+                            font-size: 30px;
+                            line-height: 42px;
+                            color: #666A7D;
+                            margin: 0px 20px;
+                        }
+                    }
+                    .tag{
+                        width: 120px;
+                        height: 49px;
+                        margin-top: 62px;
+                        margin-left: 542px;
+                        align-self: flex-start;
+                        image{
+                            width: 100%;
+                            height: 100%;
+                        }
+                        text{
+                            font-size: 24px;
+                            height: 33px;
+                            margin-top: 5px;
+                            color: #FFFFFF;
+                            width: 100%;
+                            text-align: center;
+                        }
+                    }
+                    .btn{
+                        width: 640px;
+                        height: 100px;
+                        background-color: #F97053;
+                        border-radius: 59px;
+                        text-align: center;                        
+                        font-size: 36px;
+                        font-weight: bold;
+                        color: #FFFFFF;
+                        margin-top: 1px;
+                    }
+                    .tips{
+                        font-size: 30px;
+                        color: #444444;
+                        line-height: 42px;
+                        margin-top: 30px;
+                    }
+                }
+                .pay-close{
+                    width: 48px;
+                    height: 48px;
+                    margin-top: 10px;
+                    margin-left: 692px
+                }
+            }
+        }
+        .sign-pop{
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            .sign{
+                width: 600px;
+                height: 330px;
+                .sign-content{
+                    width: 100%;
+                    height: 100%;
+                    background-color: #FFFFFF;
+                    border-radius: 24px;               
+                    flex-direction: column;
+                    align-items:center;
+                    .tit{
+                        font-size: 34px;
+                        font-weight: bold;
+                        color: #272932;
+                        line-height: 48px;
+                        margin-top: 48px;
+                    }
+                    .tips{
+                        font-size: 28px;
+                        color: #272932;
+                        line-height: 40px;
+                        margin-top: 30px;
+                    }
+                    .btn{
+                        width: 480px;
+                        height: 90px;
+                        background-color: #F97053;
+                        border-radius: 59px;
+                        text-align: center;                        
+                        font-size: 34px;
+                        font-weight: bold;
+                        color: #FFFFFF;
+                        margin-top: 44px;
+                    }
+                }
+                .sign-close{
+                    width: 48px;
+                    height: 48px;
+                    margin-top: 10px;
+                    margin-left: 542px
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+import router from '@system.router'
+import prompt from '@system.prompt'
+export default {
+    props:[
+        'bgColor',
+        'beforePayVo',
+        'showSign',
+        'bookId',
+        'chapterId',
+        'chapterIndex',
+        'omap',
+        'bgNight'
+    ],
+    data: {
+        signPop:true
+    },
+    onInit() {
+        let that = this
+        console.log(that.bgColor)
+    },
+    closeSignpop(){
+        this.$emit('closeAdvanceSign')
+    },
+    toSign(){
+        this.$parent().advanceSign=1
+        router.push({
+            uri:'/Sign',
+            sourcePage: '阅读页-提前付费挽留',
+        })
+        let that = this
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: '提前付费挽留-去做任务',
+            ButtonContent: '去做任务',
+            Title: '阅读页',
+            BookID: that.bookId || '',
+        });
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    },
+    pageBack(){
+        this.$parent().pageBackPress();
+    },
+    toPay(){
+        let that = this
+        if(that.beforePayVo.type==2){
+            that.$app.$def.requestData(that, {
+                interface: `/glory/fastapp/2156`,
+                data: {
+                    bookId: that.bookId,
+                },
+                succ: function (res) {
+                    prompt.showToast({
+                        message:'订购成功'
+                    })
+                    that.$emit('closeAdvance')
+                }
+            })
+        }else{
+            router.push({
+                uri:'/AdvancePay',
+                params:{
+                    chapterIndex:that.chapterIndex,
+                    bookId: that.bookId,
+                    chapterId: that.chapterId,
+                    omap: that.omap,
+                    type: 'advancePay',
+                    bookName: that.bookName || ''
+                }
+            })
+        }
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: '提前付费订购',
+            ButtonContent: that.beforePayVo.price + (that.beforePayVo.type == 2 ? '书币' : '元') + '订购',
+            Title: '阅读页',
+            BookID: that.bookId || ''
+        });
+    }
+}
+</script>
+

@@ -1,0 +1,325 @@
+<template>
+  <div class="MyFeedbackContent">
+    <div class="feedback-user-info">
+      <div class="userid-time">
+        <text class="userid">{{userId}}</text>
+        <text class="time">{{formatTime(ctime)}}</text>
+      </div>
+      <image class="user-head-img" src="{{userHeaderJson.t ? 'https://xsmfdq.kkyd.cn/images/hmxs/mfb-user-head.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/nologin.png'}}"></image>
+    </div>
+    <div class="feedback-content">
+      <text class="text">{{feedbackContent}}</text>
+    </div>
+    <div class="feedback-tip">
+      <text class="text">您的反馈将在1-3个工作日内收到回复，感谢您的支持！</text>
+    </div>
+    <div class="kefu-info" if={{answerContent}}>
+      <image class="kefu-head-img" src="https://xsmfdq.kkyd.cn/images/hmxs/mfb-kefu-head.png"></image>
+      <div class="name-time">
+        <text class="name">河马客服</text>
+        <text class="time">{{formatTime(answerTime)}}</text>
+      </div>
+    </div>
+    <div class="kefu-answer {{zhichiWebSrc ? 'kefu-answer-extra' : ''}}" if={{answerContent}}>
+      <text class="anser-text {{!zhichiWebSrc ? 'anser-text-extra' : ''}}">{{answerContent}}</text>
+      <div class="tip" if={{zhichiWebSrc}}>
+        <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/mfb-kefu.png"></image>
+        <text class="tip-text">如问题未解决，请联系在线客服</text>
+      </div>
+    </div>
+    <div class="mfb-tab">
+      <div class="kefu" if={{zhichiWebSrc}} @click="fnRoutetoOther('/ZhichiService')">
+          <image class="kefu-img" src="https://xsmfdq.kkyd.cn/images/hmxs/hfb-kefu.png"></image>
+          <text class="kefu-text">在线客服</text>
+      </div>
+      <div class="feedback {{zhichiWebSrc ? '' : 'feedbackSingle'}}" @click="fnRoutetoOther('/FeedBack')">
+          <image class="feedback-img" src="https://xsmfdq.kkyd.cn/images/hmxs/hfb-feedback.png"></image>
+          <text class="feedback-text">我要反馈</text>
+       </div>
+     </div>
+  </div>
+</template>
+<style lang="less" scoped>
+  .MyFeedbackContent{
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px 0;
+    margin-bottom: 120px;
+    background-color: rgba(245, 245, 248, 1);
+    .feedback-user-info{
+      width: 100%;
+      justify-content: flex-end;
+      align-items: center;
+      height: 72px;
+      .userid-time{
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-end;
+        margin-right: 16px;
+        .userid{
+          height: 33px;
+          line-height: 33px;
+          font-size: 24px;
+          color: #222222;
+        }
+        .time{
+          height: 33px;
+          line-height: 33px;
+          font-size: 24px;
+          color: #B2B2BD;
+          margin-top: 6px;
+        }
+      }
+      .user-head-img{
+        width: 72px;
+        height: 72px;
+      }
+    }
+    .feedback-content{
+      width: 526px;
+      margin-top: 16px;
+      margin-right: 88px;
+      justify-content: flex-end;
+      align-self: flex-end; 
+      .text{
+        padding: 24px;
+        font-size: 30px;
+        color: #222222;
+        line-height: 42px;
+        border-radius: 24px;
+        border-top-right-radius: 4px;
+        background-color: rgba(120, 90, 246, 0.08);
+      }
+    }
+    .feedback-tip{
+      margin-top: 63px;
+      padding: 8px 20px;
+      background-color: #FFFFFF;
+      border-radius: 25px;
+      .text{
+        height: 33px;
+        line-height: 33px;
+        font-size: 24px;
+        color: #FF9B7D;
+      }
+    }
+    .kefu-info{
+      justify-content: flex-start;
+      align-items: center;
+      height: 72px;
+      width: 100%;
+      margin-top: 56px;
+      .kefu-head-img{
+         width: 72px;
+         height: 72px;
+      }
+      .name-time{
+         flex-direction: column;
+         justify-content: center;
+         align-items: flex-start;
+         margin-left: 16px;
+         .name{
+           height: 33px;
+           line-height: 33px;
+           font-size: 24px;
+           color: #222222;
+         }
+         .time{
+           height: 33px;
+           line-height: 33px;
+           font-size: 24px;
+           color: #B2B2BD;
+         }
+      }
+    }
+    .kefu-answer{
+      width: 526px;
+      margin-top: 16px;
+      margin-left: 88px;
+      flex-direction: column;
+      align-items: center;
+      align-self: flex-start;
+      .anser-text{
+        line-height: 42px;
+        font-size: 30px;
+        color: #222222;
+        align-self: flex-start;
+      }
+      .tip{
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+        .icon{
+          width: 32px;
+          height: 32px;
+          margin-right: 8px;
+        }
+        .tip-text{
+          height: 32px;
+          line-height: 32px;
+          font-size: 24px;
+          color: #8E8E98;
+        }
+      }
+    }
+    .anser-text-extra{
+      padding: 24px;
+      border-radius: 24px;
+      border-top-left-radius: 4px;
+      background-color: rgba(255, 255, 255, 1);
+    }
+    .kefu-answer-extra{
+      padding: 24px;
+      border-radius: 24px;
+      border-top-left-radius: 4px;
+      background-color: rgba(255, 255, 255, 1);
+    }
+    .mfb-tab{
+        width: 100%;
+        height: 120px;
+        position: fixed;
+        bottom: 0;
+        padding: 16px 0px 24px;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 1);
+        .kefu{
+            width: 326px;
+            height: 80px;
+            padding: 18px 0;
+            border-radius: 16px;
+            border: 2px solid #785AF6;
+            margin-right: 18px;
+            justify-content: center;
+            align-items: center;
+            .kefu-img{
+                width: 44px;
+                height: 44px;
+                margin-right: 8px;
+            }
+            .kefu-text{
+                font-size: 32px;
+                font-weight: bold;
+                color: #785AF6;
+            }
+        }
+        .feedback{
+            width: 326px;
+            height: 80px;
+            padding: 18px 0;
+            border-radius: 16px;
+            background-color: #785AF6;
+            justify-content: center;
+            align-items: center;
+            .feedback-img{
+                width: 44px;
+                height: 44px;
+                margin-right: 8px;
+            }
+            .feedback-text{
+                font-size: 32px;
+                font-weight: bold;
+                color: #FFFFFF;
+            }
+        }
+        .feedbackSingle{
+           width: 670px;
+        }
+    }
+  }
+</style>
+<script>
+  import storage from '@system.storage';
+  import router from '@system.router';  
+  import app from '@system.app';
+  import prompt from '@system.prompt'
+    
+  export default {
+    data(){
+        return{
+          id: '',  // 反馈详情id
+          ctime: '', // 反馈时间
+          answerTime: '', // 回答时间
+          feedbackContent: '', //反馈内容
+          answerContent: '', //回答内容
+          answerStatus: '', // 回复状态 0 待回复  1 已回复但未读  2 已回复已读
+          zhichiWebSrc: '', // 第三方智齿链接
+          userHeaderJson: '',
+          userId: ''
+        }
+    },
+    onInit () {
+        this.$page.setTitleBar({ text: '我的反馈'})
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            Title: '我的反馈-详情'
+        });
+        this.feedbackContent = this.$app.getAppData('feedbackAnswerContent').feedbackContent
+        this.answerContent = this.$app.getAppData('feedbackAnswerContent').answerContent
+        this.fnGetHeaderJson()
+        this.fnReportPage()
+    },
+    onShow(){
+        this.$app.lastOpenPage = ''
+    },
+    onHide() {
+        // pageLeave(this.$page.path);
+    },
+    fnGetHeaderJson() {
+      this.userHeaderJson = this.$app.headerJson
+      this.userId = this.userHeaderJson && this.userHeaderJson.userId || '';
+    },
+    // 上报页面，获取未阅读条数
+    fnReportPage(){
+        let that = this
+        if(that.answerStatus != 1){
+          return false
+        }
+        that.$app.$def.requestData(that, {
+            interface: '/glory/fastapp/2813',
+            data: {ids: that.id},
+            succ: function (res) {
+                if (res.retCode == 0 && res.data) {
+                  that.$app.setAppData('feedbackNum', res.data.feedbackNum)
+                }
+            },
+            error: function (code) {
+            },
+        })
+    },
+    //跳转客服
+    fnRoutetoOther(url){
+        let params = {}
+        if(url === '/ZhichiService') {
+            if(this.zhichiWebSrc) {
+                params.zhichiWebSrc = this.zhichiWebSrc
+            }
+        }
+        router.push({
+            uri: url,
+            params: params
+        })
+    },
+    // 格式化日期，如月、日、时、分、秒保证为2位数
+    formatNumber(n) {
+      n = n.toString();
+      return n[1] ? n : "0" + n;
+    },
+    // 转化时间戳
+    formatTime(number) {
+      let time = new Date(+number);
+      let newArr = [];
+      let formatArr = ["Y", "M", "D", "h", "m", "s"];
+      newArr.push(time.getFullYear());
+      newArr.push(this.formatNumber(time.getMonth() + 1));
+      newArr.push(this.formatNumber(time.getDate()));
+
+      newArr.push(this.formatNumber(time.getHours()));
+      newArr.push(this.formatNumber(time.getMinutes()));
+      newArr.push(this.formatNumber(time.getSeconds()));
+      let format = "Y-M-D  h:m:s";
+      for (let i in newArr) {
+        format = format.replace(formatArr[i], newArr[i]);
+      }
+      return format;
+    }
+  }
+</script>

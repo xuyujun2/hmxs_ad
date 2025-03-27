@@ -1,0 +1,428 @@
+<template>
+    <div>
+        <block if="{{!bHasShortcut&&isshortcutshow}}">
+            <image if="{{isAddDeskBtnClose}}" class="close-image" src="../Common/images/add-desk-btn-close.png" @click="fnCloseAddDesk"></image>
+            <div class="btnwrap" if="{{vivoSupport}}" >
+                <stack class="vivo-shortcut" @click="fnAddShortcut">
+                    <vivo-shortcutbtn value="{{buttext ? buttext : '添加到桌面'}}" @click="addShortcutVivo"></vivo-shortcutbtn>
+                </stack>
+            </div>
+            <div class="btnwrap" if="{{oppoSupport}}">
+                <stack class="oppo-shortcut" @click="fnAddShortcut">
+                    <input type="{{eventbutton}}" eventtype="{{eventtype}}" class="oppo-btn" value="{{ buttext ? buttext : '保存本书到手机，方便下次阅读' }}" @click="addShortcutOppo"/>
+                </stack>
+            </div>
+            <div class="btnwrap" if="{{huaweiSupport}}">
+                <stack class="huawei-shortcut" @click="fnAddShortcut">
+                    <shortcut-button class="huawei-btn" value="{{ buttext ? buttext : '保存本书到手机，方便下次阅读' }}" @click="addShortcutHuawei"></shortcut-button>
+                </stack>
+            </div>
+        </block>
+    </div>
+</template>
+<style scoped lang="less">
+    .close-image {
+        position: fixed;
+        width: 34px;
+        height: 34px;
+        right: 40px;
+        bottom: 236px;
+    }
+    .btnwrap {
+        justify-content: center;
+        position: fixed;
+        width: 100%;
+        height: 80px;
+        bottom: 146px;
+    }
+    .vivo-shortcut {
+        width: 670px;
+        justify-content: center;
+        height: 80px;
+        background-color: rgba(224, 67, 69, 1);
+        border-radius: 40px;
+        align-items: center;
+        vivo-shortcutbtn {
+            width: 670px;
+            height: 80px;
+            font-size: 38px;
+            color: rgba(255, 255, 255, 1);
+            lines: 1; 
+            text-overflow: ellipsis;
+            text-align: center;
+            background-color: rgba(224, 67, 69, 1);
+            border-radius: 40px;
+        }
+    }
+    .oppo-shortcut {
+        width: 670px;
+        justify-content: center;
+        height: 80px;
+        background-color: rgba(224, 67, 69, 1);
+        border-radius: 40px;
+        align-items: center;
+        .oppo-btn {
+            width: 670px;
+            line-height: 80px;
+            font-size: 38px;
+            color: rgba(255, 255, 255, 1);
+            lines: 1; text-overflow: ellipsis;
+            text-align: center;
+            background-color: rgba(224, 67, 69, 1);
+            border-radius: 40px;
+        }
+    }
+    .huawei-shortcut {
+        width: 670px;
+        justify-content: center;
+        height: 80px;
+        background-color: rgba(224, 67, 69, 1);
+        border-radius: 40px;
+        align-items: center;
+        .huawei-btn {
+            width: 670px;
+            line-height: 80px;
+            font-size: 38px;
+            color: rgba(255, 255, 255, 1);
+            lines: 1; text-overflow: ellipsis;
+            text-align: center;
+            background-color: rgba(224, 67, 69, 1);
+            border-radius: 40px;
+        }
+    }
+</style>
+<script>
+import prompt from '@system.prompt'
+import shortcut from '@system.shortcut';
+export default {
+    props: ['frompage', 'destext', 'buttext', 'isshortcutshow','chapterIndex','shortbtntype','cutSupport','isCoin','systemtext','isAddDeskBtnClose','bookId'],
+    data: {
+        vivoSupport: false,
+        oppoSupport: false,
+        huaweiSupport: false,
+        bHasShortcut: true,
+        eventbutton:'eventbutton',
+        eventtype:'shortcut',
+    },
+    onInit() {
+        this.vivoSupport = this.cutSupport.vivoSupport
+        this.oppoSupport = this.cutSupport.oppoSupport
+        this.huaweiSupport = this.cutSupport.huaweiSupport
+        this.fnDetectShortcut();
+    },
+    fnDetectShortcut() {
+        let that = this;
+        let _infotype = that.$app.dataJson.infotype || 'nfind';
+        if(_infotype == 'shortcut' && that.frompage == "read"){
+            setTimeout(() => {
+                if(that.$valid) {
+                    that.$emit('togglebtn');
+                }
+            }, 200)
+        }else{
+            shortcut.hasInstalled({
+                success: function (res) {
+                    if (res) {
+                        if(that.$valid) {
+                            that.$emit('togglebtn')
+                        }
+                    }else{
+                        that.bHasShortcut = false;
+                    }
+                },
+                fail(data, code) {
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:'shortcut_hasInstalled_fail',
+                            thisUri:that.$page.uri,
+                            thisPage:"shortcut-btn",
+                            data,
+                            code
+                        }
+                    }, 'catch_error'], that)
+                },
+                complete(errdata, errcode) {}
+            })
+        }
+    },
+    addShortcutVivo(e){
+        let that = this
+        that.isClick = true
+        setTimeout(() => {
+            that.isClick = false
+        }, 1000)
+        let code = e.eventStatusCode
+        let msg = e.eventMessage
+        that.fnReportBtnClick()
+        if(code==0){
+            that.shortcutSuccess(code,msg)
+        }else{
+            that.shortcutFail(code,msg)
+        }
+        that.shortcutComplete(code,msg)
+    },
+    addShortcutOppo(e) {
+        let that = this
+        that.isClick = true
+        setTimeout(() => {
+            that.isClick = false
+        }, 1000)
+        let code = e.event_status_code
+        let msg = e.event_message
+        that.fnReportBtnClick()
+        if(code==0){
+            that.shortcutSuccess(code,msg)
+        }else{
+            that.shortcutFail(code,msg)
+        }
+        that.shortcutComplete(code,msg)
+    },
+    addShortcutHuawei(e) {
+        let that = this
+        that.isClick = true
+        setTimeout(() => {
+            that.isClick = false
+        }, 1000)
+        if(e.eventStatusCode || e.eventStatusCode === 0) {
+            let code = e.eventStatusCode
+            let msg = e.eventMessage
+            that.fnReportBtnClick()
+            if(code==0){
+                that.shortcutSuccess(code,msg)
+            }else{
+                that.shortcutFail(code,msg)
+            }
+            that.shortcutComplete(code,msg)
+        }
+    },
+    shortcutSuccess(code,msg){
+        let that = this
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            IsSuccess: true,
+            PositionName: '一键加桌-' + (that.frompage == 'index' ? '首页' : '阅读页') + '底部悬浮按钮',
+            ChaptersNum: that.frompage == 'index' ? -1 : that.chapterIndex,
+            ButtonContent: that.buttext,
+            StateCode: 'return'
+        }); 
+        //来源写入变量
+        that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+        that.bHasShortcut = true;
+        if(that.$valid) {
+            that.$emit('togglebtn')
+        }
+        that.fnTellServer(1);
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '2',
+                page: that.destext,
+                cIndex:that.chapterIndex,
+                sorce:'fiexd_but_shortcut',
+                thisPage: 'short-btn-onekey'
+            }
+        }, 'shortcut'], that)
+        that.$app.$def.requestData(that,{
+            interface: `/glory/fastapp/2107`,
+            data: {
+                isas:1,
+                isAward:that.shortbtntype==2?1:0
+            },
+            succ: function (res) {
+                if(res.data.atTip&&that.shortbtntype==2){
+                    that.$app.shortSuccessText = res.data.atTip
+                }
+                if(res.data.freeLimitAll){
+                    that.$app.shortSuccessText = res.data.freeLimitAll
+                }
+                that.$emit('showshortsuccess')
+            },
+            error: function (code) {
+                that.$emit('showshortsuccess')
+            }
+        })
+    },
+    shortcutFail(code,msg){
+        let that = this
+        console.log('shortcut_install fail')
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            IsSuccess: false,
+            PositionName: '一键加桌-' + (that.frompage == 'index' ? '首页' : '阅读页') + '底部悬浮按钮',
+            ChaptersNum: that.frompage == 'index' ? -1 : that.chapterIndex,
+            ButtonContent: that.buttext,
+            StateCode: 'return',
+            MsgSendCode: code,
+            MsgSendContent: msg,
+            
+        });
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '3',
+                page: that.destext,
+                cIndex:that.chapterIndex,
+                source:'fiexd_but_shortcut',
+                thisUri: that.$page.uri,
+                thisPage: 'short-btn-onekey',
+                msg,
+                code
+            }
+        }, 'shortcut'], that)
+        that.$emit('vivopush')
+    },
+    shortcutComplete(code,msg){
+        let that = this
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '5',
+                errmsg: `${msg}`,
+                code: `${code}`,
+                page: that.destext,
+                cIndex:that.chapterIndex,
+                sorce:'fiexd_but_shortcut',
+                thisPage: 'short-btn-onekey'
+            }
+        }, 'shortcut'], that)
+    },
+    fnTellServer(taskAction) {
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2146',
+                data: { action: taskAction },
+                succ: function (res) {
+                }
+            }
+        )
+    },
+    fnAddShortcut() {
+        let that = this
+        if(that.isClick) {
+            return
+        }
+        shortcut.install({
+            message: that.systemtext,
+            success: function () {
+                console.log('shortcut_install success');
+                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                    IsSuccess: true,
+                    PositionName: (that.frompage == 'index' ? '首页' : '阅读页') + '浮窗按钮',
+                    ChaptersNum: that.frompage == 'index' ? -1 : that.chapterIndex,
+                    ButtonContent: that.buttext,
+                    Instruction: that.systemtext,
+                    StateCode: 'return'
+                }); 
+                //来源写入变量
+                that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+                prompt.showToast({
+                    message: '创建桌面图标成功'
+                })
+                that.bHasShortcut = true;
+                if(that.$valid) {
+                    that.$emit('togglebtn')
+                }
+                that.fnTellServer(1);
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '2',
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        sorce:'fiexd_but_shortcut'
+                    }
+                }, 'shortcut'], that)
+                that.$app.$def.requestData(that,{
+                    interface: `/glory/fastapp/2107`,
+                    data: {
+                        isas:1,
+                        isAward:that.shortbtntype==2?1:0
+                    },
+                    succ: function (res) {
+                        if(res.data.atTip&&that.shortbtntype==2){
+                            that.$app.shortSuccessText = res.data.atTip
+                        }
+                        if(res.data.freeLimitAll){
+                            that.$app.shortSuccessText = res.data.freeLimitAll
+                        }
+                        that.$emit('showshortsuccess')
+                    },
+                    error: function (code) {
+                        that.$emit('showshortsuccess')
+                    }
+                })
+            },
+            fail: function (data, code) {
+                console.log('shortcut_install fail')
+                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                    IsSuccess: false,
+                    PositionName: (that.frompage == 'index' ? '首页' : '阅读页') + '浮窗按钮',
+                    ChaptersNum: that.frompage == 'index' ? -1 : that.chapterIndex,
+                    ButtonContent: that.buttext,
+                    Instruction: that.systemtext,
+                    StateCode: 'return',
+                    MsgSendCode: code,
+                    MsgSendContent: data,
+                }); 
+                prompt.showToast({
+                    message: '创建桌面图标失败'
+                })
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '3',
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        source:'fiexd_but_shortcut',
+                        thisUri: that.$page.uri,
+                        thisPage: 'short-btn',
+                        data,
+                        code
+                    }
+                }, 'shortcut'], that)
+                that.$emit('vivopush')
+            },
+            complete(errmsg) {
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '5',
+                        errmsg: `${errmsg}`,
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        sorce:'fiexd_but_shortcut'
+                    }
+                }, 'shortcut'], that)
+            }
+        })
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: (that.frompage=='index'?'首页':'阅读页')+'加桌浮窗',
+            ButtonContent: that.buttext || '',
+            BookID: that.bookId || ''
+        });
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            PositionName: (that.frompage == 'index' ? '首页' : '阅读页') + '浮窗按钮',
+            ChaptersNum: that.frompage == 'index' ? -1 : that.chapterIndex,
+            ButtonContent: that.buttext,
+            Instruction: that.systemtext,
+            StateCode: 'submit',
+            DesktopState: that.$app.isAddDesktop ? 'Deleted' : 'Neversaved'
+        }); 
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                page: that.systemtext,
+                cIndex:that.chapterIndex,
+                sorce:'fiexd_but_shortcut'
+            }
+        }, 'shortcut'], that)
+    },
+    fnReportBtnClick() {
+        let that = this
+        that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+            PositionName: '一键加桌-' + (that.frompage == 'index' ? '首页' : '阅读页') + '底部悬浮按钮',
+            ButtonName: '加桌按钮',
+            Title: that.frompage == 'index' ? '首页' : '阅读页',
+            ButtonContent: that.buttext || '',
+            BookID: that.bookId || ''
+        });
+    },
+    fnCloseAddDesk(e) {
+        e && e.stopPropagation && e.stopPropagation()
+        this.$emit('closeAddDesk')
+    },
+}
+</script>

@@ -1,0 +1,259 @@
+<template>
+   <div class="pop-order" @click="vagueClick">
+        <stack class="pop-stack">
+            <div class="pop">
+                <text class="title">{{unit==1?'购买本书':'购买章节'}}</text>
+                <text class="chapter-n">{{unit==1?'《'+bookname+'》':chapter}}</text>
+                <text class="price"><span class="big">{{price}}</span><span class="small">书币</span></text>
+                <div class="line">
+                    <div class="text-con">
+                        <text class="text">书币余额</text>
+                        <text class="text">{{coin}}书币</text>
+                    </div>
+                    <div class="text-con" if="{{unit==2}}" @click="toggleAuto">
+                        <text class="text">自动购买下一章</text>
+                        <image class="select" src="{{isAuto?'https://xsmfdq.kkyd.cn/images/order-edit-select.png':'https://xsmfdq.kkyd.cn/images/order-edit-nolm.png'}}"></image>   
+                    </div>
+                </div>
+                <div class="button" @click="btnClick">
+                    <text>{{viptips?viptips:(enough?unit==1?'购买本书':'购买本章':'书币余额不足，去充值')}}</text>
+                </div>
+            </div>
+            <image class="close" @click="closePop" src="https://xsmfdq.kkyd.cn/images/close-btn-grey.png"></image>
+        </stack>
+   </div>
+</template>
+<style scoped lang="less">
+    .pop-order{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background-color: rgba(0, 0, 0, .8);
+        flex-direction: column;
+        justify-content: flex-end;
+        .pop-stack{
+            width: 100%;
+            .pop{
+                width: 100%;
+                flex-direction: column;
+                padding: 30px 55px;
+                align-items: center;
+                background-color: #fff;
+                border-top-left-radius: 36px;
+                border-top-right-radius: 36px;
+                .title{
+                    font-size:30px;
+                    color:rgba(188,188,188,1);
+                    margin-top: 6px;
+                }
+                .chapter-n{
+                    font-size:36px;
+                    font-weight:bold;
+                    color:rgba(68,68,68,1);
+                    margin-top: 51px;
+                }
+                .price{
+                    margin-top: 45px;
+                    align-items: flex-end;
+                    .big{
+                        font-size:48px;
+                        font-weight:bold;
+                        color:rgba(255,91,96,1);
+                    }
+                    .small{
+                        font-size:26px;
+                        font-weight:bold;
+                        color:rgba(255,91,96,1);
+                    }
+                }
+                .line{
+                    width: 100%;
+                    flex-direction: column;
+                    padding: 30px 0px;
+                    margin-top: 50px;
+                    border-top-color: #DFDFDF;
+                    border-top-width: 1px;
+                    border-bottom-color: #DFDFDF;
+                    border-bottom-width: 1px;
+                }
+                .text-con{
+                    width: 100%;
+                    justify-content: space-between;
+                    align-items: center;
+                    .text{
+                        font-size:30px;
+                        line-height:90px;
+                        color:rgba(68,68,68,1);
+                    }
+                    .select{
+                        width:40px;
+                        height:40px;
+                    }
+                    
+                }
+                .button{
+                    width:100%;
+                    height:80px;
+                    background-color: #FD895A;
+                    border-radius:47px;
+                    align-items: center;
+                    justify-content: center;
+                    margin-top: 44px;
+                    text{
+                        font-size:36px;
+                        color:rgba(255,255,255,1);
+                    }
+                }
+            }
+            .close{
+                width: 42px;
+                height: 42px;
+                margin-top: 36px;
+                margin-left: 672px;
+            }
+        }
+    }
+
+</style>
+
+<script>
+import storage from '@system.storage';
+export default {
+    props:[
+        'coin',
+        'price',
+        'chapter',
+        'unit',
+        'enough',
+        'bookid',
+        'bookname',
+        'viptips'
+    ],
+    data: {
+        isAuto:true
+    },
+    closePop(){
+        this.$emit('closeOrderpop', {close:true})
+        let that = this
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '4',
+                enough:that.enough,
+                unit:that.unit,
+                auto:that.isAuto,
+                bookid:that.bookid
+            }
+        }, 'autopay'], that)
+    },
+    onInit() {
+        let that = this
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '1',
+                enough:that.enough,
+                unit:that.unit,
+                auto:that.isAuto,
+                bookid:that.bookid
+            }
+        }, 'autopay'], that)
+    },
+    toggleAuto(){
+        this.isAuto=!this.isAuto
+        let that = this
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '3',
+                enough:that.enough,
+                unit:that.unit,
+                auto:that.isAuto,
+                bookid:that.bookid
+            }
+        }, 'autopay'], that)
+    },
+    btnClick(){
+        let that = this
+        if(that.unit==2){
+            let autoObj = {bId:that.bookid,bName:that.bookname,autoPay:that.isAuto?2:1}
+            console.log(autoObj)
+            storage.get({
+                key:'booksAutopay',
+                success:function(res){
+                    if(res){
+                        try{
+                            let booksAutopay = JSON.parse(res)
+                            let hasStorage = false
+                            booksAutopay.forEach((cur,index)=>{
+                                if(cur.bId==that.bookid){
+                                    booksAutopay[index].autoPay = that.isAuto?2:1
+                                    hasStorage = true
+                                }
+                            })
+                            if(!hasStorage){
+                                if(that.isAuto){
+                                    booksAutopay.unshift(autoObj)
+                                    that.setSotrageAuto(booksAutopay)
+                                }
+                            }else{
+                                that.setSotrageAuto(booksAutopay)
+                            }
+                        }catch(err){
+                            if(that.isAuto){
+                                let booksAutopay = []
+                                booksAutopay.unshift(autoObj)
+                                that.setSotrageAuto(booksAutopay)
+                            }
+                        }
+                        
+                    }else{
+                        if(that.isAuto){
+                            let booksAutopay = []
+                            booksAutopay.unshift(autoObj)
+                            that.setSotrageAuto(booksAutopay)
+                        }
+                    }
+                },
+                fail:function(){
+                    if(that.isAuto){
+                        let booksAutopay = []
+                        booksAutopay.unshift(autoObj)
+                        that.setSotrageAuto(booksAutopay)
+                    }
+                }
+            })
+        }
+        if(that.enough){
+            //直接请求2151
+            that.$emit('closeOrderpop', {close:false})
+            that.$parent().fnNextChapter(true,that.isAuto?2:1)
+        }else{
+            //去充值
+            that.$emit('toRechargeAuto', {auto:that.isAuto?2:1})
+        }
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '2',
+                enough:that.enough,
+                unit:that.unit,
+                auto:that.isAuto,
+                bookid:that.bookid
+            }
+        }, 'autopay'], that)
+    },
+    setSotrageAuto(booksAutopay){
+        let booksAutopayStr = JSON.stringify(booksAutopay)
+        storage.set({
+            key:'booksAutopay',
+            value:booksAutopayStr,
+            success:function(){
+                console.log('success')
+            }
+        })
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    }
+}
+</script>
+

@@ -1,0 +1,1676 @@
+<template>
+    <div class="rech_pay_type">
+        <block if="{{listStyle==4}}">
+            <div class="paylist-list">
+                <block for="(personIndex, personItem) in payWayList">
+                    <div class="pay-item" @click="emitEvent(personIndex, personItem)" if="personItem.canUse != 'unactive'">
+                        <image if="{{personItem.payWay == 'ALIPAY'}}" class="pay-item-icon" src="{{personItem.canUse == 'unactive' ? 'https://xsmfdq.kkyd.cn/images/alipay-icon-unactive.png' : 'https://xsmfdq.kkyd.cn/images/wxpay/pay-alipay.png'}}"></image>
+                        <image elif="{{personItem.payWay == 'ANOTHERPAY'}}" class="pay-item-icon" src="https://xsmfdq.kkyd.cn/images/pay-alipay.png" style="width:60px;height:60px"></image>
+                        <image else class="pay-item-icon" src="{{personItem.canUse == 'unactive' ? 'https://xsmfdq.kkyd.cn/images/wxpay-icon-unactive.png' : 'https://xsmfdq.kkyd.cn/images/wxpay/pay-wxpay.png'}}"></image>
+                        <div class="pay-text">
+                            <text class="pay-item-name {{personItem.canUse == 'unactive' ? 'pay-item-name-unactive' : ''}}">{{personItem.showName}}</text>
+                            <text if="{{personItem.tips}}" class="pay-item-tip {{personItem.canUse == 'unactive' ? 'pay-item-tip-unactive' : ''}}">{{personItem.tips}}</text>
+                        </div>
+                        <image if="{{payIndex == personIndex}}" class="pay-item-btn" src="https://xsmfdq.kkyd.cn/images/recharge-selected.png"></image>
+                        <image else class="pay-item-btn" src="{{personItem.canUse == 'unactive' ? 'https://xsmfdq.kkyd.cn/images/recharge-type-unactive.png' : 'https://xsmfdq.kkyd.cn/images/recharge-normal.png'}}"></image>
+                    </div>
+                </block>
+            </div>
+        </block>
+        <block if="{{listStyle==3}}">
+            <div class="paylist-con-fix" show="{{showPaylistFix}}" @click="vagueClick">
+                <stack class="paylist-con-pop {{ showPaylistFix ? 'paylist-con-pop-move' : '' }}">
+                    <div class="paylist-con-w">
+                        <text class="title">支付</text>
+                        <text class="money">{{payMoney}}元</text>
+                        <text class="award">{{payAward}}</text>
+                        <div class="pay-list-wrap">
+                        <!-- <text class="pay-list-title">支付方式</text> -->
+                            <!--微信/支付宝radio -->
+                            <block for="(personIndex, personItem) in payWayList">
+                                <div class="pay-item" @click="emitEvent(personIndex, personItem)" if="personItem.canUse != 'unactive'">
+                                    <image if="{{personItem.payWay == 'ALIPAY'}}" class="pay-item-icon" src="{{personItem.canUse == 'unactive' ? 'https://xsmfdq.kkyd.cn/images/alipay-icon-unactive.png' : 'https://xsmfdq.kkyd.cn/images/wxpay/pay-alipay.png'}}"></image>
+                                    <image elif="{{personItem.payWay == 'ANOTHERPAY'}}" class="pay-item-icon" src="https://xsmfdq.kkyd.cn/images/pay-alipay.png" style="width:60px;height:60px"></image>
+                                    <image else class="pay-item-icon" src="{{personItem.canUse == 'unactive' ? 'https://xsmfdq.kkyd.cn/images/wxpay-icon-unactive.png' : 'https://xsmfdq.kkyd.cn/images/wxpay/pay-wxpay.png'}}"></image>
+                                    <div class="pay-text">
+                                        <text class="pay-item-name {{personItem.canUse == 'unactive' ? 'pay-item-name-unactive' : ''}}">{{personItem.showName}}</text>
+                                        <text if="{{personItem.tips}}" class="pay-item-tip {{personItem.canUse == 'unactive' ? 'pay-item-tip-unactive' : ''}}">{{personItem.tips}}</text>
+                                    </div>
+                                    <image if="{{payIndex == personIndex}}" class="pay-item-btn" src="https://xsmfdq.kkyd.cn/images/recharge-selected.png"></image>
+                                    <image else class="pay-item-btn" src="{{personItem.canUse == 'unactive' ? 'https://xsmfdq.kkyd.cn/images/recharge-type-unactive.png' : 'https://xsmfdq.kkyd.cn/images/recharge-normal.png'}}"></image>
+                                </div>
+                                <!-- <div if="{{personIndex != payWayList.length - 1}}" class="pay-item-split"></div> -->
+                            </block>
+                        </div>
+                        <text @click="parentPay" class="paylist-confirm">
+                            <span if="{{isFriendPay}}">确认</span>
+                            <span else>确认支付</span>
+                        </text>
+                    </div>
+                    <image class="paylist-close" src="https://xsmfdq.kkyd.cn/images/paylist-cancel.png" onclick="fnClosePop"></image>
+                </stack>
+            </div>
+        </block>
+        <block elif="{{listStyle==2}}">
+            <div class="list-style-row">
+                <text class="rech_list_title_row">支付方式</text>
+                <!--微信/支付宝radio -->
+                <div class="recharge_type">
+                    <div class="rech_pay_li_row" for="(personIndex,personItem) in payWayList" @click="emitEvent(personIndex,personItem)" if="personItem.canUse != 'unactive'">
+                        <div class='line' if='{{personIndex!=0&&canUseLength>1}}'></div>
+                        <stack class="rech_li_stack {{personIndex==0?'rech_li_stack_r':''}} {{payIndex == personIndex?'rech_li_stack_b':''}}">
+                            <div>
+                                <div class="rech_pay_li_img {{personItem.payWay == 'ALIPAY' ? 'rech_pay_ali_img' : 'rech_pay_wx_img'}}"></div>
+                                <text class="rech_pay_li_name_row">{{personItem.showName}}</text>
+                            </div>
+                            <div class="rech_li_select rech_li_select_b" if="{{ payIndex == personIndex }}">
+                            </div>
+                            <div class="rech_li_select rech_li_select_m" else></div>
+                        </stack>
+                    </div>
+                </div>
+            </div>
+        </block>
+        <block elif="{{payShow}}">
+            <div  class="rech_list_tit">
+                <text class="rech_list_title">请选择支付方式</text>
+            </div>
+            <!--微信/支付宝radio -->
+            <div class="recharge_type">
+                <div class="rech_pay_li" for="(personIndex,personItem) in payWayList" @click="emitEvent(personIndex, personItem)">
+                    <stack class="rech_li_stack">
+                        <div>
+                            <div class="rech_pay_li_img {{personItem.payWay == 'ALIPAY' ? 'rech_pay_ali_img' : 'rech_pay_wx_img'}}"></div>
+                            <text class="rech_pay_li_name">{{personItem.showName}}</text>
+                        </div>
+                        <div class="rech_li_select rech_li_select_b" if="{{ payIndex == personIndex }}">
+                        </div>
+                        <div class="rech_li_select rech_li_select_m" else></div>
+                    </stack>
+                </div>
+            </div>
+        </block>
+        
+        <div class="loading" if="{{loadingag}}" @click="vagueClick">
+            <progress type="circular" style="stroke-width:200px; color:#fff; width: 120px; height: 120px;"></progress>
+        </div>
+        <div class="recharge-pop" if="isWebPayAlert" @click="vagueClick">
+            <stack>
+                <div class="pop">
+                    <text class="title">提示</text>
+                    <div class="list-con"><image class="icon" src="../../images/double-circle.png"></image><text class="list">未完成付款，请点击“继续支付”。</text></div>
+                    <div class="list-con"><image class="icon"  src="../../images/double-circle.png"></image><text class="list">更换金额或使用支付宝付款，请点击“取消支付”。</text></div>
+                    <div class="list-con"><image class="icon"  src="../../images/double-circle.png"></image><text class="list">已经付款，请点击“支付完成”。</text></div>
+                    <div class="btn btn-orn" onclick="goonwxwebpay"><text>继续支付</text></div>
+                    <div onclick="closewxwebpay('quxiao')" class="btn btn-blue"><text>取消支付</text></div>
+                    <text class="complete" onclick="getselectwebpay('click')">支付完成</text>
+                </div>
+                <image class="close" @click="closewxwebpay('close')"  src="../../images/normal-close.png"></image>
+            </stack>
+        </div>
+    </div>
+</template>
+<style lang="less">
+    @keyframes ListShow {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+    .paylist-list{
+        flex-direction: column;
+        align-content: center;
+        width: 100%;
+        .pay-item {
+            flex-direction: row;
+            align-items: center;
+            margin-top: 69px;
+            .pay-item-icon {
+                margin-right: 30px;
+                width: 54px;
+                height: 54px;
+            }
+            .pay-text{
+                flex-direction: column;
+                justify-content: center;
+                flex: 1;
+            }
+            .pay-item-name {
+                font-size:30px;
+                font-weight:bold;
+                color:rgba(58,74,90,1);
+                line-height:42px;
+            }
+            .pay-item-name-unactive {
+                color: #D4D3D9;
+            }
+            .pay-item-tip {
+                font-size:24px;
+                color:rgba(249,112,83,1);
+                line-height:33px;
+                text-overflow: ellipsis;
+                lines: 1;
+                margin-top: 2px;
+            }
+            .pay-item-tip-unactive {
+                border-color: #D4D3D9;
+                color: #D4D3D9;
+            }
+            .pay-item-btn {
+                margin-left: 40px;
+                width: 40px;
+                height: 40px;
+            }
+        }
+    }
+    .paylist-con-fix{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color:rgba(0,0,0,0.6);
+        align-items: flex-end;
+        .paylist-con-pop-move {
+            animation-name: ListShow;
+            animation-duration: 400ms;
+            animation-timing-function: ease-out;
+        }
+        .paylist-con-pop{
+            .paylist-con-w{
+                width:750px;
+                background-color:rgba(255,255,255,1);
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+                flex-direction: column;
+                align-items: center;
+                .title{
+                    width: 100%;
+                    font-size:34px;
+                    font-weight:bold;
+                    line-height:48px;
+                    text-align: center;
+                    color:rgba(58,74,90,1);
+                    height: 80px;
+                    border-bottom-color: #F2F2F2;
+                    border-bottom-width: 1px;
+                }
+                .money{
+                    font-size:68px;
+                    font-weight:bold;
+                    color:rgba(41,41,41,1);
+                    line-height:95px;
+                    text-align: center;
+                    margin-top: 44px;
+                }
+                .award{
+                    font-size:26px;
+                    color:rgba(41,41,41,.6);
+                    line-height:37px;
+                    text-align: center;
+                }
+                .pay-list-wrap {
+                    width: 100%;
+                    padding: 0 50px;
+                    flex-direction: column;
+                    .pay-list-title {
+                        margin-bottom: 16px;
+                        height: 48px;
+                        font-size: 36px;
+                        /* font-weight: bold; */
+                        color: rgba(41,41,41,1);
+                    }
+                    .pay-item-split {
+                        height: 1px;
+                        background-color: #e7e7e7;
+                    }
+                    .pay-item {
+                        flex-direction: row;
+                        align-items: center;
+                        margin-top: 69px;
+                        .pay-item-icon {
+                            margin-right: 30px;
+                            width: 54px;
+                            height: 54px;
+                        }
+                        .pay-text{
+                            flex-direction: column;
+                            justify-content: center;
+                            flex: 1;
+                        }
+                        .pay-item-name {
+                            font-size:30px;
+                            font-weight:bold;
+                            color:rgba(58,74,90,1);
+                            line-height:42px;
+                        }
+                        .pay-item-name-unactive {
+                            color: #D4D3D9;
+                        }
+                        .pay-item-tip {
+                            font-size:24px;
+                            color:rgba(249,112,83,1);
+                            line-height:33px;
+                            text-overflow: ellipsis;
+                            lines: 1;
+                            margin-top: 2px;
+                        }
+                        .pay-item-tip-unactive {
+                            border-color: #D4D3D9;
+                            color: #D4D3D9;
+                        }
+                        .pay-item-btn {
+                            margin-left: 40px;
+                            width: 40px;
+                            height: 40px;
+                        }
+                    }
+                }
+                .paylist-confirm{
+                    width:670px;
+                    height: 96px;
+                    background-color:rgba(255,137,112,1);
+                    border-radius: 96px;
+                    font-size:30px;
+                    font-weight:bold;
+                    color:rgba(255,255,255,1);
+                    line-height:84px;
+                    text-align: center;
+                    margin-top: 69px;
+                    margin-bottom: 76px;
+                }
+            }
+            .paylist-close{
+                margin-left: 676px;
+                margin-top: 20px;
+                width: 44px;
+                height: 44px;
+            }
+        }
+    }
+    .list-style-row{
+        flex-direction: row;
+        justify-content: space-between;
+        .rech_list_title_row{
+            font-size:36px;
+            font-weight:bold;
+            color:rgba(41,41,41,1);
+        }
+        .line{
+            width:1px;
+            height:36px;
+            background-color: #CDCDCD;
+            margin-right: 20px;
+        }
+        .rech_pay_li_row{
+            /* padding: 15px; */
+            width:230px;
+            /* flex: 1;        */
+            align-items: center;   
+        }
+        .rech_li_stack_r{
+            margin-right: 20px;
+        }
+        .rech_li_stack_b{
+            background-color: #FFF6D6;
+            border-radius: 12px;
+        }
+        .rech_li_stack {
+            width: 100%; 
+            height: 60px;
+            justify-content: center;
+            align-items: center;
+            .rech_pay_li_img{
+                height: 36px;
+                width: 36px;
+                background-position: 0 0;
+                background-repeat: no-repeat;
+                background-size: 36px 36px;
+                flex-wrap: wrap;
+            }
+            .rech_pay_li_name_row{
+                flex: 1;
+                margin-left: 12px;
+                height: 36px;
+                font-size: 26px;
+                color: #3A4A5A;
+                line-height: 36px;
+            }
+        }
+        .rech_li_select{
+            flex:1;
+            height:100%;
+            /* border-radius: 12px; */
+        }
+        .rech_li_select_m {
+            border: 1px solid #D4D3D9;
+            border-radius:12px;
+            margin-right: 1px;
+        }
+        .rech_li_select_b {
+            border: 4px solid #FF5B60;
+            border-radius:12px;
+        }
+        .rech_pay_wx_img{
+            background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/5.png);
+        }
+        .rech_pay_ali_img{        
+            background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/pay-alipay.png);
+        }
+    }
+
+    /* 支付弹窗 */
+    .recharge-pop{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        background-color: rgba(0,0,0,0.7);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        stack{
+            width:600px;
+            margin-top: -93px;
+            .pop{
+                margin-top: 93px;
+                width:100%;
+                background-color:rgba(255,255,255,1);
+                border-radius:36px;
+                flex-direction: column;
+                align-items: center;
+                padding: 43px 40px 49px;
+                .title{
+                    font-size:36px;
+                    color:rgba(68,68,68,1);
+                    margin-bottom: 5px;
+                }
+                .list-con{
+                    margin-top: 15px;
+                    align-items: flex-start;
+                    justify-content: flex-start;
+                    width: 100%;
+                    .icon{
+                        width: 24px;
+                        height: 24px;
+                        margin-left: 8px;
+                        margin-right: 17px;
+                        margin-top: 16px;
+                    }
+                    .list{
+                        flex: 1;
+                        font-size:30px;
+                        line-height:48px;
+                        color:rgba(68,68,68,1);
+                    }
+                }
+                .btn{
+                    width:100%;
+                    height:82px;
+                    border-radius:41px;
+                    margin-top: 30px;
+                    align-items: center;
+                    justify-content: center;
+                    text{
+                        font-size:36px;
+                        font-weight:bold;
+                        color:rgba(255,255,255,1);
+                    }
+                }
+                .btn-orn{
+                    background-color:rgba(255,137,112,1);
+                }
+                .btn-blue{
+                    background-color:rgba(133,187,255,1);
+                }
+                .complete{
+                    font-size:36px;
+                    font-weight:bold;
+                    color:rgba(249,112,83,1);
+                    margin-top: 46px;
+                }
+            }
+            .close{
+                width: 54px;
+                height: 54px;
+                margin-left: 546px;
+            }
+        }
+    }
+    /* 微信支付宝支付方式 */
+    .rech_list_tit {
+        margin: 40px 15px 15px 15px;
+        height: 50px;
+        align-items: center;
+    }
+    .rech_list_title {
+        height: 50px;
+        font-size: 36px;
+        font-weight: bold;
+        color: #292929;
+        line-height: 50px;
+    }
+    .rech_pay_type{
+        width:100%;
+        flex-direction: column;
+    }
+    .rech_pay_li{
+        padding: 15px;
+        width:50%;
+        flex: 1;       
+    }
+    .rech_li_stack {
+        flex: 1;  
+        height: 142px;
+        justify-content: center;
+        align-items: center;
+        .rech_pay_li_img{
+            height: 60px;
+            width: 60px;
+            background-position: 0 0;
+            background-repeat: no-repeat;
+            background-size: 60px 60px;
+            flex-wrap: wrap;
+        }
+        .rech_pay_li_name{
+            flex: 1;
+            padding: 0 20px;
+            height: 60px;
+            font-size: 36px;
+            color: #000000;
+            line-height: 60px;
+        }
+    }
+    .rech_li_select{
+        flex:1;
+        height:100%;
+        /* border-radius: 12px; */
+    }
+    .rech_li_select_m {
+        border: 1px solid #D4D3D9;
+        border-radius:12px;
+    }
+    .rech_li_select_b {
+        border: 4px solid #FF5B60;
+        border-radius:12px;
+    }
+    .rech_pay_wx_img{
+        background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/5.png);
+    }
+    .rech_pay_ali_img{        
+        background-image: url(https://xsmfdq.kkyd.cn/images/wxpay/pay-alipay.png);
+    }
+    /* 支付后结果展示 */
+    .iswxwebpay_box{
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        background-color: rgba(0,0,0,.6);
+        justify-content: center;
+        align-items: center
+    }
+    .iswxwebpay_main{
+        padding: 32px 0 0;
+        width:480px;
+        background-color:#fff;
+        border-radius:12px;
+        font-size:30px;
+        flex-direction: column;
+    }
+    .iswxwebpay_m_tit{
+        padding: 0 28px;
+        height: 60px;
+        font-size: 34px;
+        text-align: center;
+        color: #808080;
+        line-height: 60px;
+    }
+    .iswxwebpay_m_p{
+        padding: 0 32px;
+        height: 160px;
+        font-size: 30px;
+        color: #808080;
+        text-align: center;
+        line-height: 160px;
+        border-bottom-color: #d8d8d8;
+        border-bottom-width: 1px;
+    }
+    .iswxwebpay_but_box{
+        height: 100px;
+        justify-content: center;
+        align-items: center;
+    }
+    .iswxwebpay_but_1{
+        height: 100px;
+        width: 50%;
+        text-align: center;
+        font-size: 32px;
+        line-height: 100px;
+        border-right-color: #d8d8d8;
+        border-right-width: 1px;
+        color: #808080;
+    }
+    .iswxwebpay_but_2{
+        height: 100px;
+        width: 50%;
+        text-align: center;
+        font-size: 32px;
+        line-height: 100px;
+        color:#44bbff;
+    }
+    /* 底部加载 */
+    .loading {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, .5);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .loading text {
+        color: #fff;
+    }
+    .close_icon{
+        margin-right: -500px;
+        margin-bottom: -10px;
+    }
+</style>
+<script>
+
+import wxpay from '@service.wxpay';
+import prompt from '@system.prompt';
+import alipay from '@service.alipay';
+import router from '@system.router';
+import pay from '@service.pay'
+import shortcut from '@system.shortcut';
+
+export default {
+    props:['payIndex','payWayList','receParams','listStyle','payMoney','payAward','payPlistProducts', 'showPaylistFix','canUseLength','payShow','isWebPayAlert','omap','isFriendPay','shareGetProvider','titleName','isBookPurchase'],
+    data(){
+        return {
+            pindex:this.payIndex,
+            loadingtime: null,
+            loadingnum: 5,
+            loadingag: false,
+            // webpayalert:false,
+            webpaytext:'',
+            getwebpay:'',
+            url:this.receParams.url || '',
+            unit:this.receParams.unit || '',
+            bookid:this.receParams.bookId || '',
+            chapterId:this.receParams.chapterId || '',
+            webpayorderno:'',
+            isRecharge:this.receParams.isRecharge || '',
+            isNotFoundPay:false,
+            payName:'',
+            rechargeswitch: true,
+            rechargeswitchtime: null,
+            isRechargePop:true,
+            rechargeType: '',
+            shencePayWay: '' // 神策打点支付方式
+        }
+    },
+    onInit() {
+        this.$on('initPaySwitch',this.initPaySwitch);
+        this.$on('initGoPay',this.initGoPay);
+        this.$on('wxPay',this.weiXinPay);
+        this.$on('anotherPay',this.getPaid); // 找微信好友代付
+        this.$on('aLiPay',this.aLiPay);
+        this.$on('nowPay',this.nowPay);
+        this.$on('oppoPay',this.oppoPay);
+        this.$on('initQueryParams',this.initQueryParams);
+        this.payName= this.payWayList[this.pindex] && this.payWayList[this.pindex].showName || '微信';
+    },
+    onDestroy() {
+        // console.log("组件已催回")
+        clearTimeout(this.loadingtime);
+        this.$off('initPaySwitch');
+        this.$off('initGoPay');
+        this.$off('wxPay');
+        this.$off('aLiPay');
+        this.$off('nowPay');
+        this.$off('oppoPay');
+        this.$off('initQueryParams');
+    },
+    emitEvent(index, item){
+        let that = this;
+        that.shencePayWay = '';
+        switch(item.payWay){
+                // 支付宝支付
+                case 'ALIPAY':
+                that.shencePayWay = '支付宝'
+                break;
+                // 微信APP支付
+                case 'WECHATPAY_APP':
+                that.shencePayWay = '微信支付'
+                break;
+                // 微信WEB支付
+                case 'WECHATPAY_MWEB':
+                that.shencePayWay = '微信MWEB支付'
+                break;
+                // 现在支付
+                case 'NOWPAY':
+                that.shencePayWay = '现在支付'
+                break;
+                // 找微信好友代付
+                case 'ANOTHERPAY':
+                that.shencePayWay = '找人代付'
+                break;
+                default:
+            }
+        // 神策打点-支付方式
+        if(that.listStyle==4){
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                ButtonName: '支付方式',
+                ButtonContent: that.shencePayWay,
+                Title: that.titleName ? that.titleName : '提前付费支付页',
+                BookID: that.bookid || ''
+            });
+        }else{
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                ButtonName: '支付方式',
+                ButtonContent: that.shencePayWay,
+                BookID: that.bookid || ''
+            });
+        }
+        if(item.payWay == 'ANOTHERPAY'){
+            that.$emit('changeFriendPay',{ params: true });
+        }else{
+            that.$emit('changeFriendPay',{ params: false });
+        }
+        if(item.canUse && item.canUse == 'unactive') {
+            return
+        }
+        that.$dispatch('checkPayType',{ params: index });
+    },
+    initPaySwitch(){
+        //初始化充值开关
+        clearTimeout(this.rechargeswitchtime);
+        this.loadingag = false;
+        this.rechargeswitch = true;
+    },
+    initGoPay(){
+        //3秒内不可重复点击
+        let that = this;
+        try {
+            shortcut.hasInstalled({
+                success: function(res) {
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            hasInstalled:res
+                        },
+                        omap:that.omap
+                    }, 'recharge_hasInstalled'], that)
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+        
+        
+        if(!that.rechargeswitch){
+            return false;
+        }
+        that.loadingag = true;
+        that.rechargeswitch = false;
+        clearTimeout(that.rechargeswitchtime);
+        that.rechargeswitchtime = setTimeout(() => {
+            that.loadingag = false;
+            that.rechargeswitch = true;
+        }, 3000);
+        
+    },
+    initQueryParams(){
+        this.getselectinit();
+        this.$emit('fnChangeAlertShow', {
+            show: false
+        })
+        // this.webpayalert = false;
+        this.isNotFoundPay = false;
+    },
+     //微信支付
+    weiXinPay(evt){
+        let that = this;
+        let orderNo='';
+        console.log(evt)
+        if (evt.detail.payType == 'APP'){
+            that.rechargeType = 'WECHATPAY_APP'
+            new Promise((res, rej) => {
+                that.$app.$def.ajax(that,'2132', {
+                    data: evt.detail.dataJson,
+                    succ(data) {
+                        orderNo = data.orderNo;
+                        that.webpayorderno = orderNo;
+                        wxpay.pay({
+                            //微信 app支付的prepayId
+                            prepayid: data.reqParams.prepayid,
+                            extra: {
+                                app_id:  data.reqParams.appid,
+                                partner_id:  data.reqParams.partnerid,
+                                package_value:  data.reqParams.package,
+                                nonce_str:  data.reqParams.noncestr,
+                                time_stamp:  data.reqParams.timestamp,
+                                order_sign:  data.reqParams.sign,
+                            },
+                            fail: function (data, code) {
+                                console.log(`WX PAY failed, code = ${code}`);
+                                prompt.showToast({
+                                    message: '微信支付遇到问题，请稍后重试',
+                                    duration: 0
+                                });
+                                rej(data);
+                                //$umeng_stat.trackEvent('recharge-wxpay-fail', JSON.stringify(evt.detail.logJson));
+                                //拉起微信app支付失败
+                                that.$app.$def.requestData(that,{
+                                    interface: '/glory/fastapp/2174',
+                                    data: { page: that.$page.path,event:'recharge_wechat',content:JSON.stringify({data,code,orderNo})},
+                                    succ: function (res) {
+                                        console.log(res)
+                                    }
+                                })
+                                try {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            site: '3',
+                                            orderNo,
+                                            logJson:evt.detail.logJson,
+                                            source:"wxpay_pay_fail",
+                                            thisUri: that.$page.uri,
+                                            thisPage: "payLists",
+                                            data,
+                                            code
+                                        },
+                                        omap:that.omap
+                                    }, 'catch_error'], that)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            },
+                            cancel: function () {
+                                console.log('WX PAY cancelled by user');
+                                prompt.showToast({
+                                    message: '您已取消本次支付',
+                                    duration: 0
+                                });
+                                rej('WX PAY cancelled by user');
+                                //$umeng_stat.trackEvent('recharge-wxpay-cancel', JSON.stringify(evt.detail.logJson));
+                                //取消微信app支付
+                                try {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            site: '13',
+                                            orderNo,
+                                            logJson:evt.detail.logJson,
+                                        },
+                                        omap:that.omap
+                                    }, 'recharge_wechat'], that)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            },
+                            success: function (data) {
+                                console.log('WX PAY success');
+                                res(data);
+                                that.$app.$def.setStorageFile(that,{
+                                    key:'lastpay',
+                                    value:2
+                                });
+
+                                //$umeng_stat.trackEvent('recharge-wxpay-success', JSON.stringify(evt.detail.logJson));
+                                //拉起微信app支付成功
+                                try {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            site: '2',
+                                            orderNo,
+                                            logJson:evt.detail.logJson,
+                                        },
+                                        omap:that.omap
+                                    }, 'recharge_wechat'], that)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }
+                        })
+                        //$umeng_stat.trackEvent('order-wxpay-success', JSON.stringify(evt.detail.logJson));
+                        //请求充值下单接口成功log
+                        try {
+                            that.$app.$def.quickappLog([703, {
+                                qmap:{
+                                    site: '4',
+                                    orderNo,
+                                    logJson:evt.detail.logJson,
+                                    succ:data
+                                },
+                                omap:that.omap
+                            }, 'recharge_wechat'], that);
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    },
+                    err(data) {
+                        console.log('wxapp_pay_error',data);
+                        // prompt.showToast({
+                        //     message: data,
+                        //     duration: 0
+                        // });
+                        //$umeng_stat.trackEvent('order-fail', JSON.stringify(evt.detail.logJson));
+                        //请求充值下单失败log
+                        try {
+                            that.$app.$def.quickappLog([703, {
+                                qmap:{
+                                    site: '5',
+                                    orderNo,
+                                    err:data
+                                },
+                                omap:that.omap
+                            }, 'recharge_wechat'], that)
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    },
+                    notEqualZero(data) {
+                        let message = '创建订单失败'
+                        if(data && data.retMsg) {
+                            message = data.retMsg
+                        }
+                        prompt.showToast({
+                            message: message
+                        })
+                    }
+                })
+            }).then((data) => {
+                // 微信app验单
+               let oCheck = {desc:'快应用微信APP支付',eventType:'recharge_wechat'};
+               this.checkMoneyIsToAccount(oCheck);  
+            },
+            (data) => {
+                that.$emit('fnChangeLoaclpush', {
+                    flag: true
+                })
+            })
+        } else if (evt.detail.payType == 'MWEB') {
+                that.rechargeType = 'WECHATPAY_MWEB'
+                new Promise((res, rej) => {
+                    that.$app.$def.ajax(that,'2132', {
+                        data: evt.detail.dataJson,
+                        succ(data) {
+                            console.info(data)
+                            orderNo = data.orderNo;
+                            that.webpayorderno = orderNo;
+                            wxpay.pay({
+                                //微信网页支付的prepayId
+                                prepayid: data.reqParams.prepayid,
+                                extra: {
+                                    //传递给支付页面的自定义参数, 根据需要进行设置, 会被urlEncode之后拼接在配置的url尾部
+                                    mweb_url: data.reqParams.mweb_url
+                                },
+                                fail: function (data, code) {
+                                    that.getselectinit();
+                                    console.log(`WX H5 PAY handling fail, code = ${code}`)
+                                    //$umeng_stat.trackEvent('recharge-MWEB-fail', JSON.stringify(evt.detail.logJson));
+                                    rej(code);
+                                    //拉起微信H5支付失败
+                                    that.$app.$def.requestData(that,{
+                                        interface: '/glory/fastapp/2174',
+                                        data: { page: that.$page.path,event:'recharge_wechat_H5',content:JSON.stringify({data,code,orderNo})},
+                                        succ: function (res) {
+                                            console.log(res)
+                                        }
+                                    })
+                                    try {
+                                        that.$app.$def.quickappLog([703, {
+                                            qmap:{
+                                                site: '3',
+                                                orderNo,
+                                                logJson:evt.detail.logJson,
+                                                source: 'wxpay_pay_fail',
+                                                thisUri: that.$page.uri,
+                                                thisPage: 'payLists',
+                                                data,
+                                                code
+                                            },
+                                            omap:that.omap
+                                        }, 'recharge_wechat_H5'], that)
+                                    } catch (error) {
+                                        console.log(error);
+                                    }
+                                },
+                                cancel: function () {
+                                    that.getselectinit();
+                                    console.log('WX H5 PAY handling cancel')
+                                    rej('cancel');
+                                    //$umeng_stat.trackEvent('recharge-MWEB-cancel', JSON.stringify(evt.detail.logJson));
+                                    //取消微信H5支付
+                                    try {
+                                        that.$app.$def.quickappLog([703, {
+                                            qmap:{
+                                                site: '13',
+                                                orderNo,
+                                                logJson:evt.detail.logJson,
+                                            },
+                                            omap:that.omap
+                                        }, 'recharge_wechat_H5'], that)
+                                    } catch (error) {
+                                        console.log(error);
+                                    }
+                                },
+                                success: function (data) {
+                                    //H5方式下，支付成功的回调仅仅只是指将订单递交给微信，并不意味着支付已经成功完成
+                                    console.log('WX H5 PAY handling success');
+                                    console.info('webpayorderno',orderNo);
+                                    that.webpaytext = '微信网页支付';
+                                    setTimeout(function(){
+                                        that.$emit('fnChangeAlertShow', {
+                                            show: true
+                                        })
+                                        // that.webpayalert = true;
+                                        that.isNotFoundPay =false;
+                                        //记录本次微信支付
+                                        // storage.set({
+                                        //     key:'lastpay',
+                                        //     value:2,
+                                        //     success:function(){},
+                                        //     fail:function(){}
+                                        // });
+
+                                        that.getselectwebpay('websuc');
+                                        that.$app.$def.setStorageFile(that,{
+                                            key:'lastpay',
+                                            value:2
+                                        })
+                                    },3000);
+                                    res(data);
+                                    //$umeng_stat.trackEvent('recharge-MWEB-success', JSON.stringify(evt.detail.logJson));
+                                    //拉起微信H5支付成功
+                                    try {
+                                        that.$app.$def.quickappLog([703, {
+                                            qmap:{
+                                                site: '2',
+                                                orderNo,
+                                                logJson:evt.detail.logJson,
+                                                succ:data
+                                            },
+                                            omap:that.omap
+                                        }, 'recharge_wechat_H5'], that)
+                                    } catch (error) {
+                                        console.log(error);
+                                    }
+                                }
+                            })
+                            try {
+                                that.$app.$def.quickappLog([703, {
+                                    qmap: {
+                                        site: '4',
+                                        orderNo,
+                                        logJson: evt.detail.logJson,
+                                        succ: data
+                                    },
+                                }, 'recharge_wechat_H5'], that)
+                            } catch (error) {
+                                console.log(error);
+                            }
+                            //$umeng_stat.trackEvent('order-success', JSON.stringify(evt.detail.logJson));
+                        },
+                        err(data) {
+                            // prompt.showToast({
+                            //     message: data,
+                            //     duration: 0
+                            // });
+                            //$umeng_stat.trackEvent('order-fail', JSON.stringify(evt.detail.logJson));
+                            //微信H5支付下单失败
+                            try {
+                                that.$app.$def.quickappLog([703, {
+                                    qmap:{
+                                        site: '5',
+                                        orderNo,
+                                        logJson:evt.detail.logJson,
+                                        err:data
+                                    },
+                                    omap:that.omap
+                                }, 'recharge_wechat_H5'], that)
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        },
+                        notEqualZero(data) {
+                            let message = '创建订单失败'
+                            if(data && data.retMsg) {
+                                message = data.retMsg
+                            }
+                            prompt.showToast({
+                                message: message
+                            })
+                        }
+                    })
+                }).then((data) => {
+                    
+                },
+                (data) => {
+                    that.webpayorderno = '';
+                    prompt.showToast({
+                        message: data.memo,
+                        duration: 0
+                    });
+                })
+                //$umeng_stat.trackEvent('recharge-btn', JSON.stringify(evt.detail.logJson));
+        } else {
+            prompt.showToast({
+                message: '未检测到您安装微信',
+                duration: 0
+            });
+            //未检测到您安装微信
+            try {
+                that.$app.$def.quickappLog([703, {
+                    qmap:{
+                        site: '9',
+                        orderNo,
+                        logJson:evt.detail.logJson,
+    
+                    },
+                    omap:that.omap
+                }, 'recharge_wechat'], that)
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+    },
+    // 找微信好友支付
+    getPaid(evt){
+        router.push({
+            uri: '/GetPaid',
+            params: {
+                dataJson: evt.detail.dataJson,
+                logJson: evt.detail.logJson,
+                payPlistProducts: this.payPlistProducts,
+                payMoney: this.payMoney,
+                fromPage: '/payList',
+                orderId: 0
+            }
+        });
+    },
+     //支付宝支付
+    aLiPay(evt,orderNo=''){
+        let that = this;
+        console.log('alipay');
+        //下单
+        that.rechargeType = 'ALIPAY'
+        new Promise((res, rej) => {
+            that.$app.$def.ajax(that,'2132', {
+                data: evt.detail.dataJson,
+                succ(data) {
+                    orderNo = data.orderNo;
+                    that.webpayorderno = orderNo;
+                    console.log(orderNo,'=========111========data.orderNo');
+                    alipay.pay({
+                        orderInfo: data.reqParams.callAliPayUrl,
+                        callback: function (ret) {
+                            if (ret.result) {
+                                res(ret);
+                                //$umeng_stat.trackEvent('recharge-success', JSON.stringify(evt.detail.logJson));
+                                //拉起支付宝支付成功log
+                                try {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            site: '2',
+                                            orderNo,
+                                            logJson:evt.detail.logJson
+                                        }
+                                    }, 'recharge_alipay'], that)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            } else {
+                                rej(ret);
+                                //$umeng_stat.trackEvent('recharge-fail', JSON.stringify(evt.detail.logJson));
+                                //拉起支付宝失败log
+                                try {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            site: '3',
+                                            orderNo,
+                                            logJson:evt.detail.logJson
+                                        }
+                                    }, 'recharge_alipay'], that)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }
+                        }
+                    });
+                    //$umeng_stat.trackEvent('order-success', JSON.stringify(evt.detail.logJson));
+                    //请求下单成功log
+                    try {
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                site: '4',
+                                orderNo,
+                            }
+                        }, 'recharge_alipay'], that)
+                    } catch (error) {
+                        console.log(error);
+                    }
+                },
+                err(data) {
+                    // prompt.showToast({
+                    //     message: data,
+                    //     duration: 0
+                    // });
+                    //$umeng_stat.trackEvent('order-fail', JSON.stringify(evt.detail.logJson));
+                    //请求下单失败log
+                    try {
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                site: '5',
+                                err:`${data}`
+                            }
+                        }, 'recharge_alipay'], that);
+                    } catch (error) {
+                        console.log(error);
+                    }
+                },
+                notEqualZero(data) {
+                    let message = '创建订单失败'
+                    if(data && data.retMsg) {
+                        message = data.retMsg
+                    }
+                    prompt.showToast({
+                        message: message
+                    })
+                }
+            })
+        }).then((data) => {
+            // 支付宝验单
+            this.$dispatch('alipay_Event',{ callALiPay:true })
+            let oCheck = { desc:'快应用支付宝支付',eventType:'recharge_alipay' };
+            this.checkMoneyIsToAccount(oCheck); 
+        },
+        (data) => {
+            // console.info("输出支付宝错误",data);
+            that.$emit('fnChangeLoaclpush', {
+                flag: true
+            })
+            prompt.showToast({
+                message: data.memo,
+                duration: 0
+            });
+        })
+        //$umeng_stat.trackEvent('recharge-btn', JSON.stringify(evt.detail.logJson));
+
+    },
+    // 现在支付
+    nowPay(evt){
+        let that = this;
+        //下单
+        that.rechargeType = 'NOWPAY'
+        new Promise((res, rej) => {
+            that.$app.$def.ajax(that,'2132', {
+                data: evt.detail.dataJson,
+                succ(data) {
+                    that.webpayorderno = data.orderNo;
+                    that.$emit('fnChangeAlertShow', {
+                        show: true
+                    })
+                    // that.webpayalert = true;
+                    that.isNotFoundPay = false;
+                    router.push({
+                        uri: '/RechargeNowpay',
+                        params: {webSrc:data.reqParams.payurl}
+                    });
+                    //$umeng_stat.trackEvent('order-success', JSON.stringify(evt.detail.logJson));
+                    //请求下单成功log
+                    try {
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                site: '4',
+                                payWay:'NOWPAY'
+                            }
+                        }, 'recharge_nowpay'], that)
+                    } catch (error) {
+                        console.log(error);
+                    }
+                },
+                err(data) {
+                    // prompt.showToast({
+                    //     message: data,
+                    //     duration: 0
+                    // });
+                    //$umeng_stat.trackEvent('order-fail', JSON.stringify(evt.detail.logJson));
+                    //请求下单失败log
+                    try {
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                site: '5',
+                                err:`${data}`
+                            }
+                        }, 'recharge_nowpay'], that)
+                    } catch (error) {
+                        console.log(error);
+                    }
+                },
+                notEqualZero(data) {
+                    let message = '创建订单失败'
+                    if(data && data.retMsg) {
+                        message = data.retMsg
+                    }
+                    prompt.showToast({
+                        message: message
+                    })
+                }
+            })
+        }).then((data) => {
+            // nowpay验单
+        },
+        (data) => {
+            prompt.showToast({
+                message: data.memo,
+                duration: 0
+            });
+        })
+        //$umeng_stat.trackEvent('recharge-btn', JSON.stringify(evt.detail.logJson));
+    },
+    oppoPay(evt){
+            let that = this;
+            console.log('oppojinru',evt);
+            //下单
+            let orderNo='';            
+            // let dataJson=null;
+            that.rechargeType = 'OPPOPAY'
+            new Promise((res, rej) => {
+                that.$app.$def.ajax(that,'2132', {
+                    data: evt.detail.dataJson,
+                    succ(data) {
+                        console.log(`OPPO请求支付列表成功`)
+                        console.log(data)
+                        orderNo = data.orderNo;
+                        that.webpayorderno = orderNo;
+                        pay.pay({
+                            orderInfo: data.reqParams,
+                        }).then(ret=>{
+                            console.log(`OPPO支付成功${JSON.stringify(ret)}+`)
+                            console.log(ret)
+                            if (ret.result) {
+                                //$umeng_stat.trackEvent('recharge-success', JSON.stringify(that.logJson));
+                                //拉起OPPO支付成功log
+                                try {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            site: '2',
+                                            reurl: that.url,
+                                            reunit: that.unit,
+                                            bid: that.bookId,
+                                            cid: that.chapterId,
+                                            amount: that.amount,
+                                            orderNo,
+                                            logJson:evt.detail.logJson
+                                        }
+                                    }, 'recharge_oppopay'], that)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }
+                            res(ret)
+                        },ret=>{
+                             console.log(`OPPO支付失败${JSON.stringify(ret)}`)
+                            console.log(ret)
+                            //$umeng_stat.trackEvent('recharge-fail', JSON.stringify(that.logJson));
+                            //拉起OPPO失败log
+                            try {
+                                that.$app.$def.quickappLog([703, {
+                                    qmap:{
+                                        site: '3',
+                                        reurl: that.url,
+                                        reunit: that.unit,
+                                        bid: that.bookId,
+                                        cid: that.chapterId,
+                                        amount: that.amount,
+                                        orderNo,
+                                        logJson:evt.detail.logJson
+                                    }
+                                }, 'recharge_oppopay'], that)
+                            } catch (error) {
+                                console.log(error);
+                            }
+                            rej(ret)
+                        })
+                        //$umeng_stat.trackEvent('order-success', JSON.stringify(that.logJson));
+                        //请求下单成功log
+                        try {
+                            that.$app.$def.quickappLog([703, {
+                                qmap:{
+                                    site: '4',
+                                    reurl: that.url,
+                                    reunit: that.unit,
+                                    bid: that.bookId,
+                                    cid: that.chapterId,
+                                    orderNo,
+                                    amount: that.amount
+                                }
+                            }, 'recharge_oppopay'], that)
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    },
+                    err(data) {
+                        console.log(`OPPO请求支付失败`)
+                        // prompt.showToast({
+                        //     message: data,
+                        //     duration: 0
+                        // });
+                        //$umeng_stat.trackEvent('order-fail', JSON.stringify(that.logJson));
+                        //请求下单失败log
+                        try {
+                            that.$app.$def.quickappLog([703, {
+                                qmap:{
+                                    site: '5',
+                                    reurl: that.url,
+                                    reunit: that.unit,
+                                    bid: that.bookId,
+                                    cid: that.chapterId,
+                                    amount: that.amount,
+                                    err:`${data}`
+                                },
+                                omap:that.omap
+                            }, 'recharge_oppopay'], that)
+                        } catch (error) {
+                            console.log(error);
+                        }
+                        rej(data)
+                    },
+                    notEqualZero(data) {
+                        let message = '创建订单失败'
+                        if(data && data.retMsg) {
+                            message = data.retMsg
+                        }
+                        prompt.showToast({
+                            message: message
+                        })
+                    }
+                })
+            }).then((data) => {
+                let oCheck = { desc:'快应用OPPO支付',eventType:'recharge_oppopay' };
+                this.checkMoneyIsToAccount(oCheck); 
+                console.log(`OPPO支付成功`)               
+            },
+            (data) => {
+                console.log(data)
+                prompt.showToast({
+                    message: '支付失败,请重试',
+                    duration: 0
+                });
+            })
+            //$umeng_stat.trackEvent('recharge-btn', JSON.stringify(that.logJson));
+            //点击充值log
+            try {
+                that.$app.$def.quickappLog([702, {
+                    qmap:{
+                        site: '1',
+                        reurl: that.url,
+                        reunit: that.unit,
+                        bid: that.bookId,
+                        cid: that.chapterId,
+                        amount: that.amount
+                    },
+                    omap:that.omap
+                }, 'recharge_oppopay'], that)
+            } catch (error) {
+                console.log(error);
+            }
+        },
+    //微信orNowPay  web已支付方法
+    getselectwebpay(fntype){
+        let that = this;
+        
+        if( this.payWayList[this.pindex].payWay.toLocaleLowerCase().includes('wechat') ){
+           let  desc = '快应用微信web支付',eventType = 'recharge_wechat_H5';
+           let oCheck = { desc, eventType };
+           this.checkMoneyIsToAccount(oCheck,fntype);     
+        } else {
+            let  desc = '快应用nowpay支付',eventType = 'recharge_nowpay';
+           let oCheck = { desc, eventType };
+           this.checkMoneyIsToAccount(oCheck,fntype); 
+        }
+        if(fntype == 'click'){
+            that.$app.$def.quickappLog([702, {
+                qmap:{
+                    site: '113',
+                    reurl: that.url,
+                    reunit: that.unit,
+                    bid: that.bookId,
+                    cid: that.chapterId,
+                    orderNo:that.webpayorderno,
+                    btnname:'btn_pay_end'
+                },
+                omap:that.omap
+            }, 'recharge_wechat_H5'], that);
+        }
+    },
+     //关闭微信web弹框
+    closewxwebpay(name){
+        let that = this;
+        clearTimeout(that.loadingtime);
+        // 关闭前进行查单操作
+        that.getselectwebpay('close')
+        that.$emit('fnChangeAlertShow', {
+            show: false
+        })
+        // that.webpayalert = false;
+        // if(that.isNotFoundPay) {
+        //     return false;
+        // }
+        // that.getpaylist();
+        // that.$emit('readyJump',{type: false});          
+        //关闭是否充值弹框
+        let site = '11'
+        if(name == 'quxiao'){
+            site = '111'
+        }else if(name == 'close'){
+            site = '112'
+        }else{
+            site = '11'
+        }
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: site,
+                reurl: that.url,
+                reunit: that.unit,
+                bid: that.bookId,
+                cid: that.chapterId,
+                orderNo:that.webpayorderno,
+                btnname:name
+            },
+            omap:that.omap
+        }, 'recharge_wechat_H5'], that)
+    },
+    // 初始化倒计时查询充值结果参数
+    getselectinit(){
+        let that = this;
+        clearTimeout(that.loadingtime);
+        that.loadingtime = null;
+
+        that.webpayorderno = '';
+        that.webpaytext = '';
+        that.getwebpay = false;
+        
+        that.loadingnum = 0;
+        that.loadingag = false;
+    },
+
+    // 定时器验单
+    checkMoneyIsToAccount(obj,fntype) {
+        const that = this;
+        clearInterval(that.loadingtime);
+        // web 支付不显示loading 关闭时进行一次查单操作
+        if(fntype == 'close') {
+            that.loadingnum = 1;
+            that.loadingag = false;
+        }else if(fntype == 'websuc'){
+            that.loadingnum = 240;
+            that.loadingag = false;
+        }else{
+            that.loadingnum = 5;
+            that.loadingag = true;
+        }
+        if(!that.webpayorderno){
+            return;
+        }
+
+        that.loadingtime = setInterval(() => {
+                    that.$app.$def.ajax(that,'2133', {
+                        data: {
+                            orderNo: that.webpayorderno,
+                            status: 1,
+                            desc: obj.desc
+                        },
+                        succ(data) {
+                            // console.info("验单结果==》",data);
+                            if( data.result == 1 ){
+                                that.$emit('fnChangeLoaclpush', {
+                                    flag: false
+                                })
+                                clearInterval(that.loadingtime);
+                                // 查单成功返回订单号
+                                that.$app.$def.setStorageFile(that, {
+                                    key: 'lastChargeType',
+                                    value: that.rechargeType
+                                })
+                                that.$emit('readyJump',{type: true, orderNo: that.webpayorderno});
+                                that.isRecharge = true;
+                                that.$dispatch('checkIsRecharge',{ rechargeType: that.isRecharge });
+                                //初始化倒计时查询充值结果参数
+                                // that.getselectinit();
+                                that.loadingag = false;
+                                // 非整本书购买活动，显示充值成功提示
+                                if(!(that.isBookPurchase && that.isBookPurchase == 1)) {
+                                    prompt.showToast({
+                                        message: that.titleName && that.titleName == '整本书一口价支付页' ? '购买成功' : '充值成功',
+                                        duration: 0
+                                    });
+                                }
+                                //验单成功
+                                that.$app.$def.quickappLog([703, {
+                                    qmap:{
+                                        site: '7',
+                                        orderNo: that.webpayorderno,
+                                        loadingnum:that.loadingnum,
+                                        payWay:that.payWayList[that.pindex].payWay,
+                                        succ:data
+                                    },
+                                    omap:that.omap
+                                }, obj.eventType], that);
+                            }else {                               
+                                //验单失败
+                                // that.$app.$def.quickappLog([703, {
+                                //     qmap:{
+                                //         site: '8',
+                                //         orderNo:that.webpayorderno
+                                //     }
+                                // }, obj.eventType], that);
+                                console.info(`${data.result}----${that.loadingnum}`);
+                                that.$emit('fnChangeLoaclpush', {
+                                    flag: true
+                                })
+                                if(that.loadingnum <= 0){
+                                   //初始化倒计时查询充值结果参数
+                                    // that.getselectinit();
+                                    clearInterval(that.loadingtime);
+                                    // 如果是web自动验单不弹提示
+                                    if(fntype != 'websuc' || fntype == 'click'){
+                                        prompt.showToast({
+                                            message: '未查询到您的充值记录',
+                                            duration: 0
+                                        });
+                                        that.$emit('fnChangeAlertShow', {
+                                            show: false
+                                        })
+                                        // that.webpayalert = false;
+                                    }
+                                    that.isNotFoundPay = true;
+                                    that.loadingag = false;
+                                    // 关闭时查单，刷新支付列表
+                                    // if(fntype == 'close') {
+                                    //     that.$emit('readyJump',{type: false});
+                                    // }
+                                }
+                            }
+                        },
+                        err(data) {
+                            // console.info("充值失败",data);
+                            if (that.loadingnum <= 0) {
+                                clearInterval(that.loadingtime);
+                                that.loadingag = false;
+                                // 关闭时查单，关闭弹框，刷新支付列表
+                                // if(fntype == 'close') {
+                                //     that.webpayalert = false
+                                //     that.$emit('readyJump',{type: false});
+                                // }
+                            } else {
+                                prompt.showToast({
+                                    message: data,
+                                    duration: 0
+                                });
+                            }
+                            //查询充值结果失败log
+                            // that.$app.$def.quickappLog([703, {
+                            //     qmap:{
+                            //         site: '10',
+                            //         reurl: that.url,
+                            //         reunit: that.unit,
+                            //         bid: that.bookId,
+                            //         cid: that.chapterId,
+                            //         orderNo:that.webpayorderno
+                            //     }
+                            // }, obj.eventType ], that);
+
+                        }
+                    });
+                
+            that.loadingnum = that.loadingnum - 1;
+        }, fntype == 'close' ? 300 : 1000);
+    },
+    // 继续支付
+    goonwxwebpay(){
+        let that = this;
+        
+        clearTimeout(that.loadingtime);
+
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: '101',
+                reurl: that.url,
+                reunit: that.unit,
+                bid: that.bookId,
+                cid: that.chapterId,
+                orderNo:that.webpayorderno,
+                btnname:'goonwxwebpay'
+            },
+            omap:that.omap
+        }, 'recharge_wechat_H5'], that);
+        // that.$emit('readyJump',{type: false});
+        that.$dispatch('clickGoPay',{})
+        // that.webpayalert = false;
+    },
+    fnClosePop(){
+        this.$emit('closePop');
+    },
+    parentPay(){
+        let that = this;
+        // 神策打点-确认支付/确认
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: '确认支付',
+            ButtonContent: that.isFriendPay ? '确认' :'确认支付',
+            BookID: that.bookid || ''
+        });
+        that.$emit('fnParentPay');
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    }
+};
+</script>

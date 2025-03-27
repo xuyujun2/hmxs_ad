@@ -1,0 +1,3417 @@
+<import name="pop-task" src="./pop-task"></import>
+<import name="payLists" src="../Common/sharedComponent/payLists/index"></import>
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div class="recharge_box">
+        <div class="model-mask" if="canInput" @click="vagueClick">
+            <div class="model-top">
+                <div class="model-top-mask"></div>
+                <div class="model-box">
+                    <div class="model-box-title">
+                        <stack class="model-box-stack">
+                            <text class="model-box-text">自定义金额</text>
+                            <image class="model-box-image" src="https://xsmfdq.kkyd.cn/images/model-layer-close.png" @click="closeModelInput"></image>
+                        </stack>
+                    </div>
+                    <!-- <div class="model-line"></div> -->
+                    <div>
+                        <input class="model-input" type="number" id="modelNumber" value="{{ modelPayInputNumber }}" placeholder="{{'请填写' + modelMinAmount + '-' + modelMaxAmount + '之间的整数'}}" maxlength="3" enterkeytype="go" @enterkeyclick="fnSetModelNumber" @change="fnModelNumberChange"></input>
+                        <text class="model-confirm" @click="closeModelInput">确定</text>
+                    </div>
+                    <text class="model-tip" if="isModelInputError">{{'提醒：请填写' + modelMinAmount + '-' + modelMaxAmount + '之间的整数'}}</text>
+                    
+                </div>
+            </div>
+            <div class="model-bottom"></div>
+        </div>
+        <!-- <div class="rech_box" if="{{plist}}">
+            <text class="rech_txt">用户ID：{{plist.userId}}</text>
+            <text class="rech_split"> &nbsp;|&nbsp; </text>
+            <text class="rech_txt">书币余额：{{plist.amount}}书币</text>
+        </div> -->
+        <stack class="rech_lack_balance" if="{{samount}}">
+            <image class="top_bg" src="https://xsmfdq.kkyd.cn/images/pay_top_bg.png"></image>
+            <div class="rech_lack_balance_con">
+                <text class="unit_info">余额不足，充值后继续阅读</text>
+                <text class="unit_text">
+                    <span class="normol">余额</span>
+                    <span class="red">{{plist.amount}}</span>
+                    <span class="normol">书币，阅读本{{unit == 1?'书':'章'}}需</span>
+                    <span class="red">{{samount}}</span>
+                    <span class="normol">书币</span>
+                </text>
+            </div>
+        </stack>
+        <!-- 支付列单组件 -->
+        <div class="{{listStyle=='2'?'paylist-con':''}}">
+            <payLists
+                show="{{!isOppoPay}}"
+                id='payList' 
+                list-style="{{listStyle}}" 
+                pay-way-list="{{payWayList}}" 
+                pay-index="{{payindex}}" 
+                is-friend-pay="{{isFriendPay}}"
+                rece-params="{{receParams}}"
+                show-paylist-fix="{{showPaylistFix}}"
+                can-use-length="{{canUseLength}}"
+                pay-plist-products="{{plist ? plist.products[payobj.index] : ''}}"
+                is-web-pay-alert="{{isWebPayAlert}}"
+                pay-money="{{payMoney}}"
+                pay-award="{{payAward}}"
+                @fn-change-alert-show="fnChangeAlertShow"
+                @change-friend-pay="fnChangeFriendPay"
+                @ready-jump="jumpToPage"
+                @close-pop="fnClosePop"
+                @fn-parent-pay="gopay"
+                @fn-change-loaclpush="fnChangeLoaclpush"
+            ></payLists>    
+            <!-- pay-money="{{plist ? (activeCoupon ? (activeCoupon.type == 2 ? (isModelPay ? (modelPayNumber - activeCoupon.discount) : (plist.products[payobj.index].amountNum - activeCoupon.discount)) : (isModelPay ? (Math.ceil((modelPayNumber * activeCoupon.discount / 100) * 100) / 100) : (Math.ceil((plist.products[payobj.index].amountNum * activeCoupon.discount / 100) * 100) / 100))) : (isModelPay ? modelPayNumber : plist.products[payobj.index].amountNum)) : ''}}" -->
+            <!-- pay-award="{{plist ? (plist.products[payobj.index].type == 1 ? (isModelPay ? ((modelPayNumber && modelPayNumber != 0) ? ('共得' + (((+(modelPayNumber * 100)))+(+(modelExtraNumber))) + '书币') : '') : ('共得' + (((+(plist.products[payobj.index].productNum)))+(+(plist.products[payobj.index].giveNum))) + '书币')) : (plist.products[payobj.index].give ? plist.products[payobj.index].give : '')) : ''}}" -->
+        </div>
+        <!-- <div class="rech_border" else></div> -->
+        <div class="rech_list_box" if="{{plist}}">
+            <div class="rech_list_tit">
+                <!-- <text class="rech_list_title">{{plist.payWays[0].showName}}</text> -->
+                <text class="rech_list_title">充值金额</text>
+                <text class="rech_list_tit_num">(1元=100书币)</text>
+            </div>
+            <div class="rech_list_main">
+                <block for="(index,item) in plist.products">
+                    <div class="rech_li" if="item.isModel">
+                        <stack class="rech_li_stack {{item.type != 1 ? 'rech_li_stack_200':'' }} {{payobj.index == index? 'rech_li_stack_b':'' }}" onclick="selectmoney(index, item)">
+                            <div if="!canInput && (!modelPayNumber || modelPayNumber == 0)" class="rech_li_line"></div>
+                            <text if="!canInput && (!modelPayNumber || modelPayNumber == 0)" class="rech_li_tit rech_li_tit_left">元</text>
+                            <text if="!canInput && modelPayNumber" class="rech_li_tit">{{ modelPayNumber + '元' }}</text>
+                            <div class="rech_li_red">
+                                <text class="rech_li_red_l"></text>
+                                <text class="rech_li_red_r">自定义金额</text>
+                            </div>
+                            <div class="rech_li_txt">
+                                <text if="!canInput && (!modelPayNumber || modelPayNumber == 0)" class="rech_li_txt_b {{(isModelInputError && isModelPay) ? 'rech_li_txt_b_e' : ''}}">{{ (isModelInputError && isModelPay) ? '请输入正确金额' : '自己填写充值金额'}}</text>
+                                <text if="!canInput && modelPayNumber" class="rech_li_txt_b">{{ modelPayNumber * 100 + '书币' }}</text>
+                                <text if="!canInput && modelPayNumber" class="rech_li_txt_r">{{ (modelExtraNumber && modelExtraNumber != 0) ? ('送' + modelExtraNumber + '书币') : '' }}</text>
+                            </div>
+                            <div class="rech_li_select_b" if="{{payobj.index == index}}"></div>
+                            <div class="rech_li_select_m" else></div>
+                        </stack>            
+                    </div>
+                    <div class="rech_li" else>
+                        <stack class="rech_li_stack {{item.type != 1 ? 'rech_li_stack_200':'' }} {{payobj.index == index? 'rech_li_stack_b':'' }}" onclick="selectmoney(index, item)">
+                            <text class="{{item.type != 1 ? 'rech_li_tit_2':'rech_li_tit' }}">{{item.amount}}</text>
+                            <div class="rech_li_red" if="{{item.corner}}">
+                                <text class="rech_li_red_l"></text>
+                                <text class="rech_li_red_r">{{item.corner}}</text>
+                            </div>
+                            <div class="{{item.type != 1 ? 'rech_li_txt_2':'rech_li_txt' }}">
+                                <text class="{{item.type != 1 ? 'rech_li_txt_g':'rech_li_txt_b' }}">{{item.product}}</text>
+                                <text class="{{item.type != 1 ? 'rech_li_txt_gr':'rech_li_txt_r' }}">{{item.give}}</text>
+                            </div>
+                            <text class="rech_li_gou"></text>
+                            <div class="rech_li_select_b" if="{{payobj.index == index}}"></div>
+                            <!-- <div class="rech_li_select" if="{{payobj.index == index}}"></div> -->
+                            <div class="rech_li_select_m" else></div>
+                        </stack>
+                    </div>
+                </block>
+            </div>
+            <div class="coupon-wrap {{isMember ? 'coupon-wrap-mb' : ''}}" if="activeCouponList && activeCouponList.length > 0">
+                <div class="coupon-title">
+                    <div>
+                        <image class="coupon-title-img" src="https://xsmfdq.kkyd.cn/images/recharge-coupon-icon.png"></image>
+                        <text class="coupon-title-text">优惠券</text>
+                    </div>
+                    <div class="coupon-content" @click="fnChooseCoupon">
+                        <text class="coupon-title-text">{{ (activeCouponLength > 0 && activeCoupon) ? activeCoupon.desc : '' }}</text>
+                        <!-- 判断是否有优惠券可以使用及优惠金额 -->
+                        <!-- <text class="coupon-title-text coupon-content-text {{ activeCouponLength > 0 ? 'coupon-content-active' : '' }}">{{ activeCouponLength > 0 ? (activeCoupon ? (activeCoupon.type == 2 ? `-￥${activeCoupon.discount}` : (isModelPay ? ('-￥' + (Math.floor((modelPayNumber * (100 - activeCoupon.discount) / 100) * 100) / 100)) : ('-￥' + (Math.floor((plist.products[payobj.index].amountNum * (100 - activeCoupon.discount) / 100) * 100) / 100)))) : (activeCouponLength + '张可用')) : '无可用' }}</text> -->
+                        <text class="coupon-title-text coupon-content-text {{ activeCouponLength > 0 ? 'coupon-content-active' : '' }}">{{ couponContent }}</text>
+                        <image class="coupon-content-btn" src="https://xsmfdq.kkyd.cn/images/recharge-arrow.png" if="couponList.length > 0"></image>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 特权用户提示 -->
+            <div class="member-wrap" if="isMember && canMemberDiscount && plist && plist.products[payobj.index].type == 1" @click="fnShowMemberTip">
+                <div class="member-box">
+                    <div class="member-title">
+                        <image class="member-title-img" src="https://xsmfdq.kkyd.cn/images/recharge-member-icon.png"></image>
+                        <text class="member-title-text">{{memberGrade + '特权'}}</text>
+                    </div>
+                    <div class="member-content" if="plist && plist.products[payobj.index].type == 1">
+                        <stack class="member-stack">
+                            <image class="member-content-img" src="https://xsmfdq.kkyd.cn/images/recharge-member-bg.png"></image>
+                            <text if="!isModelPay || (isModelPay && modelPayNumber && modelPayNumber != 0)" class="member-content-text">{{'额外再赠送' + (isModelPay ? Math.ceil(modelPayNumber * (+memberDiscount)) : Math.ceil(+(plist.products[payobj.index].productNum) * (+memberDiscount) / 100)) + '书币('+ memberDiscount + '%)'}}</text>
+                            <text else class="member-content-text">{{'额外再赠送' + memberDiscount + '%书币'}}</text>
+                        </stack>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="fulibao_main" if="{{plist.products[payobj.index].welfareInfos}}">
+                <div class="fuli-border"></div>
+                <div class="title">
+                    <text class="left">优惠福利</text>
+                    <div class="right-con"  @click="changeFuliSelect">
+                        <text class="right">
+                            <span class="black">原价</span>
+                            <span class="red">{{plist.products[payobj.index].totalPrice}}</span>
+                            <span class="black">元,现价{{plist.products[payobj.index].totalDistount}}元</span>
+                        </text>
+                        <div class="select">
+                            <image src="https://xsmfdq.kkyd.cn/images/pay-select-red-i.png" if="{{fuliSelect}}"></image>
+                            <image src="https://xsmfdq.kkyd.cn/images/pay-select-gary-i.png" else></image>
+                        </div>
+                    </div>
+                </div>
+                <div class="min {{fuliSelect?'':'min-gery'}}" if="{{!fuliDetail}}">
+                    <stack class="min-stack"  for="{{plist.products[payobj.index].welfareInfos}}">
+                        <div class="min-con {{fuliSelect?'':'min-con-grey'}}">
+                            <text class="des {{fuliSelect?'':'des-grey'}}">{{$item.amountName||'《'+$item.bookName+'》'+$item.remark}}</text>
+                            <stack class="money"></stack>
+                        </div>
+                        <div class="min-con-f {{fuliSelect?'':'min-con-f-grey'}}">
+                            <text class="des"></text>
+                            <stack class="money">
+                                <image src="{{fuliSelect?'https://xsmfdq.kkyd.cn/images/pay-add-price-bk-b.png':'https://xsmfdq.kkyd.cn/images/pay-add-price-bk-grey-b.png'}}"></image>
+                                <text class="{{fuliSelect?'':'money-grey'}}">￥{{$item.discount}}</text>
+                            </stack>
+                        </div>
+                    </stack>
+                </div>
+                <div class="max" else>
+                    <stack class="max-stack" for="{{plist.products[payobj.index].welfareInfos}}">
+                        <div class="max-con {{fuliSelect?'':'max-con-grey'}}">
+                            <text class="des {{fuliSelect?'':'des-grey'}}">{{$item.amountName||'《'+$item.bookName+'》'}}</text> 
+                            <text class="des {{fuliSelect?'':'des-grey'}}">{{$item.remark}}</text>   
+                            <div class="money">
+                                <text class="cur {{fuliSelect?'':'cur-grey'}}">￥{{$item.discount}}</text>
+                                <text class="old {{fuliSelect?'':'old-grey'}}">￥{{$item.price}}</text>
+                            </div>
+                        </div>
+                        <stack class="tag" if="{{$item.corner}}">
+                            <image src="https://xsmfdq.kkyd.cn/images/pay-add-tab.png"></image>
+                            <text>{{$item.corner}}</text>
+                        </stack>
+                    </stack>
+                </div>
+                <div class="btn">
+                    <div @click="showFuliDetail" style="align-items: center;">
+                        <text>{{fuliDetail?'收起福利包':'查看福利包'}}</text>
+                        <image src="{{fuliDetail?'https://xsmfdq.kkyd.cn/images/pay-red-arrow-up.png':'https://xsmfdq.kkyd.cn/images/pay-red-arrow-down.png'}}"></image>
+                    </div>
+                </div>
+            </div> -->
+            <!-- <div class="fulibao_main" if="{{hasFuli&&!plist.products[payobj.index].welfareInfos}}">
+                <div class="fuli-border"></div>
+                <div class="title"><text class="left">优惠福利</text></div>
+                <div class="no-fuli">
+                    <image src="https://xsmfdq.kkyd.cn/images/pay-no-fuli.png"></image>
+                    <text>无优惠福利</text>   
+                </div>
+            </div> -->
+
+            <!-- <div class="rech_list_but_div_top" if="{{rechargeDetail}}">
+                <div class="top-top" @click="showReDetail"></div>
+                <stack class="top" if="{{rechargeDetail}}">
+                    <div class="container">
+                        <text class="pop-title">支付明细</text>
+                        <div class="recharge">
+                            <text class="tit">{{plist.products[payobj.index].type==1?'书币充值':'VIP充值'}}</text>
+                            <div class="mony-con">
+                                <div class="left">
+                                    <text class="grey">{{plist.products[payobj.index].detailObj.payObj.remark}}</text>
+                                </div>
+                                <div class="right">
+                                    <text class="old">￥{{plist.products[payobj.index].detailObj.payObj.price}}</text>
+                                    <text class="cur">￥{{plist.products[payobj.index].detailObj.payObj.discount}}</text>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fuli" if="{{plist.products[payobj.index].welfareInfos&&fuliSelect}}">
+                            <text class="tit">优惠福利</text>
+                            <div class="mony-con" for="{{plist.products[payobj.index].welfareInfos}}">
+                                <div class="left">
+                                    <text class="black">{{$item.bookName?'《'+$item.bookName+'》':''}}</text>
+                                    <text class="grey">{{$item.bookName?$item.remark:$item.amountName}}</text>
+                                </div>
+                                <div class="right">
+                                    <text class="old">￥{{$item.price}}</text>
+                                    <text class="cur">￥{{$item.discount}}</text>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <image class="close" @click="showReDetail" src="https://xsmfdq.kkyd.cn/images/gopay-colse-i.png"></image>
+                </stack>
+            </div> -->
+            <div class="rech_list_but_div" if="{{!showPaylistFix}}">
+                <!-- <text style="flex:1;" class="rech_list_but"
+                    @click="gopay">立即充值：{{plist.products[payobj.index].amountNum}}元</text> -->
+                <div class="bot">
+                    <!-- <div class="left">
+                        <div class="num">
+                            <text class="all">￥</text>
+                            <text class="all-num" if="{{plist.products[payobj.index].welfareInfos&&fuliSelect}}">{{Number(plist.products[payobj.index].amountNum)+Number(plist.products[payobj.index].totalDistount)}}</text>
+                            <text class="all-num" else>{{plist.products[payobj.index].amountNum}}</text>                                
+                            <text class="youhui" if="{{plist.products[payobj.index].welfareInfos&&fuliSelect}}">优惠:￥{{Number(plist.products[payobj.index].giveCoupon)+Number(plist.products[payobj.index].welfareCoupon)}}</text>
+                            <text class="youhui" else>优惠:￥{{plist.products[payobj.index].giveCoupon}}</text>
+                        </div>
+                        <div class="detail" @click="showReDetail">
+                            <text>明细</text>
+                            <div class="icon">
+                                <image if="{{!rechargeDetail}}" src="https://xsmfdq.kkyd.cn/images/pay-black-arrow-up.png"></image>
+                                <image else src="https://xsmfdq.kkyd.cn/images/pay-black-arrow-down.png"></image>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="right" @click="fnShowPay">
+                        <!-- 充值金额计算 -->
+                        <!-- 括号中的+目的是替换Number()方法将字符串转为数组，Number()再华为IDE中编译报错 -->
+                        <text if="isModelPay" class="pay-btn {{ !modelPayNumber || modelPayNumber == 0 ? 'pay-btn-unactive' : ''}}">{{ activeCoupon ? (activeCoupon.type == 2 ? ('立即支付：' + (modelPayNumber - activeCoupon.discount) + '元') : ('立即支付：' + (Math.round((modelPayNumber * activeCoupon.discount / 100) * 100) / 100) + '元')) : ((modelPayNumber && modelPayNumber != 0) ? ('立即支付：' + modelPayNumber + '元') : '请输入正确金额') }}</text>
+                        <text else class="pay-btn">立即支付：{{ activeCoupon ? (activeCoupon.type == 2 ? (plist.products[payobj.index].amountNum - activeCoupon.discount) : (Math.round((plist.products[payobj.index].amountNum * activeCoupon.discount / 100) * 100) / 100)) : plist.products[payobj.index].amountNum }}元</text>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="{{isChannel?'rech_prompt_box_ext':'rech_prompt_box'}}">
+            <text class="rech_prompt_tit" @click="logout">温馨提示</text>
+            <block for="payTips">
+                <text class="rech_prompt_li" if="{{$item.isCur == 0}}">
+                    {{$item.tips}}
+                </text>
+                <text class="rech_prompt_li" else>
+                    <block for="{{(inex,value) in $item.tips}}">
+                        <span if="{{value != keyword1 && value != keyword2 && value != keyword3 && value != keyword4}}">{{value}}</span>
+                        <a class="user_fang" elif="{{value == keyword1}}" href="{{urlFang1}}">{{value}}</a>
+                        <a class="user_fang" elif="{{value == keyword2}}" href="{{urlFang2}}">{{value}}</a>
+                        <span class="user_blod" elif="{{value == keyword3 || value == keyword4}}">{{value}}</span>
+                    </block>
+                </text>
+            </block>
+        </div>
+
+        <!-- 无网络加载中弹层 updat by prh 8.2-->
+        <div class="dialog_loading" if="{{diaLoadingShow}}" style="background-color:{{setupJson.bgColor}};" @click="vagueClick">
+            <div class="dia_txt">
+                <text class="top_t"></text>
+                <div class="load_img_div">
+                    <image class="load_img" src="{{setupJson.loadImg}}"></image>
+                </div>
+                <div class="dia_reload_con">
+                    <text if="{{!diaLoadErrShow}}" style="color:#333333">正在加载，请稍后......</text>
+                </div>
+                <div class="dia_reload_con">
+                    <text if="{{diaLoadErrShow}}" style="color:#333333">网络不给力，点击刷新重试……</text>
+                </div>
+                <div if="{{diaLoadErrShow}}" class="dia_reload_btn" @click="clickreload"><text>重试</text></div>
+            </div>
+        </div>
+        <pop-task if="{{isTask}}" pop-style="{{popStyle}}" title="{{popTitle}}" description="{{popDes}}" user-type="{{userType}}" book-id="{{bookId}}" omap="{{omap}}" chapter-id="{{ chapterId }}" book-name="{{ bookName }}"></pop-task>
+        <div class="giveup" if="{{showConfirm}}">
+            <div class="pop">
+                <text class="text">优惠福利包，限量购买中！是否取消优惠？</text>
+                <div class="btn">
+                    <text class="cancle"  @click="fuliCancle">取消优惠</text>
+                    <text class="confirm"  @click="fuliConfirm">继续购买</text>
+                </div>
+            </div>
+        </div>
+
+        <!-- 优惠券选择列表 -->
+        <div class="coupon-choose-wrap" if="isChooseCouponShow" @click="vagueClick">
+            <div class="coupon-choose {{ couponList && couponList.length == 1 ? 'coupon-choose-small' : '' }}">
+                <stack class="coupon-choose-title">
+                    <text class="coupon-choose-title-text">优惠券</text>
+                    <image class="coupon-choose-title-icon" src="https://xsmfdq.kkyd.cn/images/recharge-close.png" @click="fnCloseChooseCoupon"></image>
+                </stack>
+                <list class="coupon-list-wrap">
+                    <!-- <list-item type="couponList{{index}}" class="coupon-list" for="(index, item) in activeCouponList" @click="fnConfirmChooseCoupon(item)"> -->
+                    <list-item type="couponList{{index}}" class="coupon-list" for="(index, item) in activeCouponList" @click="fnConfirmChooseCoupon(item)">
+                        <!-- <div class="coupon-list-image"> -->
+                        <stack>
+                            <image class="coupon-list-image-stack" if="plist ? (isModelPay ? (!modelPayNumber || modelPayNumber == 0 || item.premise > modelPayNumber) : (item.premise > plist.products[payobj.index].amountNum)) : 1" src="https://xsmfdq.kkyd.cn/images/coupon-bg-unactive.png"></image>
+                            <image class="coupon-list-image-stack" else src="https://xsmfdq.kkyd.cn/images/coupon-bg-active.png"></image>
+                            <div class="coupon-list-image">
+                                <div class="coupon-list-content-wrap">
+                                    <text class="coupon-list-content" if="item.type == 2">￥</text>
+                                    <text class="coupon-list-num">{{ item.type == 1 ? (item.discount / 10) : item.discount }}</text>
+                                    <text class="coupon-list-content" if="item.type == 1">折</text>
+                                </div>
+                                <text class="coupon-list-tip">满{{ item.premise }}可用</text>    
+                            </div>
+                        </stack>
+                        <div class="coupon-list-column coupon-list-grow">
+                            <text class="coupon-list-type">{{ item.type == 2 ? '现金券' : '折扣券' }}</text>
+                            <text class="coupon-list-time">有效期至: {{ item.expiryDate }}</text>
+                        </div>
+                        <div class="coupon-list-column">
+                            <image class="coupon-list-btn" src="https://xsmfdq.kkyd.cn/images/recharge-coupon-select.png" if="activeCoupon && activeCoupon.lastId == item.lastId"></image>
+                            <image class="coupon-list-btn" src="https://xsmfdq.kkyd.cn/images/recharge-coupon.png" else></image>
+                        </div>
+                    </list-item>
+                </list>
+            </div>
+        </div>
+
+        <!-- 领取优惠券弹框 -->
+        <div class="pay-success-wrap" if="isPaySuccessShow" @click="vagueClick">
+            <image class="pay-success-close" src="https://xsmfdq.kkyd.cn/images/recharge-pop-close.png" @click="fnClosePaySuccess"></image>
+            <div class="pay-success">
+                <text class="pay-success-title">充值成功</text>
+                <text class="pay-success-desc">恭喜你获得: </text>
+                <list class="pay-success-list-wrap">
+                    <list-item type="counponReceiveList" for="(index, item) in counponReceiveList" class="pay-success-list">
+                        <stack>
+                            <image class="pay-success-image-stack" src="https://xsmfdq.kkyd.cn/images/coupon-bg-active.png"></image>
+                            <div class="pay-success-image">
+                                <div class="pay-success-content-wrap">
+                                    <text class="pay-success-content" if="item.type == 2">￥</text>
+                                    <text class="pay-success-num">{{ item.type == 1 ? (item.discount / 10) : item.discount }}</text>
+                                    <text class="pay-success-content" if="item.type == 1">折</text>
+                                </div>
+                                <text class="pay-success-tip">满{{ item.premise }}可用</text>    
+                            </div>
+                        </stack>
+                        <div class="pay-success-column pay-success-grow">
+                            <text class="pay-success-type">{{ item.type == 2 ? '现金券' : '折扣券' }}</text>
+                            <text class="pay-success-time">有效期至: {{ item.expiryDate }}</text>
+                        </div>
+                    </list-item>
+                </list>
+                <image class="pay-success-btn" src="https://xsmfdq.kkyd.cn/images/recharge-coupon-receive.png" @click="fnReceiveCoupon"></image>
+            </div>
+        </div>
+
+        <!-- 优惠券领取成功弹框 -->
+        <div class="coupon-receive-wrap" if="isCouponReceivedShow" @click="vagueClick">
+            <image class="coupon-receive-close" src="https://xsmfdq.kkyd.cn/images/recharge-pop-close.png" @click="fnCloseCouponReceive"></image>
+            <div class="coupon-receive">
+                <text class="coupon-receive-title">领取成功</text>
+                <text class="coupon-receive-desc">领取的优惠券可在：【我的 - 优惠券】 中查看</text>
+                <image class="coupon-receive-btn" src="https://xsmfdq.kkyd.cn/images/recharge-coupon-success.png" @click="fnCloseCouponReceive"></image>
+            </div>
+        </div>
+
+        <!-- 会员提示 -->
+        <div if="isMemberTipShow" class="dialog-wrap" @click="fnCloseMemberTip">
+            <div class="dialog-box">
+                <text class="dialog-title">温馨提醒</text>
+                <text class="dialog-desc">在我的页面中点击&lt;我的等级&gt;，可查看更多等级权益</text>
+                <text class="dialog-btn" @click="fnCloseMemberTip">确定</text>
+            </div>
+        </div>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+<style lang="less">
+    .dialog-wrap {
+        position: fixed;
+		width: 100%;
+		height: 100%;
+		left: 0;
+		top: 0;
+		background-color: rgba(0, 0, 0, 0.7);
+		justify-content: center;
+		align-items: center;
+        .dialog-box {
+            flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			width: 560px;
+			height: 310px;
+			background-color: #FFFFFF;
+			border-radius: 24px;
+            padding: 32px 50px 0px;
+            .dialog-title {
+                font-size: 34px;
+                font-weight: bold;
+                color: #444444;
+                line-height: 48px;
+                margin-bottom: 20px;
+            }
+            .dialog-desc {
+                font-size: 30px;
+                color: #444444;
+                line-height: 44px;
+                margin-bottom: 20px;
+            }
+            .dialog-btn {
+                font-size: 30px;
+                color: #ff5b60;
+                line-height: 82px;
+                margin-bottom: 20px;
+            }
+        }
+    }
+    .pay-btn {
+        width: 670px;
+        height: 96px;
+        background-color:rgba(255,137,112,1);
+        text-align: center;
+        font-size:30px;
+        font-weight:bold;
+        color:rgba(255,255,255,1);
+        border-radius: 96px;
+    }
+    .pay-btn-unactive {
+        background-color: #E7E7E7;
+        color: #AFAFAF;
+    }
+    .model-mask {
+        position: fixed;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(0, 0, 0, .8);
+        .model-top {
+            flex: 1;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .model-bottom {
+            flex: 1;
+            width: 100%;
+            background-color: #F2F2F2;
+        }
+        .model-top-mask {
+            flex: 1;
+            width: 100%;
+        }
+        .model-box {
+            flex-direction: column;
+            padding: 0px 30px 0px 30px;
+            width: 100%;
+            height: 359px;
+            background-color: #F2F2F2;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            .model-box-title {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100px;
+            }
+            .model-box-stack {
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: center;
+                width: 100%;
+                height: 100px;
+            }
+            .model-box-text {
+                width: 100%;
+                height: 50px;
+                font-size: 36px;
+                color: #444444;
+                line-height: 50px;
+                text-align: center;
+            }
+            .model-box-image {
+                width: 43px;
+                height: 43px;
+            }
+            .model-line {
+                margin-bottom: 24px;
+                width: 690px;
+                height: 1px;
+                background-color: #DDDDDD;
+            }
+            .model-input {
+                margin-bottom: 20px;
+                flex:1;
+                height: 134px;
+                padding: 43px 0px 43px 30px;
+                background-color: #FFFFFF;
+                border-radius: 12px;
+                border-color: #D4D3D9;
+                border-width: 1px;
+                color: #444444;
+                placeholder-color: #AFAFAF;
+            }
+            .model-confirm {
+                margin-left: 20px;
+                width: 176px;
+                height: 134px;
+                background-color: #FF8970;
+                border-radius: 12px;
+                font-size: 34px;
+                color: #FFFFFF;
+                text-align: center;
+            }
+            .model-tip {
+                height: 40px;
+                font-size: 28px;
+                color: #FF5B60;
+                line-height: 40px;
+            }
+        }
+    }
+    .user_fang{
+        color: #FF5B60;
+    }
+    .user_blod{
+        font-weight: bold;
+    }
+    /* 是否特权用户 */
+    .member-wrap {
+        margin: 0px 30px 5px;
+        padding-top: 30px;
+        border-top-width: 1px;
+        border-top-color: #e7e7e7;
+        .member-box {
+            justify-content: space-between;
+            width: 100%;
+            height: 48px;
+            .member-title {
+                align-items: center;
+                justify-content: center;
+                .member-title-img {
+                    margin-right: 18px;
+                    width: 32px;
+                    height: 24px;
+                }
+                .member-title-text {
+                    height: 42px;
+                    font-size: 30px;
+                    color: #292929;
+                    line-height: 42px;
+                }
+            }
+            .member-content {
+                align-items: center;
+                justify-content: center;
+                .member-stack {
+                    align-items: center;
+                    justify-content: center;
+                }
+                .member-content-img {
+                    width: 307px;
+                    height: 48px;
+                }
+                .member-content-text {
+                    width: 307px;
+                    height: 30px;
+                    font-size: 22px;
+                    font-weight: bold;
+                    color: #484848;
+                    line-height: 30px;
+                    text-align: center;
+                }
+            }
+        }
+    }
+    /* 是否选择优惠券 */
+    .coupon-wrap {
+        margin: 0px 30px 15px;
+        padding-top: 30px;
+        border-top-width: 1px;
+        border-top-color: #e7e7e7;
+        .coupon-title {
+            justify-content: space-between;
+            width: 100%;
+            .coupon-title-text {
+                color: #292929;
+                font-size: 30px;
+            }
+            .coupon-title-img {
+                margin-top: 4px;
+                margin-right: 18px;
+                width: 32px;
+                height: 32px;
+            }
+            .coupon-content {
+                align-self: flex-end;
+                .coupon-content-text {
+                    color: #bcbcbc;
+                }
+                .coupon-content-active {
+                    color: #ff5b60;
+                }
+                .coupon-content-btn {
+                    margin-left: 10px;
+                    align-self: center;
+                    width: 40px;
+                    height: 40px;
+                 }
+            }
+        }
+    }
+    .coupon-wrap-mb {
+        margin: 0px 30px 30px;
+    }
+    /* 优惠券选择 */
+    .coupon-choose-wrap {
+        position: fixed;
+        flex-direction: column;
+        justify-content: flex-end;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .3);
+        .coupon-choose {
+            flex-direction: column;
+            width: 100%;
+            height: 510px;
+            background-color: #f2f2f2;
+            .coupon-choose-title {
+                align-items: center;
+                height: 100px;
+                background-color: #ffffff;
+                .coupon-choose-title-text {
+                    width: 100%;
+                    text-align: center;
+                    color: #292929;
+                }
+                .coupon-choose-title-icon {
+                    align-self: center;
+                    margin-left: 673px;
+                    width: 50px;
+                    height: 50px;
+                }
+            }
+            /* 优惠券列表 */
+            .coupon-list-wrap {
+                flex-direction: column;
+                padding: 0px 20px 0px;
+                .coupon-list-column {
+                    flex-direction: column;
+                    background-color: #ffffff;
+                }
+                .coupon-list-grow {
+                    flex: 1;
+                }
+                .coupon-list {
+                    margin-top: 20px;
+                    height: 180px;
+                    .coupon-list-image-stack {
+                        width: 200px;
+                    }
+                    .coupon-list-image {
+                        flex-direction: column;
+                        width: 200px;
+                        .coupon-list-content-wrap {
+                            justify-content: center;
+                            .coupon-list-content {
+                                margin-top: 50px;
+                                height: 42px;
+                                font-size: 30px;
+                                font-weight: bold;
+                                color: #ffffff;
+                                text-align: center;
+                            }
+                            .coupon-list-num {
+                                margin: 16px 5px 0px 2px;
+                                height: 92px;
+                                font-weight: bold;
+                                font-size: 72px; 
+                                color: #ffffff;   
+                            }
+                        }
+                        .coupon-list-tip {
+                            height: 37px;
+                            font-size: 26px;
+                            color: #ffffff;
+                            text-align: center;
+                        }
+                    }
+                    .coupon-list-type {
+                        margin-top: 25px;
+                        margin-left: 20px;
+                        height: 68px;
+                        font-size: 34px;
+                        color: #444444;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .coupon-list-time {
+                        margin-left: 20px;
+                        height: 68px;
+                        font-size: 26px;
+                        color: #afafaf;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .coupon-list-btn {
+                        margin: 70px 30px 0px 10px;
+                        width: 40px;
+                        height: 41px;
+                    }
+                }
+            }
+        }
+        .coupon-choose-small {
+            height: 310px;
+        }
+    }
+
+    /* 支付成功弹框 */
+    .pay-success-wrap {
+        position: fixed;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .8);
+        .pay-success-close {
+            margin-left: 641px;
+            margin-bottom: 30px;
+            width: 54px;
+            height: 54px;
+        }
+        .pay-success {
+            flex-direction: column;
+            margin: 0px 55px;
+            padding: 30px 40px;
+            width: 640px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            .pay-success-title {
+                margin-bottom: 20px;
+                height: 48px;
+                text-align: center;
+                font-size: 34px;
+                color: #292929;
+            }
+            .pay-success-desc {
+                margin-bottom: 15px;
+                height: 37px;
+                color: #7f7f7f;
+                font-size: 26px;
+            }
+            .pay-success-list-wrap {
+                flex-direction: column;
+                height: 410px;
+                .pay-success-column {
+                    flex-direction: column;
+                    background-color: #ffffff;
+                }
+                .pay-success-grow {
+                    flex: 1;
+                }
+                .pay-success-list {
+                    margin-bottom: 20px;
+                    height: 180px;
+                    border-width: 2px;
+                    border-left-width: 0px;
+                    border-color: #E7ECEF;
+                    .pay-success-image-stack {
+                        width: 200px;
+                    }
+                    .pay-success-image {
+                        flex-direction: column;
+                        height: 178px;
+                        width: 200px;
+                        .pay-success-content-wrap {
+                            justify-content: center;
+                            .pay-success-content {
+                                margin-top: 50px;
+                                height: 42px;
+                                font-size: 30px;
+                                font-weight: bold;
+                                color: #ffffff;
+                                text-align: center;
+                            }
+                            .pay-success-num {
+                                margin: 16px 5px 0px 2px;
+                                height: 92px;
+                                font-weight: bold;
+                                font-size: 72px; 
+                                color: #ffffff;   
+                            }
+                        }
+                        .pay-success-tip {
+                            height: 37px;
+                            font-size: 26px;
+                            color: #ffffff;
+                            text-align: center;
+                        }
+                    }
+                    .pay-success-type {
+                        margin-top: 25px;
+                        margin-left: 20px;
+                        height: 68px;
+                        font-size: 34px;
+                        color: #444444;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .pay-success-time {
+                        margin-left: 20px;
+                        height: 68px;
+                        font-size: 26px;
+                        color: #afafaf;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+            .pay-success-btn {
+                align-self: center;
+                height: 90px;
+            }
+        }   
+    }
+    /* 领取成功弹框 */
+    .coupon-receive-wrap {
+        position: fixed;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .8);
+        .coupon-receive-close {
+            margin-left: 641px;
+            margin-bottom: 30px;
+            width: 54px;
+            height: 54px;
+        }
+        .coupon-receive {
+            flex-direction: column;
+            margin: 0px 55px;
+            padding: 30px 52px;
+            width: 640px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            .coupon-receive-title {
+                margin-bottom: 26px;
+                height: 48px;
+                text-align: center;
+                font-size: 34px;
+                color: #292929;
+            }
+            .coupon-receive-desc {
+                margin-bottom: 23px;
+                height: 37px;
+                color: #292929;
+                font-size: 26px;
+            }
+            .coupon-receive-btn {
+                align-self: center;
+                height: 90px;  
+            }
+        }
+    }
+
+    .rech_list_but_div_top{
+        position: fixed;
+        bottom: 109px;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .8);
+        justify-content: flex-end;
+        .top-top{
+            flex: 1;
+        }
+        .top{
+            background-color: #ffffff;
+            width: 100%;
+            .container{
+                flex: 1;
+                flex-direction: column;
+                padding: 30px 30px 5px;
+                .pop-title{
+                    font-size:36px;
+                    color:rgba(68,68,68,1);
+                    text-align: center;
+                    margin-bottom: 25px;
+                }
+                .recharge,.fuli{
+                    border-top-width: 1px;
+                    border-top-color: #E7E7E7;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding-bottom: 25px;
+                }
+                .tit{
+                    color: #444444;
+                    font-size: 38px;
+                    font-weight: bold;
+                    margin-top: 25px;
+                }
+                .mony-con{
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 15px;
+                    .left{
+                        .black{
+                            color: #444444;
+                            font-size: 30px;
+                        }
+                        .grey{
+                            color: #737373;
+                            font-size: 30px;
+                        }
+                    }
+                    .right{
+                        .cur{
+                            color: #444444;
+                            font-size: 30px;
+                            font-weight: bold;
+                        }
+                        .old{
+                            color: #BABABA;
+                            font-size: 30px;
+                            text-decoration: line-through;
+                            margin-right: 30px;
+                        }
+                    }
+                }
+            }
+            .close{
+                width: 50px;
+                height: 50px;
+                margin-left: 673px;
+                margin-top: 28px;
+            }
+        }
+    }
+    .rech_list_but_div {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        .bot{
+            background-color: #ffffff;
+            .left{
+                flex: 1;
+                border-top-color: #D6D6D6;
+                border-top-width: 1px;
+                align-items: center;
+                justify-content: space-between;
+                padding-left: 30px;
+                .all{
+                    color: #444444;
+                    font-size: 30px;
+                    font-weight: bold;
+                }
+                .all-num{
+                    color: #FF5B60;
+                    font-size: 48px;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                }
+                .youhui{
+                    font-size:30px;
+                    color:rgba(168,168,168,1);
+                    margin-left: 14px;
+                }
+                .detail{
+                    align-items: center;
+                    margin-right: 25px;
+                    text{
+                        color: #444444;
+                        font-size: 30px;
+                    }
+                    image{
+                        width: 24px;
+                        height: 26px;
+                        margin-left: 10px;
+                    }
+                }
+            }
+            .right{
+                /* width:265px; */
+                width: 100%;
+                margin-bottom: 76px;
+                justify-content: center;
+                align-items: center;
+                margin-top: 30px;
+            }
+        }
+    }
+    .giveup{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0,0,0,0.8);
+        .pop{
+            width:560px;
+            background-color:rgba(255,255,255,1);
+            border-radius:24px;
+            flex-direction: column;
+            align-items: center;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(68,68,68,1);
+                margin-top: 30px;
+            }
+            .text{
+                width:410px;
+                font-size:32px;
+                color:#444444;
+                margin: 62px 0px 62px;
+                line-height:60px;
+                text-align: center;
+            }
+            .btn{
+                .cancle{
+                    width:50%;
+                    height:84px;
+                    background-color:rgba(242,242,242,1);
+                    color:rgba(186,186,186,1);
+                    text-align: center;
+                    line-height: 84px;
+                    border-bottom-left-radius: 24px;
+
+                }
+                .confirm{
+                    width:50%;
+                    height:84px;
+                    text-align: center;
+                    line-height: 84px;
+                    color:rgba(255,255,255,1);
+                    background-color:#FD895A;
+                    border-bottom-right-radius: 24px;
+                }
+            }
+        }
+    }
+    .fulibao_main{
+        flex-wrap: wrap;
+        flex-direction: column;
+        /* align-items: center; */
+        .no-fuli{
+            flex-direction: column;
+            align-items: center;
+            image{
+                width: 116px;
+                height: 98px;
+            }
+            text{
+                font-size:30px;
+                color:rgba(186,186,186,1);
+            }
+        }
+        .fuli-border{
+            width: 690px;
+            height:1px;
+            background-color:rgba(231,231,231,1);
+            margin: 15px;
+        }
+        .title{
+            padding: 15px;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            .left{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(41,41,41,1);
+            }
+            .right-con{
+                align-items: center;
+                .right{
+                    font-size:26px;
+                    font-weight:bold;
+                    .black{
+                        color:rgba(120,84,89,1);
+                    }
+                    .red{
+                        color:#FF5B60;
+                    }
+                }
+                .select{
+                    width: 40px;
+                    height: 40px;
+                    margin-left: 16px;
+                    image{
+                        width: 40px;
+                        height: 40px;
+                    }
+                }
+            }
+        }
+        .min{
+            flex-wrap: wrap;
+            .min-stack{
+                padding: 15px;
+                width: 50%;
+                .min-con{
+                    flex: 1;
+                    justify-content: space-between;
+                    align-items: center;
+                    border:1px solid rgba(202,196,196,1);
+                    border-radius:12px;
+                    height: 46px;
+                    margin-top: 1px;
+                    margin-right: 1px;
+                    .des{
+                        font-size:26px;
+                        font-weight:bold;
+                        color:rgba(81,61,61,1);
+                        margin-left: 10px;
+                        text-overflow: ellipsis;
+                        lines: 1;
+                    }
+                    .money{
+                        width: 90px;
+                        height: 48px;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                }
+                .min-con-grey{
+                    background-color: rgba(242,242,242,1);
+                    .des-grey{
+                        color:rgba(188,188,188,1);
+                    }
+                }
+                .min-con-f{
+                    flex: 1;
+                    justify-content: space-between;
+                    align-items: center;
+                    border-radius:12px;
+                    height: 48px;
+                    .money{
+                        width: 90px;
+                        height: 48px;
+                        justify-content: center;
+                        align-items: center;
+                        image{
+                            width: 90px;
+                            height: 48px;
+                        }
+                        text{
+                            font-size:26px;
+                            font-weight:bold;
+                            color:rgba(255,255,255,1);
+                        }
+                    }
+                }
+                .min-con-f-grey{
+                    .money{
+                        .money-grey{
+                            color:rgba(188,188,188,1);
+                        }
+                    }
+                    
+                }
+            }
+        }
+        .max{
+            flex-wrap: wrap;
+            .max-stack{
+                padding: 15px;
+                width: 50%;
+                .max-con{
+                    flex: 1;
+                    border:2px solid rgba(255,91,96,1);
+                    border-radius:12px;
+                    flex-direction: column;
+                    justify-content: center;
+                    height: 154px;
+                    margin-top: 16px;
+                    background-color: #FFF6D6;
+                    .des{
+                        font-size:26px;
+                        font-weight:bold;
+                        color:rgba(81,61,61,1);
+                        margin-left: 12px;
+                        margin-right: 12px;
+                        margin-top: 5px;
+                        text-overflow: ellipsis;
+                        lines: 1;
+                    }
+                    .money{
+                        align-items: center;
+                        .cur{
+                            font-size:36px;
+                            font-weight:bold;
+                            color:rgba(255,130,69,1);
+                            margin-left: 20px;
+                        }
+                        .old{
+                            font-size:26px;
+                            color:rgba(81,61,61,1);
+                            margin-left: 33px;
+                            text-decoration: line-through; 
+                        }
+                    }
+                }
+                .max-con-grey{
+                    background-color:rgba(242,242,242,1);
+                    border:1px solid rgba(214,214,214,1);
+                    .des-grey{
+                        color: #BCBCBC;
+                    }
+                    .money{
+                        .cur-grey{
+                            color: #BCBCBC;
+                        }
+                        .old-grey{
+                            color: #BCBCBC;
+                        }
+                    }
+                }
+                .tag{
+                    width: 110px;
+                    height: 33px;
+                    justify-content: center;
+                    align-items: center;
+                    image{
+                        width: 110px;
+                        height: 33px;
+                    }
+                    text{
+                        font-size:20px;
+                        color:rgba(255,255,255,1);
+                    }
+                }
+            }
+        }
+        .btn{
+            margin-top: 30px;
+            align-items: center;
+            justify-content: center;
+            text{
+                font-size:30px;
+                font-weight:bold;
+                color:rgba(249,112,83,1);
+            }
+            image{
+                width: 30px;
+                height: 30px;
+                margin-left: 10px;
+            }
+        }
+    }
+
+    /* load 弹层部分 */
+    .load_img_div {
+        width: 100%;
+        justify-content: center;
+    }
+    .load_img {
+        width: 210px;
+        height: 210px;
+    }
+    .dialog_loading {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        flex-direction: column;
+        align-items: center;
+    }
+    .top_t {
+        height: 400px;
+    }
+    .dia_txt {
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+    }
+    .top_t {
+        height: 400px
+    }
+    .dia_txt {
+        .dia_reload_con {
+            margin-top: 30px;
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+    .dia_reload_btn {
+        margin: 0 15px;
+        justify-content: center;
+        height: 80px;
+        background-color: #FF802B;
+        border-radius: 40px;
+        position: fixed;
+        left: 135px;
+        right: 135px;
+        top: 826px;
+    }
+    .dia_reload_btn text {
+        font-size: 30px;
+        color: rgba(255, 255, 255, 1);
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+    /* .unit_info {
+        font-size: 26px;
+        color: #4a4a4a;
+        line-height: 40px;
+    }
+    .unit_text {
+        font-size: 26px;
+        color: #fa2a2d;
+        line-height: 40px;
+    } */
+    .recharge_box {
+        flex-direction: column;
+        background-color:rgba(242,242,242,1);
+    }
+    .rech_box {
+        padding: 19px 30px;
+        background-color:#ffffff;
+    }
+    .rech_txt {
+        /* flex: 1; */
+        height: 42px;
+        font-size: 30px;
+        color: #292929;
+        line-height: 42px;
+    }
+    .rech_split {
+        margin: 0px 10px;
+        height: 42px;
+        font-size: 30px;
+        color: rgba(0,0,0,0.1);
+        line-height: 42px;  
+    }
+    .rech_list_box {
+        /* margin: 0px 15px; */
+        padding: 30px 15px;
+        margin-bottom: 16px;
+        flex-direction: column;
+        background-color:#ffffff;
+    }
+    .paylist-con{
+        padding: 15px 30px;
+        flex-direction: column;
+        background-color:#ffffff;
+        margin-bottom: 16px;
+    }
+    .rech_list_tit {
+        margin: 0px 15px 15px;
+        height: 50px;
+        /* align-items: center; */
+        /* align-items: flex-end; */
+    }
+    .rech_list_title {
+        /* height: 50px; */
+        font-size: 36px;
+        color: #292929;
+        /* line-height: 50px; */
+        /* font-weight: bold; */
+    }
+    .rech_list_tit_num {
+        padding-top: 5px;
+        /* height: 50px; */
+        padding-left: 20px;
+        font-size: 26px;
+        color: #FF5B60;
+    }
+    .rech_list_main {
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    .rech_li {
+        padding: 15px;
+        width: 50%;
+    }
+    .rech_li_stack {
+        flex: 1;
+        height: 134px;
+        flex-direction: column;
+    }
+    .rech_li_line {
+        padding-top: 60px;
+        margin-left: 24px;
+        width: 50px;
+        border-bottom-width: 1px;
+        border-bottom-color: #BABABA;
+    }
+    .rech_li_tit {
+        padding: 18px 0px 1px 24px;
+        height: 62px;
+        font-size: 44px;
+        color: #444444;
+        line-height: 52px;
+    }
+    .rech_li_tit_left {
+        margin-left: 60px;
+    }
+    .rech_li_tit_2 {
+        padding: 18px 0px 1px 24px;
+        height: 62px;
+        font-size: 44px;
+        color: #444444;
+        line-height: 52px;
+    }
+    .rech_li_red {
+        width: 100%;
+        text-align: right;
+        margin-top: 20px;
+        height: 44px;
+    }
+    .rech_li_red_l {
+        flex: 1;
+    }
+    .rech_li_red_r {
+        padding: 0px 26px;
+        height: 44px;
+        background-color: #FF0300;
+        font-size: 26px;
+        color: #fff;
+        border-top-left-radius: 44px;
+        border-bottom-left-radius: 44px;
+        line-height: 44px;
+    }
+    .rech_li_txt {
+        padding: 80px 0px 0px 24px;
+    }
+    .rech_li_txt_b {
+        font-size: 27px;
+        color: #737373;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+    .rech_li_txt_b_e {
+        color: #FF5B60;
+    }
+    .rech_li_txt_r {
+        font-size: 27px;
+        color: #FF5B60;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+    .rech_li_select_m {
+        flex: 1;
+        border: 1px solid #D4D3D9;
+        border-radius: 12px;
+    }
+    .rech_li_select_b {
+        flex: 1;
+        border-width: 2px;
+        border-color: #FF5B60;
+        border-radius:12px;
+        /* border-bottom-right-radius: 0px; */
+    }
+    .rech_li_select {
+        height: 100%;
+        width: 100%;
+        background-image: url(https://xsmfdq.kkyd.cn/images/pay-select-i.png);
+        background-position: right bottom;
+        background-repeat: no-repeat;
+        background-size: 45px 43px;
+    }
+    .rech_li_stack_200 {
+        height: 179px;
+    }
+    .rech_li_stack_b{
+        background-color: #FFF6D6;
+        border-radius: 12px;
+    }
+    .rech_li_txt_2 {
+        padding: 80px 0px 0px 26px;
+        flex-direction: column;
+    }
+    .rech_li_txt_g {
+        margin-bottom: 10px;
+        font-size: 30px;
+        color: #737373;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+    .rech_li_txt_gr {
+        font-size: 30px;
+        color: #FF5B60;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+
+    .rech_list_but {
+        margin: 0 25px 20px;
+        height: 94px;
+        background-color: #44bbff;
+        font-size: 30px;
+        color: #fff;
+        text-align: center;
+        line-height: 94px;
+        border-radius: 10px;
+    }
+    .rech_prompt_box {
+        padding: 460px 30px 206px;
+        flex-direction: column;
+        background-color:#ffffff;
+    }
+    .rech_prompt_box_ext {
+        padding: 100px 30px 206px;
+        flex-direction: column;
+        background-color:#ffffff;
+    }
+    .rech_prompt_tit {
+        margin: 5px 0px;
+        font-size: 30px;
+        color: #292929;
+        /* font-weight: bold; */
+        line-height: 60px;
+    }
+    .rech_prompt_li {
+        margin: 5px 0px;
+        font-size: 26px;
+        color: #3a4a5a;
+        line-height: 44px;
+    }
+    .rech_border {
+        margin: 0px 40px;
+        height: 1px;
+        background-color: #E7E7E7;
+    }
+    .rech_lack_balance {
+        margin-bottom: 16px;
+        padding: 15px 0px;
+        background-color: #ffffff;
+
+        .top_bg{
+            width: 100%;
+            height: 100%;
+        }
+        .rech_lack_balance_con{
+            width: 100%;
+            height: 148px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            .unit_info{
+                font-size:30px;
+                font-weight:bold;
+                color:rgba(249,112,83,1);
+                line-height:42px;
+                margin-top: 12px;
+                text-align: center;
+            }
+            .unit_text{
+                font-size:26px;
+                line-height:37px;
+                margin-top: 6px;
+                .normol{
+                    color:rgba(186,186,186,1);
+                }
+                .red{
+                    color:rgba(249,112,83,1);
+                }
+            }
+        }
+    }
+    .userFang{
+        color: #ff0000;
+    }
+</style>
+<script>
+    import storage from '@system.storage';
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    import wxpay from '@service.wxpay';
+    import app from '@system.app';
+    import pay from '@service.pay'
+    import audio from '@system.audio'
+    import shareSe from '@service.share';
+    import shortcut from '@system.shortcut'
+    import notification from '@system.notification'
+    import account from '@service.account'
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+    export default {
+        private: {
+            keyword1:'',
+            keyword2:'',
+            keyword3:'',
+            keyword4:'',
+            txtName:'',
+            urlFang1:'',
+            urlFang2:'',
+            payobj: {
+                nmoney: '',
+                payid: '',
+                paytype: '',
+                paytime: '',
+                index: 0,
+                selected: true,
+                oparams: '',
+                myamount: '',
+                logoutnum: 0,
+                isAuto: 0,
+            },
+            // loadingtime: null,
+            // loadingnum: 5,
+            // loadingag: false,
+            plist: '', // 支付信息
+            isOppoPay:false,
+            payWayList:[],
+            ouserinfo: '',
+            headerJson: {},
+            payDataJson:'',
+            logJson: {},
+            payindex:0,
+            isFriendPay:false,
+            oparams: {
+                bookId: '',
+                chapterId: '',
+                refererPage: '/Recharge',
+                pageFrom: '',
+            },
+            surl: '',
+            samount: '',
+            sunit: '',
+            ispay: 2,
+            getwebpay: false,
+            webpaytext: '',
+            isshow: false,
+            repage: '',
+            //充值开关
+            // rechargeswitch: true,
+            // rechargeswitchtime: null,
+            receParams:{},
+            payTips: [],
+            // 网络错误加载
+            reloadNum: '',
+            diaLoadingShow: false,
+            diaLoadErrShow: false,
+            setupJson: {
+                bgColorIndex: 3,
+                bgColor: 'rgba(255,255,255,1)',
+                loadImg: '../Common/images/loading-chapter.png',
+                fontSize: 36,
+                bNight: false,
+                lineheight: 64
+            },
+            isRecharge:false,
+            isTask:false,
+            isTasknet:false,
+            hidePageTimeout:null,
+            hidePageTimeout1:null,
+            isVipCharge:1,
+            callALiPay:false,
+            goPayClock:false,
+            isPaidShow: false, // 点击确认按钮后返回刷新开关
+
+            // 优惠券列表 Modified By Zzc 2020.03.31
+            isChooseCouponShow: false, // 优惠券列表是否展示
+            couponList: [], // 优惠券列表
+            activeCouponList: [], // 当前可用的优惠券列表
+            activeCoupon: null, // 当前选中的优惠券
+            isPaySuccessShow: false, // 支付成功弹框是否显示
+            isCouponReceivedShow: false, // 领取成功弹框是否显示
+            counponReceiveList: [], // 待领取的优惠券列表
+            isCouponReceive: false, // 是否在领取优惠券
+            isFirstFilterCoupon: true, // 优惠券进入充值页
+            successOrderNo: false, // 成功支付的订单号
+            activeCouponLength: 0, // 可用优惠券长度
+            isPush: false, // 是否从PUSH进入
+            isExtraPayWay: false, // 是否金额单独配置支付方式
+            isFirstRender: true, // 是否是首次渲染支付列表
+            lastChargeType: '', // 上次支付方式
+            isWebPayAlert: false, // 支付提醒是否显示
+            isRenew: 0, // 是否充值金额是续约
+            shenceItem: {}, // 神策打点增加充值档位item对应变量
+            shencePayWayList: [], // 神策打点增加支付方式列表
+            shencePayWayStr: '', // 神策打点增加支付方式列表字符串
+            // 特权用户待定参数
+            isMember: false, // 是否是特权用户
+            memberDiscount: 0, // 特权用户充值多送比例
+            memberGrade: '', // 特权用户等级
+            isModelPay: false, // 是否是自定义支付
+            canInput: false, // 是否输入
+            isModelInputError: false, // 是否输入有问题
+            modelPayInputNumber: '', // 输入支付金额
+            modelPayNumber: '', // 自定义支付金额
+            modelExtraNumber: '', // 匹配常规金额多送书币
+            modelUserTacticsVo: '', // 自定义支付用户策略
+            modelMinAmount: 1, // 最小金额
+            modelMaxAmount: 100, // 最大金额
+            payMoney: 0, // 支付金额
+            payAward: '', // 支付优惠
+            couponContent: '', // 优惠券显示
+            isMemberTipShow: false, // 会员特权显示
+            canMemberDiscount: true, // 能否使用会员折扣
+            memberDiscountAmount: 0, // 会员折扣使用门槛
+            isSupportVivoPush: false, // 是否支持vivoPush
+            vivoPush: null, // vivoPush实例
+            isSignOpen: true, // 签到入口
+            isCoin: false, // 金币模式
+            isChannel: false, // 是否是默认渠道
+        },
+        protected: {
+            url: '',
+            unit: '',
+            bookId: '',
+            chapterId: '',
+            chapterIndex:-1,
+            bookName: '',
+            amount: '',
+            // /Recharge?payChannelCode=4&msid=10000
+            pageFrom: '',
+            auto:1,
+            payType:'',
+            fuliSelect:true,
+            fuliDetail:false,
+            showConfirm:false,
+            rechargeDetail:false,
+            hasFuli:false,
+            couponId: null,
+            autoOrder:'',
+            localPush:{},
+            localPushUt:{},
+            sendPush:false
+        },
+        public: {
+            payChannelCode: '',
+            msid: '',
+            jobId: '',
+            isFromVip:0,
+            vipHasselect:false,
+            SourcePosition:'',
+            listStyle:'2',
+            showPaylistFix:false,
+            canUseLength:1,
+            popStyle:1,
+            popTitle:'',
+            popDes:'',
+            userType:0,
+            payUserTacticsVo:{},
+            omap:'',
+            isUpdateOmap:1,
+            shareGetProvider:'', // 是否支持分享
+        },
+        capitalize(value){
+            if(!Array.isArray(value)){
+                return value
+            }
+        },
+        // 关闭自定义支付蒙层 
+        closeModelInput() {
+            let that = this
+            that.modelPayInputNumber = that.modelPayNumber
+            that.fnFilterCoupon({
+                isModel: true,
+                amountNum: that.modelPayNumber
+            })
+            setTimeout(() => {
+                if(that.$element('modelNumber')) {
+                    that.$element('modelNumber').focus({ focus: false });
+                }
+                that.canInput = false
+            }, 0)
+            that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                ButtonName: '自定义充值',
+                ButtonContent: that.modelPayNumber + '元',
+                BookID: that.bookId || '',
+            });
+        },
+        // 设置自选支付金额
+        fnSetModelNumber(obj) {
+            let that = this
+            let value = obj.value
+            if(value && value >= that.modelMinAmount && value <= that.modelMaxAmount && /^[0-9]*$/.test(value) && !/^0[0-9]*$/.test(value)) {
+                that.modelPayNumber = value
+                that.modelPayInputNumber = value
+                that.isModelInputError = false
+                that.fnModelMatch()
+            }else {
+                that.modelPayNumber = ''
+                that.modelPayInputNumber = ''   
+                that.modelExtraNumber = '' 
+                that.isModelInputError = true
+            }
+            that.fnFilterCoupon({
+                isModel: true,
+                amountNum: that.modelPayNumber
+            }) 
+            setTimeout(() => {
+                if(that.$element('modelNumber')) {
+                    that.$element('modelNumber').focus({ focus: false });
+                }
+                that.canInput = false
+            }, 0)
+            that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                ButtonName: '自定义充值',
+                ButtonContent: that.modelPayNumber + '元',
+                BookID: that.bookId || '',
+            });
+        },
+        // 自选支付金额改变
+        fnModelNumberChange(obj) {
+            let that = this
+            let value = obj.value
+            if(!(/^[0-9]*$/.test(value))) {
+                that.modelPayInputNumber = value
+                setTimeout(() => {
+                    that.modelPayInputNumber = value.replace(/[^\d]/g, '');
+                }, 0)
+                return
+            }
+            if(value && value >= that.modelMinAmount && value <= that.modelMaxAmount && /^[0-9]*$/.test(value) && !/^0[0-9]*$/.test(value)) {
+                that.modelPayNumber = value
+                that.isModelInputError = false
+                that.fnModelMatch()
+            }else {
+                that.modelPayNumber = ''
+                that.modelExtraNumber = ''
+                that.isModelInputError = true
+            }
+        },
+        // 自定义金额匹配
+        fnModelMatch() {
+            let amount = this.modelPayNumber
+            let hasMatch = false
+            this.plist.products.forEach(item => {
+                if(!item.isModel && amount == item.amountNum && item.amountNum != 0 && item.giveNum && item.giveNum != 0) {
+                    this.modelExtraNumber = item.giveNum
+                    hasMatch = true
+                }
+            })
+            if(!hasMatch) {
+                this.modelExtraNumber = ''
+            }
+        },
+        // 显示优惠券列表
+        fnChooseCoupon() {
+            let that = this
+            console.log('fnChooseCoupon-----Recharge')
+            if(that.couponList.length > 0) {
+                that.isChooseCouponShow = true
+            } else {
+                // prompt.showToast({
+                //     message: '当前无优惠券可用'
+                // })
+            }
+        },
+        // 取消选择优惠券
+        fnCloseChooseCoupon() {
+            console.log('fnCloseChooseCoupon-----Recharge')
+            this.isChooseCouponShow = false
+        },
+        // 确认选择优惠券
+        fnConfirmChooseCoupon(item) {
+            let that = this
+            console.log('fnConfirmChooseCoupon-----Recharge')
+            if(that.isModelPay) {
+                if(item.premise <= that.modelPayNumber) {
+                    that.activeCoupon = item
+                    that.isChooseCouponShow = false
+                }  
+            }else {
+                if(item.premise <= that.plist.products[that.payobj.index].amountNum) {
+                    that.activeCoupon = item
+                    that.isChooseCouponShow = false
+                }
+            }
+            that.fnSetPayMoney()
+            that.fnSetPayAward()
+            that.fnSetCouponContent()
+        },
+        // 通过金额过滤可以使用的优惠券
+        fnFilterCoupon(payParams) {
+            let that = this
+            if(that.memberDiscountAmount && that.memberDiscountAmount != 0 && payParams.amountNum >= that.memberDiscountAmount) {
+                that.canMemberDiscount = true
+            }else {
+                that.canMemberDiscount = false   
+            }
+            console.log('fnFilterCoupon-----Recharge')
+            that.activeCouponList = []
+            that.activeCoupon = null
+            that.activeCouponLength = 0
+            // 过滤可用优惠券
+            that.couponList.forEach(item => {
+                if(item.premise <= payParams.amountNum) {
+                    that.activeCouponList.push(item)
+                    that.activeCouponLength++
+                }
+            })
+            that.couponList.forEach(item => {
+                if(item.premise > payParams.amountNum) {
+                    that.activeCouponList.push(item)
+                }
+            })
+            // 自定义金额判断是否有充值金额
+            if(payParams.isModel && (!payParams.amountNum || payParams.amountNum == 0)) {
+                that.fnSetPayMoney()
+                that.fnSetPayAward()
+                that.fnSetCouponContent()
+                return
+            }
+            // 从优惠券页进入自动选择优惠券
+            if(that.isFirstFilterCoupon && that.couponId) {
+                that.activeCouponList.forEach(item => {
+                    if(item.lastId == that.couponId && item.premise <= payParams.amountNum) {
+                        that.activeCoupon = item
+                    }
+                })
+                that.isFirstFilterCoupon = false
+                that.fnSetPayMoney()
+                that.fnSetPayAward()
+                that.fnSetCouponContent()
+                return
+            }
+            that.isFirstFilterCoupon = false
+            // 切换金额,自动选择优惠券
+            let cacheDiscount = 0
+            let cacheCoupon = null
+            that.activeCouponList.forEach(item => {
+                let discount = 0
+                if(item.premise <= payParams.amountNum) {
+                    if(item.type == 2) {
+                        discount = Number(item.discount)
+                    }else {
+                        discount = Number(payParams.amountNum) * (100 - Number(item.discount)) / 100
+                    }
+                    // 判断折扣金额是否相等
+                    if(cacheDiscount == discount && cacheCoupon) {
+                        // 优先使用过期时间临近 
+                        if(cacheCoupon.expiryDate && item.expiryDate && (+new Date(cacheCoupon.expiryDate)) > (+new Date(item.expiryDate))) {
+                            cacheDiscount = discount
+                            cacheCoupon = item
+                        }else {
+                            // 优先使用现金券
+                            if(cacheCoupon.expiryDate && item.expiryDate && (+new Date(cacheCoupon.expiryDate)) == (+new Date(item.expiryDate))) {
+                                if(cacheCoupon.type != 2 && cacheCoupon.type != item.type) {
+                                    cacheDiscount = discount
+                                    cacheCoupon = item 
+                                }else {
+                                    // 优先使用满足条件小
+                                    if(cacheCoupon.type == item.type) {
+                                        if(cacheCoupon.premise > item.premise) {
+                                            cacheDiscount = discount
+                                            cacheCoupon = item    
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // 优先折扣金额小
+                    if((cacheDiscount == 0 && discount != 0) || discount > cacheDiscount) {
+                        cacheDiscount = discount
+                        cacheCoupon = item
+                    }
+                }
+            })
+            if(cacheCoupon) {
+                that.activeCoupon = cacheCoupon
+            }
+            that.fnSetPayMoney()
+            that.fnSetPayAward()
+            that.fnSetCouponContent()
+            // push进入自动支付
+            if(that.isPush) {
+                that.isFirstRender = true
+                that.filterPayWayList()
+            }
+        },
+        fnShowPay(){
+            let that = this
+            if(that.plist.products[that.payobj.index].isModel && (!that.modelPayNumber || that.modelPayNumber == 0)) {
+                prompt.showToast({
+                    message: '请输入正确金额'
+                })
+                return
+            }    
+            if(that.listStyle==3&&!that.showPaylistFix){
+                that.showPaylistFix = true;
+                // 神策打点-点击立即支付
+                that.$app.shenceLog.log(that,'track','ButtonClick', {
+                    ButtonName: '立即支付',
+                    ButtonContent: '立即支付：' + that.shenceItem.isModel ? (that.modelPayNumber + '元') : that.shenceItem.amount,
+                    BookID: that.bookId || '',
+                });
+                that.shencePayWayList = [];
+                that.shencePayWayStr = '';
+                that.payWayList.forEach((item,index,array) => {
+                    if(item.canUse == 'active'){
+                        that.shencePayWayList.push(item.showName);
+                    }
+                })
+                that.shencePayWayStr = that.shencePayWayList.join('-')
+                that.$app.shenceLog.log(that,'track','PopupExposure', {
+                    PositionName: '支付方式列表',
+                    PayChannels: that.shencePayWayStr
+                });
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '1',
+                    },
+                    omap:that.omap
+                }, 'paymathod_show'], that)
+            }else{
+                that.gopay()
+            }
+
+        },
+        fnClosePop(){
+            let that = this
+            this.showPaylistFix = false
+            that.$app.$def.quickappLog([703, {
+                qmap: {
+                    site: '2',
+                },
+                omap:that.omap
+            }, 'paymathod_show'], that)
+        },
+        fnGoPay() {
+            let that = this
+            console.log('fnGoPay-----Recharge')
+            if(that.isPush) {
+                that.isPush = false
+                setTimeout(function() {
+                    that.gopay();
+                }, 500);
+            }
+        },
+        // 关闭支付成功弹框
+        fnClosePaySuccess() {
+            let that = this
+            console.log('fnClosePaySuccess-----Recharge')
+            that.isPaySuccessShow = false
+            that.fnRouterTo()
+        },
+        // 关闭优惠券领取成功弹框
+        fnCloseCouponReceive() {
+            let that = this
+            console.log('fnCloseCouponReceive-----Recharge')
+            that.isCouponReceivedShow = false
+            that.fnRouterTo()
+        },
+        // 获取优惠券列表
+        fnGetCouponList() {
+            let that = this
+            console.log('fnGetCouponList-----Recharge')
+            that.counponReceiveList = []
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2201',
+                data: {
+                    orderNo: that.successOrderNo
+                },
+                succ: function (res) {
+                    if(res.retCode == 0 && res.data && res.data.counponVoList && res.data.counponVoList.length > 0) {
+                        that.counponReceiveList = res.data.counponVoList
+                        that.isPaySuccessShow = true
+                        that.$app.$def.quickappLog([703, {
+                            qmap: {
+                                site: '2',
+                            },
+                            omap:that.omap
+                        }, 'coupon_record'], that)
+                    } else {
+                        that.fnRouterTo()
+                    }
+                },
+                error: function () {
+                    that.fnRouterTo()
+                },
+            })        
+        },
+        // 领取优惠券
+        fnReceiveCoupon() {
+            let that = this
+            console.log('fnReceiveCoupon-----Recharge')
+            if(that.isCouponReceive) {
+                return
+            }
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '3',
+                }
+            }, 'coupon_record'], that)
+            let couponIds = []
+            that.counponReceiveList.forEach(item => {
+                if(item.id) {
+                    couponIds.push(item.id)
+                }
+            })
+            that.isCouponReceive = true
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2202',
+                data: {
+                    couponIds: couponIds,
+                    orderNo: that.successOrderNo
+                },
+                succ: function (res) {
+                    that.isCouponReceive = false
+                    if (res.retCode == 0) {
+                        that.isPaySuccessShow = false
+                        that.isCouponReceivedShow = true
+                        that.getpaylist() 
+                    } else {
+                        prompt.showToast({
+                            message: res.retMsg ? res.retMsg : '领取失败'
+                        })
+                    }
+                },
+                error: function (code) {
+                    that.isCouponReceive = false
+                }
+            })
+        },
+        // 判断支付成功后是否需要跳转
+        fnRouterTo() {
+            let that = this
+            console.log('fnRouterTo-----Recharge')
+            if (/BookDetail/.test(that.surl) || /Read/.test(that.surl) || /Directory/.test(that.surl)) {
+                //充值成功后页面跳转
+                that.$app.$def.requestData(that, {
+                    interface: '/glory/fastapp/2151',
+                    data: {
+                        bookId: that.oparams.bookId,
+                        chapterId: that.oparams.chapterId,
+                        autoPay: that.oparams.autoPay,
+                        confirmPay: that.oparams.confirmPay,
+                        uuid:that.$app.sourceInfo['uuid'],
+                        pullMode:that.$app.sourceInfo['pullMode'],
+                        omap:JSON.stringify(that.omap),
+                        isUpdate:that.isUpdateOmap,
+                        isBr: 0,
+                        hmManualAddFlag: 1, // 670支持手动加书架，此字段服务端用于版本判断
+                    },
+                    succ: function (res) {
+                        if (res.retCode == 0) {
+                            // 1.需要付费-扣费成功
+                            // 2.不需要付费-免费章节 包括限免书籍，包括章节缺失
+                            // 3.不需要付费-之前已经付费过
+                            // 4:扣费失败-余额不足去充值
+                            if(res.data.status != 4) {
+                                router.clear();
+                                router.replace({
+                                    uri: '/Read',
+                                    params: that.oparams
+                                });
+                            }
+                        }
+                    }
+                })
+            }
+            if (/Sign/.test(that.surl)) {
+                router.back();
+            }
+            if (/CouponRecord/.test(that.surl)) {
+                router.back();
+            }
+        },
+        //温馨提示点五下退出登录
+        logout() {
+            let that = this;
+            that.payobj.logoutnum++;
+            if (that.payobj.logoutnum >= 5) {
+                storage.clear();
+                that.payobj.logoutnum = 0;
+            }
+        },
+        showFuliDetail(){
+            this.fuliDetail = !this.fuliDetail
+        },
+        changeFuliSelect(){
+            // let that = this
+            // that.$app.$def.quickappLog([702, {
+            //     qmap: {
+            //         site: '1',
+            //         selected:that.fuliSelect?1:0
+            //     }
+            // }, 'gift_select'], that)
+            // if(this.fuliSelect){
+            //     this.showConfirm = true
+            // }else{
+                this.fuliSelect = !this.fuliSelect
+            // }
+        },
+        fuliCancle(){
+            this.fuliSelect = false
+            this.showConfirm = false
+            let that = this
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '2',
+                    cancle:1
+                }
+            }, 'gift_select'], that)
+        },
+        fuliConfirm(){
+            this.fuliSelect = true
+            this.showConfirm = false
+            let that = this
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '2',
+                    cancle:0
+                }
+            }, 'gift_select'], that)
+        },
+        showReDetail(){
+            this.rechargeDetail = !this.rechargeDetail
+        },
+        //切换支付方式
+        changePayType(evt) {
+            let that = this;
+            console.log(evt)
+            // that.ispay = num;
+            that.payindex = evt.detail.params;
+            // let _payWayList=that.payWayList;
+            // for(let i=0; i<that.payWayList.length; i++){
+            //     if(i == evt.detail.params){
+            //         that.payWayList[i].cur = 1;
+            //     }else{
+            //         that.payWayList[i].cur = 0;
+            //     }
+            // }
+            if(that.listStyle == 3&&that.autoOrder){
+                that.gopay()
+            }
+            
+        },
+        // 
+        fnChangeFriendPay(evt){
+            this.isFriendPay = evt.detail.params;
+        },
+        hundleIsRecharge(evt){
+         this.isRecharge = evt.detail.rechargeType;
+        },
+        
+        //充值
+        gopay(num) {
+            let that = this;
+            that.rechargeDetail = false
+            // if(that.goPayClock){
+            //     return;
+            // }
+            // that.goPayClock = true;
+            // that.hidePageTimeout1 = setTimeout(() => {
+            //     that.goPayClock = false;
+            // }, 500);
+            if(that.plist.products[that.payobj.index].isModel && (!that.modelPayNumber || that.modelPayNumber == 0)) {
+                prompt.showToast({
+                    message: '请输入正确金额'
+                })
+                return
+            }  
+            this.$broadcast('initGoPay');
+            that.hidePageTimeout = setTimeout(() => {
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site:'1'
+                    },
+                    omap:that.omap
+                }, 'recharge_timeout'], that)
+            }, 3000);
+            
+            let _payWayList = that.payWayList;
+            let _index = that.payindex;
+            that.payDataJson = {
+                from: _payWayList[_index].from,
+                payWay: _payWayList[_index].payWay,
+                id: that.plist.products[that.payobj.index].id,
+                type: that.plist.products[that.payobj.index].type,
+                sourceType: that.oparams.bookId ? 1 : 2,
+                sourceInfo: that.oparams.bookId ? that.oparams.bookId : '',
+                bookId: that.oparams.bookId,
+                chapterId: that.oparams.chapterId,
+                checked:that.plist.products[that.payobj.index].welfareInfos&&that.fuliSelect?1:0,
+                utJson: that.plist.products[that.payobj.index].isModel ? JSON.stringify(that.modelUserTacticsVo) : JSON.stringify(that.payUserTacticsVo),
+                omap:that.omap==''?'':JSON.stringify(that.omap)
+            }
+            if(that.plist.products[that.payobj.index].isModel) {
+                that.payDataJson.cusAmount = that.modelPayNumber
+                that.payDataJson.modelExtraNumber = that.modelExtraNumber
+            }
+            if(that.isMember && that.memberDiscount && that.memberDiscountl != 0) {
+                that.payDataJson.gradeRate = that.memberDiscount
+            }
+            // 判断是否使用了优惠券
+            if(that.activeCoupon && that.activeCoupon.lastId) {
+                that.payDataJson.couponId = that.activeCoupon.lastId
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site:'4',
+                        couponType: that.activeCoupon.type,
+                        couponAmount: that.activeCoupon.discount,
+                    },
+                    omap:that.omap
+                }, 'coupon_record'], that)
+            }
+            // that.payDataJson.couponId = 10000
+            that.logJson={
+                from: that.payDataJson.from,
+                payWay: that.payDataJson['payWay'],
+                id: that.payDataJson['id'],
+                sourceType: that.payDataJson['sourceType'],
+                sourceInfo: that.payDataJson['sourceInfo'],
+                bookId: that.payDataJson['bookId'],
+                chapterId: that.payDataJson['chapterId'],
+                brand: that.headerJson['brand'],
+                model: that.headerJson['model'],
+                userId: that.headerJson['userId'],
+                omap:that.omap==''?'':JSON.stringify(that.omap),
+            };
+            // console.info('datajson',that.payDataJson);
+            switch( _payWayList[that.payindex].payWay ){
+                //oppo支付
+                case 'OPPOPAY':
+                console.info('开始oppozhifu');
+                this.$broadcast('oppoPay',{dataJson:that.payDataJson,logJson:that.logJson});
+                break;
+                // 支付宝支付
+                case 'ALIPAY':
+                this.$broadcast('aLiPay',{ dataJson:that.payDataJson,logJson:that.logJson });
+                break;
+                // 微信APP支付
+                case 'WECHATPAY_APP':
+                this.$broadcast('wxPay',{ payType:'APP', dataJson:that.payDataJson, logJson:that.logJson});
+                break;
+                // 微信WEB支付
+                case 'WECHATPAY_MWEB':
+                this.$broadcast('wxPay',{ payType:'MWEB', dataJson:that.payDataJson, logJson:that.logJson});
+                break;
+                // 现在支付
+                case 'NOWPAY':
+                this.$broadcast('nowPay',{ dataJson:that.payDataJson, logJson:that.logJson });
+                break;
+                // 找微信好友代付
+                case 'ANOTHERPAY':
+                this.isPaidShow = true;
+                this.isWebPayAlert = false;
+                this.$broadcast('anotherPay',{ dataJson:that.payDataJson, logJson:that.logJson });
+                break;
+                default:
+            }
+        },      
+        //设置倒计时查询充值结果参数
+        setselectinit(orderno, webpaytext) {
+            console.log('设置倒计时查询充值结果参数');
+            var that = this;
+            clearTimeout(that.loadingtime);
+            that.loadingtime = null;
+            that.webpaytext = webpaytext;
+            that.getwebpay = true;
+            that.loadingnum = 6;
+            that.loadingag = true;
+        },
+       
+        //表示ViewModel的数据已经准备好，可以开始使用页面中的数据
+        onInit(e) {
+            this.txtName = this.$app.$data.channelCode;
+            let that = this;
+            that.isSignOpen = that.$app.isSignOpen
+            that.isCoin = that.$app.isCoin
+            // vivopush支持判断
+            try {
+                if(account.getProvider().toLowerCase() == 'vivo' && that.$app.$def.fnVivoPushSupport(that)) {
+                    account.isLogin({
+                        success: function (data) {
+                            if(data.isLogin) {
+                                try {
+                                    that.vivoPush = require('@system.vivopush')
+                                    if(that.vivoPush && that.vivoPush.getstate) {
+                                        that.vivoPush.getstate({
+                                            success: function() {
+                                                that.isSupportVivoPush = true
+                                            }
+                                        })
+                                    }
+                                }catch(e) {}
+                            }
+                        }
+                    })
+                }
+            } catch(e) {}
+            //分享功能支持判断
+            that.shareGetProvider = shareSe.getProvider();
+            shareSe.getAvailablePlatforms({
+                success(data) {
+                    that.ogetavailableplatforms = data.platforms;
+                },
+                fail(data, code) {
+                }
+            });
+            if(this.omap!='' && typeof(this.omap)=='string'){
+                this.omap = JSON.parse(this.omap)
+            }
+            this.fnCheckScStart()
+            // pageEnter(this.$page.path);
+            that.$page.setTitleBar({
+                text: '充值'
+            });
+            that.surl = that.url;
+            that.sunit = that.unit;
+            that.samount = that.amount;
+            that.receParams={
+                 url:that.url,
+                 unit:that.unit,
+                 bookId:that.bookId,
+                 chapterId: that.chapterId,
+                 amount: that.amount,
+                 pageFrom: that.pageFrom,
+                 isRecharge:that.isRecharge
+            }
+            if (that.bookId) {
+                that.oparams = {
+                    bookId: that.bookId,
+                    chapterId: that.chapterId,
+                    refererPage: '/Recharge',
+                    pageFrom: that.pageFrom,
+                    autoPay:that.auto,
+                    confirmPay:2,
+                    SourcePosition:that.SourcePosition,
+                    omap:that.omap,
+                    isUpdateOmap:that.isUpdateOmap
+                }
+                console.log(`that.oparams=`)
+                console.log(JSON.stringify(that.oparams))
+            }
+            that.$app.$def.getStorageFile(that, {
+                key: 'lastpay',
+                success: function (data) {
+                    if (data) {
+                        that.ispay = data;
+                    }
+                },
+                fail: function (data,code) {
+                      that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:"getStorage_lastpay_fail",
+                            thisUri:that.$page.uri,
+                            thisPage:"Recharge",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+                }
+            })
+            that.getpaylist();
+            let ogetinfo = app.getInfo();
+            //获取来源
+            if (that.jobId) {
+                that.$app.$def.requestData(that, {
+                    interface: `/glory/fastapp/2170`,
+                    data: {
+                        jobId: that.jobId
+                    },
+                    succ: function (data) {
+                        console.log('successsuccess')
+                    }
+                })
+                 that.$app.$def.quickappLog([703, {
+                    qmap:{
+                        jobId:that.jobId,
+                        page:'Recharge'
+                    },
+                    omap:that.omap
+                },'Recharge'],that);
+            }
+            console.log(ogetinfo);
+            that.$app.$def.quickappLog([703, {
+                qmap: {
+                    page: '4',
+                    infotype: ogetinfo.source.type,
+                    extra: ogetinfo.source.extra
+                }
+            }, 'source'], that)
+            // update by peiruihe 19.08.28
+           this.$on('checkPayType',this.changePayType);
+           this.$on('checkIsRecharge',this.hundleIsRecharge);
+           this.$on('alipay_Event',this.handleALiPay)
+           this.$on('clickGoPay',this.gopay)
+
+            that.$app.$def.appSourceinfoLog(that)
+
+        },
+        //表示ViewModel的模板已经编译完成，可以开始获取DOM节点（如：this.$element(idxxx) )
+        onReady(e) {
+            let that = this;
+            if (that.payChannelCode) {
+                that.ispay = that.payChannelCode;
+            }
+            console.log(
+                `'onReady---------${that.payChannelCode}------  ${that.payChannelCode}  ${that.msid}   ${that.ispay}------'`
+                );
+            try {
+                audio.getPlayState({
+                    success: function(data) {
+                        if(data.state=='play'){
+                            audio.pause()
+                        }
+                    },
+                    fail: function(data, code) {
+                        console.log('handling fail, code=' + code)
+                    }
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        //自动pushpay
+        pushpay() {
+            let that = this;
+            if (that.payChannelCode == 2 || that.payChannelCode == 1) {
+                that.ispay = that.payChannelCode;
+                for (let i = 0; i < that.plist.products.length; i++) {
+                    if (that.msid == that.plist.products[i].id) {
+                        that.payobj.index = i;
+                        that.isModelPay = false
+                        that.isModelInputError = false
+                        that.payobj.isAuto = that.plist.products[i].isAuto ? that.plist.products[i].isAuto : 0
+                        that.payobj.selected = false;
+                        break;
+                    }
+                }
+                that.isPush = true
+                that.fnFilterCoupon(that.plist.products[that.payobj.index])
+                console.log(`that.payChannelCode  that.ispay  ${that.payChannelCode}  ${that.msid}   ${that.ispay}`);
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        page: '4',
+                        payChannelCode: that.payChannelCode,
+                        msid: that.msid
+                    }
+                }, 'pushpay'], that)
+                that.payChannelCode = 100;
+            }
+        },
+        //页面被切换重新显示时调用
+        onShow(e) {
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                BookID: this.bookId,
+                ChaptersID: this.chapterId,
+                ChaptersNum: this.chapterIndex,
+                Title: '支付'
+            });
+            let that = this;
+            // if(that.getwebpay){
+            //     that.getselectwebpay();
+            // }else{
+            if (that.isshow) {
+                if(!this.callALiPay){
+                    // that.getpaylist();
+                    this.$broadcast('initPaySwitch');
+                }
+            }
+            that.isshow = true;
+            //初始化充值开关
+            
+            // 判断点击确认按钮后返回刷新that.getpaylist();
+            if(that.isPaidShow){
+                that.isPaidShow = false;
+                that.isWebPayAlert = false;
+                that.showPaylistFix = false;
+                that.getpaylist();
+            }
+
+            this.$app.$def.quickappLog([701,{omap:that.omap}], this);
+            ////$umeng_stat.resume(this);
+        },
+        onHide(e) {
+            // console.log('onhide')
+            //$umeng_stat.pause(this);
+            clearTimeout(this.hidePageTimeout);
+            // console.info('隐藏',e);
+            
+
+        },
+        //页面被销毁时调用，被销毁的可能原因有：用户从当前页面返回到上一页，或者用户打开了太多的页面，框架自动销毁掉部分页面，避免占用资源
+        onDestroy(e) {
+            // pageLeave(this.$page.path);
+        },
+        //当用户点击返回实体按键、左上角返回菜单、调用返回API时触发该事件,
+        onBackPress() {
+            console.info(`触发：onBackPress`);
+            let that = this
+            setTimeout(function(){
+                if(that.isMemberTipShow) {
+                    that.isMemberTipShow = false
+                    return true
+                }
+                // 自定义金额，先关闭
+                if(that.canInput) {  
+                    if(that.$element('modelNumber')) {
+                        that.$element('modelNumber').focus({ focus: false });
+                    }
+                    that.canInput = false
+                    that.modelPayInputNumber = that.modelPayNumber
+                    that.fnFilterCoupon({
+                        isModel: true,
+                        amountNum: that.modelPayNumber
+                    })                  
+                    return true
+                }
+                // 如果打开了支付提示，先关闭
+                if(that.isWebPayAlert) {
+                    that.isWebPayAlert = false
+                    return true
+                }
+                // 如果打开了支付方式弹窗，先关闭
+                if(that.showPaylistFix) {
+                    that.showPaylistFix = false
+                    return true
+                }
+                // 如果打开了优惠券列表，默认先关闭
+                if(that.isChooseCouponShow) {
+                    that.isChooseCouponShow = false
+                    return true
+                }
+                // 如果显示了充值成功弹框，默认先关闭
+                if(that.isPaySuccessShow) {
+                    that.fnClosePaySuccess()
+                    return true
+                }
+                // 如果显示了优惠券领取成功弹框，默认先关闭
+                if(that.isCouponReceivedShow) {
+                    that.fnCloseCouponReceive()
+                    return true
+                }
+                console.log(!that.isRecharge)
+                console.log(that.isTasknet)
+                if(that.showConfirm||that.rechargeDetail){
+                    // that.showConfirm = false
+                    that.rechargeDetail = false
+                    // that.$app.$def.quickappLog([702, {
+                    //     qmap: {
+                    //         site: '2',
+                    //         cancle:1
+                    //     }
+                    // }, 'gift_select'], that)
+                }else if(!that.isRecharge&&that.isTasknet&&that.isSignOpen&&!that.isCoin){
+                    if(!that.isTask){
+                        if(that.sendPush&&that.localPush&&JSON.stringify(that.localPush)!='{}'){
+                            that.showNotification(that.localPush)
+                            that.fnReportLocalpush(4)
+                        }
+                    }
+                    that.isTask = true
+                }else{
+                    if(that.sendPush&&that.localPush&&JSON.stringify(that.localPush)!='{}'){
+                        that.showNotification(that.localPush)
+                        that.fnReportLocalpush(4)
+                    }
+                    let routerlen = router.getLength();
+                    console.info(routerlen);
+                    if (routerlen <= 1) {
+                        router.replace({
+                            uri: '/Index'
+                        })
+                    }else{
+                        router.back()
+                    }
+                }
+            },0)
+            return true
+        },
+        fnReportLocalpush(sceneVal){
+            let that = this;
+            that.$app.$def.requestData(that,
+                {
+                    interface: '/glory/fastapp/2175',
+                    data: { sceneVal: sceneVal },
+                    succ: function (res) {
+                    }
+                }
+            )
+        },
+        showNotification(localPush){
+            let that = this
+            storage.get({
+                key:'isPush',
+                success(res){
+                    if(res!=1){
+                        let NotificationTime = new Date().getTime()
+                        notification.show({
+                            contentTitle: localPush.title,
+                            contentText: localPush.content,
+                            clickAction: {
+                                uri: `/LoginVisitor?jumpPage=Webhuodong&webSrc=${encodeURIComponent(localPush.url)}&NotificationTaskId=${localPush.jobId}&NotificationTime=${NotificationTime}`
+                            }
+                        })
+                        that.$app.hasShowNote = true
+                        that.$app.shenceLog.log(that,'track','NotificationShow', {
+                            NotificationId: `${localPush.jobId}_${that.$app.headerJson.userId}_${NotificationTime}`,
+                            NotificationTaskId: localPush.jobId,
+                            NotificationTitle: localPush.title,
+                            NotificationContent: localPush.content,
+                            NotificationLink: `/LoginVisitor?jumpPage=Webhuodong&webSrc=${encodeURIComponent(localPush.url)}&NotificationTaskId=${localPush.jobId}&NotificationTime=${NotificationTime}`,
+                            NotificationTiming: '1',
+                        }); 
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                site: '2'
+                            }
+                        }, 'notification'], that)
+                    }
+                        
+                }
+            })
+        },
+        fnChangeLoaclpush(evt){
+            this.sendPush = evt.detail.flag
+        },
+        //当使用原生的顶部标题栏时，可以通过manifest.json中的menu属性配置是否显示右上角的菜单
+        onMenuPress(e) {
+        },
+        onrouterto(url) {
+            router.push({
+                uri: url
+            })
+        },
+        selectmoney(num, item) {
+            let that = this;
+            if(item.isModel) {
+                that.canInput = true
+                let isLower = false
+                if(that.$app && that.$app.headerJson && that.$app.headerJson.pfvc && that.$app.headerJson.pfvc <= 1050) {
+                    isLower = true
+                }
+                setTimeout(() => {
+                    if(that.$element('modelNumber')) {
+                        that.$element('modelNumber').focus({ focus: true });
+                    }
+                }, isLower ? 200 : 0)
+                that.isModelPay = true
+            }else {
+                that.isModelPay = false
+                that.isModelInputError = false
+            }
+            // 神策打点增加充值档位item对应变量
+            that.shenceItem = {};
+            that.shenceItem = item;
+            // 神策打点-点选充值档位
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                ButtonName: '充值档位',
+                ButtonContent: item.isModel ? 0 : item.amount,
+                BookID: that.bookId || '',
+            });
+            let index = this.payobj.index
+            this.payobj.index = num;
+            this.payobj.selected = false;
+            this.payobj.isAuto = item.isAuto ? item.isAuto : 0
+            if(index != num || item.isModel){
+                // 修改金额，判断优惠券 Modified By Zzc 2020.03.31
+                console.log('selectmoney-----Recharge')
+                that.fnFilterCoupon(item)
+                that.filterPayWayList()
+                that.fuliSelect = true
+            }
+        },
+        // isp查单结果 orderNo订单状态
+        getpaylist(isp=false, orderNo=false) {
+            let that = this;
+            console.info("充值成功后跳转isp",isp);
+            //获取 userinfo
+            if(JSON.stringify(that.$app.headerJson) != "{}"){
+                that.headerJson = that.$app.headerJson
+                that.fnGetLastChargeType().then(() => {
+                    that.renderList(isp,orderNo)
+                })
+                if(that.headerJson && that.headerJson.channelCode && (that.headerJson.channelCode == that.$app.$data.channelCode)) {
+                    that.isChannel = true
+                }
+            }else{
+                new Promise((resolve, reject) => {
+                    that.$app.$def.getStorageFile(that, {
+                        key: 'headerJson',
+                        success: function (data) {
+                            resolve(data);
+                        }
+                    })
+                }).then((rdata) => {
+                    that.headerJson = rdata ? JSON.parse(rdata) : '';
+                    that.fnGetLastChargeType().then(() => {
+                        that.renderList(isp,orderNo)
+                    })
+                    if(that.headerJson && that.headerJson.channelCode && (that.headerJson.channelCode == that.$app.$data.channelCode)) {
+                        that.isChannel = true
+                    }
+                })
+            }
+        },
+        fnSplitWord(str,keyword){
+            return str.replace(new RegExp(keyword, 'g'), '%%' + keyword + '%%').split('%%');
+        },
+        renderList(isp,orderNo){
+            let that = this
+             //充值列表
+            that.$app.$def.ajax(that,'2131', {
+                data: {
+                    bookId: that.bookId,
+                    chapterId: that.chapterId,
+                    chapterIndex:that.chapterIndex,
+                    provider: pay.getProvider(),
+                    url:'/Recharge',
+                    fromurl:that.surl,
+                    autoPay:that.auto,
+                    isFromVip:that.isFromVip,
+                    SourcePosition:that.SourcePosition,
+                    from:that.bookId?1:0,
+                    omap:that.omap==''?'':JSON.stringify(that.omap),
+                    isUpdateOmap:that.isUpdateOmap
+                },
+                succ(data) {
+                    if(data.localPush&&JSON.stringify(data.localPush)!='{}'){
+                        that.localPush = data.localPush
+                        that.localPushUt = data.localPushUt
+                    }
+                    if(data.retention&&JSON.stringify(data.retention)!='{}'){
+                        that.popStyle = 2
+                        that.userType = data.retention.userType
+                        that.popTitle = data.retention.title
+                        that.popDes = data.retention.desc
+                    }
+                    if(data.chargeLimit) {
+                        that.memberDiscountAmount = data.chargeLimit
+                    }else {
+                        that.memberDiscountAmount = 0
+                    }
+                    that.payUserTacticsVo = data.payListUt||{}
+                    that.diaLoadingShow = false;
+                    that.diaLoadErrShow = false
+                    if(data.puSwitch){
+                        that.listStyle = '3' // 新样式
+                    }else{
+                        that.listStyle = '2' // 旧样式
+                    }
+                    if(data.autoOrder){
+                        that.autoOrder = data.autoOrder
+                    }
+                    // that.listStyle = '2'
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            listStyle: that.listStyle,
+                        },
+                        omap:that.omap
+                    }, 'pay_style'], that)
+                    // 自定义充值
+                    if(data.cusAmountVo && JSON.stringify(data.cusAmountVo) != '{}') {
+                        that.modelUserTacticsVo = data.cusAmountVo.userTacticsVo
+                        that.modelMinAmount = data.cusAmountVo.minAmount
+                        that.modelMaxAmount = data.cusAmountVo.maxAmount
+                        data.products.push({
+                            isModel: true,
+                            id: data.cusAmountVo.id, 
+                            type: 1,
+                        })
+                    }
+                    // 会员等级
+                    if(data.gradeName && data.payPrivilegeVal && data.payPrivilegeVal != 0) {
+                        that.isMember = true
+                        that.memberDiscount = data.payPrivilegeVal
+                        that.memberGrade = data.gradeName
+                    }
+                    that.plist = data;
+                    let coupons = data.coupons ? data.coupons : []
+                    coupons.forEach(item => {
+                        if(item.type == 2) {
+                            item.desc = '【' + item.discount + '元现金券】'
+                        }else {
+                            item.desc = '【'+ item.discount/10 + '折折扣券】'
+                        }
+                    })
+                    that.couponList = coupons
+                    that.isTasknet = data.isTask;
+                    if(that.plist.payWays[0].payWay=='OPPOPAY'){
+                        that.isOppoPay = true
+                    }
+                    if (that.plist.payTip) {
+                        let payTips1 = that.plist.payTip;
+                        let payTips2 = [];
+                        that.keyword1 = '《用户协议》';
+                        that.keyword2 = '《隐私策略》';
+                        that.keyword3 = '400-118-0066'
+                        that.keyword4 = that.headerJson['userId']?that.headerJson['userId']:null
+                        for (let i=0;i<payTips1.length;i++) {
+                            let arrFang2 = {};
+                            if(payTips1[i].indexOf(that.keyword1) > 0 || payTips1[i].indexOf(that.keyword3) > 0 || payTips1[i].indexOf(that.keyword4) > 0){
+                                arrFang2.tips = payTips1[i].replace(new RegExp(that.keyword1, 'g'), '%%' + that.keyword1 + '%%').replace(new RegExp(that.keyword2, 'g'), '%%' + that.keyword2 + '%%').replace(new RegExp(that.keyword3, 'g'), '%%' + that.keyword3 + '%%').replace(new RegExp(that.keyword4, 'g'), '%%' + that.keyword4 + '%%').split('%%');
+                                arrFang2.isCur = 1
+                            }else{
+                                arrFang2.tips = payTips1[i]
+                                arrFang2.isCur = 0
+                            }
+                            payTips2.push(arrFang2)
+                        }
+                        that.payTips = payTips2
+                        payTips1 = []
+                        payTips2 = []
+                        that.urlFang1 = that.$app.api+`/huodong/quickapp/free_agreement/xieyi_free.html?channelCode=${that.txtName}`;
+                        that.urlFang2 = that.$app.api+`/huodong/quickapp/free_agreement/yinsi_free.html?channelCode=${that.txtName}`;
+                    } else {
+                        that.payTips = ['1、充值书币仅限本书城使用。', '2、1元兑换100书币。',
+                            '3、充值获赠书币的有限期为7天，您可至【我的】-【充值记录】查看赠送书币的到期时间。',
+                            '4、若充值后账户余额长时间无变化，请记录您的用户ID，然后致电客服400–118–0066。',
+                            '5、用户充值一旦成功，不得以任何理由要求本公司退换全部或部分已充值款项，因不可抗力或本公司单方面原因导致的情况除外。',
+                            '6、VIP用户享全品类书籍免费阅读，部分提示“本书暂不支持VIP免费”书籍，因版权方要求暂不参与免费。'
+                        ]
+                    }
+
+                    // 选中充值金额
+                    if (that.payobj.selected) {
+                        for (let i = 0; i < that.plist.products.length; i++) {
+                            if(that.plist.products[i].welfareInfos){
+                                that.hasFuli = true
+                            }
+                            if(that.isFromVip==1){
+                                if(!that.vipHasselect&&that.plist.products[i].type == 2){
+                                    that.payobj.index = i
+                                    that.payobj.isAuto = that.plist.products[i].isAuto ? that.plist.products[i].isAuto : 0
+                                    that.vipHasselect = true
+                                }
+                            }else{
+                                if (that.plist.products[i].checked == 1) {
+                                    that.payobj.index = i
+                                    that.payobj.isAuto = that.plist.products[i].isAuto ? that.plist.products[i].isAuto : 0
+                                }
+                            }
+                        }
+                    }
+
+                    //从优惠券跳转 如果默认金额不满足优惠券且不是VIP 自动切换金额
+                    if(that.couponId && that.isFirstFilterCoupon && !that.vipHasselect) {
+                        let coupon = null
+                        that.couponList.forEach(item => {
+                            if(item.lastId == that.couponId) {
+                                coupon = item
+                            }
+                        })
+                        if(coupon && coupon.premise > that.plist.products[that.payobj.index].amountNum) {
+                            for (let i = 0; i < that.plist.products.length; i++) {
+                                if(coupon.premise <= that.plist.products[i].amountNum) {
+                                    that.payobj.index = i
+                                    that.payobj.isAuto = that.plist.products[i].isAuto ? that.plist.products[i].isAuto : 0
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // 选中支付方式
+                    that.filterPayWayList()
+
+                    // 支付成功，当前选中优惠券清空
+                    if (isp == true) {
+                        that.activeCoupon = null
+                    }
+
+                    // 首次进入支付页过滤优惠券
+                    console.log('fnFilterCoupon-----firstTime-----Recharge')
+                    if(that.plist.products[that.payobj.index].isModel) {
+                        that.plist.products[that.payobj.index].amountNum = that.modelPayNumber
+                    }
+                    that.fnFilterCoupon(that.plist.products[that.payobj.index])
+                    //微信支付状态 isWechatPay 1 关闭微信支付 2 自己的微信支付 3 第三方微信支付
+                    if (that.plist.isWechatPay == 3) {
+                        that.ispay = 3;
+                    }
+                    that.pushpay();
+                    that.reloadNum = 0;
+                    // console.info("充值成功准备跳转到read页",that.url);
+                    if (isp == true) {
+                        that.$broadcast('initQueryParams');
+                        //初始化倒计时查询充值结果参数
+                        // that.getselectinit();
+                        // that.webpayalert = false;
+                        // prompt.showToast({
+                        //     message: ' 充值成功 ',
+                        //     duration: 0
+                        // });
+                        // 支付成功显示弹框
+                        // that.successOrderNo = false
+                        if(orderNo) {
+                            that.successOrderNo = orderNo
+                            that.fnGetCouponList()
+                        }
+                    }
+                },
+                err(err) {
+                    console.log(err);
+                    that.diaLoadingShow = true;
+                    that.diaLoadErrShow = false;
+                    that.$app.$def.requestData(that,{
+                        interface: '/glory/fastapp/2174',
+                        data: { page: that.$page.path,event:'net_error',content:JSON.stringify({reloadNum:that.reloadNum,bookId:that.oparams.bookId,chapterId:that.oparams.chapterId})},
+                        succ: function (res) {
+                            console.log(res)
+                        }
+                    })
+                    if (that.reloadNum == 0) {
+                        that.reloadNum = 1;
+                        setTimeout(function () {
+                            that.getpaylist()
+                        }, 2000)
+                    } else {
+                        that.diaLoadingShow = true;
+                        that.diaLoadErrShow = true;
+                    }
+                }
+            })
+        },
+        // 判断是否存有支付方式
+        fnGetLastChargeType() {
+            let that = this
+            return new Promise((res) => {
+                // 读取缓存数据
+                that.$app.$def.getStorageFile(that, {
+                    key: 'lastChargeType',
+                    success: function(data) {
+                        console.log('lastChargeType------success------', data)
+                        that.lastChargeType = data
+                        res()
+                    },
+                    fail: function(data, code) {
+                        console.log('lastChargeType------fail-----', data)
+                        that.lastChargeType = ''
+                        res()
+                    }
+                })
+            })
+        },
+        // 渲染支付方式列表 默认+特定
+        filterPayWayList() {
+            let that = this
+            console.log('filterPayWayList-----Recharge')
+            // 缓存列表
+            let _payWayList = [];
+            // 缓存支付方式索引
+            let payindex = 0
+            // 判断是否有特定支付标志
+            let isExtra = that.isExtraPayWay
+            // 判断是否有更新标志
+            let isFirst = that.isFirstRender
+            // 判断是否因为续约需要刷新列表
+            let isNeedRefresh = false
+            let isAuto = that.payobj.isAuto
+            if(isAuto != that.isRenew) {
+                isNeedRefresh = true
+            }
+            that.isRenew = isAuto
+            // 标志重置
+            that.isExtraPayWay = false
+            that.isFirstRender = false
+            if(!that.payType){
+                that.payType = wxpay.getType();
+            }
+            // 支付列表处理
+            if(that.plist.payWays && that.plist.payWays.length){
+                // 缓存支付列表渲染
+                that.plist.payWays.forEach(function(i){
+                    switch(i.payWay) {
+                        case 'OPPOPAY':
+                                _payWayList.push(i);
+                        break;
+                        case 'WECHATPAY_APP':
+                            if(that.payType == 'APP'){
+                                _payWayList.push(i);
+                            }
+                        break;
+                        case 'WECHATPAY_MWEB':
+                            if(that.payType == 'MWEB'){
+                                _payWayList.push(i);
+                            }
+                        break;
+                        case 'ALIPAY':
+                            _payWayList.push(i);
+                        break;
+                        case 'ANOTHERPAY':
+                            if(!isAuto  && that.shareGetProvider && that.payType != 'none') {
+                                _payWayList.push(i);
+                            }
+                        break;
+                        default:
+                            _payWayList.push(i);
+                    }
+                })
+                // 默认支付方式可用
+                _payWayList.forEach(item => {
+                    item.canUse = 'active'
+                })
+                // 有更新标志或者特定支付，重新赋值索引
+                if(!that.isOppoPay) {
+                    // 判断金额是否有单独配置（特定支付）
+                    if(that.plist.products[that.payobj.index].payTypeJson) {
+                        isExtra = true
+                        that.isExtraPayWay = true
+                        let payTypeJson = JSON.parse(that.plist.products[that.payobj.index].payTypeJson)
+                        let payWayArr = []
+                        let checkedPayWay = []
+                        let isChecked = false
+                        payTypeJson.forEach(item => {
+                            if(item.payType === 1) {
+                                payWayArr.push('WECHATPAY_APP')
+                                payWayArr.push('WECHATPAY_MWEB')
+                                payWayArr.push('NOWPAY')
+                                if(item.isChecked == 1) {
+                                    checkedPayWay = ['WECHATPAY_APP', 'WECHATPAY_MWEB', 'NOWPAY']
+                                }
+                            }
+                            if(item.payType === 2) {
+                                payWayArr.push('ALIPAY')
+                                if(item.isChecked == 1) {
+                                    checkedPayWay = ['ALIPAY']
+                                }
+                            }
+                             if(item.payType === 3) {
+                                payWayArr.push('ANOTHERPAY')
+                                if(item.isChecked == 1) {
+                                    checkedPayWay = ['ANOTHERPAY']
+                                }
+                            }
+                        })
+                        // 判断当前支付方式是否可用
+                        let length = 0
+                        _payWayList.forEach(item => {
+                            if(payWayArr.indexOf(item.payWay) == -1) {
+                                item.canUse = 'unactive'
+                            }else{
+                                length++
+                            }
+                        })
+                        // 判断支付方式长度，修改样式
+                        that.canUseLength = length
+                        _payWayList.forEach(function(item, index) {
+                            if(checkedPayWay.indexOf(item.payWay) > -1) {
+                                isChecked = true
+                                payindex = index
+                            }
+                            if(item.isChecked == 1 && !isChecked) {
+                                isChecked = true
+                                payindex = index
+                            }
+                        })
+                        if(_payWayList[payindex].canUse == 'unactive') {
+                            isChecked = false
+                            _payWayList.forEach(function(item, index) {
+                                if(!isChecked && !(item.canUse && item.canUse == 'unactive')) {
+                                    isChecked = true
+                                    payindex = index
+                                }
+                            })
+                        }
+                    }else {
+                        // 判断有更新标志或者特定支付，重新选中支付方式
+                        if(isFirst || isExtra) {
+                            // 判断是否跟随
+                            if(that.plist.isFollow == 1 && that.lastChargeType) {
+                                let isChecked = false
+                                _payWayList.forEach(function(item, index) {
+                                    if(item.payWay == that.lastChargeType) {
+                                        isChecked = true
+                                        payindex = index
+                                    }
+                                    if(item.isChecked == 1 && !isChecked) {
+                                        isChecked = true
+                                        payindex = index
+                                    }
+                                })
+                            }else {
+                                let isChecked = false
+                                _payWayList.forEach(function(item, index) {
+                                    if(item.isChecked == 1 && !isChecked) {
+                                        isChecked = true
+                                        payindex = index
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+                // 有更新标志或者特定支付，重新渲染充值列表
+                if(isFirst || isExtra || isNeedRefresh) {
+                    // 选中支付方式不为首位，修改支付列表顺序
+                    if(payindex !== 0) {
+                        let payItem = _payWayList.splice(payindex, 1)[0]
+                        _payWayList.unshift(payItem)
+                    }
+                    that.payindex = 0
+                    // _payWayList.push({
+                    //     canUse: "active",
+                    //     from: 1,
+                    //     isChecked: 1,
+                    //     payWay: "ANOTHERPAY",
+                    //     showName: "找微信好友支付"
+                    // })
+                    // 判断无微信
+                    if(that.canUseLength == 0) {
+                        _payWayList.forEach(item => {
+                            item.canUse = 'active'
+                        })
+                    }
+                    // 深拷贝数据使页面重新渲染
+                    that.canUseLength = _payWayList.length
+                    that.payWayList = JSON.parse(JSON.stringify((_payWayList)));
+                }
+                // 找人代付修改按钮文案
+                if(that.payWayList[that.payindex] && that.payWayList[that.payindex].payWay == 'ANOTHERPAY') {
+                    that.isFriendPay = true
+                }else {
+                    that.isFriendPay = false
+                }
+                // 判断是否自动进行支付
+                that.fnGoPay()
+            }
+        },
+        clickreload() {
+            this.diaLoadingShow = true;
+            this.diaLoadErrShow = false;
+            setTimeout(() => {
+                this.getpaylist();
+            }, 1000);
+        },
+        jumpToPage(evt){
+            let that = this
+            // 查单重新渲染支付列表
+            if(evt.detail.type == true) {
+                that.payobj.index = 0
+                that.showPaylistFix = false
+                that.isModelPay = false
+                that.modelPayNumber = ''
+                that.modelPayInputNumber = ''   
+                that.modelExtraNumber = '' 
+                that.isModelInputError = false
+            }
+            // vivopush消息
+            if(that.isSupportVivoPush) {
+                that.$app.$def.fnVivoPush(that, '5')
+            }
+            that.isFirstRender = true
+            // 查单成功返回订单号
+            this.getpaylist(evt.detail.type, evt.detail.orderNo);
+        },
+        // 支付提醒显示切换
+        fnChangeAlertShow(evt) {
+            if(evt && evt.detail && evt.detail.show) {
+                this.isWebPayAlert = true
+            }else {
+                this.isWebPayAlert = false
+            }
+        },
+        handleALiPay(evt){
+            this.callALiPay = evt.detail.callALiPay;
+        },
+        // 设置支付金额
+        fnSetPayMoney() {
+            let that = this
+            let payMoney = 0
+            if(that.plist) {
+                if(that.activeCoupon) {
+                    if(that.activeCoupon.type == 2) {
+                        if(that.isModelPay) {
+                            payMoney = that.modelPayNumber - that.activeCoupon.discount
+                        }else {
+                            payMoney = that.plist.products[that.payobj.index].amountNum - that.activeCoupon.discount
+                        }
+                    }else {
+                        if(that.isModelPay) {
+                            payMoney = Math.round((that.modelPayNumber * that.activeCoupon.discount / 100) * 100) / 100
+                        }else {
+                            payMoney = Math.round((that.plist.products[that.payobj.index].amountNum * that.activeCoupon.discount / 100) * 100) / 100
+                        }
+                    }
+                }else {
+                    if(that.isModelPay) {
+                        payMoney = that.modelPayNumber
+                    }else {
+                        payMoney = that.plist.products[that.payobj.index].amountNum
+                    }
+                }
+            }
+            that.payMoney = payMoney
+        },
+        // 设置奖励提示
+        fnSetPayAward() {
+            let that = this
+            let payAward = ''
+            if(that.plist) {
+                if(that.plist.products[that.payobj.index].type == 1) {
+                    if(that.isModelPay) {
+                        if(that.modelPayNumber && that.modelPayNumber != 0) {
+                            if(that.isMember && that.memberDiscount && that.memberDiscount != 0 && that.canMemberDiscount) {
+                                payAward = '共得' + ((that.modelPayNumber * 100) + Math.ceil(that.modelPayNumber * that.memberDiscount) + (+(that.modelExtraNumber))) + '书币'
+                            }else {
+                                payAward = '共得' + ((that.modelPayNumber * 100) + (+(that.modelExtraNumber))) + '书币'
+                            }
+                        }
+                    }else {
+                        if(that.isMember && that.memberDiscount && that.memberDiscount != 0 && that.canMemberDiscount) {
+                            payAward = '共得' + ((+(that.plist.products[that.payobj.index].productNum)) + Math.ceil(that.plist.products[that.payobj.index].productNum * that.memberDiscount / 100) + (+(that.plist.products[that.payobj.index].giveNum))) + '书币'
+                        }else {
+                            payAward = '共得' + ((+(that.plist.products[that.payobj.index].productNum)) + (+(that.plist.products[that.payobj.index].giveNum))) + '书币'
+                        }
+                    }
+                }else {
+                    if(that.plist.products[that.payobj.index].give) {
+                        payAward = that.plist.products[that.payobj.index].give
+                    }
+                }
+            }
+            that.payAward = payAward
+        },
+        // 设置优惠券显示
+        fnSetCouponContent() {
+            let that = this
+            let couponContent = ''
+            if(that.activeCouponLength > 0) {
+                if(that.activeCoupon) {
+                    if(that.activeCoupon.type == 2) {
+                        couponContent = `-￥${that.activeCoupon.discount}` 
+                    }else {
+                        if(that.isModelPay) {
+                            couponContent = '-￥' + (Math.round((that.modelPayNumber * (100 - that.activeCoupon.discount) / 100) * 100) / 100)
+                        }else {
+                            couponContent = '-￥' + (Math.round((that.plist.products[that.payobj.index].amountNum * (100 - that.activeCoupon.discount) / 100) * 100) / 100)
+                        }
+                    }
+                }else {
+                    couponContent = that.activeCouponLength + '张可用'
+                }
+            }else {
+                couponContent = '无可用'
+            }
+            that.couponContent = couponContent
+        },
+        /**
+         * 展示会员提示
+         * */
+        fnShowMemberTip() {
+            this.isMemberTipShow = true
+        },
+        /**
+         * 关闭会员提示
+         * */
+        fnCloseMemberTip() {
+            this.isMemberTipShow = false
+        },
+        vagueClick(){
+            console.log('为了解决部分机型滑动穿透的问题')
+        },
+        fnCheckScStart() {
+            let that = this
+            if(!that.$app.isScStart) {
+                shortcut.hasInstalled({
+                    success: function(res) {
+                        let fnGetCreateTime = that.$app.$def.fnGetCreateTime.call(that)
+                        let fnGetInstallTime = that.$app.$def.fnGetInstallTime.call(that)
+                        Promise.all([fnGetCreateTime, fnGetInstallTime]).then(result => {
+                            if(result[0] || result[1]) {
+                                that.$app.shenceLog.fnSetCommonArgs({
+                                    RegisterDate: result[0] || result[1] 
+                                })
+                            }
+                            let property = {
+                                StartPath: that.$page.uri,
+                                BookID: that.bookId ? that.bookId : '无',
+                                DesktopState: res ? 'Saved' : 'Notsaved',
+                            }
+                            that.$app.shenceLog.log(that, 'appLaunch', '', property);
+                            that.$app.isScStart = true
+                        })
+                    },
+                    fail: function() {
+                        that.$app.$def.quickappLog([703, {
+                            site: '5',
+                        }, 'get_shortcut_install_fail'], that);
+                    }
+                })
+            }
+        }
+    }
+</script>

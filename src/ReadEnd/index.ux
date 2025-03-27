@@ -1,0 +1,802 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="paid-tag" src="../Component/tag.ux"></import>
+
+<template>
+    <div class="readend">
+        <div class="bookstatus">
+            <div class="status noend" if="{{status===1}}">
+                <div class="banner">
+                    <image src="https://xsmfdq.kkyd.cn/images/pic-new-unfinished.png"></image>
+                    <div>
+                        <text class="top">本书未完结，作者努力码字中</text>
+                        <text class="bot">后续剧情更精彩，敬请期待后续更新吧！</text>
+                    </div>
+                </div>
+                <div class="tips">
+                    <text class="title">温馨提示</text>
+                    <text class="text">小说连载中，作者正在加急写作。</text>
+                    <text class="text-orange">正常情况，每天更新1-5章</text>
+                    <text class="text">当天未更新，我们将为您催促作者，请您耐心等待。</text>
+                </div>
+            </div>
+            <div class="status end" elif="{{status===2}}">
+                 <div class="banner">
+                    <image src="https://xsmfdq.kkyd.cn/images/pic-new-end.png"></image>
+                    <div>
+                        <text class="top">本书已完结</text>
+                        <text class="bot">小编为您准备了其他精彩书籍</text>
+                    </div>
+                </div>
+            </div>
+            <div class="status off" elif="{{status===3}}">
+                <div class="banner">
+                    <image src="https://xsmfdq.kkyd.cn/images/pic-new-lower.png"></image>
+                    <div>
+                        <text class="top">本书已下架</text>
+                        <text class="bot">本书已下架，去看看其他书籍吧</text>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grey-line"></div>
+        <div if="{{bookStyle == 1 && hasRec}}" class="new-recommend" @appear="fnBookAppear">
+            <div class="tit">
+                <image src="https://xsmfdq.kkyd.cn/images/readend-heart.png"></image>
+                <text>{{recoText}}</text>
+            </div>
+            <div class="book">
+                <stack style="width: 165px; height: 186px;">
+                    <image class="book-cover" src="{{newRecomment.coverWap}}"></image>
+                    <paid-tag if="newRecomment.iconType === '10'" tag="{{ newRecomment.iconDesc }}"></paid-tag>
+                </stack>
+                <div class="book-detail">
+                    <div class="book-top">
+                        <text class="book-name">{{newRecomment.bookName}}</text>
+                        <div class="book-change" @click="fnRefresh('换一本')">
+                            <image src="https://xsmfdq.kkyd.cn/images/readend-change.png"></image>
+                            <text>换一本</text>
+                        </div>
+                    </div>
+                    <div class="book-tips" if="newRecomment.fpTag">
+                        <text>{{newRecomment.fpTag}}</text>
+                    </div>
+                    <div class="book-tag">
+                        <text class="first" if="{{newRecomment.twoTypeName}}">{{newRecomment.twoTypeName}}</text>
+                        <text class="second" if="{{newRecomment.threeTypeName}}">{{newRecomment.threeTypeName}}</text>
+                    </div>
+                    <div class="book-blank"></div>
+                    <div class="book-bot" if="{{isChange}}">
+                        <div class="book-rank" if="{{newRecomment.rankBookVo}}" @click="toRank">
+                            <image class="left" src="https://xsmfdq.kkyd.cn/images/store-pop-rank.png"></image>
+                            <text>[{{newRecomment.rankBookVo.classifyName}}类{{newRecomment.rankBookVo.rankName}}] 第{{newRecomment.rankBookVo.sort}}名</text>
+                            <image class="right" src="https://xsmfdq.kkyd.cn/images/store-pop-arrow.png"></image>
+                        </div>
+                        <div class="book-num">
+                            <image src="https://xsmfdq.kkyd.cn/images/readend-readnum.png"></image>
+                            <text>{{newRecomment.clickNum}}人阅读</text>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="book-content">
+                <stack>
+                    <div class="text">
+                        <block for="{{firstContent}}">
+                            <text><span class="text_indent_span">一-</span><span>{{$item}}</span></text>
+                        </block>
+                    </div>
+                    <div class="vague"></div>
+                </stack>
+                 <div class="goon-read" @click="readBook(newRecomment,'继续阅读','')">
+                    <text>继续阅读</text>
+                    <image src="https://xsmfdq.kkyd.cn/images/readend-down.png"></image>
+                </div>
+            </div>
+        </div>
+        <div if="{{bookStyle == 1 && hasRec}}" class="bottom-btn">
+            <text class="read" @click="readBook(newRecomment,'阅读本书','')">阅读本书</text>
+            <text class="store" @click="routeBookstore">去书城逛逛</text>
+        </div>
+        <div if="{{bookStyle == 2 && hasRec}}" class="bookrecommend">
+            <div class="tit1">
+                <text>为你推荐</text>
+                <div @click="fnRefresh('换一换')" class="refreshbtn">
+                    <image src="https://xsmfdq.kkyd.cn/images/icon-refresh-orange.png"></image>
+                </div>
+            </div>
+            <div class="box">
+                <div class="item" for="{{recommentList}}" @click="routeBookDetail($item, $idx)" @appear="fnBookAppear($item,$idx)">
+                    <stack class="bookcover">
+                        <image src="{{$item.coverWap}}"></image>
+                        <paid-tag if="$item.iconType === '10'" tag="{{ $item.iconDesc }}"></paid-tag>
+                    </stack>
+                    <div class="name"><text>{{$item.bookName}}</text></div>
+                </div>
+            </div>
+        </div>
+        <div if="{{bookStyle == 2 && hasRec || !hasRec}}" class="bottombtn" @click="routeBookstore"><text>去书城逛逛</text></div>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+
+<style lang="less" scoped>
+.bottom-btn{
+    width: 100%;
+    padding: 30px;
+    background-color: #ffffff;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    justify-content: space-between;
+    text{
+        width: 330px;
+        height: 94px;
+        border-radius: 47px;
+        font-size: 34px;
+        color: #FFFFFF;
+        line-height: 48px;
+        text-align: center;
+    }
+    .read{
+        background-color: #F97053;
+    }
+    .store{
+        background-color: #F9B953;
+    }
+}    
+.grey-line{
+    width: 100%;
+    height: 20px;
+    background-color: #F4F4F4;
+    margin: 30px 0;
+}
+.readend{
+    flex-direction:column;
+    background-color: #ffffff;
+}
+.new-recommend{
+    flex-direction: column;
+    padding: 0 30px;
+    .tit{
+        align-items: center;
+        image{
+            width: 30px;
+            height: 30px;
+            margin-right: 16px;
+        }
+        text{
+            flex: 1;
+            font-size: 28px;
+            color: #EA243F;
+            line-height: 40px;
+        }
+    }
+    .book{
+        padding: 30px 0;
+        border-bottom-width: 1px;
+        border-bottom-color: #E5E5E8;
+        .book-cover{
+            width: 140px;
+            height: 186px;
+            border-radius: 6px;
+            margin-right: 25px;
+        }
+        .book-detail{
+            flex: 1;
+            height: 186px;
+            flex-direction: column;
+            .book-top{
+                align-items: center;
+                .book-name{
+                    font-size: 30px;
+                    font-weight: 500;
+                    color: rgba(0, 0, 0, 0.9);
+                    line-height: 42px;
+                    flex: 1;
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+                .book-change{
+                    align-items: center;
+                    image{
+                        width: 28px;
+                        height: 28px;
+                        margin-right: 14px;
+                    }
+                    text{
+                        font-size: 26px;
+                        color: #EA243F;
+                        line-height: 37px;
+                    }
+                }
+            }
+            .book-tips {
+                margin-top: 6px;
+                height: 42px;
+                text {
+                    padding: 0px 8px;
+                    height: 42px;
+                    background-color: #FF0300;
+                    border-radius: 4px;
+                    font-size: 24px;
+                    font-weight: 500;
+                    color: #FFFFFF;
+                    line-height: 42px;
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+            }
+            .book-blank {
+                flex: 1;
+            }
+            .book-tag{
+                align-items: center;
+                margin-top: 10px;
+                text{
+                    font-size: 22px;
+                    font-weight: 400;
+                    color: #666666;
+                    line-height: 30px;
+                    border-radius: 4px;
+                    text-align: center;
+                    padding: 0 5px;
+                    height: 28px;
+                    margin-right: 8px;
+                }
+                .first{
+                    background-color: #EAEEE6;
+                }
+                .second{
+                    background-color: #E6EBF2;
+                }
+            }
+            .book-bot{
+                align-items: center;
+                /* margin-top: 66px; */
+                .book-rank{
+                    height: 36px;
+                    background-color: #FFF4DD;
+                    border-radius: 4px;
+                    align-items: center;
+                    .left{
+                        width: 24px;
+                        height: 23px;
+                        margin-left: 9px;
+                        margin-right: 7px;
+                    }
+                    .right{
+                        width: 9px;
+                        height: 14px;
+                        margin-left: 9px;
+                        margin-right: 10px;
+                    }
+                    text{
+                        font-size: 24px;
+                        color: #C89B43;
+                        line-height: 33px;
+                    }
+                }
+                .book-num{
+                    flex: 1;
+                    align-items: center;
+                    justify-content: flex-end;
+                    image{
+                        width: 40px;
+                        height: 40px;
+                        margin-right: 4px;
+                    }
+                    text{
+                        font-size: 26px;
+                        color: #ED9E13;
+                        line-height: 37px;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+        }
+    }
+    .book-content{
+        padding: 37px 0px 154px;
+        flex-direction: column;
+        stack{
+            align-items: flex-end;
+            .text{
+                flex-direction: column;
+                text{
+                    font-size: 34px;
+                    font-weight: 400;
+                    color: #332F3E;
+                    line-height: 56px;
+                    margin-top: 20px;
+                }
+                text span{
+                    line-height: 56px;
+                }
+                .text_indent_span {
+                    color: #ffffff;
+                }
+            }
+            .vague{
+                width: 100%;
+                height: 160px;
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
+            }
+        }
+        .goon-read{
+            height: 81px;
+            justify-content: center;
+            align-items: center;
+            text{
+                font-size: 34px;
+                color: #F97053;
+                line-height: 48px;
+            }
+            image{
+                width: 40px;
+                height: 40px;
+                margin-left: 20px;
+            }
+        }
+    }
+}
+.bookstatus{
+    padding: 30px 30px 0px;
+    .status{
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        .banner{
+            background-color: rgba(254, 237, 190,.1);
+            width: 100%;
+            padding: 5px 33px;
+            border: 6px solid rgba(139,87,42,.1);
+            align-items: center;
+            image{
+                width: 94px;
+                height: 100px;
+            }
+            div{
+                margin-left: 44px;
+                flex-direction: column;
+                flex: 1;
+                .top{
+                    font-size:30px;
+                    font-weight:bold;
+                    color:rgba(81,61,61,1);
+                }
+                .bot{
+                    font-size:26px;
+                    color:rgba(81,61,61,1);
+                }
+            }
+        }
+        .tips{
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            background-image: url(https://xsmfdq.kkyd.cn/images/tip-border-bg.png);
+            padding-bottom: 30px;
+            margin-top: 30px;
+            .title{
+                font-size:26px;
+                margin-left: 40px;
+                font-weight:bold;
+                color:rgba(115,115,115,1);
+            }
+            .text{
+                font-size:24px;
+                color:rgba(115,115,115,1);
+                margin-top: 18px;
+            }
+            .text-orange{
+                font-size:24px;
+                margin-top: 20px;
+                color:rgba(228, 108, 106, 1);
+            }
+        }
+    }
+}
+
+.bookrecommend{flex-direction:column;}
+.bookrecommend .tit1{align-items:center;padding:0 30px;}
+.bookrecommend .tit1 text{font-size:42px;color:rgba(68,68,68,1);font-weight: bold;flex:1;}
+.bookrecommend .tit1 .refreshbtn image{width:40px;height:40px;}
+.bookrecommend .box{margin-top:45px;}
+.bookrecommend .box .item{flex-direction:column;width:152px;margin-left: 30px; margin-right: -4px;}
+.bookrecommend .box .bookcover{width:152px;height:202px;background-color:rgba(242,242,242,1);border-radius:8px;}
+.bookrecommend .box .bookcover image{width:100%;height:100%;}
+.bookrecommend .box .name{height:74px;margin-top:20px;align-items:flex-start;}
+.bookrecommend .box .name text{font-size:26px;color:rgba(53,53,53,1);lines:2;text-overflow:ellipsis;}
+
+.bottombtn{width:640px;height:80px;background-color:#FD895A;border-radius:47px;position: fixed;left:55px;bottom:30px;justify-content: center;align-items: center;}
+.bottombtn text{font-size: 36px;color: #fff;}
+.color-pink{
+    background-color: #F97053;
+}
+.video-tit1{
+    align-self: flex-start;
+}
+.align-center{
+    align-items: center;
+}
+.margin-bottom-80{
+    margin-bottom: 80px;
+}
+.rotate{
+    transform: rotate(-90deg);
+}
+</style>
+
+<script>
+import device from '@system.device';
+import storage from '@system.storage';
+import router from '@system.router';
+import prompt from '@system.prompt';
+import account from '@service.account'
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+export default {
+    data: {
+        recommentList:[],
+        status:'',
+        bookId: '',
+        bookName: '',
+        StartTime:'',
+        EndTime:'',
+        isLowerShelf:'',
+        bookStyle:'',
+        newRecomment:'',
+        recoText:'',
+        firstContent:[],
+        fullContent:[],
+        isChange:true,
+        isSupportVivoPush: false, // 是否支持vivoPush
+        vivoPush: null, // vivoPush实例
+        hasRec: false, // 书籍推荐
+        bookList: [], // 浏览记录
+    },
+    onInit() {
+        this.loadData(true);
+        this.$page.setTitleBar({text:this.bookName})
+        let that = this;
+        // vivopush支持判断
+        try {
+            if(account.getProvider().toLowerCase() == 'vivo' && that.$app.$def.fnVivoPushSupport(that)) {
+                account.isLogin({
+                    success: function (data) {
+                        if(data.isLogin) {
+							try {
+								that.vivoPush = require('@system.vivopush')
+								if(that.vivoPush && that.vivoPush.getstate) {
+									that.vivoPush.getstate({
+										success: function() {
+											that.isSupportVivoPush = true
+										}
+									})
+								}
+							}catch(e) {}
+                        }
+                    }
+                })
+            }
+        } catch(e) {}
+        that.StartTime = new Date().getTime()
+        that.EndTime = new Date().getTime()
+    },
+    onShow(e) {
+        // 开屏判断
+        let currentOpenTime = new Date().getTime()
+        if(this.$app.isOpenPageSwitch == 1 && this.$app.lastOpenPage == 'readEnd' && currentOpenTime - this.$app.lastOpenTime > this.$app.openPageSpace && currentOpenTime - this.$app.leavePageTime > this.$app.leavePageSpace) {
+            this.$app.lastOpenTime = currentOpenTime
+            this.$app.lastOpenPage = ''
+            router.push({
+                uri: 'Pop',
+                params: {
+                    fromPage: '/ReadEnd',
+                }
+            })
+            return
+        }
+        this.$app.lastOpenPage = 'readEnd'
+        this.$app.$def.quickappLog([701, {
+            qmap: {
+                bookId: this.bookId,
+                bookName: this.bookName
+            },
+            omap: this.omap
+        }], this);
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            BookID: this.bookId,
+            BookName: this.bookName,
+            Title: '终章页'
+        });
+        this.fnGetReadState();
+    },
+    onHide() {
+        this.$app.leavePageTime = new Date().getTime()
+    },
+    /**
+     * 加载数据
+     * @param {Number} isFirst 首次请求
+     */
+    loadData(isFirst = false) {
+        let that = this;
+        that.bLoadingShow=true;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2113',
+                data: {bookId:that.bookId},
+                succ: function (res) { 
+                    that.bookStyle = res.data.bookStyle
+                    if(that.isLowerShelf=='0'){
+                        that.status = 3
+                    }else{
+                        that.status=res.data.status;
+                    }
+                    if(res.data.recoText){
+                        that.recoText = res.data.recoText
+                    }           
+                    that.recommentList=res.data.recommentList ? res.data.recommentList : [];
+                    that.isChange = false
+                    that.newRecomment = that.recommentList[0]?that.recommentList[0]:{}
+                    setTimeout(() => {
+                        that.isChange = true
+                    }, 0)
+                    if(that.recommentList.length) {
+                        that.hasRec = true
+                    } else {
+                        that.hasRec = false
+                    }
+                    if(that.newRecomment.content){
+                        let content = that.newRecomment.content
+                        let length = content.length
+                        that.fullContent = content
+                        that.firstContent = content.slice(0,Math.ceil(length/2))
+                    }
+                    // vivopush消息
+                    if(isFirst && that.isSupportVivoPush) {
+                        that.$app.$def.fnVivoPush(that, '8')
+                    }
+                    if(!isFirst) {
+                        if(that.bookStyle === 1){
+                            that.fnBookAppear()
+                        }else{
+                            that.recommentList.forEach((item,index)=>{
+                                that.fnBookAppear(item,index)
+                            })
+                        }
+                    }
+                },
+                error: function (code) {
+					prompt.showToast({message:'网络不给力，请稍后再试'})
+                }
+            }
+        )
+    },
+    fnRefresh(ButtonName){
+        this.loadData(false);
+        this.$app.shenceLog.log(this,'track','ButtonClick', {
+            ButtonName: '终章页-' + ButtonName,
+            ButtonContent:ButtonName,
+            Title:'阅读结束页',
+            RBookID: this.bookId || ''
+        });
+    },
+    readBook(bookInfo, ButtonName){
+        let that = this
+        let trigger_time = that.$app.$def.getLogTime()
+        let omap = {
+            origin: 'zztj',
+            action: '2',
+            channel_id: that.bookId,
+            channel_name: that.bookName,
+            channel_pos: 0,
+            column_id: 'zzdbtptj',
+            column_name: '终章单本书推荐',
+            column_pos: 0,
+            content_id: bookInfo.bookId,
+            content_pos: 0,
+            content_type: '2',
+            rec_id: bookInfo.recId || '',
+            model_id: bookInfo.modelId || '',
+            log_id: bookInfo.logId || '',
+            exp_id: bookInfo.expId || '',
+            cur_bookId: that.bookId,
+            trigger_time: trigger_time
+        }
+        that.$app.$def.quickappLog([702, {
+			omap: omap
+        }, 'book_click'], that)
+        that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+            OperationPosition: '终章推荐',
+            OperationID: '12',
+            OperationName: '终章推荐',
+            OperationType: '普通单本书',
+            BookID: bookInfo.bookId || '',
+            ActID: '',
+            BookName: bookInfo.bookName || '',
+            PicURL: bookInfo.coverWap || '',
+            ActURL: '',
+            StartTime: that.StartTime,
+            EndTime: that.EndTime,
+            ChaptersID: bookInfo.chapterId || '',
+            RBookID: that.bookId || ''
+        });
+        that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+            ButtonName: ButtonName,
+            ButtonContent: ButtonName,
+            Title: '阅读结束页',
+            BookID: bookInfo.bookId || '',
+            RBookID: that.bookId || ''
+        });
+        let chapterId = '';
+        that.bookList.forEach(item => {
+            if(item.bookId === bookInfo.bookId) {
+                chapterId = item.chapterId;
+            }
+        });
+        router.clear()
+        router.replace({
+            uri: '/Read',
+            params: {
+                bookId: bookInfo.bookId,
+                chapterId: chapterId,
+                SourcePosition:'终章单本书推荐',
+                tips: bookInfo.fpTag ? bookInfo.fpTag : '',
+                omap: omap
+            }
+        })
+    },
+    toRank(){
+        router.push({
+            uri:'/SubRank',
+            params:{
+                rankName:this.newRecomment.rankBookVo.rankName,
+                classifyType:this.newRecomment.rankBookVo.classifyType,
+                classifyId:this.newRecomment.rankBookVo.classifyId,
+                classifyName:this.newRecomment.rankBookVo.classifyName
+            }
+        })
+        this.$app.shenceLog.log(this,'track','ButtonClick', {
+            ButtonName: '阅读结束页-榜单标签',
+            ButtonContent:`[${this.newRecomment.rankBookVo.classifyName}类${this.newRecomment.rankBookVo.rankName}] 第${this.newRecomment.rankBookVo.sort}名`,
+            Title:'阅读结束页',
+            BookID: this.newRecomment.bookId || '',
+            RBookID: this.bookId || ''
+        });
+    },
+    routeBookDetail(bookInfo, index) {
+        let that = this
+		let trigger_time = that.$app.$def.getLogTime()
+		let omap = {
+			origin: 'zztj',
+			action: '2',
+            channel_id: that.bookId,
+            channel_name: that.bookName,
+			channel_pos: 0,
+			column_id: 'zztptj',
+			column_name: '终章图片推荐',
+			column_pos: 0,
+			content_id: bookInfo.bookId,
+			content_pos: index,
+            content_type: '1',
+            rec_id: bookInfo.recId || '',
+            model_id: bookInfo.modelId || '',
+            log_id: bookInfo.logId || '',
+            exp_id: bookInfo.expId || '',
+            cur_bookId: that.bookId,
+			trigger_time: trigger_time
+		}
+        router.push({
+            uri: '/BookDetail',
+            params: {
+                bookId: bookInfo.bookId,
+                SourcePosition: '书末推荐',
+                omap: omap,
+                sourcePage: '书末推荐'
+            }
+        })
+        that.$app.$def.quickappLog([702, {
+             qmap: {
+                oaid: that.$app && that.$app.oaid || ''
+            },
+            omap: omap
+        }, 'book_click'], that)
+        that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+            OperationPosition: '阅读结束页图片荐书',
+            OperationType: '四张书封',
+            BookID: bookInfo.bookId || '',
+            BookName: bookInfo.bookName || '',
+            PicURL: bookInfo.img || '',
+            StartTime: that.StartTime || '',
+            EndTime: that.EndTime || '',
+	        ChaptersID: bookInfo.chapterId || '',
+            RBookID: that.bookId || ''
+        });
+    },
+    /**
+     * 书籍曝光
+     * @param {Object} bookInfo 书籍信息
+     */
+    fnBookAppear(bookInfo={}, idx=""){
+        let that = this;
+        let bookStyle = that.bookStyle
+        let trigger_time = that.$app.$def.getLogTime()
+        that.$app.shenceLog.log(that, 'track', 'OperationExposure', {
+            OperationPosition: bookStyle == 1 ? '终章推荐' : '阅读结束页图片荐书',
+            OperationID: '12',
+            OperationName: bookStyle == 1 ? '终章推荐' : '阅读结束页荐书',
+            OperationType: bookStyle == 1 ? '普通单本书' : '四张书封',
+            BookID: bookStyle == 1 ? that.newRecomment.bookId : bookInfo.bookId,
+            BookName: bookStyle == 1 ? that.newRecomment.bookName : bookInfo.bookName,
+            StartTime: that.StartTime,
+            EndTime: that.EndTime,
+            RBookID: that.bookId || '',
+        });
+        let omap = {
+            origin: 'zztj',
+            action: '1',
+            channel_id: that.bookId,
+            channel_name: that.bookName,
+            channel_pos: 0,
+            column_id: bookStyle == 1 ? 'zzdbtptj' : 'zztptj',
+            column_name: bookStyle == 1 ? '终章单本书推荐' : '终章图片推荐',
+            column_pos: 0,
+            content_id: bookStyle == 1 ? that.newRecomment.bookId : bookInfo.bookId,
+            content_pos: bookStyle == 1 ? 0 : idx,
+            rec_id: bookStyle == 1 ? (that.newRecomment.recId || '') : (bookInfo.recId || ''),
+            model_id: bookStyle == 1 ? (that.newRecomment.modelId || '') : (bookInfo.modelId || ''),
+            log_id: bookStyle == 1 ? (that.newRecomment.logId || '') : (bookInfo.logId || ''),
+            exp_id: bookStyle == 1 ? (that.newRecomment.expId || '') : (bookInfo.expId || ''),
+            cur_bookId: that.bookId,
+            trigger_time: trigger_time
+        }
+        that.$app.$def.quickappLog([706, {
+            qmap: {
+                oaid: that.$app && that.$app.oaid || ''
+            },
+            omap: omap
+        }], that)
+    },
+    routeBookstore(){
+        router.clear();
+        router.replace({
+            uri: '/Index',
+            params: {
+                cardIndex: 1
+            }
+        })
+        let that = this
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: '去书城逛逛',
+            ButtonContent:'去书城逛逛',
+            Title:'阅读结束页',
+            BookID: that.newRecomment.bookId || '' ,
+            RBookID: that.bookId || ''
+        });
+    },
+    /**
+     * 获取阅读状态
+     */
+    fnGetReadState() {
+        let that = this;
+        this.bookList = [];
+        storage.get({
+            key: 'bookHistory',
+            success: function(bookList) {
+                if (bookList) {
+                    try {
+                        bookList = JSON.parse(bookList);
+                    } catch(err) {
+                        return false;
+                    }
+                    if (bookList && bookList.length) {
+                        that.bookList = bookList;
+                    }
+                }
+            }
+        });
+    },
+}
+</script>

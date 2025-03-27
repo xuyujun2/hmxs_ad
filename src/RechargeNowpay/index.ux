@@ -1,0 +1,62 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div>
+        <div class="dialogh5" if="dialogh5Show">
+            <div class="divweb">
+                <web class="web1" id="web" @pagefinish="fnWebFinish" @message="fnMessage" @titlereceive="titlereceive" src="{{webSrc}}"></web>
+            </div>
+        </div>
+        <back-baidu></back-baidu> 
+    </div>
+</template>
+<style scoped lang="less">
+    .dialogh5,.divweb,.web1 {width:100%;}
+</style>
+
+<script>
+import app from '@system.app';
+import router from '@system.router';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+export default {
+
+    data:{
+        dialogh5Show:true,
+        headerJson:'',
+        webSrc:'',
+        dialogImg:'',
+        imgInfo:{
+            id:'',
+            type:'',
+            info:'',
+        },
+    },
+    onInit(){
+    },
+    fnWebFinish(e){
+        let that=this;
+    },
+    titlereceive(e){
+        console.log(e)
+        if(e.title == '支付结果'){
+            router.back();
+        }
+    },
+    fnMessage(){
+
+    },
+    onShow() {
+        this.$app.lastOpenPage = ''
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            Title: '现在支付'
+        });
+        // pageEnter(this.$page.path);
+        let that = this;
+        that.$app.$def.quickappLog([701], that);
+    },
+    onHide() {
+        // pageLeave(this.$page.path);
+    }
+}
+</script>
+

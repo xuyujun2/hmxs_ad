@@ -1,0 +1,782 @@
+<import name="payLists" src="../Common/sharedComponent/newPayList/index.ux"></import>
+<template>
+    <div class="member-wrap">
+        <div class="member-box">
+            <div class="member-card-wrap {{vipTypes && vipTypes.length === 1 ? 'member-card-no-types' : ''}}">
+                <stack class="member-card">
+                    <image class="member-card-bg" src="https://xsmfdq.kkyd.cn/images/vip_bigCard.png"></image>
+                    <text class="member-card-user">书友{{userId}}</text>
+                    <text class="member-card-desc">VIP尊贵免广告畅快看书特权</text>
+                    <text class="member-card-time">{{isVipMember ? '有效期至：' + vipEndTime : '暂未开通'}}</text>
+                </stack>
+                <div class="vip-types" if="vipTypes && vipTypes.length > 1">
+                    <block for="(index, item) in vipTypes">
+                        <stack class="vip-type-btn" @click="fnChangeVipType(item)">
+                            <image class="vip-type-bg" src="{{vipType === item.vipType ? 'https://xsmfdq.kkyd.cn/images/hmxs/vip-type-bg-active.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/vip-type-bg-unactive.png'}}"></image>
+                            <text class="vip-type-text {{vipType === item.vipType ? 'vip-type-active' : ''}}">{{item.vipTypeCn}}</text>
+                        </stack>
+                    </block>
+                </div>
+            </div>
+            <list class="pay-list" id="list">
+                <block for="payList">
+                    <list-item type="comboItem">
+                        <stack class="pay-list-item" @click="fnChangePayInfo($item)">
+                            <div class="pay-list-box {{ $item.id === payInfo.id ? 'active' : '' }}">
+                                <text class="pay-title {{ $item.id === payInfo.id ? 'text-active' : '' }}">{{$item.titleDesc}}</text>
+                                <div class="money-wrap">
+                                    <text class="sign {{ $item.id === payInfo.id ? 'text-active' : '' }}">¥</text>
+                                    <text class="money {{ $item.id === payInfo.id ? 'text-active' : '' }}">{{$item.buyPrice}}</text>
+                                </div>
+                                <text class="discount">{{$item && $item.showPrice ? `¥${$item.showPrice}` : '' }}</text>
+                                <text if="$item.payExplanation" class="renew">{{$item.payExplanation}}</text>
+                            </div>
+                            <div class="tip">
+                                <text if="$item.corner" class="tips">{{$item.corner}}</text>
+                            </div>
+                        </stack>
+                    </list-item>
+                </block>
+            </list>
+            <text if="payInfo.renewalPrompt" class="renew-tips">{{payInfo.renewalPrompt}}</text>
+            <text class="privilege-title">功能特权</text>
+            <div class="privilege-list">
+                <block for="privileges">
+                    <div class="privilege-box">
+                        <div class="privilege-item">
+                            <image src="{{$item.icon}}" class="privilege-icon"></image>
+                            <text class="privilege-name">{{$item.name}}</text>
+                            <text class="privilege-des">{{$item.description}}</text>
+                        </div>
+                    </div>
+                </block>
+            </div>
+        </div>
+        <div class="pay-fixed">
+            <text @click="fnPaySwitch" class="pay-btn">{{isVipMember ? '立即续费' : '立即开通' }}</text>
+            <div class="pay-agreement">
+                <div if="checkAgreeSwitch && !isCheckAgree" class="pay-agreement-btn" @click="fnChangeAgree"></div>
+                <image if="checkAgreeSwitch && isCheckAgree" class="pay-agreement-image" @click="fnChangeAgree" src="https://xsmfdq.kkyd.cn/images/hmxs/vip-agreement-btn.png"></image>
+                <text class="pay-agreement-text">开通前请阅读</text>
+                <text class="pay-agreement-text" @click="fnRouterRules('vip')">《会员服务协议》</text>
+                <text if="isAutoRenew" class="pay-agreement-text">和</text>
+                <text if="isAutoRenew" class="pay-agreement-text" @click="fnRouterRules('renew')">《自动续费协议》</text>
+            </div>
+        </div>
+        <payLists 
+            pay-scene="adVip"
+            pay-pop-show="{{payPopShow}}"
+            pay-way-list="{{payWayList}}"
+            pay-way-index="{{payWayIndex}}"
+            pay-other-info="{{payOtherInfo}}"
+            is-web-pay-alert="{{isWebPayAlert}}"
+            pay-info="{{payInfo}}"
+            is-vip-member="{{isVipMember}}"
+            @fn-change-alert-show="fnChangeAlertShow"
+            @pay-pop-close="fnPayPopClose"
+            @pay-click="fnToPay"
+            @pay-way-change="fnPayWayChange"
+            @pay-result="fnPayResult"
+        ></payLists>
+    </div>
+</template>
+
+<style scoped lang="less">
+    .member-wrap {
+        flex-direction: column;
+        width: 100%;
+        flex: 1;
+        .member-box {
+            flex-direction: column;
+            width: 100%;
+            padding-bottom: 176px;
+        }
+        .member-card-wrap {
+            flex-direction: column;
+            width: 100%;
+            height: 375px;
+            background-color: #FFE7CD;
+            .member-card {
+                flex-direction: column;
+                margin-top: 27px;
+                margin-left: 40px;
+                width: 670px;
+                height: 236px;
+                .member-card-bg {
+                    width: 670px;
+                    height: 236px;
+                    object-fit: cover;
+                }
+                .member-card-user {
+                    margin-top: 32px;
+                    margin-left: 24px;
+                    height: 44px;
+                    line-height: 44px;
+                    font-size: 36px;
+                    font-weight: bold;
+                    color: #F9CDAF;
+                }
+                .member-card-desc {
+                    margin-top: 84px;
+                    margin-left: 24px;
+                    height: 30px;
+                    line-height: 30px;
+                    font-size: 24px;
+                    color: #F9CDAF;
+                }
+                .member-card-time {
+                    margin-top: 179px;
+                    margin-left: 24px;
+                    height: 33px;
+                    line-height: 33px;
+                    font-size: 24px;
+                    color: #F9CDAF;
+                }
+            }
+            .vip-types {
+                margin-top: 32px;
+                margin-left: 40px;
+                .vip-type-btn {
+                    width: 225px;
+                    height: 80px;
+                    .vip-type-bg {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                    .vip-type-text {
+                        width: 235px;
+                        height: 80px;
+                        line-height: 80px;
+                        font-size: 28px;
+                        color:  #222222;
+                        text-align: center;
+                    }
+                    .vip-type-active {
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+        .member-card-no-types {
+            height: 295px;
+        }
+        .pay-list {
+            flex-direction: row;
+            margin-top: 48px;
+            margin-left: 40px;
+            height: 274px;
+            .pay-list-item {
+                flex-direction: column;
+                margin-right: 20px;
+                width: 208px;
+                height: 274px;
+                .tip {
+                    width: 100%;
+                    height: 36px;
+                    .tips {
+                        background-color: #EA6805;
+                        border-top-left-radius: 8px;
+                        border-top-right-radius: 8px;
+                        border-bottom-right-radius: 8px;
+                        padding: 4px 12px;
+                        height: 36px;
+                        text-align: center;
+                        font-size: 22px;
+                        color: #FFFFFF;
+                        line-height: 28px;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                }
+                .pay-list-box {
+                    flex-direction: column;
+                    align-items: center;
+                    margin-top: 16px;
+                    width: 208px;
+                    height: 258px;
+                    background-color: #F6F6F6;
+                    border-radius: 8px;
+                    .pay-title {
+                        margin-top: 40px;
+                        height: 34px;
+                        line-height: 34px;
+                        font-size: 30px;
+                        font-weight: bold;
+                        color: #888888;
+                        text-align: center;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .money-wrap {
+                        justify-content: center;
+                        margin-top: 12px;
+                        width: 100%;
+                        height: 58px;
+                    }
+                    .money {
+                        height: 58px;
+                        line-height: 58px;
+                        font-size: 48px;
+                        font-weight: bold;
+                        color: #666666;
+                    }
+                    .sign {
+                        margin-right: 6px;
+                        margin-top: 22px;
+                        height: 34px;
+                        line-height: 34px;
+                        font-size: 28px;
+                        font-weight: bold;
+                        color: #666666;
+                    }
+                    .discount {
+                        margin-top: 8px;
+                        height: 30px;
+                        line-height: 30px;
+                        font-size: 24px;
+                        color: rgba(34, 34, 34, 0.3);
+                        text-align: center;
+                        text-decoration: line-through;
+                    }
+                    .renew {
+                        margin-top: 8px;
+                        width: 174px;
+                        height: 36px;
+                        line-height: 28px;
+                        background-color: rgba(250, 88, 5, 0.1);
+                        border-radius: 8px;
+                        text-align: center;
+                        font-size: 22px;
+                        color: rgba(250, 88, 5, 0.76);
+                    }
+                    .text-active {
+                        color: #6F350C;
+                    }
+                }
+                .active {
+                    background-color: #FFEED9;
+                }
+            }
+        }
+        .renew-tips {
+            margin-top: 24px;
+            margin-left: 40px;
+            height: 30px;
+            line-height: 30px;
+            font-size: 24px;
+            color: #222222;
+        }
+        .privilege-title {
+            margin-top: 48px;
+            margin-left: 40px;
+            height: 45px;
+            line-height: 45px;
+            font-size: 32px;
+            color: #222222;
+            font-weight: bold;
+        }
+        .privilege-list {
+            flex-wrap: wrap;
+            margin-top: 24px;
+            padding-left: 40px;
+            padding-right: 40px;
+            width: 100%;
+            .privilege-box {
+                width: 33.33%;
+            }
+            .privilege-item {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                height: 254px;
+                .privilege-icon {
+                    margin-top: 24px;
+                    height: 88px;
+                    width: 88px;
+                }
+                .privilege-name {
+                    margin-top: 16px;
+                    width: 100%;
+                    height: 40px;
+                    font-size: 28px;
+                    color: #222222;
+                    line-height: 40px;
+                    text-align: center;
+                    font-weight: bold;
+                }
+                .privilege-des {
+                    margin-top: 4px;
+                    width: 144px;
+                    font-size: 24px;          
+                    color: #B0B0B0;
+                    line-height: 33px;
+                    text-align: center;
+                    text-overflow: ellipsis;
+                    lines: 2;
+                }
+            }
+        }
+        .pay-fixed {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 40px 24px;
+            width: 750px;
+            height: 192px;
+            background-color: #FFFFFF;
+            border-top-width: 1px;
+            border-top-color: #F2F2F2;
+            .pay-btn {
+                margin-bottom: 24px;
+                width: 670px;
+                height: 96px;
+                font-weight: bold;
+                background-color: #EA6805;
+                border-radius: 48px;
+                font-size: 34px;
+                color: #FFFFFF;
+                line-height: 96px;
+                text-align: center;
+            }
+            .pay-agreement {
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 32px;
+                .pay-agreement-btn {
+                    margin-right: 8px;
+                    width: 32px;
+                    height: 32px;
+                    border: 3px solid rgba(0,0,0,0.19);
+                    border-radius: 32px;
+                }
+                .pay-agreement-image {
+                    margin-right: 8px;
+                    width: 32px;
+                    height: 32px; 
+                }
+                .pay-agreement-text {
+                    height: 32px;
+                    line-height: 32px;
+                    font-size: 22px;
+                    color: #9D9D9D;
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+    import wxpay from '@service.wxpay';
+    import prompt from '@system.prompt'
+    import router from '@system.router'
+    export default {
+        protected: {
+            pageFrom: '', // 页面来源
+            referrer: '' ,  //  进入页面前场景名称
+            bookId: '',
+            chapterId: '',
+            choosePay: '', // 选中会员类型
+        },
+        private: {
+            userId: '', // 用户id
+            isCoin: true, // 金币模式
+            isVipMember: false, // VIP用户
+            vipEndTime: '', // 会员截止时间
+            vipTypes: [], // 会员类型
+            userTacticsVo: {}, // 支付策略信息
+            immediatePay: false, // 直接支付
+            vipType: -1, // 当前vip类型
+            payList: [], // 支付列表
+            payInfo: {}, // 支付信息
+            // 特权说明
+            privilegesSetting: [
+                {
+                    vipTypes: [1,2],
+                    icon: 'https://xsmfdq.kkyd.cn/images/advertising_icon.png',
+                    name: '阅读免广告',
+                    description: '畅读无打扰'
+                },
+                {
+                    vipTypes: [3],
+                    icon: 'https://xsmfdq.kkyd.cn/images/advertising_icon.png',
+                    name: '纯净免广告',
+                    description: '全站无广告'
+                },
+                {   
+                    vipTypes: [2,3],
+                    icon: 'https://xsmfdq.kkyd.cn/images/listen_book_icon.png',
+                    name: '语音听书',
+                    description: '语音畅快听书'
+                },
+                {   
+                    vipTypes: [1,2,3],
+                    icon: 'https://xsmfdq.kkyd.cn/images/exalted_icon.png',
+                    name: '尊贵标识',
+                    description: '尊贵VIP标识'
+                },
+                {
+                    vipTypes: [1,2,3],
+                    icon: 'https://xsmfdq.kkyd.cn/images/prerogative_icon.png',
+                    name: '更多特权',
+                    description: '敬请期待'
+                }
+            ],
+            privileges: [], // 当前特权
+            payWays: [], // 支付方式
+            payWayList: [], // 支付列表
+            payWayIndex: 0, // 支付索引
+            wxPayType: '', // 微信支付方式
+            paySuccess: false, // 支付成功
+            payOtherInfo: {}, // 其他支付信息
+            isWebPayAlert: false, // 支付提醒弹窗
+            payPopShow: false, // 支付弹窗展示
+            canChoosePayType: true, // 选中会员类型
+            isExtraPayWay: false, // 特定支付
+            isSetPayWayList: false, // 切换支付列表 
+            checkAgreeSwitch: false, // 需要勾选开关
+            isCheckAgree: false, // 点击勾选开关
+            isAutoRenew: false, // 自动续费判断
+        },
+        onInit() {
+            this.userId = this.$app.headerJson.userId
+            this.isCoin = this.$app.isCoin
+            this.fnLoadMemberInfo()
+        },
+        onShow() {
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+				SourcePage: this.referrer,
+                Title: '会员'
+            });
+            this.$app.$def.quickappLog([701], this);
+        },
+        onBackPress() {
+            let that = this;
+            setTimeout(() => {
+                if(that.isWebPayAlert) {
+                    that.isWebPayAlert = false
+                    return true
+                }
+                if(that.payPopShow) {
+                    that.payPopShow = false
+                    return true
+                }
+                if(that.paySuccess && that.pageFrom === 'read') {
+                    router.clear()
+                    router.replace({
+                        uri: '/Read',
+                        params: {
+                            bookId: that.bookId,
+                            chapterId: that.chapterId,
+                        }
+                    })
+                    return
+                }
+                if(that.paySuccess && that.pageFrom === 'index') {
+                    router.replace({
+                        uri: '/Index',
+                        params: {
+                            cardIndex: that.isCoin ? 4 : 3,
+                        }
+                    })
+                    return
+                }
+                router.back();
+            }, 0);
+            return true;
+        },
+        /**
+         * 获取会员页信息
+         */
+        fnLoadMemberInfo() {
+            let that =  this
+            that.$app.$def.requestData(that, {
+                interface: `/glory/fastapp/2851`,
+                data: {
+                    url: '/Member',
+                    bookId: that.bookId,
+                    chapterId: that.chapterId,
+                    pageFrom: that.pageFrom,
+                },
+                succ: function (res) {
+                    if(res.retCode === 0 && res.data) {
+                        const memberInfo = res.data
+                        that.checkAgreeSwitch = !!res.data.checkAgreeSwitch
+                        that.isVipMember = memberInfo.vipInfo ? true : false
+                        that.vipEndTime = memberInfo.vipInfo ? memberInfo.vipInfo.endTime.split(' ')[0] : ''
+                        that.vipTypes = memberInfo.payGroup
+                        that.userTacticsVo = memberInfo.utJson
+                        that.payWays = memberInfo.payWays
+                        if(that.payWays && that.payWays.length) {
+                            that.fnSetPayWayList(false)
+                        }
+                        if(that.vipTypes && that.vipTypes.length) {
+                            let hasSetPayType = false
+                            if(that.canChoosePayType && that.choosePay === 'listen') {
+                                that.canChoosePayType = false
+                                let index = that.vipTypes.findIndex(item => (item.vipType === 2 || item.vipType === 3))
+                                if(index > 0) {
+                                    hasSetPayType = true
+                                    that.fnChangeVipType(that.vipTypes[index])
+                                }
+                            }
+                            if(!hasSetPayType) {
+                                that.fnChangeVipType(that.vipTypes[0])
+                            }
+                            
+                        }
+                    }
+                }
+            })
+        },
+        /**
+         * 选择会员类型
+         * @param {Object} vipInfo 会员内容
+         */
+        fnChangeVipType(vipInfo) {
+            if(this.isSetPayWayList) {
+                return
+            }
+            this.vipType = vipInfo.vipType
+            this.fnSetPriviliges()
+            if(vipInfo.rechargeList && vipInfo.rechargeList.length) {
+                this.fnSetPayList(vipInfo.rechargeList)
+            }
+        },
+        /**
+         * 展示支付列表
+         * @param {Object} payList 支付列表
+         */
+        fnSetPayList(payList) {
+            console.log(payList)
+            this.payList = payList
+            this.fnChangePayInfo(payList[0])
+        },
+        /**
+         * 选择支付类型
+         * @param {Object} payInfo 支付信息
+         */
+        fnChangePayInfo(payInfo) {
+            if(this.isSetPayWayList) {
+                return
+            }
+            this.payInfo = payInfo
+            this.isAutoRenew = /包月|包季|包年/.test(payInfo.corner)
+            const isExtra = payInfo.payWayList
+            if(isExtra) {
+                this.fnSetPayWayList(true)
+            }
+            if(this.isExtraPayWay && !isExtra) {
+                this.fnSetPayWayList(false)
+            }
+        },
+        /**
+         * 特权显示
+         */
+        fnSetPriviliges() {
+            this.privileges = this.privilegesSetting.filter(item => item.vipTypes.indexOf(this.vipType) > -1)
+        },
+        /**
+         * 支付提醒显示切换
+         * @param {Object} evt 支付提醒状态
+         */
+        fnChangeAlertShow(evt) {
+            if(evt && evt.detail && evt.detail.show) {
+                this.isWebPayAlert = true
+            } else {
+                this.isWebPayAlert = false
+            }
+        },
+        /**
+         * 支付结果
+         * @param {Object} evt 支付结果
+         */
+        fnPayResult(evt) {
+            if(evt.detail.type) {
+                this.paySuccess = true
+                prompt.showToast({
+                    message: '充值成功'
+                })
+                this.fnPayPopClose()
+                this.payWayIndex = 0
+                this.fnLoadMemberInfo()
+                this.$element('list') && this.$element('list').scrollTo({ index: 0 });
+            }
+        },
+        /**
+         * 支付判断
+         */
+        fnPaySwitch() {
+            if(this.checkAgreeSwitch && !this.isCheckAgree) {
+                prompt.showToast({
+                    message: '请先阅读并确认协议后购买'
+                })
+                return
+            }
+            if(this.immediatePay) {
+                this.fnToPay()
+            } else {
+                this.payPopShow = true
+            }
+        },
+        /**
+         * 支付弹窗关闭
+         */
+        fnPayPopClose() {
+            this.payPopShow = false
+        },
+        /**
+         * 支付
+         */
+        fnToPay() {
+            this.$broadcast('initPay')
+            const headerJson = this.$app.headerJson
+            const _payInfo = this.payInfo;
+            const _payWayList = this.payWayList;
+            const _payWayIndex = this.payWayIndex;
+            const payInfo = {
+                id: _payInfo.id,
+                type: _payInfo.type,
+                payWay: _payWayList[_payWayIndex].payWay,
+                sourceType: 2,
+                utJson: JSON.stringify(this.userTacticsVo),
+            }
+            const logInfo = {
+                id: payInfo.id,
+                payWay: payInfo.payWay,
+                sourceType: payInfo.sourceType,
+                brand: headerJson && headerJson.brand || '',
+                model: headerJson && headerJson.model || '',
+                userId: this.userId,
+            };
+            switch( _payWayList[_payWayIndex].payWay ) {
+                // 支付宝
+                case 'ALIPAY':
+                    this.$broadcast('alipay', { dataJson: payInfo, logJson: logInfo });
+                    break;
+                // 微信APP支付
+                case 'WECHATPAY_APP':
+                    this.$broadcast('wxPay', { payType: 'APP', dataJson: payInfo, logJson: logInfo});
+                    break;
+                // 微信WEB支付
+                case 'WECHATPAY_MWEB':
+                    this.$broadcast('wxPay', { payType: 'MWEB', dataJson: payInfo, logJson: logInfo});
+                    break;
+                // 现在支付
+                case 'NOWPAY':
+                    this.$broadcast('nowPay', { dataJson: payInfo, logJson: logInfo });
+                    break;
+                default:
+                    break;
+            }
+        },
+        /**
+         * 支付方式切换
+         * @param {Object} evt 支付方式索引
+         */
+        fnPayWayChange(evt) {
+            if(evt && evt.detail) {
+                this.payWayIndex = evt.detail.index
+            }
+        },
+        /**
+         * 支付方式
+         * @param {Boolean} isExtra 特定支付
+         */
+        fnSetPayWayList(isExtra = false) {
+            const _payWayList = this.payWays
+            const needInitPayIndex = this.isExtraPayWay
+            const extraPayWayList = this.payInfo.payWayList || []
+            if(!_payWayList || _payWayList.length === 0) {
+                return
+            }
+            this.isSetPayWayList = true
+            this.isExtraPayWay = isExtra
+            let payWayList = []
+            if(!this.wxPayType) {
+                this.wxPayType = wxpay.getType();
+            }
+            _payWayList.forEach(item => {
+                switch(item.payWay) {
+                    case 'WECHATPAY_APP':
+                        if(this.wxPayType == 'APP') {
+                            payWayList.push(item);
+                        }
+                        break;
+                    case 'WECHATPAY_MWEB':
+                        if(this.wxPayType == 'MWEB') {
+                            payWayList.push(item);
+                        }
+                        break;
+                    case 'ALIPAY':
+                        payWayList.push(item);
+                        break;
+                    default:
+                        payWayList.push(item);
+                }
+            })      
+            if(isExtra) {
+                const payWays = extraPayWayList.map(item => item.payType)
+                if(payWays.indexOf('WECHATPAY') > -1) {
+                    payWays.push('WECHATPAY_APP')
+                    payWays.push('WECHATPAY_MWEB')
+                }
+                payWayList = payWayList.filter(item => payWays.indexOf(item.payWay) > -1)
+            }
+            if(needInitPayIndex) {
+                this.payWayIndex = 0
+            }
+            this.payWayList = payWayList
+            
+            let payWayIndex = 0
+            if(isExtra) {
+                let payType = ''
+                for(let i = 0; i < extraPayWayList.length; i++) {
+                    let payWayInfo = extraPayWayList[i]
+                    if(payWayInfo.isChecked === 1) {
+                        payType = payWayInfo.payType
+                        break;
+                    }
+                }
+                if(payType) {
+                    for(let i = 0; i < payWayList.length; i++) {
+                        let payWayInfo = payWayList[i]
+                        if(payType === 'WECHATPAY' && (payWayInfo.payWay === 'WECHATPAY_APP' || payWayInfo.payWay === 'WECHATPAY_MWEB') || payType === payWayInfo.payWay) {
+                            payWayIndex = i
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for(let i = 0; i < payWayList.length; i++) {
+                    let payWayInfo = payWayList[i]
+                    if(payWayInfo.isChecked === 1) {
+                        payWayIndex = i
+                        break;
+                    }
+                }
+            }
+            this.payWayIndex = payWayIndex
+            this.isSetPayWayList = false
+        },
+        fnRouterRules(tag) {
+            if(tag === 'vip') {
+                router.push({
+                    uri: `${this.$app.api}/huodong/quickapp/free_agreement/vip_free.html?channelCode=${this.txtName}`
+                })
+            }
+            if(tag === 'renew') {
+                router.push({
+                    uri: `${this.$app.api}/huodong/quickapp/free_agreement/auto_renewal_free.html?channelCode=${this.txtName}`
+                })
+            }
+        },
+        fnChangeAgree() {
+            this.isCheckAgree = !this.isCheckAgree
+        }
+    }
+</script>

@@ -1,0 +1,1074 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div class="login_box">
+        <div class="login_logo">
+            <image class="login_logo_img" src="/Common/logo.png"></image>
+            <text class="login_logo_txt">{{appName}}</text>
+        </div>
+        <div class="login_phone_box">
+            <div class="login_phone_input_box">
+                <input class="phone_tel" id="phone_tel" type="number" placeholder="请输入手机号" value="{{ntel}}" @change="edittel" />
+            </div>
+            <div class="login_phone_input_box">
+                <input class="phone_tel_code" id="phone_tel_code" type="number" placeholder="请输入验证码" value="{{rule}}" @change="telcode" />
+                <text class="auth_code" @click="getCode" if="{{codetime<=0}}">{{codetext}}</text>
+                <text class="auth_code" style="color:#9b9b9b" else>{{codetime}}s</text>
+            </div>
+            <text class="login_phone_but" @click="logCheck">{{btnText}}</text>
+            <text class="login_notice" if="{{isLogout}}">验证成功后即可进入注销流程</text>
+        </div>
+        <div class="agreement-wrap" if="{{ isCheckAgreeOpen && !isLogout }}" @click="fnAgreeToLogin">
+            <image class="agreement-image" src="{{isAgreeToLogin ? 'https://xsmfdq.kkyd.cn/images/edit-right-select.png' : 'https://xsmfdq.kkyd.cn/images/edit-right-nol.png'}}"></image>
+            <text class="agreement-text" if="{{!hasClickToLogin}}">我已阅读并同意{{appName}}<a href="{{webSrc}}/huodong/quickapp/free_agreement/xieyi_free.html?channelCode={{txtName}}" class="colred color-theme">《用户协议》</a>和<a href="{{webSrc}}/huodong/quickapp/free_agreement/yinsi_free.html?channelCode={{txtName}}" class="colred color-theme">《隐私策略》</a></text>
+            <text class="agreement-text agreement-error" if="{{hasClickToLogin}}">我已阅读并同意{{appName}}<a href="{{webSrc}}/huodong/quickapp/free_agreement/xieyi_free.html?channelCode={{txtName}}" class="colred color-theme">《用户协议》</a>和<a href="{{webSrc}}/huodong/quickapp/free_agreement/yinsi_free.html?channelCode={{txtName}}" class="colred color-theme">《隐私策略》</a></text>
+        </div>
+        <text class="agreement" if="{{ !isCheckAgreeOpen && !isLogout}}">点击登录代表同意{{appName}}<a href="{{webSrc}}/huodong/quickapp/free_agreement/xieyi_free.html?channelCode={{txtName}}" class="colred">《用户协议》</a>和<a href="{{webSrc}}/huodong/quickapp/free_agreement/yinsi_free.html?channelCode={{txtName}}" class="colred">《隐私策略》</a></text>
+        <div class="logout-notice" if="{{showNotice}}" @click="vagueClick">
+            <web id="web" src="{{webSrc}}/huodong/quickapp/free_agreement/loginotice.html?channelCode={{txtName}}"></web>
+            <div class="btn-con">
+                <div class="agree" @click="changeAgree">
+                    <image src="{{isAgree?'https://xsmfdq.kkyd.cn/images/edit-right-select.png':'https://xsmfdq.kkyd.cn/images/edit-right-nol.png'}}"></image>
+                    <text>阅读并同意以上注销须知</text>
+                </div>
+                <div class="{{isAgree?'btn':'btn-grey'}}" @click="reqLogout">
+                    <text class="{{isAgree?'text':'text-grey'}}">申请注销账号</text>
+                </div>
+            </div>
+        </div>
+        <div class="logout-know" if="{{showKnow}}" @click="vagueClick">
+            <image src="https://xsmfdq.kkyd.cn/images/pic-examine.png"></image>
+            <text class="title">注销账号申请已提交审核</text>
+            <text class="text">注销账号申请将在15个工作日内完成审核，正式注销前，可通过再次登录终止注销流程。</text>
+            <div class="btn" @click="goBook">
+                <text>随便逛逛</text>
+            </div>
+            <text class="out" @click="exitApp">退出</text>
+        </div>
+        <div class="giveup" if="{{isGiveup}}">
+            <div class="pop">
+                <text class="title">放弃账号注销</text>
+                <text class="text">账号注销正在审核中，点击“放弃注销”按钮后，将终止注销流程，您的账号信息将保留，可使用原先账号进行登录。</text>
+                <div class="btn">
+                    <text class="cancle"  @click="giveupCancle">取消</text>
+                    <text class="confirm"  @click="giveupConfirm">放弃注销</text>
+                </div>
+            </div>
+        </div>
+        <div class="giveup-suc" if="{{isGiveupSuc}}" @click="vagueClick">
+            <stack>
+                <div class="pop">
+                    <text class="title">取消账号注销成功</text>
+                    <text class="text">您已取消账户注销，请重新登录。</text>
+                    <div class="btn">
+                        <text class="confirm" @click="reLogin">立即登录</text>
+                    </div>
+                </div>
+                <image src="https://xsmfdq.kkyd.cn/images/pic-success.png"></image>
+            </stack>
+        </div>
+        <div class="giveup" if="{{switchShow}}" @click="vagueClick">
+            <div class="pop">
+                <text class="title">温馨提示</text>
+                <text class="text"><span class="black">切换账号可能会导致账户变化,当前账号：</span><span class="colred">{{userHeaderJson.userId}}</span><span class="black">，确定切换为登录账号：</span><span  class="colred">{{resultUid}}</span></text>
+                <div class="btn">
+                    <text class="cancle"  @click="switchCancle">取消</text>
+                    <text class="confirm"  @click="loginSuccess">确定</text>
+                </div>
+            </div>
+        </div>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+<style lang="less">
+    .giveup-suc{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        flex-direction: column;
+        align-items: center;
+        background-color: rgba(0,0,0,0.8);
+        justify-content: center;
+        stack{
+            width:560px;
+            justify-content: center;
+        }
+        .pop{
+            width:560px;
+            margin-top: 88px;
+            background-color:rgba(255,255,255,1);
+            border-radius:24px;
+            flex-direction: column;
+            align-items: center;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(68,68,68,1);
+                margin-top: 76px;
+            }
+            .text{
+                text-indent: 2em;
+                width:480px;
+                font-size:26px;
+                color:rgba(115,115,115,1);
+                margin: 30px 0px 32px;
+                line-height:40px;
+            }
+            .btn{
+                .confirm{
+                    width:100%;
+                    height:84px;
+                    text-align: center;
+                    line-height: 84px;
+                    color:rgba(255,255,255,1);
+                    background-color:#FD895A;
+                    border-bottom-right-radius: 24px;
+                    border-bottom-left-radius: 24px;
+                }
+            }
+        }
+        image{
+            width: 192px;
+            height: 166px;
+        }
+    }
+    .giveup{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0,0,0,0.8);
+        .pop{
+            width:560px;
+            background-color:rgba(255,255,255,1);
+            border-radius:24px;
+            flex-direction: column;
+            align-items: center;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(68,68,68,1);
+                margin-top: 30px;
+            }
+            .text{
+                text-indent: 2em;
+                width:480px;
+                font-size:26px;
+                color:rgba(115,115,115,1);
+                margin: 30px 0px 32px;
+                line-height:40px;
+                .black{
+                    color:rgba(115,115,115,1);
+                    
+                }
+                .colred{
+                    color:rgba(255, 91, 96, 1);
+                }
+            }
+            .btn{
+                .cancle{
+                    width:33%;
+                    height:84px;
+                    background-color:rgba(242,242,242,1);
+                    color:rgba(186,186,186,1);
+                    text-align: center;
+                    line-height: 84px;
+                    border-bottom-left-radius: 24px;
+                }
+                .confirm{
+                    width:67%;
+                    height:84px;
+                    text-align: center;
+                    line-height: 84px;
+                    color:rgba(255,255,255,1);
+                    background-color:#FD895A;
+                    border-bottom-right-radius: 24px;
+                }
+            }
+        }
+    }
+    .logout-know{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        align-items: center;
+        flex-direction: column;
+        background-color: #fff;
+        image{
+            width: 200px;
+            height: 240px;
+            margin-top: 60px;
+        }
+        .title{
+            font-size:30px;
+            font-weight:500;
+            color:rgba(41,41,41,1);
+            margin-top: 32px;
+        }
+        .text{
+             font-size:26px;
+            color:rgba(115,115,115,1);
+            margin-top: 40px;
+            width:540px;
+        }
+        .btn{
+            margin-top: 30px;
+            width:540px;
+            height:80px;
+            background-color:#FD895A;
+            border-radius:47px;
+            justify-content: center;
+            align-items: center;
+            text{
+                font-size:36px;
+                color:rgba(255,255,255,1);
+            }
+        }
+        .out{
+            font-size:36px;
+            color:rgba(184,190,204,1);
+            margin-top: 50px;
+        }
+    }
+    .logout-notice{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        background-color: #fff;
+        #web{
+            width: 100%;
+            height: 100%;
+        }
+        .btn-con{
+            position: fixed;
+            width:100%;
+            height: 200px;
+            bottom: 0;
+            left: 0;
+            background-color:rgba(255,255,255,.9);
+            flex-direction: column;
+            padding: 30px 30px 20px;
+            .agree{
+                image{
+                    width: 40px;
+                    height: 40px;
+                    margin-right: 20px;
+                }
+                text{
+                    font-size:28px;
+                    color:rgba(249,112,83,1);
+                }
+            }
+            .btn{
+                margin-top: 30px;
+                width:100%;
+                height:80px;
+                background-color:#FD895A;
+                border-radius:47px;
+                justify-content: center;
+                align-items: center;
+            }
+            .btn-grey{
+                 margin-top: 30px;
+                width:100%;
+                height:80px;
+                background-color:rgba(242,242,242,1);
+                border-radius:47px;
+                justify-content: center;
+                align-items: center;
+            }
+            .text{
+                font-size:36px;
+                color:rgba(255,255,255,1);
+            }
+            .text-grey{
+                font-size:36px;
+                color:#BABABA;
+            }
+        }
+    }
+    .login_box {
+        padding-top: 50px;
+        flex-direction: column;
+        columns: 1;
+    }
+    .login_logo {
+        flex-direction: column;
+        align-items: center;
+    }
+    .login_logo_img {
+        width: 160px;
+        height: 160px;
+        border-radius: 28px;
+    }
+    .login_logo_txt {
+        margin-bottom: 50px;
+        height: 60px;
+        font-size: 26px;
+        color: #4a4a4a;
+        line-height: 60px;
+    }
+    .login_phone_box {
+        padding: 0 100px 100px;
+        flex-direction: column;
+    }
+    .login_phone_input_box {
+        padding: 20px 0;
+        height: 90px;
+        border-bottom-color: #cac4c4;
+        border-bottom-width: 1px;
+    }
+    .phone_tel,
+    .phone_tel_code {
+        flex: 1;
+        height: 50px;
+        font-size: 30px;
+        color: #4a4a4a;
+    }
+    .auth_code {
+        padding: 10px 0px 10px 30px;
+        margin-top:5px;
+        margin-right:0px;
+        margin-bottom:5px;
+        margin-left:20px;
+        height: 40px;
+        width: 190px;
+        border-left-color: #d6d6d6;
+        border-left-width: 1px;
+        font-size: 30px;
+        color: #4bf;
+        text-align: center;
+        line-height: 40px;
+    }
+    .login_phone_but {
+        margin-top: 40px;
+        height: 94px;
+        background-color: #4bf;
+        border-radius: 10px;
+        font-size: 36px;
+        color: #fff;
+        text-align: center;
+        line-height: 94px;
+    }
+    .login_notice{
+        font-size:26px;
+        color:rgba(186,186,186,1);
+        margin-top: 33px;
+        text-align: center;
+    }
+    .phone_tel_error {
+        color: #fa2a2d;
+    }
+    .agreement{
+        position: fixed;
+        left: 0px;
+        bottom: 50px;
+        text-align: center;
+        width: 100%;
+        height: 30px;
+        font-size: 24px;
+        .colred{
+            color:#FF5B60;
+        }
+    }
+    .agreement-wrap {
+        width: 100%;
+        height: 50px;
+        align-items: center;
+        justify-content: center;
+    }
+    .agreement-image {
+        margin-top: 5px;
+        margin-right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+    .agreement-text {
+        text-align: center;
+        height: 50px;
+        font-size: 24px;
+        color: rgba(115,115,115,1);
+        .colred {
+            color:#FF5B60;
+        }
+        .color-theme {
+            color: #1892ff;
+        }
+    }
+    .agreement-error {
+        color: #FF5B60;
+    }
+</style>
+<script>
+    import router from '@system.router';
+    import prompt from '@system.prompt'
+    import device from '@system.device';
+    import storage from '@system.storage';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+    export default {
+        private: {
+            ntel: '',
+            telreg: /^1[3456789]\d{9}$/,
+            rule: '',
+            codetext: '获取验证码',
+            codetime: 0,
+            cleartime: null,
+            oparams: '',
+            userHeaderJson: {},
+            surl: '',
+            bLoginSwitch: true,
+            appName:'',
+            btnText:'登录',
+            showNotice:false,
+            webSrc:'',
+            isAgree:false,
+            showKnow:false,
+            isGiveup:false,
+            isGiveupSuc:false,
+            authCode:'',
+            logoutUid:'',
+            txtName:'',
+            isAgreeToLogin: false, // 是否同意登陆
+            hasClickToLogin: false, // 是否点击登录
+            isCheckAgreeOpen: false, // 登陆勾选开关
+        },
+        protected: {
+            url: '',
+            bookId: '',
+            chapterId: '',
+            isLogout:false,
+            unit: '',
+            amount: '',
+            fromurl:'',
+            autoPay:1,
+            resultUid:'',
+            resultT:'',
+            routeruri:'',
+            switchShow:false,
+            androidId:'',
+            isFromVip:0,
+            SourcePosition:'',
+            omap:'',
+            isUpdateOmap:1,
+            chapterIndex:-1,
+            pageFrom: '',
+            positionName: '',
+        },
+        giveupCancle(){
+            this.isGiveup = false
+        },
+        giveupConfirm(){
+            let that = this
+            that.ajax('2110', {
+                data: {
+                        'type': 1,
+                        'authCode': that.authCode,
+                        'logoutUid':that.logoutUid
+                    },
+                    succ: function (res) {
+                        if(res.code==0){
+                            that.isGiveup = false
+                            that.isGiveupSuc = true
+                        }else{
+                            prompt.showToast({
+                                message: res.mag
+                            });
+                        }
+                    },
+                    err: function (code) {
+                        prompt.showToast({
+                            message: '放弃注销账号失败，请检查网络重试',
+                            duration: 0
+                        });
+                    }
+                }
+            )
+        },
+        reLogin(){
+            let that = this
+            that.isGiveupSuc = false
+            clearInterval(that.cleartime);
+            that.codetime = 0;
+            that.rule = ''
+        },
+        goBook(){
+            storage.delete({
+                key:'bookshelf'
+            })
+            router.clear()
+            router.replace({
+                uri:'/Index'
+            })
+        },
+        exitApp(){
+            this.$app.exit()
+        },
+        changeAgree(){
+            this.isAgree = !this.isAgree
+        },
+        edittel(e) {
+            this.ntel = e.value;
+        },
+        telcode(e) {
+            this.rule = e.value;
+        },
+        reqLogout(){
+            let that = this
+            let oGetAndroidId = new Promise((resolve,reject)=>{
+                device.getUserId({
+                    success: function(data) {
+                        that.androidId = data.userId
+                        resolve()
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                // id:data.userId,
+                                site:'1'
+                            }
+                        }, 'getAndroidId'], that)
+                    },
+                    fail: function(data, code) {
+                        resolve()
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                code:code,
+                                data:data,
+                                site:'2'
+                            }
+                        }, 'getAndroidId'], that)
+                    }
+                })
+            })
+            oGetAndroidId.then((result) => {
+                if(that.isAgree){
+                    that.ajax('2110', {
+                        data: {
+                                'type': 0,
+                                'authCode': that.authCode,
+                                'androidId': that.androidId
+                            },
+                            succ: function (res) {
+                                if(res.code==0){
+                                    that.userHeaderJson['userId'] = ''
+                                    that.userHeaderJson['t'] = ''
+                                    that.userHeaderJson['utdidTmp'] = ''
+                                    that.$app.$def.setStorageFile(that,{
+                                        key:'headerJson',
+                                        value:that.userHeaderJson,
+                                        success:function(){
+                                            that.$app.headerJson = that.userHeaderJson
+                                            that.showKnow = true
+                                            that.showNotice = false                                    
+                                        }
+                                    })
+                                    that.$app.$def.deleteStorageFile(that,{
+                                        key:'agreement',
+                                        success:function(){     
+                                            console.log('clear agreement')                             
+                                        }
+                                    })
+                                    that.$app.$def.deleteStorageFile(that,{
+                                        key:'isPref',
+                                        success:function(){ 
+                                            console.log('clear isPref')   
+                                        }
+                                    })
+                                }else{
+                                    prompt.showToast({
+                                        message: res.mag
+                                    });
+                                }
+                            },
+                            err: function (code) {
+                                prompt.showToast({
+                                    message: '注销账号失败，请检查网络重试',
+                                    duration: 0
+                                });
+                            }
+                        }
+                    )
+                }
+            })
+        },
+        logCheck(){
+            let that = this;
+            that.$element('phone_tel_code').focus({ focus: false });
+            let tel = that.ntel;
+            that.routeruri = that.surl;
+            //console.log(that.telreg.test(tel));
+            if (!tel) {
+                prompt.showToast({
+                    message: '请输入手机号码',
+                    duration: 0
+                });
+                return false;
+            }
+            if (!that.telreg.test(tel)) {
+                prompt.showToast({
+                    message: '请输入正确的手机号码',
+                    duration: 0
+                });
+                return false;
+            }
+            if (!that.rule) {
+                prompt.showToast({
+                    message: '请输入正确的短信验证码',
+                    duration: 0
+                });
+                return false;
+            }
+            console.log(tel)
+            if (!that.bLoginSwitch) {
+                return false;
+            }
+            if(!that.isLogout && that.isCheckAgreeOpen && !that.isAgreeToLogin) {
+                prompt.showToast({
+                    message: '请先阅读并同意用户协议和隐私策略',
+                }); 
+                that.hasClickToLogin = true
+                return
+            }
+            that.bLoginSwitch = false;
+            that.isLogout?that.logout(tel):that.login(tel)
+        },
+
+        logout(tel){
+            let that =this
+            that.$app.$def.rsa.encrypt(tel,that).then(res=>{
+                let flag = 0
+                if(res){
+                    flag = 1
+                }
+                //2109接口
+                that.ajax('2109', {
+                        data: {
+                            'validCode': that.rule,
+                            'bindId': flag?res:tel,
+                            'swParam': flag?that.$app.swParam:''
+                        },
+                        succ: function (res) {
+                            that.bLoginSwitch = true;
+                            if(res.code==0){
+                                that.authCode = res.authCode
+                                that.showNotice=true
+                                that.$page.setTitleBar({ text: '注销账号' });
+                            }else{
+                                prompt.showToast({
+                                    message: res.msg
+                                })
+                            }
+                        },
+                        err: function (code) {
+                            that.bLoginSwitch = true;
+                            prompt.showToast({
+                                message: '验证失败，请检查网络重新登录',
+                                duration: 0
+                            });
+                        }
+                    }
+                )
+            })
+        },
+        //登录
+        login(tel) {
+            let that = this
+            that.$app.$def.rsa.encrypt(tel,that).then(res=>{
+                let flag = 0
+                if(res){
+                    flag = 1
+                }
+                that.ajax('2105', {
+                    data: {
+                        validCode: that.rule,
+                        bindId: flag ? res : tel,
+                        accountType: 1,
+                        type: 1,
+                        swParam: flag ? that.$app.swParam : '',
+                        smdid: that.$app.fnGetSmdid(), // 数美设备标识
+                        positionName: that.positionName
+                    },
+                    succ(res) {
+                        that.bLoginSwitch = true;
+                        if (res.code == 0) {
+                            if (res.result.token) {
+                                that.resultUid = res.result.userId
+                                that.resultT = res.result.token
+                                if(that.userHeaderJson.userId==res.result.userId){
+                                    that.loginSuccess()
+                                }else{
+                                    that.switchShow = true
+                                }
+                            } else {
+                                prompt.showToast({
+                                    message: '登录失败，请检查网络重新登录',
+                                    duration: 0
+                                });
+                            }
+                        }else if(res.code==1005){
+                            that.isGiveup = true
+                            that.authCode = res.result.authCode
+                            that.logoutUid = res.result.logoutUid
+                        }else{
+                            prompt.showToast({
+                                message: res.message
+                            })
+                        }
+                    },
+                    err(data) {
+                        that.bLoginSwitch = true;
+                        prompt.showToast({
+                            message: '登录失败，请检查网络重新登录',
+                            duration: 0
+                        });
+                    }
+                })
+            })
+        },
+
+         //获取验证码
+        getCode(e) {
+            let that = this;
+            let tel = that.ntel;
+            this.$element('phone_tel').focus({ focus: false });
+            console.log(that.telreg.test(tel));
+            if (!tel) {
+                prompt.showToast({
+                    message: '请输入手机号码',
+                    duration: 0
+                });
+                return false;
+            }
+            if (!that.telreg.test(tel)) {
+                prompt.showToast({
+                    message: '请输入正确的手机号码',
+                    duration: 0
+                });
+                return false;
+            }
+            console.log(tel)
+            clearInterval(that.cleartime);
+            that.codetime = 60;
+            that.cleartime = setInterval(function () {
+                that.codetime--;
+                if (that.codetime < 1) {
+                    clearInterval(that.cleartime);
+                    that.codetime = 0;
+                }
+            }, 1000);
+            that.$app.$def.rsa.encrypt(tel,that).then(res=>{
+                let flag = 0
+                if(res){
+                    flag = 1
+                }
+                that.ajax('2102', {
+                    data: {
+                        appName: that.$app.$data.name,
+                        phoneNum: flag?res:tel,
+                        swParam: flag?that.$app.swParam:''
+                    },
+                    succ(data) {
+                        console.log(data);
+                        if (data.result !== 1) {
+                            that.codetext = '重新获取';
+                        } 
+                    },
+                    err(data) {
+                        that.codetext = '重新获取';
+                        clearInterval(that.cleartime);
+                        that.codetime = 0;
+                        prompt.showToast({
+                            message: '获取失败，请检查网络重新获取',
+                            duration: 0
+                        });
+                        console.log(data);
+                    }
+                })
+            })
+
+        },
+        //表示ViewModel的数据已经准备好，可以开始使用页面中的数据
+        onInit(e) {
+            let that = this;
+            that.isCheckAgreeOpen = that.$app.isCheckAgreeOpen
+            if(this.omap!='' && typeof(this.omap)=='string'){
+                this.omap = JSON.parse(this.omap)
+            }
+            that.webSrc = that.$app.api
+            that.$page.setTitleBar({ text: that.isLogout?'账号验证':'登录' });
+            that.btnText = that.isLogout?'立即验证':'登录'
+            this.appName=this.$app.$data.name;
+            this.txtName = this.$app.$data.channelCode;
+            that.surl = that.url;
+            if(that.surl=='/Recharge'){
+                that.$app.$def.quickappLog([703,{
+                    qmap:{
+                        site:'1',
+                        fromurl:that.fromurl,
+                        bookId:that.bookId
+                    }
+                },'recharge_login'], that);
+            }
+            if (that.bookId && that.surl != '/Member') {
+                that.oparams = {
+                    bookId: that.bookId,
+                    chapterId: that.chapterId,
+                    unit: that.unit,
+                    amount: that.amount
+                }
+            }
+            console.info(that.oparams);
+            //获取 headerJson
+            new Promise((resolve, reject) => {
+                // storage.get({
+                //     key: 'headerJson',
+                //     success: function (data) {
+                //         resolve(data);
+                //     }
+                // })
+                that.$app.$def.getStorageFile(that,{
+                    key:'headerJson',
+                    success:function(data){
+                        resolve(data);
+                    }
+                })
+            }).then((res) => {
+                that.userHeaderJson = JSON.parse(res);
+            })
+        },
+        //表示ViewModel的模板已经编译完成，可以开始获取DOM节点（如：this.$element(idxxx) )
+        onReady(e) {
+        },
+        onShow() {
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '登录'
+            });
+            // pageEnter(this.$page.path);
+            this.$app.$def.quickappLog([701,{omap:this.omap}],this);
+            //$umeng_stat.resume(this);
+        },
+        onHide() {
+            // pageLeave(this.$page.path);
+        },
+        onBackPress() {
+            let that = this
+            setTimeout(function(){
+                if(that.showNotice){
+                    that.showNotice = false
+                    that.isAgree = false
+                    return
+                }else if(that.showKnow){
+                    that.showKnow = false
+                    that.goBook()
+                    return 
+                }else if(that.isGiveup){
+                    that.isGiveup = false
+                    return
+                }else if(that.isGiveupSuc){
+                    that.reLogin()
+                    return
+                }else{
+                    router.back()
+                }
+            },0)
+            return true
+        },
+        /**
+         * that.ajax('2102', {
+                data: {
+                    appName: this.$app.$data.name,
+                    phoneNum: tel
+                },
+                succ(data){
+                    console.log(data);
+                    if(data.result == 1){
+                        clearInterval(that.cleartime);
+                        that.codetime = 60;
+                        that.cleartime = setInterval(function(){
+                            that.codetime--;
+                            if(that.codetime < 1){
+                                clearInterval(that.cleartime);
+                            }
+                        },1000);
+                    }
+                    that.codetext = '重新获取';
+                },
+                err(data){
+                    console.log(data);
+                }
+            })
+        */
+        ajax(routercode, obj) {
+            let that = this;
+            that.$app.$def.requestData(that,
+                {
+                    interface: `/glory/fastapp/${routercode}`,
+                    data: obj.data,
+                    succ: function (res) {
+                        console.log(res);
+                        if (res.retCode == 0) {
+                            obj.succ(res.data);
+                        } else {
+                            prompt.showToast({
+                                message: res.retMsg,
+                                duration: 0
+                            });
+                        }
+                    },
+                    error: function (code) {
+                        obj.err(code);
+                    }
+                }
+            )
+        },
+        loginSuccess(){
+            let that = this
+            that.switchShow=false
+            //重写 userId
+            // storage.set({
+            //     key: 'userId',
+            //     value: res.result.userId
+            // });
+            that.$app.$def.setStorageFile(that,{
+                key:'userId',
+                value:that.resultUid
+            })
+            //重写 headerJson
+            that.userHeaderJson['userId'] = that.resultUid
+            that.userHeaderJson['t'] = that.resultT
+            // 重置会员内容
+            that.$app.$def.getStorageFile(that,{
+                key:'setupJson',
+                success:(data)=>{
+                    let setupJson = data ? JSON.parse(data) : '';
+                    setupJson.isMember = false
+                    if(data){
+                        that.$app.$def.setStorageFile(that,{
+                            key:'setupJson',
+                            value:setupJson
+                        })
+                    }
+                }
+            })
+            that.$app.$def.setStorageFile(that,{
+                key:'headerJson',
+                value:that.userHeaderJson,
+                success:function(data){
+                    console.log(that.userHeaderJson)
+                    //如果请求登录页面没有填写登录成功跳转的页面，登录成功后就跳转至首页
+                    that.$app.headerJson = that.userHeaderJson
+                    if (!that.routeruri) {
+                        that.routeruri = '/Index';
+                        //登录成功后页面跳转
+                        router.replace({
+                            uri: that.routeruri
+                        });
+                        return false;
+                    }
+                    if (that.oparams.bookId) {
+                        that.ajax('2151', {
+                            data: {
+                                confirmPay: 2,
+                                autoPay: that.autoPay,
+                                bookId: that.oparams.bookId,
+                                chapterId: that.oparams.chapterId,
+                                uuid:that.$app.sourceInfo['uuid'],
+                                pullMode:that.$app.sourceInfo['pullMode'],
+                                omap:JSON.stringify(that.omap),
+                                isUpdate:that.isUpdateOmap,
+                                isBr: 0,
+                                hmManualAddFlag: 1, // 670支持手动加书架，此字段服务端用于版本判断
+                            },
+                            succ(data) {
+                                if (data.orderPage && (data.status == 5 || data.status == 4)) {
+                                    that.surl = '/Recharge';
+                                    that.oparams.url = '/Read';
+                                    that.oparams.unit = data.orderPage.unit;
+                                    that.oparams.amount = data.orderPage.price;
+                                } else {
+                                    that.surl = '/Read';
+                                    router.clear();
+                                }
+                                //登录成功后页面跳转
+                                router.replace({
+                                    uri: that.surl,
+                                    params: that.oparams,
+                                    isFromVip:that.isFromVip,
+                                    SourcePosition:that.SourcePosition,
+                                    omap:that.omap,
+                                    isUpdateOmap:that.isUpdateOmap,
+                                    chapterIndex:that.chapterIndex
+                                });
+                            }
+                        });
+                        that.$app.$def.quickappLog([703,{
+                            qmap:{
+                                site:'2',
+                                fromurl:that.fromurl,
+                                bookId:that.bookId
+                            }
+                        },'recharge_login'], that);
+                    } else if (that.surl == '/My' || that.surl == '/BookShelf' || that.surl == '/Sign') {
+                        router.back();
+                    } else if(that.surl == '/Member') {
+                        router.replace({
+                            uri: that.surl,
+                            params: {
+                                pageFrom: that.pageFrom,
+                                bookId: that.bookId,
+                                chapterId: that.chapterId,
+                            }
+                        }); 
+                    } else if (that.surl == '/Recharge'){
+                        that.$app.$def.quickappLog([703,{
+                            qmap:{
+                                site:'2',
+                                fromurl:that.fromurl,
+                                bookId:that.bookId
+                            }
+                        },'recharge_login'], that);
+                        router.replace({
+                            uri: that.surl,
+                            params: {
+                                url: that.fromurl,
+                                isFromVip:that.isFromVip
+                            }
+                        });
+                    } else {
+                        //登录成功后页面跳转
+                        router.replace({
+                            uri: that.surl,
+                            params: {
+                                url: that.surl
+                            }
+                        });
+                    }
+                }
+            })
+        },
+        switchCancle(){
+            this.switchShow=false
+        },
+        fnAgreeToLogin() {
+            if(this.isAgreeToLogin) {
+                this.isAgreeToLogin = false
+                this.hasClickToLogin = true
+            }else {
+                this.isAgreeToLogin = true
+                this.hasClickToLogin = false
+            }
+        },
+        vagueClick(){
+            console.log('为了解决部分机型滑动穿透的问题')
+        },
+    }
+</script>

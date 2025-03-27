@@ -1,0 +1,134 @@
+<template>
+    <div class="top-adwall-entry-wrap">
+        <stack class="stack-box">
+            <div class="end-time-box">
+                <div class="end-time">
+                    <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-read-hourglass{{ isNight ? '-night' : '' }}.png"></image>
+                    <text class="text {{ isNight ? 'night' : '' }}">{{ fnDateFormat(expiredTime) }}结束</text>
+                </div>
+                <div class="empty-block" if="isShowWallEntry"></div>
+            </div>
+            <div class="btn-wrap" if="isShowWallEntry" @click="fnEnterAdWall">
+                <stack class="btn-stack">
+                    <image class="bg" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-read-top-adwall-entry-bg{{ isNight ? '-night' : '' }}.png"></image>
+                    <text class="text">延长免广告 ></text>
+                </stack>
+            </div>
+        </stack>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .top-adwall-entry-wrap {
+        position: fixed;
+        top: 0;
+        left: 78px;
+        flex-direction: column;
+        width: 188px;
+        height: 90px;
+        .stack-box {
+            width: 100%;
+            height: 100%;
+            .end-time-box {
+                flex-direction: column;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+                .end-time {
+                    align-items: center;
+                    justify-content: center;
+                    width: 100%;
+                    height: 33px;
+                    .icon {
+                        width: 24px;
+                        height: 24px;
+                        margin-top: 2px;
+                        margin-right: 8px;
+                    }
+                    .text {
+                        color: #333;
+                        font-size: 24px;
+                    }
+                    .night {
+                        color: #fff;
+                    }
+                }
+                .empty-block {
+                    width: 188px;
+                    height: 38px;
+                }
+            }
+            .btn-wrap {
+                align-items: flex-end;
+                width: 100%;
+                height: 100%;
+                .btn-stack {
+                    width: 100%;
+                    height: 44px;
+                    .bg {
+                        width: 100%;
+                        height: 100%;
+                    }
+                    .text {
+                        align-items: center;
+                        width: 100%;
+                        height: 100%;
+                        color: #fff;
+                        font-size: 24px;
+                        text-align: center;
+                    }
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+export default {
+    props: {
+        isNight: {                                      // 是否夜间模式
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        expiredTime: {                                  // 免广时长到期时间,时间戳
+            type: Number,
+            required: false,
+            default: 0
+        },
+        isShowWallEntry: {                              // 是否展示激励墙入口
+            type: Boolean,
+            required: true,
+            default: false
+        },
+    },
+    data () {
+        return {
+            isBtnClick: false,                          // 激励墙入口按钮是否点击
+        }
+    },
+    // 格式化时间戳
+    fnDateFormat (timestamp) {
+        if (!timestamp) {
+            return '--:--';
+        }
+        let now = new Date(timestamp)
+        let h = now.getHours();
+        let m = now.getMinutes();
+        return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+    },
+    // 延长免广告按钮点击，进入激励墙
+    fnEnterAdWall () {
+        if (this.isBtnClick) {
+            return false;
+        }
+        this.isBtnClick = true;
+        setTimeout(() => {
+            if (this.$valid) {
+                this.isBtnClick = false;
+            }
+        }, 2000);
+        this.$emit('fnEnterAdWall');                    // 进入激励墙
+    },
+}
+</script>

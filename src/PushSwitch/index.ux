@@ -1,0 +1,262 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div class='auto-order'>
+        <div class="items">
+            <div class="text-con">
+                <text class="top">接收消息通知</text>
+                <text class="bot">开启后，优惠活动、书籍更新实时推送</text>
+            </div>
+            <div class="img-con" @click="changeSwitch">
+                <image if="{{isPush==2}}" src="../Common/images/auto-btn-open.png"></image>
+                <image else src="../Common/images/auto-btn-close.png"></image>
+            </div>
+        </div>
+        <div class="giveup" if="{{popShow}}">
+            <div class="pop">
+                <text class="title">提示</text>
+                <text class="text">关闭消息通知后，将无法接收优惠活动和书籍更新实时推送，确认关闭？</text>
+                <div class="btn">
+                    <text class="cancle"  @click="pushCancle">取消</text>
+                    <text class="confirm"  @click="pushConfirm">确认关闭</text>
+                </div>
+            </div>
+        </div>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+<style lang="less">
+    .giveup{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0,0,0,0.8);
+        .pop{
+            width:560px;
+            background-color:rgba(255,255,255,1);
+            border-radius:24px;
+            flex-direction: column;
+            align-items: center;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(68,68,68,1);
+                margin-top: 30px;
+            }
+            .text{
+                text-indent: 2em;
+                width:480px;
+                font-size:26px;
+                color:rgba(115,115,115,1);
+                margin: 30px 0px 32px;
+                line-height:40px;
+            }
+            .btn{
+                .cancle{
+                    width:33%;
+                    height:84px;
+                    background-color:rgba(242,242,242,1);
+                    color:rgba(186,186,186,1);
+                    text-align: center;
+                    line-height: 84px;
+                    border-bottom-left-radius: 24px;
+
+                }
+                .confirm{
+                    width:67%;
+                    height:84px;
+                    text-align: center;
+                    line-height: 84px;
+                    color:rgba(255,255,255,1);
+                    background-color:#FD895A;
+                    border-bottom-right-radius: 24px;
+                }
+            }
+        }
+    }
+    .auto-order{
+        flex-direction: column;
+        padding: 0px 30px;
+        background-color: #ffffff;
+        align-items: center;
+        .items{
+            width: 100%;
+            padding:25px 0px 25px 10px;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-color: rgba(102, 106, 125, 0.2);
+            border-bottom-width: 1px;
+            .text-con{
+                flex-direction: column;
+                .top{
+                    font-size:30px;
+                    color:rgba(68,68,68,1);
+                }
+                .bot{
+                    margin-top: 12px;
+                    font-size:24px;
+                    color:rgba(186,186,186,1);
+                }
+            }
+            .img-con{
+                width: 93px;
+                height: 58px;
+                justify-content: center;
+                align-items: center;
+                image{
+                    width: 93px;
+                    height: 58px;
+                }
+            }
+        }
+    }
+</style>
+<script>
+  /**
+   * 默认的菜单页(可自定义)
+   * name默认为manifest文件中的name字段
+   * icon默认为manifest文件中的icon字段
+   * 若需修改页面中文本，请修改ViewModel private中对应变量
+   * 注意：使用加载器测试`创建桌面快捷方式`功能时，需要进入系统设置->权限管理->开启应用加载器的`桌面快捷方式`权限，才能保存到桌面。应用上线后可自动获取`桌面快捷方式`权限
+   */
+  import storage from '@system.storage';
+  import push from '@service.push';
+  import router from '@system.router';
+  export default {
+    private: {
+        isPush:2,
+        popShow:false
+    },
+    onInit () {
+        let that = this
+        that.$page.setTitleBar({ text:'消息通知'})
+        storage.get({
+            key:'isPush',
+            success(res){
+                if(res==1){
+                    that.isPush=1
+                }
+            }
+        })
+        that.$app.$def.quickappLog([701], that);
+    },
+    onShow(){
+        this.$app.lastOpenPage = ''
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            Title: 'PUSH开关'
+        });
+    },
+    onHide() {
+    },
+    changeSwitch(){
+        let that = this
+        if(that.isPush==2){
+            that.popShow=true
+        }else{
+            that.changePush()
+        }
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                ispush:that.isPush
+            }
+        }, 'push_switch'], that)
+    },
+    changePush(){
+        let that = this
+        let getProvider = push.getProvider();
+        getProvider = that.isPush==2?`${getProvider}_none`:getProvider
+        push.subscribe({
+            success: function(data) {
+                
+                that.$app.$def.requestData(that,{
+                    interface: `/glory/fastapp/2107`,
+                    data: {
+                        pushCid:data.regId,
+                        provider:getProvider
+                    },
+                    succ: function (data) {
+                        storage.set({
+                            key:'isPush',
+                            value:that.isPush==2?1:2,
+                            success(res){
+                                
+                            }
+                        })
+                        that.isPush = that.isPush==2?1:2
+                    },
+                    error: function (code) {
+                    }
+                })
+            },
+            fail: function(data, code) {
+
+                //获取设备信息失败打点
+                that.$app.$def.quickappLog([703, {
+                    qmap:{
+                        page:'1',
+                        site:'2',
+                        source: 'push_subscribe_fail',
+                        thisUri: that.$page.uri,
+                        thisPage: 'pushswitch',
+                        data,
+                        code,
+                    }
+                }, 'catch_error'], that)
+            },
+            complete: function(data, code) {
+                
+
+                //获取设备信息失败打点
+                that.$app.$def.quickappLog([703, {
+                    qmap:{
+                        page:'1',
+                        site:'3',
+                        data,
+                        code
+                    }
+                }, 'push_id'], that)
+            }
+        })
+    },
+    pushCancle(){
+        let that = this
+        this.popShow=false
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '2'
+            }
+        }, 'push_switch'], that)
+    },
+    pushConfirm(){
+        this.popShow=false
+        let that = this
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '3'
+            }
+        }, 'push_switch'], that)
+        this.changePush()
+    },
+    onBackPress() {
+        let that =this
+        setTimeout(function(){
+            if(that.popShow){
+                that.popShow = false
+                that.$app.$def.quickappLog([702, {
+                    qmap: {
+                        site: '2'
+                    }
+                }, 'push_switch'], that)
+            }else{
+                router.back()
+            }
+        },0)
+        return true
+    }
+  }
+</script>

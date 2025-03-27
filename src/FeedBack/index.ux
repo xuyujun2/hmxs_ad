@@ -1,0 +1,287 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div class="feedback">
+        <div class="top">
+            <text class="title">问题类型</text>
+            <div class="tab">
+                <div for="tabList" class="{{$item.active?'div-selected':''}}" @click="toggleActive($idx,$item.active)">
+                    <text class="{{$item.active?'text-selected':''}}">{{$item.content}}</text>
+                </div>
+            </div>
+            <textarea placeholder="请简要说明您的问题" @change="getValdes" maxlength="200">{{feedbackMes}}</textarea>
+            <text class="textNum">{{textNum}}/200</text>
+        </div>
+        <div class="bottom">
+            <text class="title">联系方式（必填）</text>
+            <input type="number" placeholder="请输入手机号以便回访" value="{{feedbackPhone}}" @change="getValphone"></input>
+            <div class="submitBtn" @click="submitFeed">
+                <text class="btn-text">提交</text>
+            </div>
+        </div>
+        <back-baidu></back-baidu>
+    </div>
+
+</template>
+
+<style lang="less">
+    .feedback{
+        width: 100%;
+        flex-direction: column;
+        background-color:rgba(246,246,246,1);
+        .top{
+            flex-direction: column;
+            padding: 30px;
+            background-color: #ffffff;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(41,41,41,1);
+                height: 60px;
+            }
+            .tab{
+                padding: 30px 0px 25px;
+                flex-wrap: wrap;
+                div{
+                    width:150px;
+                    height:60px;
+                    margin-right: 12px;
+                    margin-left: 10px;
+                    border-radius:32px;
+                    border:1px solid rgba(212,211,217,1);
+                    justify-content: center;
+                    align-items: center;
+                    margin-bottom: 30px;
+                }
+                text{
+                    font-size:26px;
+                    color:rgba(115,115,115,1);
+                }
+                .div-selected{
+                    border:1px solid rgba(249,112,83,1);
+                }
+                .text-selected{
+                    color:rgba(249,112,83,1);
+                }
+            }
+            textarea{
+                border-color: #F2F2F2;
+                border-bottom-width: 1px;
+                border-top-width: 1px;
+                margin-left: 10px;
+                width: 670px;
+                height: 279px;
+                padding: 21px 0px;
+                font-size: 26px;
+                placeholder-color:rgba(212,211,217,1);
+            }
+            .textNum{
+                width: 100%;
+                text-align: right;
+                height:37px;
+                font-size:26px;
+                color:rgba(115,115,115,1);
+                margin: 14px 14px 0 0;
+            }
+        }
+        .bottom{
+            margin-top: 20px;
+            flex-direction: column;
+            padding: 30px;
+            background-color: #ffffff;
+            flex: 1;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(41,41,41,1);
+                height: 60px;
+            }
+            input{
+                border-color: #F2F2F2;
+                border-bottom-width: 1px;
+                border-top-width: 1px;
+                margin-top: 30px;
+                margin-left: 10px;
+                width:670px;
+                height:90px;
+                font-size:26px;
+                font-weight:400;
+                placeholder-color:rgba(212,211,217,1);
+            }
+            .submitBtn{
+                margin-left: 66px;
+                width: 558px;
+                height: 88px;
+                background-color: #785AF6;
+                border-radius: 44px;
+                margin-top: 40px;
+                align-items: center;
+                justify-content: center;
+                .btn-text {
+                    text-align: center;
+                    height: 45px;
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #FFFFFF;
+                    line-height: 45px;
+                }
+            }
+        }
+    }
+</style>
+
+
+
+
+<script>
+    import prompt from '@system.prompt';
+    import router from '@system.router';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+
+    export default {
+        private: {
+            feedbackMes:'',
+            feedbackPhone:'',
+            feedbackProblem:'',
+            canSubmit:true,
+            textNum:0,
+            telreg: /^(0|86|17951)?1[0-9]{10}$/,
+            tabList:[{
+                content:'更新慢',
+                active:false
+                },
+                {
+                content:'不流畅',
+                active:false
+                },
+                {
+                content:'耗流量',
+                active:false
+                },
+                {
+                content:'书籍少',
+                active:false
+                },
+                {
+                content:'界面少',
+                active:false
+                },
+                {
+                content:'提示少',
+                active:false
+                },
+                {
+                content:'其他',
+                active:false
+                },
+                
+            ]
+        },
+        onInit(e) {
+            let that = this;
+            that.$page.setTitleBar({ text: '意见反馈' });
+        },
+        onShow() {
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '用户反馈'
+            });
+            // pageEnter(this.$page.path);
+        },
+        onHide() {
+            // pageLeave(this.$page.path);
+        },
+        toggleActive(index,active){
+            let that = this
+            let arr = []
+            this.tabList[index].active = !active
+            this.tabList.forEach(element => {
+                if(element.active){
+                    arr.push(element.content)
+                }
+            });
+            if(arr.length){
+                that.feedbackProblem = arr.join(',')              
+            }else{
+                that.feedbackProblem = ''
+            }
+        },
+        submitFeed(){
+            let that = this
+            if(!that.feedbackProblem && !that.feedbackMes) {
+                prompt.showToast({
+                    message:'请描述您遇到的问题'
+                });
+                return false;
+            }
+            if(!that.feedbackMes) {
+                prompt.showToast({
+                    message:'请填写反馈内容'
+                });
+                return false;
+            }
+            if(!that.feedbackPhone) {
+                prompt.showToast({
+                    message:'请填写联系方式'
+                });
+                return false;
+            }
+            if(!that.telreg.test(that.feedbackPhone)) {
+                prompt.showToast({
+                    message:'请填写正确的电话号码'
+                });
+                return false;
+            }
+            if(that.canSubmit) {
+                that.submitRequest();
+            }
+        },
+        submitRequest(){
+            let that = this
+            that.canSubmit = false
+            let phoneNum = ''
+            that.$app.$def.rsa.encrypt(that.feedbackPhone,that).then(res=>{
+                let flag = 0
+                if(res){
+                    flag = 1
+                }
+                let data = {type:that.feedbackProblem,content:that.feedbackMes,phoneNum:flag?res:that.feedbackPhone,swParam:flag?that.$app.swParam:''}
+                console.log(data)
+                that.$app.$def.requestData(that,{
+                    interface: '/glory/fastapp/2171',
+                    data: data,
+                    succ: function(data){
+                        prompt.showToast({
+                            message:'提交成功'
+                        })
+                        that.$app.setAppData('hasSubmitFeedback', true)
+                        router.back()
+                        // that.canSubmit = true
+                        // that.tabList.forEach(element => {
+                        //     element.active = false
+                        // });
+                        // that.feedbackMes = ''
+                        // that.feedbackPhone = ''
+                        // that.feedbackProblem = ''
+                    },
+                    error:function(code){
+                        that.canSubmit = true
+                            prompt.showToast({
+                            message:'提交失败'
+                        })
+                    }
+                })
+            })
+        },
+        getValdes(e){
+            this.feedbackMes = e.text.trim()
+            this.textNum = this.feedbackMes.length
+        },
+        getValphone(e){
+            this.feedbackPhone = e.text
+            console.log(this.feedbackPhone)
+        }
+    }
+
+
+</script>

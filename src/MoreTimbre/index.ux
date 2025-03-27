@@ -1,0 +1,151 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div class="root">
+        <div class="title container">
+            <text>基础语音</text>
+        </div>
+        <div class="items container">
+            <div class="item" for="{{curTimbres}}">
+                <image class="peo" src="{{$item.url}}"></image>
+                <div class="des">
+                    <div class="left">
+                        <text class="top" if="{{$item.name}}">{{$item.name}}</text>
+                        <text class="bot" if="{{$item.desc}}">{{$item.desc}}</text>
+                    </div>
+                    <image class="btn" @click="changeTimbre($item)" src="{{curTimbre == $item.id ? 'https://xsmfdq.kkyd.cn/images/listen-btn-current.png' : 'https://xsmfdq.kkyd.cn/images/listen-btn-active.png'}}"></image>
+                </div>
+            </div>
+        </div>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+
+<style lang="less">
+    .root {
+        flex-direction: column;
+        .container {
+            padding: 0px 30px;
+        }
+        .title {
+            width: 100%;
+            height: 54px;
+            align-items: center;
+            background-color: rgba(246,246,246,1);
+            text {
+                font-size: 24px;
+                color: rgba(68,68,68,1);
+            }
+        }
+        .items {
+            width: 100%;
+            background-color: #ffffff;
+            flex-direction: column;
+            .item {
+                width: 100%;
+                border-bottom-color: rgba(242,242,242,1);
+                border-bottom-width: 1px;
+                padding: 20px 0px;
+                .peo {
+                    width: 99px;
+                    height: 99px;
+                    margin-right: 17px;
+                }
+                .des {
+                    flex: 1;
+                    justify-content: space-between;
+                    align-items: center;
+                    .box {
+                        flex: 1;
+                        align-items: center;  
+                    }
+                    .left {
+                        flex-direction: column;
+                        justify-content: center;
+                        .top {
+                            font-size: 30px;
+                            color: #444444;
+                            font-weight: bold;
+                        }
+                        .bot {
+                            margin-top: 5px;
+                            font-size: 26px;
+                            color: #BABABA;
+                        }
+                    }
+                    .member {
+                        margin-left: 8px;
+                        width: 240px;
+                        height: 36px;
+                    }
+                    .btn {
+                        width: 170px;
+                        height: 56px;
+                        resize-mode: contain;
+                        object-fit: contain;
+                    }
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+    import storage from '@system.storage';
+    import prompt from '@system.prompt';
+    import router from '@system.router';
+	export default {
+		protected: {
+            timbres: '',
+            bookId:''
+		},
+		private: {
+            curTimbre: -1,
+            curTimbres: []
+        },
+        onInit() {
+            this.$page.setTitleBar({ text: '更多声音角色' });
+            this.curTimbre = this.$app.listenJson.timbre
+            if(this.timbres && this.timbres.length) {
+                try {
+                    this.curTimbres = JSON.parse(this.timbres)
+                } catch(e) { console.log('JSON解析失败' + e) }
+            }
+        },
+        onShow() {
+            this.$app.lastOpenPage = ''
+            this.$app.$def.quickappLog([701], this);
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '音色选择'
+            });
+        },
+        changeTimbre(timbreInfo) {
+            const { id: timbreId, name: timbreName, desc: timbreDesc } = timbreInfo
+            if(timbreId == this.curTimbre) {
+                prompt.showToast({
+                    message: '无需重复设置'
+                });
+            } else {
+                this.curTimbre = timbreId
+                this.$app.listenJson.timbre = timbreId
+                this.$app.$def.quickappLog([702, {
+                    qmap: {
+                        site: '4',
+                        timbre: timbreId
+                    }
+                }, 'listen_book'], this)
+                this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                    Title: '阅读页',
+                    ButtonName: '选择听书音色' + timbreName + '(' + timbreDesc + ')' ,
+                    BookID: this.bookId || ''
+                });
+                storage.set({
+                    key: 'listenSetting',
+                    value: JSON.stringify(this.$app.listenJson),
+                    success() {
+                        router.back()
+                    }
+                })
+            }
+        },
+	}
+</script>

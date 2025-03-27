@@ -1,0 +1,791 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="paid-tag" src="../Component/tag.ux"></import>
+<template>
+    <div class="rank_wrap">
+        <div class="ranking_nav_div">
+            <block for="(personIndex, personItem) in rankList">
+                <stack @click="clickParentTab(personIndex)" class="ranking_nav">
+                    <text class="ftext {{personItem.isCur == 1 ? 'ftext_cur' : ''}}">{{personItem.name}}</text>
+                    <div class="{{personItem.isCur == 1 ? 'sex_cur_ffs' : ''}}"></div>
+                </stack>
+            </block>
+        </div>
+        <div class="bga_grid_ffs"></div>
+        <div class="book_list_ffs">
+            <div class="ranking_nav2_div">
+                <block for="(personIndex, personItem) in rankList">
+                    <div class="txt_div {{eitem.isCur ? 'txt_div_cur_line txt_div_bga' : ''}}" if="personItem.isCur == 1 && personItem.subList.length > 1" for="(eidx, eitem) in personItem.subList">
+                        <text @click="clickSubTab(eidx)" class="stext {{eitem.isCur ? 'stext_cur' : ''}}">{{eitem.name}}</text>
+                    </div>
+                </block>
+            </div>
+            <list id="ranklistId">
+                <list-item class="book_list_w" type="booklist_{{loadNum}}" if="nowBookListArr.length > 0" for="(idx, item) in nowBookListArr">
+                    <div class="book_li">
+                        <div class="list-item" @appear="bookAppear(item,idx)" @click="routeBookDetail(item,idx)">
+                            <stack class="imgdiv">
+                                <image class="img" src="{{item.coverWap}}"></image>
+                                <paid-tag if="item.iconType === '10'" tag="{{ item.iconDesc }}"></paid-tag>
+                            </stack>
+                            <div class="text-wrap">
+                                <div class="text-top-ffs">
+                                    <div class="text-name"><text>{{item.bookName}}</text></div>
+                                    <div class="text-rank-ffs-img">
+                                        <image if="{{idx<=2}}" class="image" src="https://xsmfdq.kkyd.cn/images/rank-top-{{idx+1}}.png" alt=""></image><text class="text-rank-ffs" elif="{{idx>2}}" style="color:{{idx<=2?'rgba(255,3,0,1)':'#AFAFAF'}};">{{idx+1}}</text>
+                                    </div>
+                                </div>
+                                <div class="text-desc">
+                                    <text>{{item.introduction}}</text>
+                                </div>
+                                <div class="text-bottom-ffs">
+                                    <text class="text-author">{{item.author}}</text>
+                                    <text class="text-countreading">{{item.clickNum}}</text>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </list-item>
+                <!-- 加载更多，type属性自定义命名为loadMore -->
+                <list-item type="loadMore" class="load-more">
+                    <div if="{{bLoadingShow}}">
+                        <progress type="circular"></progress>
+                        <text>正在加载中</text>
+                    </div>
+                    <div else>
+                        <text style="color:#A1A3A5;">已经是全部了</text>
+                        <!-- <text else>{{bFirstLoad ? '' : '上拉加载更多'}}</text> -->
+                    </div>
+                </list-item>
+            </list>
+        </div>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+<style lang="less">
+.rank_wrap {
+  flex-direction: column;
+}
+.ranking_nav_div {
+  width: 100%;
+  height: 90px;
+  justify-content: center;
+  background-color: #ffffff;
+}
+.ranking_nav {
+  align-items:flex-end;
+  justify-content: center;
+  width: 160px;
+}
+.ftext {
+  /* margin: 0px 7px 0px 8px; */
+  height: 83px;
+  line-height: 83px;
+  text-align: center;
+  font-size: 30px;
+  color: #444444;
+}
+.ftext_cur {
+  /* margin-top: -5px; */
+  font-size: 34px;
+  color: #292929;
+  font-weight: bold;
+}
+.sex_cur_ffs {
+  width: 54px;
+  height: 6px;
+  background-color: #6D28F4;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.ranking_snav_div {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.bga_grid_ffs {
+  width: 750px;
+  height: 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(246, 246, 246, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+.book_list_ffs {
+  display: flex;
+  height: 100%;
+}
+.ranking_nav2_div {
+  width: 152px; /*justify-content: space-around;*/
+  background-color: rgba(248, 248, 248, 1);
+  display: flex;
+  flex-direction: column;
+}
+#ranklistId {
+  flex: 1;
+}
+.txt_div {
+  /* flex: 1; */
+  color: #737373;
+  background-color: rgba(248, 248, 248, 1);
+  border-left-width: 6px;
+  border-left-color: rgba(248, 248, 248, 1);
+  padding-left: 29px;
+}
+.txt_div_bga {
+  background-color: #ffffff;
+}
+.stext {
+  height: 99px;
+  line-height: 99px;
+  text-align: center;
+  font-size: 28px;
+  color: #7c7c7c;
+}
+.stext_cur {
+  color: #f97053;
+  font-weight: bold;
+}
+.txt_div_cur_line {
+  border-left-width: 6px;
+  border-left-color: #f97053;
+  padding-left: 29px;
+}
+.book_list_w {
+  flex-direction: column;
+  padding: 20px 24px 15px 27px;
+}
+.book_li {
+  /* padding: 20px 0px 16px 0px; */
+  width: 100%;
+  height: 172px;
+}
+.list-item {
+  /* padding: 0px 30px; */
+  width: 100%;
+}
+.imgdiv {
+  width: 128px;
+  height: 172px;
+  background-color: rgba(242, 242, 242, 1);
+  border-radius: 4px;
+}
+.imgdiv image {
+  width: 128px;
+  height: 172px;
+  border-radius: 4px;
+}
+.list-item .text-wrap {
+  padding-left: 20px;
+  flex: 1;
+  flex-direction: column;
+}
+.book_li_line {
+  height: 2px;
+}
+.book_li_line_l {
+  width: 240px;
+}
+.book_li_line_r {
+  margin: 0px 30px;
+  flex: 1;
+  height: 2px;
+  background-color: #d5d5d5;
+}
+.text-red {
+  color: #f13131;
+}
+.text-top-ffs {
+    width: 100%;
+  display: flex;
+  height: 56px;
+  color: #000000;
+  .text-name {
+    flex: 1;
+    height: 48px;
+    line-height: 42px;
+    /* padding-right: 40px; */
+    text {
+      padding-right: 10px;
+      font-size: 32px;
+      font-family: PingFangSC-Regular;
+      color: #333333;
+      lines: 1;
+      text-overflow: ellipsis;
+      font-weight: bold;
+    }
+  }
+  .text-rank-ffs-img {
+    height: 48px;
+    border-width: 0px;
+    justify-content: flex-end;
+    .image {
+      width: 40px;
+      height: 48px;
+      border-width: 0px;
+    }
+    .text-rank-ffs {
+        height: 48px;
+        text-align: center;
+    }
+  }
+}
+.text-desc {
+  margin-top: 6px;
+  height: 80px;
+  line-height: 40px;
+  text {
+    font-size: 26px;
+    font-family: PingFangSC-Regular;
+    font-weight: 400;
+    color: #555555;
+    lines: 2;
+    text-overflow: ellipsis;
+  }
+}
+.text-bottom-ffs {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  .text-author {
+    flex: 1;
+    height: 40px;
+    line-height: 40px;
+    font-size: 24px;
+    color: #B2B6B7;
+    font-weight: 400;
+    lines: 1;
+    text-overflow: ellipsis;
+    /* opacity: 0.5; */
+  }
+  .text-countreading {
+    height: 40px;
+    margin-left: 8px;
+    line-height: 40px;
+    font-size: 24px;
+    font-weight: 400;
+    color: #fb761f;
+    text-align: right;
+  }
+}
+.load-more {
+  justify-content: center;
+  margin: 30px;
+  height: 64px;
+}
+.load-more text {
+  font-size: 28px;
+  color: #59f;
+}
+</style>
+<script>
+import app from '@system.app';
+import router from '@system.router';
+import prompt from '@system.prompt';
+import storage from '@system.storage';
+import _ from '../Common/js/common.js' 
+// import { pageEnter } from '../TDSDK/TDSDK.min.js';
+// import { pageLeave } from '../TDSDK/TDSDK.min.js';
+export default {
+    private: {
+        userHeaderJson: '',
+        rankList: [],
+        nowIndex: {
+            'personIndex': 0,
+            'subIndex': 0 
+        },
+        cacheIndex: {}, // 缓存子榜索引
+        nowBookListArr: [],
+        dataList: [],
+        isAjaxLock: false,
+        bLoadingShow: false,
+        streamAll: false,
+        bFirstLoad: true,
+        firstRequestFlag: 1,
+        UtilHandleBigDataTimer: false,
+        loadNum: 0, // 解决曝光埋点不上报的问题
+    },
+    protected: {
+        rankId:'',
+        sourcePage: ''
+    },
+    public: {
+        jobId: ''
+    },
+    onInit(e) {
+        let that = this;
+        that.$page.setTitleBar({ text: '排行榜' });
+        that.getListDatafn(1);
+        storage.get({
+            key: 'rankInstructS',
+            success: function(data) {
+                if(data == 1){
+                    // that.rankInstruct = 0
+                    storage.set({
+                        key: 'rankInstructS',
+                        value: 0,
+                        success: function (data) {
+                        },
+                        fail: function (data, code) {
+                        }
+                    })
+                    // that.$parent().tabHeadList[1].redDot = false
+                }
+            },
+            fail: function(red) {
+            }
+        })
+        if(that.jobId){
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2170`,
+                data: {
+                    jobId:that.jobId
+                },
+                succ: function (data) {
+                    console.log('successsuccess')
+                }
+            })
+             that.$app.$def.quickappLog([703, {
+                qmap:{
+                    jobId:that.jobId
+                }
+            },'push_report'],that);
+        }
+    },
+    clickParentTab:_.throttle(function(personIndex) {
+        let that = this;
+            // 更改当前选择项
+        if(+that.nowIndex.personIndex != +personIndex) {
+            that.nowIndex.subIndex = that.cacheIndex['personIndex' + personIndex] ? +(that.cacheIndex['personIndex' + personIndex].substr(8)) : 0
+        }
+        that.nowIndex.personIndex = personIndex;
+        for (let i = 0; i < that.rankList.length; i++) {
+            if (personIndex == i) {
+                that.rankList[i].isCur = 1;
+            } else {
+                that.rankList[i].isCur = 0;
+            }
+        }
+        // 神策打点-排行榜-男女点击
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            Title: '一级排行榜页面',
+            ButtonName: '排行榜-切换榜单频道',
+            ButtonContent: that.rankList[personIndex].name
+        });
+        // 点击加载
+        that.clickGetBookList();
+        },250),
+    clickSubTab:_.throttle(function(subIndex) {
+        let that = this;
+        // 更改当前选择项
+        that.nowIndex.subIndex = subIndex;
+        let personIndex = that.nowIndex.personIndex
+        that.cacheIndex['personIndex' + personIndex] = 'nowIndex' + subIndex
+        for (let i = 0; i < that.rankList[that.nowIndex.personIndex].subList.length; i++) {
+            if (subIndex == i) {
+                that.rankList[that.nowIndex.personIndex].subList[i].isCur = 1;
+            } else {
+                that.rankList[that.nowIndex.personIndex].subList[i].isCur = 0;
+            }
+        }
+        that.rankList[that.nowIndex.personIndex].subList[subIndex].isCur = 1;
+        
+        // 神策打点-排行榜-男女-子榜单点击
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            Title: '一级排行榜页面',
+            ButtonName: '排行榜-切换榜单类型',
+            ButtonContent: that.rankList[that.nowIndex.personIndex].subList[subIndex].name
+        });
+        // 点击加载
+        that.clickGetBookList();
+    },250),
+    clickGetBookList() {
+        let that = this;
+        clearTimeout(that.UtilHandleBigDataTimer)
+        // 回到顶部
+        that.$element('ranklistId').scrollTo({ index: 0 });
+        // 判断当前项是否有数据     如果有，不重新加载
+        // let subList = that.rankList[that.nowIndex.personIndex].subList;
+        // let thisSubIndex = 0;
+        // for (let i = 0; i < subList.length; i++) {
+        //     if (subList[i].isCur == 1) {
+        //         thisSubIndex = i;
+        //     }
+        // }
+        // if (subList[thisSubIndex].bookList.length > 0 || subList[thisSubIndex].isMore == 0) {
+        //     that.isAjaxLock = true;
+        // } else {
+        //     that.isAjaxLock = false;
+        // }
+        // 更改数据
+        that.getListDatafn(0);
+    },
+    getListDatafn(num) { // num   1第一次渲染   0点击加载    2上拉加载
+        let that = this;
+        let dataJson = {};
+        // if (that.isAjaxLock && num != 2) {
+        //     // 更改当前页面列表内容
+        //     for (let i = 0; i < that.rankList[that.nowIndex.personIndex].subList.length; i++) {
+        //         if (that.rankList[that.nowIndex.personIndex].subList[i].isCur == 1) {
+        //             // 更改当前页面列表内容
+        //             that.nowBookListArr = that.rankList[that.nowIndex.personIndex].subList[i].bookList;
+        //             // 更改当前列表项是否有下一页
+        //             if (that.rankList[that.nowIndex.personIndex].subList[i].isMore == 0) {
+        //                 // isMore
+        //                 that.streamAll = true;
+        //             } else {
+        //                 // isMore
+        //                 that.streamAll = false;
+        //             }
+        //         }
+        //     }
+        //     return;
+        // }
+        that.bLoadingShow = true;
+        that.isAjaxLock = true;
+        if (num == 1) {
+            that.firstRequestFlag = 1
+            dataJson = {
+                'rankId': that.rankId,
+                'firstRequestFlag': that.firstRequestFlag
+            }
+        } else {
+            that.rankId = '';
+            that.firstRequestFlag = 0;
+            // console.log(that.nowIndex.personIndex,'===========personIndex===');
+            // console.log(that.nowIndex.subIndex,'===========subIndex===');
+            // 获取当前 subID 
+            let _subId = '';
+            let _page = 1;
+            for (let i = 0; i < that.rankList[that.nowIndex.personIndex].subList.length; i++) {
+                if (that.rankList[that.nowIndex.personIndex].subList[i].isCur == 1) {
+                    _subId = that.rankList[that.nowIndex.personIndex].subList[i].id;
+                    _page = that.rankList[that.nowIndex.personIndex].subList[i].page;
+                }
+            }
+            dataJson = {
+                'rankId': _subId,
+                'firstRequestFlag': that.firstRequestFlag
+                // 'page': _page
+            }
+        }
+        that.ajax('2865', {
+            data: dataJson,
+            succ(data) {
+                that.loadNum++
+                // console.log(JSON.stringify(data));
+                if (num == 1) {
+                    let _rankList = [];
+                    for (let i = 0; i < data.rankData.length; i++) {
+                        let _subList = [];
+                        let _subList2 = [];
+                        let $subList = data.rankData[i].subList ? data.rankData[i].subList : []
+                        // 对应原2167接口代码
+                        if ($subList.length == 0 && i == 0) {
+                            let _subListJson = {
+                                'id': '',
+                                'name': '0',
+                                'isCur': 1,
+                                'isMore': data.isMore,
+                                'bookList': data.rankBook,
+                                'page': 1
+                            };
+                            _subList.push(_subListJson);
+                        }
+                        if ($subList.length == 0 && i != 0) {
+                            let _subListJson = {
+                                'id': '',
+                                'name': '0',
+                                'isCur': 1,
+                                'isMore': 2,
+                                'bookList': [],
+                                'page': 1
+                            };
+                            _subList.push(_subListJson);
+                        }
+                        let itemFfs = $subList.find(item => {
+                                        return item.id == that.rankId;
+                                    });
+                        if(that.rankId != ''){
+                            let _rankListJson = {}
+                            if(itemFfs){
+                                that.nowIndex.personIndex = i
+                                let subIsCurIdx = 0 // 判断是否从其他页面过来，对sublist的isCur赋值（0 or 1）
+                                let isMoreCon = 0
+                                let bookListArry = []
+                                for (let j = 0; j < $subList.length; j++) {
+                                    subIsCurIdx = $subList[j].id == that.rankId ? 1 : 0
+                                    isMoreCon = $subList[j].id == that.rankId ? data.isMore : 2
+                                    bookListArry = $subList[j].id == that.rankId ? data.rankBook: []
+                                    let _subListJson = {
+                                            'id': $subList[j].id,
+                                            'name': $subList[j].name,
+                                            'isCur': subIsCurIdx,
+                                            'isMore': isMoreCon,
+                                            'bookList': bookListArry,
+                                            'page': 1
+                                        }
+                                    _subList.push(_subListJson);
+                                }
+                                _rankListJson = {
+                                    'id': data.rankData[i].rankType,
+                                    'name': data.rankData[i].rankTypeName,
+                                    'subList': _subList,
+                                    'isCur': 1
+                                }
+                            }else{
+                                for (let j = 0; j < $subList.length; j++) {
+                                    // if(that.rankId){
+                                    //     subIsCurIdx = $subList[j] == that.rankId ? 1 : 0
+                                    // }
+                                    let _subListJson = {
+                                        'id': $subList[j].id,
+                                        'name': $subList[j].name,
+                                        'isCur': j == 0 ? 1 : 0,
+                                        'isMore': 2,
+                                        'bookList': [],
+                                        'page': 1
+                                    };
+                                    _subList2.push(_subListJson);
+                                }
+                                _rankListJson = {
+                                    'id': data.rankData[i].rankType,
+                                    'name': data.rankData[i].rankTypeName,
+                                    'subList': _subList2,
+                                    'isCur': 0
+                                }
+                            }
+                            _rankList.push(_rankListJson);
+                        }else{
+                            for (let j = 0; j < $subList.length; j++) {
+                                // if(that.rankId){
+                                //     subIsCurIdx = $subList[j] == that.rankId ? 1 : 0
+                                // }
+                                let _subListJson = {
+                                    'id': $subList[j].id,
+                                    'name': $subList[j].name,
+                                    'isCur': j == 0 ? 1 : 0,
+                                    'isMore': i == 0 && j == 0 ? data.isMore : 2,
+                                    'bookList': i == 0 && j == 0 ? data.rankBook : [],
+                                    'page': 1
+                                };
+                                _subList.push(_subListJson);
+                            }
+                            let _rankListJson = {
+                                'id': data.rankData[i].rankType,
+                                'name': data.rankData[i].rankTypeName,
+                                'subList': _subList,
+                                'isCur': i == 0 ? 1 : 0
+                            }
+                            _rankList.push(_rankListJson);
+                        }
+                    }
+                    that.rankList = [];
+                    that.rankList = _rankList;
+                    // console.log(JSON.stringify(_rankList),'==============_rankList==============');
+                    that.bFirstLoad = false;
+                } else {
+                    // 添加数据
+                    let subList = that.rankList[that.nowIndex.personIndex].subList;
+                    let thisSubIndex = 0;
+                   
+                    for (let i = 0; i < subList.length; i++) {
+                        if (subList[i].isCur == 1) {
+                            thisSubIndex = i;
+                        }
+                    }
+                    // that.rankList[that.nowIndex.personIndex].subList[thisSubIndex].bookList = data.rankBook
+                    // let Arr = that.rankList[that.nowIndex.personIndex].subList[thisSubIndex].bookList;
+                    // that.rankList[that.nowIndex.personIndex].subList[thisSubIndex].bookList = Arr.concat(data.rankBook);
+                    // 更改是否有更多
+                    that.rankList[that.nowIndex.personIndex].subList[thisSubIndex].isMore = data.isMore;
+                }
+                // 每次数据完成后page值加1
+                 for (let i = 0; i < that.rankList.length; i++) {
+                        for(let j = 0; j < that.rankList[i].subList.length; j++){
+                            that.rankList[i].subList[j].bookList = []
+                        }
+                    }
+                let nowBookListArrs = []
+                for (let i = 0; i < that.rankList[that.nowIndex.personIndex].subList.length; i++) {
+                    if (that.rankList[that.nowIndex.personIndex].subList[i].isCur == 1) {
+                        // 更改当前页面列表内容
+                        nowBookListArrs = data.rankBook;
+                        // 更改当前数据页码
+                        // that.rankList[that.nowIndex.personIndex].subList[i].page++;
+                        if (that.rankList[that.nowIndex.personIndex].subList[i].isMore == 0) {
+                            // isMore
+                            that.streamAll = true;
+                        } else {
+                            // isMore
+                            that.streamAll = false;
+                        }
+                    }
+                }
+                that.nowBookListArr = []
+                if(nowBookListArrs.length <= 20){
+                    that.nowBookListArr = nowBookListArrs
+                }else{
+                    that.UtilHandleBigData(that,nowBookListArrs,20)
+                }
+                that.bLoadingShow = false;
+                that.isAjaxLock = false;
+            },
+            err(data) {
+            }
+        })
+    },
+    UtilHandleBigData(that,data,pageSize) {
+        let totalCount = data.length; // 共多少条
+        let currentPageNumber = 0; // 当前页数
+        let totalPageNumer = Math.ceil(totalCount / pageSize); //可分多少页,就是分割为多少个小数组
+        let handler = () => {
+            let start = currentPageNumber * pageSize;
+            let end = (currentPageNumber + 1) * pageSize;
+            let currentData = data.slice(start, end); // 当前页的数据
+            that.nowBookListArr.push(...currentData)
+            currentPageNumber++;
+            if (currentPageNumber <= totalPageNumer) {
+                that.UtilHandleBigDataTimer = setTimeout(function(){handler()},1000)
+            }else{
+                clearTimeout(that.UtilHandleBigDataTimer)
+            }
+        };
+        handler();
+    },
+    //表示ViewModel的模板已经编译完成，可以开始获取DOM节点（如：this.$element(idxxx) )
+    onReady(e) {
+    },
+    onShow() {
+        this.$app.lastOpenPage = ''
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            SourcePage: this.sourcePage || '',
+            Title: '排行榜'
+        });
+        // pageEnter(this.$page.path);
+        //$umeng_stat.resume(this);
+    },
+    onHide() {
+        // pageLeave(this.$page.path);
+        //$umeng_stat.pause(this);
+    },
+    //页面被销毁时调用，被销毁的可能原因有：用户从当前页面返回到上一页，或者用户打开了太多的页面，框架自动销毁掉部分页面，避免占用资源
+    onDestroy(e) {
+    },
+    //当用户点击返回实体按键、左上角返回菜单、调用返回API时触发该事件
+    onBackPress(e) {
+        // console.info(`触发：onBackPress`);
+        let routerlen = router.getLength();
+        // console.info(routerlen);
+        if (routerlen <= 1) {
+            router.replace({
+                uri: '/Index'
+            })
+            return true;
+        }
+    },
+    //当使用原生的顶部标题栏时，可以通过manifest.json中的menu属性配置是否显示右上角的菜单
+    onMenuPress(e) {
+    },
+    ajax(routercode, obj) {
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                interface: `/glory/fastapp/${routercode}`,
+                data: obj.data,
+                succ: function (res) {
+                    // console.log(res);
+                    if (res.retCode == 0) {
+                        obj.succ(res.data);
+                    } else {
+                        prompt.showToast({
+                            message: res.retMsg,
+                            duration: 0
+                        });
+                    }
+                },
+                error: function (code) {
+                    obj.err(code);
+                }
+            }
+        )
+    },
+    bookAppear(bookInfo,idx) {
+        let that = this
+		let trigger_time = that.$app.$def.getLogTime()
+		let omap = {
+			origin:'phbb',
+			action:'1',
+			channel_id:that.rankList[that.nowIndex.personIndex].id,
+			channel_name:that.rankList[that.nowIndex.personIndex].name,
+			channel_pos:that.nowIndex.personIndex,
+			column_id:that.rankList[that.nowIndex.personIndex].subList[that.nowIndex.subIndex].id,
+			column_name:that.rankList[that.nowIndex.personIndex].subList[that.nowIndex.subIndex].name,
+			column_pos:that.nowIndex.subIndex,
+			content_id:bookInfo.bookId,
+			content_pos:idx,
+			content_type:'1',
+            rec_id: bookInfo.recId ? bookInfo.recId : '',
+            model_id: bookInfo.modelId ? bookInfo.modelId : '',
+            log_id: bookInfo.logId ? bookInfo.logId : '',
+            exp_id: bookInfo.expId ? bookInfo.expId : '',
+			trigger_time:trigger_time
+		}
+        that.$app.$def.quickappLog([706, {
+            qmap: {
+                oaid: that.$app && that.$app.oaid || ''
+            },
+			omap:omap
+		}], that)
+    },
+    routeBookDetail(bookInfo,idx) {
+        let that = this
+		let trigger_time = that.$app.$def.getLogTime()
+		let omap = {
+			origin:'phbb',
+			action:'2',
+			channel_id:that.rankList[that.nowIndex.personIndex].id,
+			channel_name:that.rankList[that.nowIndex.personIndex].name,
+			channel_pos:that.nowIndex.personIndex,
+			column_id:that.rankList[that.nowIndex.personIndex].subList[that.nowIndex.subIndex].id,
+			column_name:that.rankList[that.nowIndex.personIndex].subList[that.nowIndex.subIndex].name,
+			column_pos:that.nowIndex.subIndex,
+			content_id:bookInfo.bookId,
+			content_pos:idx,
+			content_type:'1',
+            rec_id: bookInfo.recId ? bookInfo.recId : '',
+            model_id: bookInfo.modelId ? bookInfo.modelId : '',
+            log_id: bookInfo.logId ? bookInfo.logId : '',
+            exp_id: bookInfo.expId ? bookInfo.expId : '',
+			trigger_time:trigger_time
+		}
+        router.push({
+            uri: '/BookDetail',
+            params: {
+                bookId: bookInfo.bookId,
+                SourcePosition: '排行页',
+                sourcePage: '排行页',
+                omap:omap
+            }
+        })
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            Title: '一级排行榜-'+ that.rankList[that.nowIndex.personIndex].name + '-' + that.rankList[that.nowIndex.personIndex].subList[that.nowIndex.subIndex].name,
+            ButtonName: '排行榜-查看书籍',
+            BookID: bookInfo.bookId || '',
+            BookName: bookInfo.bookName
+        });
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                oaid: that.$app && that.$app.oaid || ''
+            },
+			omap:omap
+		}, 'book_click'], that)
+    },
+    scrollLoadMoreData() {
+        // console.log(this.streamAll, '=======this.streamAll=======')
+        if (!this.streamAll) {
+            this.getListDatafn(2);
+        }
+    }
+}
+</script>

@@ -1,0 +1,319 @@
+<template>
+  <div class='help-feedback'>
+      <stack class="my-feedback" @click="fnRoutetoOther('/MyFeedbackList')">
+          <image class="my-feedback-img" src="https://xsmfdq.kkyd.cn/images/hmxs/hfb-my-feedback.png"></image>
+          <text class="my-feedback-text">我的反馈</text>
+          <div class="my-feedback-reddots" show="{{feedbackNum}}"></div>
+      </stack>
+      <div id="help-feedback-list" class="help-feedback-list">
+          <div class="question-wrap" for="{{ (questionIndex, questionItem) in helpFeedbackList}}">
+              <div class="question-type">
+                  <image class="question-type-icon" src="{{questionItem.icon}}"></image>
+                  <text class="question-type-text">{{questionItem.title}}</text>
+              </div>
+              <div class="question-answer {{$idx !== questionItem.problemInfoVos.length - 1 ? 'question-answer-border' : ''}}" for="{{ questionItem.problemInfoVos }}">
+                  <div class="question-box" @click="fnQuestionClick(questionIndex, $idx, questionItem, $item)">
+                      <text class="question-text">{{$item.problem}}</text>
+                      <image class="question-icon" if="{{$item.answerType == 'text'}}" src="{{ ($item.answerType == 'text' && questionTypeActive == questionIndex && questionAction == $idx) ? 'https://xsmfdq.kkyd.cn/images/hmxs/hfb-up-arrow.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/hfb-down-arrow.png'}}"></image>
+                      <image class="question-icon" if="{{$item.answerType == 'html'}}" src="https://xsmfdq.kkyd.cn/images/hmxs/hfb-link.png"></image>
+                  </div>
+                  <div class="answer-box" show="{{ $item.answerType == 'text' && questionTypeActive == questionIndex && questionAction == $idx }}">
+                      <text class="answer-text">{{$item.answerContent}}</text>
+                      <div class="is-resolve">
+                          <image class="unresolve" src="{{$item.isResolveClick == 1 ? 'https://xsmfdq.kkyd.cn/images/hmxs/hfb-unresolve-active.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/hfb-unresolve.png'}}" @click="fnIsResolveClick($item, 1)"></image>
+                          <image class="resolve" src="{{$item.isResolveClick == 2 ? 'https://xsmfdq.kkyd.cn/images/hmxs/hfb-resolve-active.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/hfb-resolve.png'}}" @click="fnIsResolveClick($item, 2)"></image>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="hfb-tab">
+          <div class="kefu" if={{zhichiWebSrc}} @click="fnRoutetoOther('/ZhichiService')">
+              <image class="kefu-img" src="https://xsmfdq.kkyd.cn/images/hmxs/hfb-kefu.png"></image>
+              <text class="kefu-text">在线客服</text>
+          </div>
+          <div class="feedback {{zhichiWebSrc ? '' : 'feedbackSingle'}}" @click="fnRoutetoOther('/FeedBack')">
+              <image class="feedback-img" src="https://xsmfdq.kkyd.cn/images/hmxs/hfb-feedback.png"></image>
+              <text class="feedback-text">我要反馈</text>
+          </div>
+      </div>
+  </div>
+</template>
+<style lang="less" scoped>
+    .help-feedback{
+        .my-feedback{
+            position: fixed;
+            top: 2px;
+            right: 0;
+            width: 152px;
+            height: 132px;
+            .my-feedback-img{
+                width: 152px;
+                height: 132px;
+            }
+            .my-feedback-text{
+                font-size: 26px;
+                font-weight: bold;
+                color: #785AF6;
+                margin-top: 41px;
+                margin-left: 34px;
+            }
+            .my-feedback-reddots{
+                width: 18px;
+                height: 18px;
+                border-radius: 18px;
+                background-color: #ff0000;
+                border: 2px solid #fff;
+                margin-top: 22px;
+                margin-left: 90px;
+            }
+        }
+        .help-feedback-list{
+            margin-bottom: 120px;
+            flex-direction: column;
+            width: 100%;
+            .question-wrap{
+                width: 100%;
+                flex-direction: column;
+                .question-type{
+                    width:100%;
+                    padding: 26px 32px;
+                    align-items: center;  
+                    background-color: rgba(245, 245, 248, 1);
+                    .question-type-icon{
+                        width: 44px;
+                        height: 44px;
+                        margin-right: 8px;
+                    }
+                    .question-type-text{
+                        font-size: 32px;
+                        color: #8E8E98;
+                    }
+                }
+                .question-answer{
+                    flex-direction: column;
+                    background-color: rgba(255, 255, 255, 1);
+                    .question-box{
+                        width:100%;
+                        padding: 28px 32px;
+                        align-items: center;  
+                        justify-content: space-between;
+                        .question-text{
+                            font-size: 28px;
+                            color: #222222;
+                        }
+                        .question-icon{
+                            width: 24px;
+                            height: 24px;
+                        }
+                    }
+                    .answer-box{
+                        flex-direction: column;
+                        padding: 4px 32px 0px;
+                        font-size: 28px;
+                        color: #5A5A64;
+                        line-height: 40px;
+                        .is-resolve{
+                            width: 100%;
+                            justify-content: center;
+                            margin: 40px 0px 32px;
+                            image{
+                                width: 177px;
+                                height: 56px;
+                            }
+                            .unresolve{
+                                margin-right: 104px;
+                            }
+                        }
+                    }
+                }
+                .question-answer-border {
+                    border-bottom-width: 1px;
+                    border-bottom-color: rgba(142, 142, 152, 0.2);
+                }
+            }
+        }
+        .hfb-tab{
+            width: 100%;
+            height: 120px;
+            position: fixed;
+            bottom: 0;
+            padding: 16px 0px 24px;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 1);
+            .kefu{
+                width: 326px;
+                height: 80px;
+                line-height: 80px;
+                border-radius: 16px;
+                border: 2px solid #785AF6;
+                margin-right: 18px;
+                justify-content: center;
+                align-items: center;
+                .kefu-img{
+                    width: 44px;
+                    height: 44px;
+                    margin-right: 8px;
+                }
+                .kefu-text{
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #785AF6;
+                }
+            }
+            .feedback{
+                width: 326px;
+                height: 80px;
+                line-height: 80px;
+                border-radius: 16px;
+                background-color: #785AF6;
+                justify-content: center;
+                align-items: center;
+                .feedback-img{
+                    width: 44px;
+                    height: 44px;
+                    margin-right: 8px;
+                }
+                .feedback-text{
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #FFFFFF;
+                }
+            }
+            .feedbackSingle{
+                width: 670px;
+            }
+        }
+    }
+</style>
+<script>
+  import storage from '@system.storage';
+  import router from '@system.router';  
+  import app from '@system.app';
+  import prompt from '@system.prompt'
+    
+  export default {
+    data(){
+        return {
+            helpFeedbackList:[],
+            feedbackNum: 0, // 未读消息条数
+            questionTypeActive: -1, // 问题类型动态索引
+            questionAction: -1, // 问题动态索引
+            zhichiWebSrc: '', // 第三方智齿链接
+            helpFeedbackOnshow: false
+        }
+    },
+    onInit () {
+        this.$page.setTitleBar({ text: '帮助与反馈' })
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            Title: '帮助与反馈-列表'
+        });
+        this.fnLoadData()
+    },
+    onShow() {
+        this.$app.lastOpenPage = ''
+        if(this.helpFeedbackOnshow){
+            this.feedbackNum = this.$app.getAppData('feedbackNum')
+        }
+        this.helpFeedbackOnshow = true
+    },
+    // 加载数据
+    fnLoadData(){
+        let that = this
+        that.$app.$def.requestData(that, {
+            interface: '/glory/fastapp/2810',
+            data: {},
+            succ: function (res) {
+                if (res.retCode == 0 && res.data) {
+                    res.data.problemTypeList.forEach((item)=>{
+                        item.problemInfoVos.forEach((i)=>{
+                            i.isResolveClick = 0
+                        })
+                    })
+                    that.helpFeedbackList = res.data.problemTypeList
+                    that.feedbackNum = res.data.feedbackNum || 0
+                    that.$app.setAppData('feedbackNum', that.feedbackNum)
+                    that.zhichiWebSrc = res.data.zhiChiUrl
+                }
+            },
+            error: function (code) {
+            },
+        })
+    },
+    /**
+     *  点击问题
+     * @param {Number} index1 问题类型索引
+     * @param {Number} index2 问题索引
+     * @param {Object} questionItem 问题类型 + 问题
+     * @param {Object} item 问题
+     */
+    fnQuestionClick(index1, index2, questionItem, item){
+        let that = this
+        
+        if(this.questionTypeActive == index1 && this.questionAction == index2){
+            this.questionTypeActive = -1
+            this.questionAction = -1
+        }else{
+            this.questionTypeActive = index1
+            this.questionAction = index2
+            
+            if(index1 == this.helpFeedbackList.length -1 && index2 == questionItem.problemInfoVos.length -1){             
+                that.$element('help-feedback-list') && that.$element('help-feedback-list').getBoundingClientRect({
+                    success: function (data) {
+                        const { height } = data;
+                        setTimeout(()=>{
+                            that.$page.scrollTo && that.$page.scrollTo({top:height})
+                        },0)
+                    }
+                })
+            }
+        }
+
+        if(item.answerType == 'html') {
+            router.push({
+                uri: '/HelpAnswer',
+                params: {
+                    webSrc: this.$app.api + `/huodong/quickapp/help_feedback/index.html?infoId=${item.id}`,
+                    problem: item.problem
+                }
+            })
+        }
+
+        that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+            OperationName: '帮助与反馈',
+            PositionName: item.problem
+        })
+    },
+    // 跳转客服
+    fnRoutetoOther(url){
+        let params = {}
+        if(url === '/ZhichiService') {
+            if(this.zhichiWebSrc) {
+                params.zhichiWebSrc = this.zhichiWebSrc
+            }
+        }
+        router.push({
+            uri: url,
+            params: params
+        })
+    },
+    /**
+     * 点击 未解决、已解决
+     * @param {Object} item 某一个 问题 + 答案 
+     * @param {Number} status 1 点击未解决 2 点击已解决
+     */
+    fnIsResolveClick(item,status){
+        if(item.isResolveClick !== 0){
+            return false
+        }
+        
+        item.isResolveClick = status
+
+        this.$app.shenceLog.log(this, 'track', 'OperationClick', {
+            OperationName: '帮助与反馈',
+            PositionName: item.problem,
+            ButtonContent: item.isResolveClick == 1 ? '未解决' : '已解决'
+        })
+    }
+  }
+</script>

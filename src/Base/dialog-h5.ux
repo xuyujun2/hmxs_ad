@@ -1,0 +1,703 @@
+<import name="ad-union" src="../AdUnion/index"></import>
+
+<template>
+    <div>
+        <div class="dialogh5 {{ (imgInfo.type == 15 && !isGetAd) ? 'dialog-hide' : 'dialog-show' }}" if="dialogh5Show" @click="fnClick">
+            <!-- 样式1 -->
+            <div class="popup-wrap popup-style1" @appear="fnPopupAppear" if="styleType === 1">
+                <image class="icon-close" src="https://xsmfdq.kkyd.cn/images/hmxs/index-popup-close.png" @click="fnCloseDialogH5"></image>
+                <stack class="popup-content" @click="clickDialogImg">
+                    <image class="popup-bg" src="https://xsmfdq.kkyd.cn/images/hmxs/index-popup-style1-bg.png"></image>
+                    <div class="title" if="imgInfo.operationTip">
+                        <image class="icon-left" src="https://xsmfdq.kkyd.cn/images/hmxs/index-popup-style1-maisui-left.png"></image>
+                        <stack class="text-wrap">
+                            <text class="text">{{ imgInfo.operationTip }}</text>
+                            <image class="text-underline" src="https://xsmfdq.kkyd.cn/images/hmxs/index-popup-style1-text-underline.png"></image>
+                        </stack>
+                        <image class="icon-right" src="https://xsmfdq.kkyd.cn/images/hmxs/index-popup-style1-maisui-right.png"></image>
+                    </div>
+                    <image class="book-cover" src="{{ imgInfo.imgUrl }}"></image>
+                </stack>
+            </div>
+            <!-- 样式2 -->
+            <div class="popup-wrap popup-style2" @appear="fnPopupAppear" elif="styleType === 2">
+                <image class="icon-close" src="https://xsmfdq.kkyd.cn/images/hmxs/index-popup-close.png" @click="fnCloseDialogH5"></image>
+                <div class="popup-content" @click="clickDialogImg">
+                    <image class="book-cover" src="{{ imgInfo.imgUrl }}"></image>
+                    <div class="category-and-score">
+                        <text class="category" if="imgInfo.twoTypeName">{{ imgInfo.twoTypeName }}类高分小说</text>
+                        <text class="category" else>高分小说</text>
+                        <div class="score" if="imgInfo.bookScore">
+                            <text class="large-size">{{ imgInfo.bookScore }}</text>
+                            <text class="small-size">分</text>
+                        </div>
+                    </div>
+                    <text class="praise-count" if="imgInfo.clickNum">{{ imgInfo.clickNum }}人好评</text>
+                    <image class="btn" src="https://xsmfdq.kkyd.cn/images/hmxs/index-popup-style2-btn.png"></image>
+                </div>
+            </div>
+            <block else>
+                <ad-union
+                    if="imgInfo.type == 15"
+                    ad-unit-id="{{ popAdId }}"
+                    ad-type="pop"
+                    ad-alias="popMessage"
+                    brand-ad-switch="{{ brandAdSwitch }}"
+                    onfn-get-ad="fnGetAd"
+                    other-info="{{ imgInfo }}"
+                    onfn-pop-close="fnCloseDialogH5"
+                ></ad-union>
+                <block else>
+                    <div class="close" @click="fnCloseDialogH5">
+                        <image src="https://xsmfdq.kkyd.cn/images/close-btn-grey.png"></image>
+                    </div>
+                    <div class="img-box" @appear="fnPopupAppear">
+                        <image @click="clickDialogImg" class="img" src="{{ imgInfo.imgUrl }}" alt="blank"></image>
+                    </div>
+                </block>
+            </block>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .dialogh5 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        .popup-wrap {
+            flex-direction: column;
+            align-items: flex-end;
+            width: 524px;
+            .icon-close {
+                width: 54px;
+                height: 54px;
+            }
+        }
+        .popup-style1 {
+            width: 100%;
+            height: 778px;
+            margin-bottom: 54px;
+            .icon-close {
+                margin-right: 113px;
+            }
+            .popup-content {
+                width: 100%;
+                .popup-bg {
+                    width: 524px;
+                    height: 724px;
+                    margin-left: 113px;
+                }
+                .title {
+                    align-items: center;
+                    justify-content: center;
+                    height: 72px;
+                    margin: 26px auto 0;
+                    .icon-left {
+                        width: 40px;
+                        height: 72px;
+                        margin-right: 3px;
+                    }
+                    .text-wrap {
+                        height: 100%;
+                        flex-direction: column;
+                        .text {
+                            height: 46px;
+                            line-height: 46px;
+                            margin-top: 13px;
+                            color: #FFEBAD;
+                            font-size: 48px;
+                            font-weight: bold;
+                            lines: 1;
+                        }
+                        .text-underline {
+                            width: 100%;
+                            height: 18px;
+                            margin-top: 58px;
+                        }
+                    }
+                    .icon-right {
+                        width: 40px;
+                        height: 72px;
+                        margin-left: 3px;
+                    }
+                }
+                .book-cover {
+                    width: 336px;
+                    height: 448px;
+                    margin-top: 119px;
+                    margin-left: 195px;
+                    border-radius: 6px;
+                    object-fit: cover;
+                }
+            }
+        }
+        .popup-style2 {
+            margin-bottom: 71px;
+            .icon-close {
+                margin-bottom: 17px;
+            }
+            .popup-content {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                border-radius: 24px;
+                background-color: #fff;
+                .book-cover {
+                    width: 386px;
+                    height: 518px;
+                    margin-top: 27px;
+                    border-radius: 16px;
+                    object-fit: cover;
+                }
+                .category-and-score {
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 386px;
+                    height: 31px;
+                    margin-top: 23px;
+                    .category {
+                        flex: 1;
+                        color: #333;
+                        font-size: 32px;
+                        font-weight: bold;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .score {
+                        align-items: center;
+                        justify-content: flex-end;
+                        flex-shrink: 0;
+                        height: 100%;
+                        padding-right: 9px;
+                        .large-size {
+                            lines: 1;
+                            color: #FF451A;
+                            font-size: 35px;
+                            font-weight: bold;
+                            text-align: right;
+                            text-overflow: ellipsis;
+                        }
+                        .small-size {
+                            margin-top: 2px;
+                            margin-left: 5px;
+                            color: #FF451A;
+                            font-size: 24px;
+                            font-weight: bold;
+                        }
+                    }
+                }
+                .praise-count {
+                    width: 386px;
+                    height: 23px;
+                    line-height: 23px;
+                    margin-top: 16px;
+                    color: #333;
+                    font-size: 24px;
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+                .btn {
+                    width: 476px;
+                    height: 80px;
+                    margin-top: 34px;
+                    margin-bottom: 24px;
+                }
+            }
+        }
+        .close {
+            align-self: flex-end;
+            width: 52px;
+            height: 52px;
+            margin-right: 50px;
+            margin-bottom: 20px;
+            image {
+                width: 52px;
+                height: 52px;
+            }
+        }
+        .img-box {
+            align-items: flex-start;
+            justify-content: center;
+            width: 524px;
+            height: 724px;
+            .img {    
+                width: 524px;
+                height: 724px;
+                border-radius: 36px;
+                object-fit: cover;
+            }
+        }
+    }
+    .dialog-hide {
+        width: 0px;
+    }
+    .dialog-show {
+        width: 750px;
+    }
+</style>
+
+<script>
+import prompt from '@system.prompt';
+import shortcut from '@system.shortcut';
+import router from '@system.router';
+
+export default {
+    props: [
+        'location', 'isCoin'
+    ],
+    data () {
+        return {
+            dialogh5Show: false,
+            headerJson: '',
+            imgInfo: {},
+            operationInfo: {},
+            userTacticsVo: {},
+            isGetAd: false,
+            systemtext: '创建桌面图标后，可领取奖励',
+            popAdId: '5001203707',                      // 开屏广告广告位id
+            brandAdSwitch: false,                       // 支持新版厂商广告开关
+            styleType: 0,                               // 样式类型，0：无，1：样式1，2：样式2
+            bigData: {},                                // 大数据打点信息
+        }
+    },
+    onInit() {
+        this.getDialogImg();
+        this.$app.$def.quickappLog([701, {
+            qmap: {
+                source: 'h5Dialog',
+                location: this.location
+            }
+        }], this);
+    },
+    getDialogImg() {
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                url: '/Index',
+                interface: '/glory/fastapp/2401',
+                data: { location: that.location },                                              // 4弹窗  5开屏  7签到
+                succ: function (res) {
+                    if (!that.$valid) {
+                        return ;
+                    }
+                    if (res && res.data && JSON.stringify(res.data) !== "{}") {
+                        let data = res.data;
+                        let type = data.type;
+                        that.imgInfo = data;
+                        that.operationInfo = data.operationInfo;
+                        that.userTacticsVo = data.userTacticsVo || {}
+                        that.$dispatch('showstartshort', {
+                            isShow: type !== 14 ? 1 : 0
+                        });
+                        that.$app.fnSetMisclickConf({                                           // 设置误触频次控制
+                            misClickTotalFrequency: data.misClickTotalFrequency,                // 误触总频次限制
+                            misClickAdPosition: data.misClickAdPosition,                        // 各广告位置误触频次限制
+                            misClickIntervalTime: data.misClickIntervalTime,                    // 时间间隔（秒）
+                        });
+                        if (data.isBigData === 1) {                                             // 大数据打点相关
+                            if (data.logId) {
+                                that.bigData.logId = data.logId;
+                            }
+                            if (data.expId) {
+                                that.bigData.expId = data.expId;
+                            }
+                            if (data.recId) {
+                                that.bigData.recId = data.recId;
+                            }
+                            if (data.modelId) {
+                                that.bigData.modelId = data.modelId;
+                            }
+                        }
+                        if (type >= 1 && type <= 8 || type === 14) {
+                            if (type === 1) {                                                   // 1：书籍
+                                that.styleType = data.imgStyle || 0;                            // 书籍弹窗样式
+                            }
+                            if (data.operationTip) {
+                                data.operationTip = data.operationTip.slice(0, 10);             // 样式1的提示文案，最多显示10个字
+                            }
+                            that.dialogh5Show = true;
+                        } else if(type === 15) {
+                            if(data.brandAdSwitch) {
+                                that.brandAdSwitch = true;
+                            }
+                            if(data.adPositionId) {
+                                that.popAdId = data.adPositionId;
+                            }
+                            if(data.xmDeviation) {
+                                that.$app.setAppData('adClickOffsetConfInfo',data.xmDeviation);
+                            }
+                            that.$app.brandAdPreloadSwitch = !!data.brandAdPreloadSwitch
+                            that.dialogh5Show = true;
+                        } else {
+                            that.dialogh5Show = false;
+                        }
+                    } else {
+                        that.$dispatch('showstartshort', { isShow: 1 });
+                        that.dialogh5Show = false;
+                    }
+                    that.$emit('fnDialogClose', {
+                        isLayerShow: !that.dialogh5Show
+                    });
+                },
+                error: function (code) {
+                    if (!that.$valid) {
+                        return ;
+                    }
+                    that.$emit('fnDialogClose', {
+                        isLayerShow: true
+                    });
+                    that.$dispatch('showstartshort', { isShow: 1 });
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            type: 'err',
+                            activity: that.imgInfo.id,
+                            imgType: that.imgInfo.type,
+                            location: that.location
+                        }
+                    }, 'h5Dialog'], that);
+                }
+            }
+        );
+    },
+    // 广告已获取
+    fnGetAd() {
+        this.isGetAd = true;
+    },
+    fnCloseDialogH5() {
+        this.dialogh5Show = false;
+        this.$emit('fnDialogClose', {
+            isLayerShow: true
+        });
+        if (this.imgInfo.type === 15) {                         // 广告不需要大数据打点
+            return false;
+        }
+        let qmap = {
+            type: 'close',
+            activity: this.imgInfo.id,
+            imgType: this.imgInfo.type,
+            location: this.location,
+            imgStyle: this.styleType
+        }
+        Object.assign(qmap, this.bigData);
+        this.$app.$def.quickappLog([702, {
+            qmap
+        }, 'h5Dialog'], this);
+    },
+    fnMessage() {
+        let that = this;
+        let omap = {
+            origin: 'dialog_expo',
+            action: '2',
+            channel_id: that.location == 7 ? 'qd_dialog_expo' : 'sj_dialog_expo',
+            channel_name: that.location == 7 ? '签到页弹窗' : '书架弹窗',
+            channel_pos: that.location == 7 ? 1 : 0,
+            column_id: that.imgInfo.id,
+            column_name: that.location == 7 ? '签到页弹窗运营位' : '书架弹窗运营位',
+            column_pos: 0,
+            content_id: that.imgInfo.info,
+            content_pos: 0,
+            content_type: '2',
+            trigger_time: that.$app.$def.getLogTime(),
+            imgStyle: that.styleType
+        }
+        Object.assign(omap, that.bigData);                      // 大数据打点相关
+        switch(that.imgInfo.type) {
+            case 1:                                             // 书籍阅读页
+                router.push({
+                    uri: '/Read',
+                    params: {
+                        bookId: that.imgInfo.info,
+                        activity: that.imgInfo.id,              // 活动id
+                        SourcePosition: that.location == 7 ? '签到页弹窗运营位' : '书架弹窗运营位',
+                        omap: omap
+                    }
+                });
+                break;
+            case 2:                                             // web
+                router.push({
+                    uri: '/Webhuodong',
+                    params: {
+                        webSrc: that.imgInfo.actUrl,
+                        activity: that.imgInfo.id,              // 活动id
+                        pageFrom: that.location == 7 ? 'sign' : 'h5Dialog',
+                        OperationPosition: that.location == 4 ? '书架弹窗' : that.location == 7 ? '签到页弹窗' : '',
+                        OperationID: that.operationInfo.id,
+                        OperationName: that.operationInfo.name,
+                        OperationType: that.imgInfo.type || '',
+                        StartTime: that.operationInfo.startTime,
+                        EndTime: that.operationInfo.endTime
+                    }
+                });
+                break;
+            case 4:                                             // 充值页
+                router.push({
+                    uri: '/Recharge',
+                    params: {
+                        activity: that.imgInfo.id               //活动id
+                    }
+                });
+                break;
+            case 14:
+                if(that.imgInfo.isAddDesktop) {
+                    shortcut.hasInstalled({
+                        success: function(res) {
+                            if(res) {
+                                that.$app.$def.requestData(that,{
+                                    interface: `/glory/fastapp/2107`,
+                                    data: {
+                                        isas: 1
+                                    },
+                                    succ: function (res) {
+                                        if(res.data.freeLimitAll) {
+                                            that.$dispatch('showtoast', { msg: res.data.freeLimitAll });
+                                        }
+                                    }
+                                });
+                            }else {
+                                that.fnAddShortcut();
+                            }
+                        }
+                    });
+                }else {
+                    that.fnAddShortcut();
+                }
+                break;
+            default:
+                router.push({
+                    uri: '/Index',
+                });
+        }
+        if(that.userTacticsVo.isDot == '1') {
+            that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+                OperationPosition: that.location == 4 ? '书架弹窗' : that.location == 7 ? '签到页弹窗' : '',
+                OperationID: that.operationInfo.id,
+                OperationName: that.operationInfo.name,
+                OperationType: that.imgInfo.type + '' || '',
+                BookID: that.imgInfo.info || '',
+                ActID: that.imgInfo.actUrl ? that.imgInfo.actUrl.split('id=')[1] ? that.imgInfo.actUrl.split('id=')[1] : '' : '',
+                PicURL: that.imgInfo.imgUrl || '',
+                ActURL: that.imgInfo.actUrl || '',
+                StartTime: that.operationInfo.startTime || '',
+                EndTime: that.operationInfo.endTime || '',
+                TacticsId: that.userTacticsVo.tacticsId || '',
+                TacticsName: that.userTacticsVo.tacticsName || '',
+                SourceId: that.userTacticsVo.sourceId || '',
+                SourceName: that.userTacticsVo.sourceName || '',
+                ShuntId: that.userTacticsVo.shuntID || '',
+                ShuntName: that.userTacticsVo.shuntName || '',
+                BookName: that.imgInfo.bookName || '' ,
+                ChaptersID: that.imgInfo.chapterId || ''
+            });
+        }
+        if (that.imgInfo.type === 1) {
+            that.$app.$def.quickappLog([702, {
+                omap
+            }, 'book_click'], that);
+            return false;
+        }
+        let qmap = {
+            type: 'clickImg',
+            activity: that.imgInfo.id,
+            imgType: that.imgInfo.type,
+            location: that.location,
+        }
+        that.$app.$def.quickappLog([702, {
+            qmap,
+        }, 'h5Dialog'], that);
+    },
+    clickDialogImg() {
+        this.dialogh5Show = false;
+        this.fnMessage();
+    },
+    fnAddShortcut() {
+        let that = this;
+        let award = '';
+        let awardJson = JSON.parse(that.imgInfo.info);
+        switch(awardJson.benefitType) {
+            case 1:
+                award = awardJson.quota + ((that.$app && that.$app.isCoin || that.isCoin) ? '金币' : '书币');
+                break;
+            case 2:
+                award = '免费阅读' + awardJson.memberQuota + '天';
+                break;
+            case 3:
+                award = awardJson.couponName;
+                break;
+            case 4:
+                award = '免费阅读' + awardJson.duration + '小时';
+                break;
+        } 
+        that.systemtext = `创建桌面图标后，可领取${ award }奖励`;
+        shortcut.install({
+            message: that.systemtext,
+            success: function () {
+                that.$dispatch('holdpop');
+                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                    IsSuccess: true,
+                    PositionName: '书架弹窗',
+                    Instruction: that.systemtext,
+                    StateCode: 'return'
+                }); 
+                //来源写入变量
+                that.$app.dataJson = Object.assign({}, { infotype: 'shortcut' });
+                prompt.showToast({
+                    message: '创建桌面图标成功'
+                });
+                that.fnTellServer(1);
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '2',
+                        page: that.systemtext,
+                        cIndex: that.chapterIndex,
+                        sorce: 'dialog_shortcut'
+                    }
+                }, 'shortcut'], that);
+                that.$app.$def.requestData(that, {
+                    interface: `/glory/fastapp/2107`,
+                    data: {
+                        isas: 1
+                    },
+                    succ: function (res) {
+                        if(res.data.atTip && that.shortbtntype == 2) {
+                            that.$app.shortSuccessText = res.data.atTip;
+                        }
+                        if(res.data.freeLimitAll) {
+                            that.$app.shortSuccessText = res.data.freeLimitAll;
+                        }
+                        that.$dispatch('showshortsuccess');
+                    },
+                    error: function (code) {
+                        that.$dispatch('showshortsuccess');
+                    }
+                });
+            },
+            fail: function (data, code) {
+                console.log('shortcut_install fail');
+                that.$app.shenceLog.log(that,'track','SaveToDesktop', {
+                    IsSuccess: false,
+                    PositionName: '书架弹窗',
+                    Instruction: that.systemtext,
+                    StateCode: 'return',
+                    MsgSendCode: code,
+                    MsgSendContent: data,
+                    
+                }); 
+                prompt.showToast({
+                    message: '创建桌面图标失败'
+                });
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '3',
+                        page: that.systemtext,
+                        cIndex: that.chapterIndex,
+                        source: 'dialog_shortcut',
+                        thisUri: that.$page.uri,
+                        thisPage: 'short-btn',
+                        data,
+                        code
+                    }
+                }, 'shortcut'], that);
+            },
+            complete(errmsg) {
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '5',
+                        errmsg: '' + errmsg,
+                        page: that.systemtext,
+                        cIndex: that.chapterIndex,
+                        sorce: 'dialog_shortcut'
+                    }
+                }, 'shortcut'], that);
+            }
+        });
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            PositionName: '书架弹窗',
+            Instruction: that.systemtext,
+            StateCode: 'submit',
+            DesktopState: that.$app.isAddDesktop ? 'Deleted' : 'Neversaved'
+        }); 
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                page: that.systemtext,
+                cIndex: that.chapterIndex,
+                sorce: 'dialog_shortcut'
+            }
+        }, 'shortcut'], that);
+    },
+    fnTellServer(taskAction) {
+        this.$app.$def.requestData(this,
+            {
+                interface: '/glory/fastapp/2146',
+                data: { action: taskAction },
+                succ: function (res) {
+                }
+            }
+        );
+    },
+    fnClick() {
+        console.log('dialogH5 click');
+    },
+    // 弹窗appear事件处理
+    fnPopupAppear() {
+        if (this.userTacticsVo.isDot == '1') {
+            this.$app.shenceLog.log(this, 'track', 'OperationExposure', {
+                OperationPosition: this.location == 4 ? '书架弹窗' : this.location == 7 ? '签到页弹窗' : '',
+                OperationID: this.operationInfo.id,
+                OperationName: this.operationInfo.name,
+                OperationType: this.imgInfo.type || '',
+                BookID: this.imgInfo.info || '',
+                ActID: this.imgInfo.actUrl ? this.imgInfo.actUrl.split('id=')[1] ? this.imgInfo.actUrl.split('id=')[1] : '' : '',
+                PicURL: this.imgInfo.imgUrl || '',
+                ActURL: this.imgInfo.actUrl || '',
+                StartTime: this.operationInfo.startTime,
+                EndTime: this.operationInfo.endTime,
+                TacticsId: this.userTacticsVo.tacticsId || '',
+                TacticsName: this.userTacticsVo.tacticsName || '',
+                SourceId: this.userTacticsVo.sourceId || '',
+                SourceName: this.userTacticsVo.sourceName || '',
+                ShuntId: this.userTacticsVo.shuntID || '',
+                ShuntName: this.userTacticsVo.shuntName || '',
+                PositionName: this.styleType === 1 ? '模板1-榜单' : (this.styleType === 2 ? '模板2-书籍详情' : '图片')
+            });
+        }
+        if (this.imgInfo.type !== 1) {                              // 非书籍类，不需要打书籍曝光的点
+            this.$app.$def.quickappLog([703, {
+                qmap: {
+                    type: 'show',
+                    activity: this.imgInfo.id,
+                    imgType: this.imgInfo.type,
+                    location: this.location,
+                    imgStyle: this.styleType
+                }
+            }, 'h5Dialog'], this);
+            return false;
+        }
+        let omap = Object.assign({}, this.bigData, {
+            origin: 'dialog_expo',
+            action: '2',
+            channel_id: this.location == 7 ? 'qd_dialog_expo' : 'sj_dialog_expo',
+            channel_name: this.location == 7 ? '签到页弹窗' : '书架弹窗',
+            channel_pos: this.location == 7 ? 1 : 0,
+            column_id: this.imgInfo.id,
+            column_name: this.location == 7 ? '签到页弹窗运营位' : '书架弹窗运营位',
+            column_pos: 0,
+            content_id: this.imgInfo.info,
+            content_pos: 0,
+            content_type: '2',
+            trigger_time: this.$app.$def.getLogTime(),
+            imgStyle: this.styleType
+        });
+        this.$app.$def.quickappLog([706, {
+            omap
+        }], this);
+    },
+}
+</script>

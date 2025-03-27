@@ -1,0 +1,480 @@
+<template>
+    <div class="sign-pop">
+        <image class="pop-close" src="https://xsmfdq.kkyd.cn/images/recharge-operation-close.png" @click="fnClosePop"></image>
+        <stack class="pop-box">
+            <image class="pop-image-small {{ bgImageSize }}" src='{{ bgImageSrc }}'></image>
+            <div class="sign-pop-container">
+                <text class="sign-top">签到成功+{{ waitAwardIndex == 8 ? signRecordVos[6].num : signRecordVos[waitAwardIndex-1].num }}金币</text>
+                <div class="sign-box-content">
+                    <div class="content-top">
+                        <text class="sign-des"><span>已连续签到</span><span class="text-light">{{waitAwardIndex == 8 ? 7 : waitAwardIndex}}</span><span>/7天，明日签到再得</span><span class="text-light">{{waitAwardIndex !=8 ? signRecordVos[waitAwardIndex].num : signRecordVos[0].num}}</span><span>金币</span></text>
+                    </div>
+                    <div class="reward-content">
+                        <block  for="{{signRecordVos}}">
+                            <div if="{{$idx !== signRecordVos.length-1}}" class="reward-box">
+                                <div class="box-content {{$item.isSign ? 'content-gray' : ''}}">
+                                    <text class="reward-text {{!$item.isSign ? 'reward-text-light' : ''}}">+{{$item.num}}</text>
+                                    <image if="{{$item.isSign}}" src="https://xsmfdq.kkyd.cn/images/reward_gold_icon.png" class="reward-img"></image> 
+                                    <image elif="{{!$item.isSign && $idx!=3 && $idx!=6}}" src="https://xsmfdq.kkyd.cn/images/reward_gold.png" class="reward-img"></image>  
+                                    <image elif="{{!$item.isSign && $idx==3}}" src="https://xsmfdq.kkyd.cn/images/reward_dou_icon.png" class="reward-img-big"></image> 
+                                </div>
+                                <text class="reward-day {{!$item.isSign ? 'text-active' : ''}}">{{$item.isSign?'已领':`第${$item.day}天`}}</text>
+                            </div>
+                            <div else class="reward-box-last">
+                                <div class="box-content {{$item.isSign ? 'content-gray' : ''}}">
+                                    <text class="reward-text {{!$item.isSign ? 'reward-text-light' : ''}}">+{{$item.num}}</text>
+                                    <image if="{{!$item.isSign}}" src="https://xsmfdq.kkyd.cn/images/reward_last_icon.png" class="reward-img"></image>
+                                    <image else src="https://xsmfdq.kkyd.cn/images/reward_gold_icon.png" class="reward-img-small"></image> 
+                                </div>
+                                <text class="reward-day {{!$item.isSign ? 'text-active' : ''}}">{{$item.isSign?'已领':`第${$item.day}天`}}</text>
+                            </div>
+                        </block>
+                    </div>
+                </div>
+                <div class="sign-box-bottom">
+                    <text class="sign-share confirm-btn" @click="fnClosePop" if="!shareEntrance && !videoEntrance">确定</text>
+                    <text class="sign-share {{ videoEntrance ? '' : 'sign-share-top'}}" @click="fnShareGetAward" if="shareEntrance">分享好友再得{{ shareAwardCoin }}金币</text>
+                    <text class="sign-video" @click="fnvideoGetAward" if="videoEntrance">看视频再得{{ videoAward }}金币</text>
+                    <block if="isShowSignRemindEntrance">
+                        <div class="sign-remind">
+                            <text>断签奖励会变少哦</text>
+                            <div class="line"></div>
+                            <text class="open-sign-remind {{ isOpenSignRemind ? 'opened-remind' : '' }}"> {{ !isOpenSignRemind ? '开启签到提醒' : '已开启签到提醒' }}</text>
+                            <image src="{{ !isOpenSignRemind ? 'https://xsmfdq.kkyd.cn/images/hmxs/open-sign-remind.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/opened-sign-remind.png' }}" @click="fnOpenSignReminder" class="remind-switch"></image>
+                        </div>
+                    </block>
+                </div>
+            </div>
+        </stack>
+    </div>
+</template>
+<style scoped lang="less">
+    .sign-pop {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .7);
+        .pop-close {
+            align-self: flex-end;
+            margin-bottom: 21px;
+            margin-right: 52px;
+            width: 54px;
+            height: 54px;
+        }
+        .pop-box {
+            flex-direction: column;
+            align-items: center;
+            width: 690px;
+            border-radius: 10px;
+            .pop-image-small {
+               width: 690px;
+               height: 884px; 
+               border-bottom-left-radius: 15px;
+               border-bottom-right-radius: 15px;
+               object-fit: fill;
+            }
+            .pop-image-mid {
+                height: 950px; 
+            }
+            .pop-image {
+                height: 998px;
+            }
+            .pop-image-large {
+                height: 1061px;
+            }
+            .sign-pop-container{
+                width: 598px;
+                flex-direction: column;
+                align-items: center;
+                .sign-top {
+                    margin-bottom: 16px;
+                    margin-top: 147px;
+                    height: 62px;
+                    font-size: 44px;
+                    font-weight: bold;                
+                    color: #FFEFB3;
+                    line-height: 62px;
+                    text-align: center;
+                }
+                .sign-box-content {
+                    width: 598px;
+                    height: 504px;
+                    background-color: #FFFFFF;
+                    border-radius: 8px;
+                    flex-direction: column;
+                    .content-top {
+                        width: 598px;
+                        height: 56px;
+                        background-color: #FFF7D8;
+                        border-top-left-radius: 8px;
+                        border-top-right-radius: 8px;
+                        .sign-des {
+                            width: 100%;
+                            text-align: center;
+                            height: 56px;
+                            font-size: 26px;
+                            color: #807E7A;
+                            line-height: 56px;
+                            .text-light {
+                                color: #FFA000;
+                            }
+                        }                             
+                    }
+                    .reward-content {
+                        flex: 1;
+                        flex-direction: row;
+                        flex-wrap: wrap;
+                        padding-left: 24px;
+                        padding-right: 24px;
+                        padding-top: 32px;
+                        justify-content: space-between;   
+                        .reward-box {
+                            width: 120px;
+                            height: 177px;
+                            margin-bottom: 32px;
+                            flex-direction: column;
+                            align-items: center;
+                            .box-content {
+                                background-color: #ffe4c4;
+                                width: 100%;
+                                height: 130px;
+                                flex-direction: column;
+                                align-items: center;
+                                border-radius: 8px;
+                                .reward-text {
+                                    width: 100%;
+                                    text-align: center;
+                                    height: 37px;
+                                    font-size: 26px;
+                                    margin-top: 7px;
+                                    font-weight: bold;
+                                    color: #807E7A;
+                                    line-height: 37px;
+                                }
+                                .reward-text-light {
+                                    color: #FFA000;
+                                }
+                                .reward-img {
+                                    margin-top: 4px;
+                                    width: 72px;
+                                    height: 72px;
+                                }
+                                .reward-img-big {
+                                    margin-top: 4px;
+                                    width: 94px;
+                                    height: 72px;
+                                }
+                            }
+                            .content-gray {
+                                background-color: #F6F6F6;
+                            }
+                            .reward-day {
+                                width: 100%;
+                                text-align: center;
+                                margin-top: 2px;
+                                height: 37px;
+                                font-size: 26px;
+                                color: #807E7A;
+                                line-height: 37px;
+                            }
+                            .text-active {
+                                color: #FFA000;
+                            }
+                        }
+                        .reward-box-last {
+                            width: 263px;
+                            height: 177px;
+                            margin-bottom: 32px;
+                            flex-direction: column;
+                            .box-content {
+                                width: 263px;
+                                height: 130px;
+                                background-color: #ffe4c4;
+                                border-radius: 8px;
+                                flex-direction: row;
+                                align-items: flex-start;
+                                .reward-text {
+                                    margin-top: 7px;
+                                    margin-left: 24px;
+                                    height: 37px;
+                                    font-size: 26px;
+                                    margin-top: 7px;
+                                    font-weight: bold;
+                                    color: #807E7A;
+                                    line-height: 37px;
+                                }
+                                .reward-text-light {
+                                    color: #FFA000;
+                                }
+                                .reward-img {
+                                    width: 136px;
+                                    height: 104px;
+                                    margin-top: 13px;
+                                }
+                                .reward-img-small {
+                                    margin-top: 50px;
+                                    margin-left: 20px;
+                                    width: 72px;
+                                    height: 72px;
+                                }
+                            }
+                            .content-gray {
+                                background-color: #F6F6F6;
+                            }
+                            .reward-day {
+                                width: 100%;
+                                text-align: center;
+                                margin-top: 2px;
+                                height: 37px;
+                                font-size: 26px;
+                                color: #807E7A;
+                                line-height: 37px;
+                            }
+                            .text-active {
+                                color: #FFA000;
+                            }
+                        }
+                    }
+                }
+                .sign-box-bottom {
+                    width: 100%;
+                    justify-content: center;
+                    flex-direction: column;
+                    margin: 32px 0;
+                    align-items: center;
+                    .sign-share {
+                        margin-bottom: 24px;
+                        width: 598px;
+                        height: 90px;
+                        background-color: #FEC947;
+                        border-radius: 45px;
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #EF4726;
+                        line-height: 90px;
+                        text-align: center;
+                    }
+                    .sign-share-top {
+                        margin-bottom: 0;
+                    }
+                    .confirm-btn {
+                        margin-bottom: 0px;
+                    }
+                    .sign-video {
+                        width: 598px;
+                        height: 90px;
+                        background-color: rgba(204, 30, 0, 0.2);
+                        border-radius: 45px;
+                        font-size: 32px;
+                        border: 2px solid #FFEFB3;
+                        font-weight: bold;
+                        color: #FFEFB3;
+                        line-height: 90px;
+                        text-align: center;
+                    }
+                    .sign-remind {
+                        padding: 0 34px 0 60px;
+                        height: 32px;
+                        align-items: center;
+                        justify-content: center;
+                        margin-top: 32px;
+                        text {
+                            font-size: 26px;
+                            color: rgba(255, 239, 179, 0.8);
+                            height: 32px;
+                            text-align: center;
+                            line-height: 32px;
+                        }
+                        .open-sign-remind {
+                            font-weight:  bold;
+                            margin-right: 8px;
+                            height: 32px;
+                            color: rgba(255, 239, 179, 1);
+                        }
+                        .opened-remind {
+                            font-weight: normal;
+                            color: rgba(255, 239, 179, 0.8);
+                        }
+                        .line {
+                            height: 28px;
+                            width: 2px;
+                            margin: 0px 24px;
+                            background-color: rgba(255, 239, 179, 0.8);
+                        }
+                        .remind-switch {
+                            width: 56px;
+                            height: 28px;
+                            object-fit: fill;
+                        }
+                    }
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+import prompt from '@system.prompt';
+import calendar from '@system.calendar';
+import storage from '@system.storage';
+export default {
+    props: {
+        // 签到获得金币数组
+        signRecordVos:{
+            type: Array,
+            required: false,
+            default:[]
+        },
+        // 视频任务入口是否展示
+        videoEntrance: {
+            type: Boolean,
+            required: false,
+        },
+        // 分享给好友奖励入口是否展示
+        shareEntrance : {
+            type: Boolean,
+            required: false,
+        },
+        // 视频金币奖励数组
+        videoAward: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        // 分享好友奖励金币
+        shareAwardCoin: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        // 是否展示签到提醒入口
+        isShowSignRemindEntrance: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        //  签到提醒相关信息
+        signRemindInfo: {
+            type: Object,
+            required: false,
+            default: ()=> {}
+        }
+    },
+    data() {
+        return {
+            waitAwardIndex: 0,  // 下次签到index
+            isOpenSignRemind : false,  // 是否已开启签到提醒
+            bgImageSize: '', // 背景图尺寸
+            bgImageSrc: '', // 背景图路径
+        }    
+    },
+    onInit() {
+        this.waitAwardIndex = this.signRecordVos.findIndex((item)=> item.isSign == 0) !== -1 ? this.signRecordVos.findIndex((item)=> item.isSign == 0) : 8;
+        this.fnGetSignRemindStorage();
+        this.fnChangeImageSize();
+    },
+    //点击分享获取奖励
+    fnShareGetAward(){
+        this.$dispatch('signAwardShare');
+    },
+    //点击观看视频获取奖励
+    fnvideoGetAward(){
+        this.$dispatch('signAwardVideo');
+    },
+    fnClosePop() {
+        this.$emit('fnCloseSignPop');   
+    },
+    fnOpenSignReminder() {
+        if(this.isOpenSignRemind) {
+            return;
+        }
+        // 开启签到提醒
+        let that = this;
+        let remindTime = new Date();
+        let remindTimeArr = that.signRemindInfo.remindTime.split(':');
+        remindTime.setHours(remindTimeArr[0], remindTimeArr[1], 0);
+        calendar.insert({
+            title: that.signRemindInfo.title,
+            startDate: '' + remindTime.getTime(),
+            endDate: '' + remindTime.getTime(),
+            description: that.signRemindInfo.remindDescription,
+            remindMinutes: [0],
+            rrule: 'FREQ=DAILY;',
+            success: function (data) {
+                try {
+                    let signRemind = {
+                        isOpen: true
+                    };
+                    that.isOpenSignRemind = true;
+                    let signRemindInfo = JSON.stringify(signRemind);
+                    storage.set({
+                        key: 'signRemind',
+                        value: signRemindInfo,
+                    });
+                    that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                        PositionName:  '签到弹窗-开启签到提醒',
+                        ButtonName: '签到弹窗-开启签到提醒',
+                    });     
+                    prompt.showToast({
+                        message: '成功开启提醒，不错过每一分钱'
+                    });
+                } catch(e) {
+                    console.log(e);
+			    }
+            },
+            cancel: function () {
+                prompt.showToast({
+                    message: '开启提醒失败-别忘了领取奖励哦'
+                });
+            },
+            fail: function (e) {
+                prompt.showToast({
+                    message: '开启签到提醒失败, 别忘了领取奖励哦'
+                });
+            }
+        })
+    },
+    // 获取签到提醒缓存信息
+    fnGetSignRemindStorage() {
+        let that = this;
+        storage.get({
+            key: 'signRemind',
+            success: function (data) {
+                try {
+                    let signRemindInfo = data && JSON.parse(data);
+					that.isOpenSignRemind = signRemindInfo.isOpen ? true : false;
+				} catch(e) {
+				    console.log(e);
+			    }
+            },
+            fail: function () {
+                that.isOpenSignRemind = false;
+            }
+        });
+    },
+    // 签到弹窗背景图尺寸UI适配
+    fnChangeImageSize() {
+        this.bgImageSize = '';
+        this.bgImageSrc = 'https://xsmfdq.kkyd.cn/images/hmxs/pop-bg-small.png';
+        if(this.shareEntrance && this.videoEntrance && this.isShowSignRemindEntrance) {
+            this.bgImageSize = 'pop-image-large';
+            this.bgImageSrc = 'https://xsmfdq.kkyd.cn/images/hmxs/pop-bg-large.png'; 
+            return;   
+        }
+        if(this.shareEntrance && this.videoEntrance && !this.isShowSignRemindEntrance) {
+            this.bgImageSize = 'pop-image';
+            this.bgImageSrc = 'https://xsmfdq.kkyd.cn/images/hmxs/pop-bg.png';  
+            return;
+        }
+        if(this.isShowSignRemindEntrance) {
+            this.bgImageSize = 'pop-image-mid'; 
+            this.bgImageSrc = 'https://xsmfdq.kkyd.cn/images/hmxs/pop-bg-mid.png'; 
+            return;
+        }
+    }
+}
+
+</script>

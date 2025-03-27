@@ -1,0 +1,323 @@
+<template>
+    <div class="record-wrap">
+        <list class="list-wrap" @scrollbottom="fnLoadRecord">
+            <block for="(index, item) in recordList">
+                <list-item type="recordItem" class="list-item" @click="fnMaskShow(item)">
+                    <div class="record-box">
+                        <div class="record-info">
+                            <text class="record-title">现金：{{item.amount}}元</text>
+                            <text class="record-rules" if="item && item.serviceFeeScale && item.serviceFeeScale !== '0' && item.serviceFeeScale !== '100'">手续费{{ item.serviceFeeScale }}%, 实际打款{{ item.actualAmount }}元</text>
+                            <text class="record-date">{{ item.date }}</text>
+                        </div>
+                        <div class="record-state {{ item.statusCn === '提现失败' ? 'record-fail-state' : '' }}">
+                            <text class="record-state-text {{ item.statusStyle }}">{{ item.customerServiceFlag == 1 ? (item.statusCn + ' >') : item.statusCn }}</text>
+                            <text class="record-notice-text" if="{{ item.statusCn === '提现失败' }} ">{{ item.payChannel === 1 ? item.payFailDesc : '商户暂时余额不足' }}</text>
+                        </div>
+                    </div>
+                </list-item>
+            </block>
+            <list-item type="loading" class="load-more">
+                <block if="{{ isLoading }}">
+                    <progress type="circular" class="loading-progress"></progress>
+                    <text class="loading-text">正在加载中</text>
+                </block>
+                <block else>
+                    <text if="{{ canLoadMore }}" class="loading-text" @click="fnLoadRecord">上拉加载更多</text>
+                    <text else class="all-text">{{ recordList.length > 0 ? '已经是全部了' : '暂无提现记录' }}</text>
+                </block>
+            </list-item>
+        </list>
+        <div class="mask-wrap" if="isMaskShow">
+            <stack class="mask-stack">
+                <div class="mask-box">
+                    <image class="mask-error" src="https://xsmfdq.kkyd.cn/images/withdraw-record-error.png"></image>
+                    <text class="mask-desc" >{{ popUpContent }}</text>
+                    <div class="mask-service" @click="fnToService">
+                        <image class="mask-image" if="customerServiceUrl" src="https://xsmfdq.kkyd.cn/images/withdraw-record-msg.png"></image>
+                        <text class="mask-btn">{{customerServiceUrl ? '在线客服' : '确定'}}</text>
+                    </div>
+                </div>
+                <image class="mask-close" @click="fnMaskClose" src="https://xsmfdq.kkyd.cn/images/withdraw-record-close.png"></image>
+            </stack>
+        </div>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .record-wrap {
+        background-color: #F6F6F6;
+        .list-wrap {
+            margin-top: 16px;
+            flex-direction: column;
+            width: 100%;
+            flex: 1;
+            .list-item {
+                padding: 30px 30px 0px 30px;
+                background-color: #FFFFFF;
+                .record-box {
+                    justify-content: space-between;
+                    padding-bottom: 30px;
+                    width: 100%;
+                    border-bottom-width: 1px;
+                    border-bottom-color: #EEEEEE;
+                    .record-info {
+                        flex-direction: column;
+                        .record-title {
+                            height: 40px;
+                            font-size: 28px;
+                            color: #333333;
+                            line-height: 40px;
+                        }
+                        .record-date {
+                            margin-top: 8px;
+                            height: 37px;
+                            font-size: 26px;
+                            color: #999999;
+                            line-height: 37px;
+                        }
+                        .record-rules {
+                            margin-top: 8px;
+                            height: 37px;
+                            font-size: 26px;
+                            color: #333333;
+                            line-height: 37px;
+                        }
+                    }
+                    .record-state { 
+                        width: 345px;
+                        flex: 1;
+                        justify-content: center;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        .record-state-text {
+                            height: 37px;
+                            font-size: 28px;
+                            color: #333333;
+                            line-height: 37px;
+                            font-weight: bold;
+                        }
+                        .record-state-checking {
+                            color: #FA5805; 
+                        }
+                        .record-state-succeed {
+                            color:  #11B913;
+                        }
+                        .record-notice-text {
+                            font-size: 26px;
+                            line-height: 37px;
+                            color: #999999;
+                            margin-top: 8px;
+                            text-align: right;
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                    }
+                    .record-fail-state {
+                        justify-content: flex-end;
+                    }
+                }
+            }
+        }
+        .load-more {
+            justify-content: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            .loading-text {
+                font-size: 26px;
+                color: #ff5b60;
+            }
+            .loading-progress {
+                margin-right: 10px;
+                color: #ff5b60;
+            }
+            .all-text {
+                font-size: 30px;
+                color: #bababa;
+            }
+        }
+        .mask-wrap {
+            position: fixed;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            left: 0px;
+            top: 0px;
+            background-color: rgba(0, 0, 0, .7);
+            .mask-stack {
+                justify-content: flex-end;
+                width: 646px;
+                border-radius: 24px;
+                margin-bottom: 90px;
+            }
+            .mask-close {
+                width: 54px;
+                height: 54px;
+            }
+            .mask-box {
+                flex-direction: column;
+                align-items: center;
+                width: 646px;
+                background-color: #FFFFFF;
+                border-radius: 24px;
+                .mask-error {
+                    margin-top: 40px;
+                    width: 110px;
+                    height: 84px;
+                }
+                .mask-desc {
+                    margin-top: 30px;
+                    text-align: center;
+                    width: 540px;
+                    font-size: 30px;
+                    color: #333333;
+                    line-height: 48px;
+                }
+                .mask-service {
+                    margin: 30px 0;
+                    align-items: center;
+                    justify-content: center;
+                    width: 540px;
+                    height: 90px;
+                    background-color: #F97053;
+                    border-radius: 45px;
+                    .mask-image {
+                        margin-right: 10px;
+                        width: 35px;
+                        height: 28px;
+                    }
+                    .mask-btn {
+                        height: 90px;
+                        font-size: 30px;
+                        color: #FFFFFF;
+                        line-height: 90px;
+                    }
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+    import router from '@system.router'
+    export default {
+        private: {
+            recordList: [],
+            currentPage: 1,
+            isLoading: false,
+            canLoadMore: true,
+            customerServiceUrl: '',
+            isMaskShow: false,
+            popUpContent: ''                            // 提现失败弹窗内容
+        },
+        onInit() {
+            this.$page.setTitleBar({ 
+                text: '提现记录',
+				textColor: '#222222',
+				backgroundColor: '#FFFFFF'
+            })
+            this.fnLoadRecord()
+        },
+        onShow() {
+            let that = this;
+            that.$app.lastOpenPage = ''
+            that.$app.$def.quickappLog([701], that)
+            that.$app.shenceLog.log(that, 'pageShow', '', {
+                Title: '提现记录'
+            })
+        },
+        /**
+         * 失败蒙层显示
+         */
+        fnMaskShow(item) {
+            if(item.customerServiceFlag == 1) {
+                if(item.payChannel === 1) {
+                   this.popUpContent = '提现要求：实名信息与微信所属用户信息一致, 请绑定正确微信或者联系客服修改实名信息!';
+                }
+                if(item.payChannel === 2 || item.payChannel === 3) {
+                   this.popUpContent = '商户暂时余额不足，请稍后重新发起提现。详情可咨询客服';
+                }
+                this.isMaskShow = true;
+            }
+        },
+        /**
+         * 失败蒙层关闭
+         */
+        fnMaskClose() {
+            this.isMaskShow = false
+        },
+        /**
+         * 获取提现记录
+         */
+        fnLoadRecord() {
+            let that = this
+            if (that.isLoading || !that.canLoadMore) {
+                return
+            }
+            that.isLoading = true
+            that.$app.$def.requestData(that, {
+                interface: `/glory/fastapp/2857`,
+                data: {
+                    pageSize: 15,
+                    pageNum: that.currentPage
+                },
+                succ: function (res) {
+                    if (res && res.retCode == 0 && res.data) {
+                        if(res.data.customerServiceUrl) {
+                            that.customerServiceUrl = res.data.customerServiceUrl
+                        }
+                        res.data.records && res.data.records.length && res.data.records.forEach(item => {
+                            item.statusStyle = that.fnDealStatusStyle(item.statusCn)
+                        })
+                        that.recordList.length > 0 ? that.recordList = that.recordList.concat(res.data.records) : that.recordList = res.data.records;
+                        if (res.data.records && res.data.records.length == 15) {
+                            that.currentPage++
+                        } else {
+                            that.canLoadMore = false
+                        }
+                    }
+                    that.isLoading = false
+                },
+                error: function() {
+                    that.isLoading = false
+                }
+            })
+        },
+        /**
+         * 跳转客服页面
+         */
+        fnToService() {
+            let that = this
+            if(!that.customerServiceUrl) {
+                that.isMaskShow = false
+                return
+            }
+            router.push({
+				uri: '/ZhichiService',
+				params: {
+                    zhichiWebSrc: that.customerServiceUrl
+                }
+			})
+        },
+        /**
+         * 处理提现样式
+         * @param {String} statusCn  提现文案
+        */
+        fnDealStatusStyle(statusCn) {
+            let statusStyle = ''
+            switch (statusCn) {
+                case '审核中':
+                    statusStyle = 'record-state-checking';
+                    break;
+                case '提现成功':
+                    statusStyle = 'record-state-succeed';
+                    break;
+                default:
+                    break;
+            }
+            return statusStyle
+        }
+    }
+</script>
+
+

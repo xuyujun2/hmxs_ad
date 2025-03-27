@@ -1,0 +1,6 @@
+{
+    "rules": [
+        { "rule": "enable", "page": "BookDetail", "params": ["bookId"] },
+        { "rule": "disable", "page": "*" }
+    ]
+}

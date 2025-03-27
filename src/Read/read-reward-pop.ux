@@ -1,0 +1,190 @@
+<import name="ad-union" src="../AdUnion/index"></import>
+<template>
+    <div class="wrap">
+        <div class="read-award-pop">
+            <div class="pop-box">
+                <image class="pop-image" src="https://xsmfdq.kkyd.cn/images/readTask_pop_icon.png"></image>
+                <text class="pop-text">已阅读{{readTaskInfo.readTime}}分钟</text>
+                <text class="pop-text-bottom"><span class="coin">+</span>{{readTaskInfo.amount}}<span class="coin">金币</span></text>
+                <div class="pop-tip-box">
+                    <text class="pop-tip-text">可兑换现金到微信</text>
+                    <image class="pop-tip-image" src="https://xsmfdq.kkyd.cn/images/hmxs/reward-pop-wx.png"></image>
+                </div>
+                <text class="pop-btn" if="readTaskInfo.canLoadVideo && !isChargeBook" @click="fnVideoStart">看视频最高再得100金币</text>
+            </div>
+            <image class="pop-close" src="https://xsmfdq.kkyd.cn/images/hmxs/reward-pop-close.png" @click="fnClosePop"></image>
+            <ad-union
+                if="rewardAdSwitch"
+                ad-unit-id="{{ rewardAdId }}"
+                ad-type="reward"
+                ad-alias="rewardMessage"
+                book-id="{{ bookId }}"
+                book-name="{{ bookName }}"
+                chapter-id="{{ chapterId }}"
+                chapter-name="{{ chapterName }}"
+                chapter-index="{{ chapterIndex }}"
+                other-info="{{ rewardAdTactics }}"
+                brand-ad-switch="{{ brandAdSwitch }}"
+            ></ad-union>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .read-award-pop {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        .pop-close {
+            margin-top: 40px;
+            margin-bottom: 24px;
+            width: 54px;
+            height: 54px;
+        }
+        .pop-box {
+            flex-direction: column;
+            align-items: center;
+            width: 580px;
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            .pop-image {
+                margin-bottom: 10px;
+                margin-top: 24px;
+                width: 260px;
+                height: 160px;
+            }
+            .pop-text {
+                margin-bottom: 16px;
+                height: 45px;
+                font-size: 32px;
+                font-weight: bold;
+                color: #222222;
+                line-height: 45px;
+                text-align: center;
+            }
+            .pop-text-bottom {
+                margin-bottom: 4px;
+                height: 78px;
+                font-size: 56px;
+                font-weight: bold;
+                color: #FA5805;
+                line-height: 78px;
+                text-align: center;
+                .coin {
+                    font-size: 32px;
+                }
+            }
+            .pop-tip-box {
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 26px;
+                width: 286px;
+                height: 40px;
+                background-color: rgba(255, 206, 93, .2);
+                border-radius: 20px;
+                .pop-tip-text {
+                    margin-right: 6px;
+                    height: 40px;
+                    font-size: 26px;
+                    color: #222222;
+                    line-height: 40px;
+                }
+                .pop-tip-image {
+                    width: 24px;
+                    height: 24px;
+                }
+            }
+            .pop-btn {
+                margin-bottom: 32px;
+                width: 484px;
+                height: 90px;
+                background-color: #6D28F4;
+                border-radius: 44px;
+                font-size: 32px;
+                color: #FFFFFF;
+                line-height: 90px;
+                text-align: center;
+            }
+        }
+    }
+</style>
+<script>
+export default {
+    props: {
+        readTaskInfo: {
+            type: Object,
+        },
+        isChargeBook: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        rewardAdSwitch: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        rewardAdId: {
+            type: String,
+            required: true,
+        },
+        rewardAdTactics: {
+            type: Object,
+        },
+        bookId: {
+            type: String,
+            required: false,  
+            default: ''
+        },
+        bookName: {
+            type: String,
+            required: false,  
+            default: ''
+        },
+        chapterId: {
+            type: String,
+            required: false,  
+            default: ''
+        },
+        chapterName: {
+            type: String,
+            required: false,  
+            default: ''
+        },
+        chapterIndex: {
+            type: String | Number,
+            required: false,  
+            default: ''
+        },
+        brandAdSwitch: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+    },
+    data: {
+        isVideoLoading: false,   //阅读任务激励视频防连点
+    },
+    fnClosePop() {
+        this.$parent().readRewardPopShow = false
+    },
+    //观看激励视频并领取奖励
+    fnVideoStart() {
+        if(this.isVideoLoading) {
+            return
+        }
+        this.isVideoLoading = true
+        setTimeout(() => {
+            this.isVideoLoading = false
+        }, 3000)
+        this.$parent().fnStartReadVideo()
+    },
+}
+</script>

@@ -1,0 +1,784 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+  <div class='setting'>
+    <video 
+    style="width: 200px;height: 300px;"
+    class="video" 
+    autoplay="true" 
+    src="https://media.w3.org/2010/05/sintel/trailer.mp4"
+    controls="false" 
+    ></video>
+    <div class="setting-item setting-line"  @click="changeApi">
+        <div class="left"> 
+            <!-- <image src="https://xsmfdq.kkyd.cn/html/images/new_my/icon_6.png"></image> -->
+            <text class="text-left" @click="changeAd">当前版本</text>
+        </div>
+        <div class="right">
+            <text class="text-right">{{versionName}}</text>
+        </div>
+    </div>
+    <div class="setting-item setting-line" if="{{autoRenew==1 && !autoRenewCancle}}" @click="toOther('/Renew')">
+        <div class="left"> 
+            <!-- <image src="https://xsmfdq.kkyd.cn/html/images/new_my/icon_6.png"></image> -->
+            <text class="text-left">包月订购设置</text>
+        </div>
+        <div class="right">
+            <image class="img-right" src="https://xsmfdq.kkyd.cn/images/user_right.png"></image>
+        </div>
+    </div>
+    <div class="setting-item setting-line" if="{{pushSwitch==1}}" @click="toOther('/PushSwitch')">
+        <div class="left"> 
+            <!-- <image src="https://xsmfdq.kkyd.cn/html/images/new_my/icon_6.png"></image> -->
+            <text class="text-left">消息通知</text>
+        </div>
+        <div class="right">
+            <image class="img-right" src="https://xsmfdq.kkyd.cn/images/user_right.png"></image>
+        </div>
+    </div>
+    <div class="setting-item setting-line">
+        <div class="left"> 
+            <!-- <image src="https://xsmfdq.kkyd.cn/html/images/new_my/icon_6.png"></image> -->
+            <text class="text-left">个性化推荐</text>
+        </div>
+        <div class="right">
+            <div class="img-con" @click="changeSwitch">
+                <image if="{{perRecommend}}" src="../Common/images/auto-btn-open.png"></image>
+                <image else src="../Common/images/auto-btn-close.png"></image>
+            </div>
+        </div>
+    </div>
+    <div class="setting-item" @click="clearCaches">
+        <div class="left"> 
+            <!-- <image src="https://xsmfdq.kkyd.cn/images/clear-cache.png"></image> -->
+            <text class="text-left">清除缓存</text>
+        </div>
+        <div class="right">
+            <div class="clear">
+                <text>清除</text>
+            </div>
+        </div>
+    </div>
+    <div class="grey-line"></div>
+    <div class="setting-item setting-line" @click="checkIslogin">
+        <div class="left"> 
+            <text class="text-left">注销账号</text>
+            <text class="text-left-bot">注销后账号内数据将无法恢复，请谨慎操作</text>
+        </div>
+        <div class="right">
+            <image class="img-right" src="https://xsmfdq.kkyd.cn/images/user_right.png"></image>
+        </div>
+    </div>
+    <div class="grey-line" if="{{userHeaderJson.t}}"></div>
+    <div class="log-out" @click="popUp" if="{{userHeaderJson.t}}">
+      <text class="text-left">退出登录</text>
+    </div>
+    <div class="grey-line" if="{{userHeaderJson.t}}"></div>
+    <div class="pop-widow" if="isPop">
+      <div class="confirm">
+        <div class="top">
+          <text class="text">退出登录</text>
+          <text class="ask">确定退出账号吗？</text>
+        </div>
+        <div class="bottom">
+          <text class="cancle" @click=logOut(0)>取消</text>
+          <text class="sure" @click=logOut(1)>确定</text>
+        </div>
+      </div>
+    </div>
+    <picker if="{{apiShow}}"  class="picker" type="text" range="{{apilist}}" value="{{notice}}" onchange="getApi" id="picker">></picker>
+    <picker if="{{adShow}}"  class="picker" type="text" range="{{adlist}}" value="{{adNotice}}" onchange="getAd" id="adPicker">></picker>
+    <div class="pop-widow" if="{{imeiShow}}">
+      <div class="confirm">
+        <div class="top">
+          <text class="text">IMEI随机生成</text>
+          <text class="ask">内部专用，请谨慎操作</text>
+        </div>
+        <div class="bottom">
+          <text class="cancle" @click=changeImei(0)>取消</text>
+          <text class="sure" @click=changeImei(1)>确定</text>
+        </div>
+      </div>
+    </div>
+    <div class="clear-loading" if="{{isClear}}">
+        <div class="loading">
+            <progress type="circular" style="stroke-width:10px; color:#ffffff; width: 60px; height: 60px;"></progress>
+            <text>正在清除缓存文件,请您耐心等待...</text>
+        </div>
+    </div>
+    <back-baidu></back-baidu>
+  </div>
+</template>
+<style lang="less">
+  .clear-loading{
+      width: 100%;
+      height: 100%;
+      /* background-color:rgba(0, 0, 0, .8);  */
+      position: fixed;
+      left: 0;
+      top: 0;
+      justify-content: center;
+      align-items: center;
+      .loading{
+          background-color:rgba(0, 0, 0, .7); 
+          border-radius: 30px;
+          width: 450px;
+          height: 200px;
+          align-items: center;
+          justify-content: center;
+          padding: 0 30px;
+          text{
+              font-size: 30px;
+              color: #fff;
+              margin-left: 20px;
+          }
+      }
+    }
+  .log-out{
+      margin-left: 30px;
+        margin-right: 30px;
+        padding:34px 0 34px 10px;
+        justify-content: center;
+        text{
+          font-size:32px;
+          color:#444444;
+          text-align: center;
+          font-weight: bold;
+        }
+  }
+ .picker{
+    margin-top: 200px;
+    justify-content: center;
+    text-align: center;
+  }
+  .setting{
+    flex-direction: column;
+    /* padding: 0 30px; */
+    .setting-line{
+        border-bottom-color: rgba(102, 106, 125, 0.2);
+        border-bottom-width: 1px;
+    }
+    .grey-line{
+      width:750px;
+      height:20px;
+      background-color:rgba(246,246,246,1)
+    }
+    .setting-item{
+        margin-left: 30px;
+        margin-right: 30px;
+        padding:34px 0 34px 10px;
+        justify-content: space-between;
+        align-items: center;
+        .left{
+            flex-direction: column;
+            .text-left{
+                font-size:32px;
+                color:#444444;
+            }
+            .text-left-top{
+                font-size:32px;
+                color:#444444;
+            }
+            .text-left-bot{
+                font-size:24px;
+                color:#BABABA;
+                margin-top: 12px;
+            }
+            image{
+                margin-right: 10px;
+                height: 84px;
+                width: 84px;
+            }
+        }
+        .right{
+            .text-right{
+                font-size:30px;
+                color:#292929;
+            }
+            .img-right{
+                width: 40px;
+                height: 40px;
+            }
+            .clear{
+              width:80px;
+              height:38px;
+              border-radius:21px;
+              border:1px solid rgba(249,112,83,1);
+              align-items: center;
+              justify-content: center;
+              margin-left: 18px;
+              text{
+                  font-size:26px;
+                  color:rgba(249,112,83,1);
+              }
+            }
+            .img-con{
+                width: 93px;
+                height: 58px;
+                justify-content: center;
+                align-items: center;
+                image{
+                    width: 93px;
+                    height: 58px;
+                }
+            }
+        }
+    }
+    .pop-widow{
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      top: 0;
+      left: 0;
+      align-items: center;
+      justify-content: center;
+      .confirm{
+        width:600px;
+        /* height:300px; */
+        background-color:rgba(255,255,255,1);
+        border-radius:24px;
+        flex-direction: column;
+        .top{
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 211px;
+          border-bottom-color: #E7ECEF;
+          border-bottom-width: 1px;
+          .text{
+            font-size:30px;
+            font-weight:bold;
+            color:rgba(39,41,50,1);
+          }
+          .ask{
+            font-size:26px;
+            color:rgba(39,41,50,1);
+            margin-top: 30px;
+          }
+        }
+        .bottom{
+          width: 100%;
+          justify-content: space-around;
+          align-items: center;
+          height: 87px;
+          .cancle{
+            flex: 1;
+            font-size:30px;
+            color:#FD895A;
+            border-right-color: #E7ECEF;
+            border-right-width: 1px;
+            text-align: center;
+            height: 100%;
+          }
+          .sure{
+            flex: 1;
+            font-size:30px;
+            color:#272932;
+            text-align: center;
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+</style>
+<script>
+  /**
+   * 默认的菜单页(可自定义)
+   * name默认为manifest文件中的name字段
+   * icon默认为manifest文件中的icon字段
+   * 若需修改页面中文本，请修改ViewModel private中对应变量
+   * 注意：使用加载器测试`创建桌面快捷方式`功能时，需要进入系统设置->权限管理->开启应用加载器的`桌面快捷方式`权限，才能保存到桌面。应用上线后可自动获取`桌面快捷方式`权限
+   */
+  import storage from '@system.storage';
+	import router from '@system.router';  
+  import app from '@system.app';
+  import prompt from '@system.prompt';
+  import file from '@system.file';
+      // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+  export default {
+    private: {
+      isPop:false,
+      userHeaderJson: '',
+      versionName:'',
+      chapterList:[],
+      bookLength:0,
+      chapterListLength:0,
+      apiClickNum:0,
+      apilist:[
+        'http://97dzmf.kky.dzods.cn',
+        'http://98dzmf.kky.dzods.cn',
+        'http://yfbdzmf.kky.dzods.cn',
+        'https://dzmfxs.kkyd.cn',
+      ],
+      notice:'点击选择环境域名，内部专用，谨慎操作',
+      apiShow:false,
+      autoPay:0,
+      pushSwitch:0,
+      autoRenew: 0, // 自动续费开关
+      autoRenewCancle: false,
+      imeiShow:false,
+      adlist: [
+          'http://192.168.0.234/api/ad',
+          'https://ad-union.dzods.cn/api/ad',
+          'https://ad-union.ssread.cn/api/ad',
+          'https://ad-union-stag.ssread.cn/api/ad',
+          'http://sandbox.ad.qcread.cn/api/ad'
+      ],
+      adClickNum: 0,
+      adShow: false,
+      adNotice: '点击选择广告域名，内部专用，谨慎操作',
+      listenFileNum:0,
+      isClear:false,
+      perRecommend:true
+    },
+    toOther(url){
+      router.push({
+        uri:url
+      })   
+    },
+    logOut(bol){
+      let that = this;
+      if(bol){
+        that.userHeaderJson['userId'] = ''
+        that.userHeaderJson['t'] = ''
+        // 重置会员内容
+        that.$app.$def.getStorageFile(that,{
+            key:'setupJson',
+            success:(data)=>{
+                let setupJson = data ? JSON.parse(data) : '';
+                setupJson.isMember = false
+                if(data){
+                    that.$app.$def.setStorageFile(that,{
+                        key:'setupJson',
+                        value:setupJson
+                    })
+                }
+            }
+        })
+        that.$app.$def.setStorageFile(that,{
+            key:'headerJson',
+            value:that.userHeaderJson,
+            success:function(){
+              that.$app.headerJson = that.userHeaderJson
+                router.clear()
+                router.replace({
+                  uri:'/Index'
+                })                                
+            }
+        })
+      }else{
+        that.isPop = false
+      }
+    },
+    popUp(){
+      this.isPop = true
+    },
+    onInit () {
+        var getinfo = app.getInfo()
+        let that = this
+        that.versionName = getinfo.versionName
+        that.$page.setTitleBar({ text:'设置'})
+        that.userHeaderJson = that.$app.headerJson
+        that.userid = that.userHeaderJson.userId
+        that.getAtuoPush()
+        that.getPerRecommend()
+    },
+    getPerRecommend(){
+      let that = this
+      that.$app.$def.getStorageFile(that,{
+          key:'perRecommend',
+          success:(data)=>{
+              //==2 个性化推荐关闭 ；==1||不存在  个性化推荐开启
+              if(data==2){
+                that.perRecommend = false
+              }
+          }
+      })
+    },
+    changeSwitch(){
+      let that = this
+      that.perRecommend = !that.perRecommend
+      that.$app.$def.requestData(that,{
+        interface: '/glory/fastapp/2107',
+        data: {perRec: that.perRecommend?1:2},
+        succ: function (res) {                
+            console.log('上传成功')
+        }
+      })
+      that.$app.$def.setStorageFile(that,{
+        key:'perRecommend',
+        value:that.perRecommend?1:2
+      })
+      that.$app.shenceLog.log(that,'track','ButtonClick', {
+        ButtonName: '个性化开关',
+        ButtonContent: that.perRecommend?'开':'关',
+        PositionName:'个人中心设置'
+      });
+      prompt.showToast({
+        message:that.perRecommend?'已打开':'已关闭'
+      })
+    },
+    getAtuoPush(){
+      let that = this
+      that.$app.$def.requestData(that,{
+        interface: '/glory/fastapp/2150',
+        data: {bookId:that.bookId},
+        succ: function (res) {                
+            if(res.data.isAp=='1'){
+              that.autoPay=1
+            }
+            if(res.data.isNotify=='1'){
+              that.pushSwitch=1
+            }
+            // 系统订购显示开关
+            if(res.data.vipAutoPay=='1'){
+              that.autoRenew=1
+              that.$app.isAutoRenewCancle = false
+              that.autoRenewCancle = false
+            }
+        }
+      })
+    },
+    onShow(){
+      this.$app.lastOpenPage = ''
+      this.$app.shenceLog.log(this, 'pageShow', '', {
+        Title: '设置'
+      });
+      let that = this
+      that.$app.$def.quickappLog([701], that);
+      // 是否已取消订购
+      that.autoRenewCancle = that.$app.isAutoRenewCancle
+      // pageEnter(this.$page.path);
+    },
+    onHide() {},
+    // 返回键触发
+    onBackPress() {
+        setTimeout(() => {
+            let routerLength = router.getLength()
+            if(routerLength <= 1) {
+                router.replace({
+                    uri: '/Index'
+                })
+            }else{
+                router.back()
+            }
+        }, 0)
+        return true
+    },
+    checkIslogin(){
+      let that = this
+      that.$app.$def.quickappLog([702, {
+          qmap:{
+              t:that.$app.headerJson.t
+          }
+      }, 'logout'], that)
+      if(that.$app.headerJson.t==''){
+        prompt.showToast({
+          message:'您未使用手机号登录，无需注销账号'
+        })
+      }else{
+        router.push({
+          uri:'/Login',
+          params:{
+            url:'/Setting',
+            isLogout:true,
+            positionName: '设置'
+          }
+        })
+      }
+    },
+    clearListen(){
+      let that = this
+      prompt.showToast({
+          message:'正在清除缓存文件,请您耐心等待'
+      })
+      that.isClear=true
+      console.log('正在扫描听书缓存文件')
+        that.fnGetListenfileList(`internal://cache/`).then(bres=>{
+          bres.forEach((cur,index)=>{
+            that.fnDeleteListenFile(bres,cur.uri)
+          })
+        },err=>{
+          console.log('无听书缓存')
+          that.clearALlBooks()
+        })
+      },
+    fnDeleteListenFile(bres,url){
+      let that = this
+      file.delete({
+        uri: url,
+        success: function(data) {
+          that.listenFileNum++
+          if(that.listenFileNum==bres.length){
+            that.clearALlBooks()
+          }
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code}`)
+          that.clearALlBooks()
+        }
+          })
+      },
+    fnGetListenfileList(url){
+      return new Promise((resolve,reject)=>{
+        file.list({
+          uri:url,
+          success: function(data) {
+            console.log('==========listenCaches=======')
+            console.log(data.fileList)
+            if(data.fileList.length){
+              resolve(data.fileList)
+            }else{
+              reject()
+            }
+          },
+          fail: function(data, code) {
+            console.log(`handling fail, code = ${code}`)
+            reject(code)
+          }
+        })
+      })
+    },
+    clearCaches(){
+      let that = this
+      prompt.showDialog({
+        title: '清除缓存',
+        message: '确定清除缓存',
+        buttons: [
+          {
+            text: '否',
+            color: 'rgba(249,112,83,1)'
+          },
+          {
+            text: '是',
+            color: 'rgba(249,112,83,1)'
+          }
+        ],
+        success: function(data) {
+          console.log('handling callback')
+          console.log(data)
+          if(data.index==1){
+            that.clearListen()
+          }
+        },
+        cancel: function() {
+          console.log('handling cancel')
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code}`)
+          that.$app.$def.quickappLog([703, {
+                      qmap:{
+                          source:"prompt_showDialog_fail",
+                          thisUri:that.$page.uri,
+                          thisPage:"Setting",
+                          data,
+                          code,
+                      }
+                  }, 'catch_error'], that)
+        }
+      })
+    },
+    clearALlBooks(){
+      let that = this
+      that.bookLength=0
+      let isFiles = false
+      that.fnGetfileList(`internal://files/books/`).then(bres=>{
+          bres.forEach((cur,index)=>{
+              that.fnGetfileList(cur.uri).then(lres=>{
+                that.bookLength++
+                isFiles = true
+                lres.forEach((cur,index)=>{
+                  that.chapterList.push(cur.uri)                    
+                })
+                if(that.bookLength == bres.length){
+                  that.chapterList.forEach((url,index)=>{
+                    that.fnDeleteFile(url,index)
+                  })
+                }
+              },err=>{
+                that.bookLength++
+                if(that.bookLength == bres.length){
+                  that.chapterList.forEach((url,index)=>{
+                    that.fnDeleteFile(url,index)
+                  })
+                  if(!isFiles){
+                    that.isClear=false
+                    prompt.showToast({
+                        message:'已清除缓存'
+                    })
+                  }
+                }
+              })
+          })
+          
+      },err=>{
+        that.isClear=false
+        prompt.showToast({
+              message:'已清除缓存'
+          })
+      })
+    },
+    fnDeleteFile(url){
+        let that = this
+        file.delete({
+        uri: url,
+        success: function(data) {
+            that.chapterListLength++
+            if(that.chapterListLength==that.chapterList.length){
+              that.isClear=false
+              prompt.showToast({
+                  message:'已清除缓存'
+              })            
+            }
+        },
+        fail: function(data, code) {
+            console.log(`handling fail, code = ${code}`)
+            that.chapterListLength++
+            if(that.chapterListLength==that.chapterList.length){
+              that.isClear=false
+              prompt.showToast({
+                  message:'已清除缓存'
+              })            
+            }
+            that.$app.$def.quickappLog([703, {
+                      qmap:{
+                          source:"file_delete_fail",
+                          thisUri:that.$page.uri,
+                          thisPage:"Setting",
+                          data,
+                          code,
+                      }
+                  }, 'catch_error'], that)
+            }
+        })
+    },
+    fnGetfileList(url){
+      let that = this;
+        return new Promise((resolve,reject)=>{
+              file.list({
+                  uri:url,
+                  success: function(data) {
+                      console.log('==========books=======')
+                      console.log(data.fileList)
+                      resolve(data.fileList)
+                  },
+                  fail: function(data, code) {
+                      console.log(`handling fail, code = ${code}`)
+                      reject(code)
+                      that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:"file_list_fail",
+                            thisUri:that.$page.uri,
+                            thisPage:"Setting",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+                  }
+              })
+        })
+    },
+    changeAd() {
+      this.adClickNum++
+      if(this.adClickNum==8){
+        this.adShow = true
+      }  
+    },
+    changeApi(){
+      this.apiClickNum++
+      if(this.apiClickNum==8){
+        this.apiShow = true
+      }
+    },
+    getAd(data) {
+      this.$app.adRequestUrl = data.newValue
+      storage.set({
+        key: 'ad_api',
+        value: data.newValue,
+        success: function() {
+          prompt.showToast({
+            message: '域名切换成功'
+          })
+        }
+      })
+    },
+    getApi(data){
+      let that = this
+      storage.clear({
+        success: function(res) {
+          that.fnGetfileList(that.$app.$data.storageFilePath).then(res=>{
+            res.forEach((cur,index)=>{
+              file.delete({
+                uri:cur.uri,
+                success:function(){
+                  console.log('shangchuchenggong')
+                  if(index==res.length-1){
+                    storage.set({
+                      key:'kyy_api',
+                      value:data.newValue,
+                      success:function(){
+                        console.log('tuichuyingyongchengxu')
+                        that.$app.exit()
+                      }
+                    })
+                  }
+                }
+              })
+            })
+          })
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code}`)
+          that.$app.$def.quickappLog([703, {
+                      qmap:{
+                          source:"storage_clear_fail",
+                          thisUri:that.$page.uri,
+                          thisPage:"Setting",
+                          data,
+                          code,
+                      }
+                  }, 'catch_error'], that)
+           }
+      })
+    },
+    changeImei(bol){
+      let that = this
+      if(bol){
+        storage.clear({
+          success: function(res) {
+            that.fnGetfileList(that.$app.$data.storageFilePath).then(res=>{
+              res.forEach((cur,index)=>{
+                file.delete({
+                  uri:cur.uri,
+                  success:function(){
+                    console.log('shangchuchenggong')
+                    if(index==res.length-1){
+                      storage.set({
+                        key:'isChangeImei',
+                        value:1,
+                        success:function(){
+                          storage.set({
+                            key:'kyy_api',
+                            value:that.$app.api,
+                            success:function(){
+                              that.$app.exit()
+                            }
+                          })
+                        }
+                      })
+                    }
+                  }
+                })
+              })
+            })
+          }
+        })
+      }else{
+        that.imeiShow=false
+      }
+    }
+  }
+</script>

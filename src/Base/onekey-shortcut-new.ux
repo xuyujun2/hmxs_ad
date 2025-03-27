@@ -1,0 +1,210 @@
+<template>
+    <div>
+        <block if="{{!bHasShortcut}}">
+            <div class="vivo-shortcut" if="{{vivoSupport}}" >
+                <vivo-shortcutbtn 
+                    style="width:{{btnwidth}};height:{{btnheight}};font-size:{{btnfontsize}};border-radius:{{btnradius}};color:{{btncolor}};background-color:{{btnbgcolor}};line-height:{{btnheight}};" 
+                    value="{{buttextv}}" 
+                    @click="addShortcutVivo">
+                </vivo-shortcutbtn>
+            </div>
+            <div class="oppo-shortcut" if="{{oppoSupport}}" >
+                <input 
+                style="width:{{btnwidth}};height:{{btnheight}};font-size:{{btnfontsize}};border-radius:{{btnradius}};color:{{btncolor}};background-color:{{btnbgcolor}};line-height:{{btnheight}};" 
+                type="{{eventbutton}}"  
+                eventtype="{{eventtype}}" 
+                class="oppo-btn" 
+                value="{{buttexto}}" 
+                @click="addShortcutOppo"/>
+            </div>
+            <div class="huawei-shortcut-wrap" if="{{huaweiSupport}}" >
+                <shortcut-button style="width:{{btnwidth}};height:{{btnheight}};font-size:{{btnfontsize}};border-radius:{{btnradius}};color:{{btncolor}};background-color:{{btnbgcolor}};line-height:{{btnheight}}" class="huawei-shortcut" value="{{buttextv}}" @click="addShortcutHuawei"></shortcut-button>
+            </div>
+        </block>
+    </div>
+</template>
+<style scoped lang="less">
+    .oppo-btn {
+        lines: 1; 
+        text-overflow: ellipsis;
+        text-align: center;
+    }
+    .huawei-shortcut {
+        lines: 1; 
+        text-overflow: ellipsis;
+        text-align: center;
+    }
+</style>
+<script>
+import shortcut from '@system.shortcut';
+import prompt from '@system.prompt'
+export default {
+    props: [
+        'btnwidth',
+        'btnheight',
+        'btnfontsize',
+        'btnradius',
+        'btncolor',
+        'btnbgcolor',
+        'buttexto',
+        'buttextv',
+        'cutSupport',
+        'chapterIndex',
+        'position',
+        'extra',
+        'bookId'
+    ],
+    data: {
+        bHasShortcut: false,
+        vivoSupport: false,
+        oppoSupport: false,
+        huaweiSupport: false,
+        eventbutton: 'eventbutton',
+        eventtype: 'shortcut',
+        logPosition: ''
+    },
+    onInit() {
+        this.vivoSupport = this.cutSupport.vivoSupport
+        this.oppoSupport = this.cutSupport.oppoSupport
+        this.huaweiSupport = this.cutSupport.huaweiSupport
+        switch (this.position) {
+            case 'warning':
+                this.logPosition='阅读页警告加桌弹窗'                
+                break;
+            case 'readback':
+                this.logPosition='阅读页返回弹窗添桌'                
+                break;
+            case 'exitapp':
+                this.logPosition='退出应用加桌'                
+                break;
+            case 'afterauth':
+                this.logPosition='阅读页提前加桌'                
+                break;
+            case 'adExit':
+                this.logPosition='广告退出应用'                
+                break;
+            case 'adAction':
+                this.logPosition='广告行为触发'              
+                break;
+            default:
+                this.logPosition='未知'
+        }
+    },
+    addShortcutVivo(e) {
+        let code = e.eventStatusCode
+        let msg = e.eventMessage
+        this.fnReportBtnClick()
+        if(code == 0) {
+            this.shortcutSuccess(code, msg)
+        }else{
+            this.shortcutFail(code, msg)
+        }
+        this.shortcutComplete(code, msg)
+    },
+    addShortcutOppo(e) {
+        let code = e.event_status_code
+        let msg = e.event_message
+        this.fnReportBtnClick()
+        if(code == 0) {
+            this.shortcutSuccess(code, msg)
+        }else{
+            this.shortcutFail(code, msg)
+        }
+        this.shortcutComplete(code, msg)
+    },
+    addShortcutHuawei(e) {
+        //兼容华为bug,两个click回调
+        if(e.eventStatusCode || e.eventStatusCode === 0) {
+            let code = e.eventStatusCode
+            let msg = e.eventMessage
+            this.fnReportBtnClick()
+            if(code == 0) {
+                this.shortcutSuccess(code,msg)
+            }else{
+                this.shortcutFail(code,msg)
+            }
+            this.shortcutComplete(code,msg)
+        }
+    },
+    shortcutSuccess(code, msg) {
+        let that = this
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            IsSuccess: true,
+            PositionName: '一键加桌-' + that.logPosition,
+            ChaptersNum: that.chapterIndex ? that.chapterIndex : -1,
+            ButtonContent: that.vivoSupport ? that.buttextv : that.buttexto,
+            StateCode: 'return'
+        }); 
+        //来源写入变量
+        that.$app.dataJson = Object.assign({}, { infotype: 'shortcut' });
+        that.bHasShortcut = true;
+        that.fnTellServer(1);
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '2',
+                cIndex: that.chapterIndex,
+                sorce: that.position,
+                thisPage: 'short-btn-onekey'
+            }
+        }, 'shortcut'], that)
+    },
+    shortcutFail(code, msg) {
+        let that = this
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            IsSuccess: false,
+            PositionName: '一键加桌-' + that.logPosition,
+            ChaptersNum: that.chapterIndex ? that.chapterIndex : -1,
+            ButtonContent: that.vivoSupport ? that.buttextv : that.buttexto,
+            StateCode: 'return',
+            MsgSendCode: code,
+            MsgSendContent: msg,
+        });
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '3',
+                cIndex: that.chapterIndex,
+                source: that.position,
+                thisUri: that.$page.uri,
+                thisPage: 'short-btn-onekey',
+                msg,
+                code
+            }
+        }, 'shortcut'], that)
+    },
+    shortcutComplete(code, msg) {
+        let that = this
+        that.$emit('oneshortcomplete', {
+            result: code == 0 ? 1 : 0,
+            position: that.position,
+            extra: that.extra,
+        })
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '5',
+                errmsg: `${msg}`,
+                code: `${code}`,
+                cIndex: that.chapterIndex,
+                sorce: that.position,
+                thisPage: 'short-btn-onekey'
+            }
+        }, 'shortcut'], that)
+    },
+    fnTellServer(taskAction) {
+        let that = this;
+        that.$app.$def.requestData(that, {
+            interface: '/glory/fastapp/2146',
+            data: { action: taskAction },
+            succ: function (res) {}
+        })
+    },
+    fnReportBtnClick() {
+        let that = this
+        that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+            PositionName: '一键加桌-' + that.logPosition,
+            ButtonName: '加桌按钮',
+            ButtonContent: that.vivoSupport ? that.buttextv : that.buttexto,
+            BookID: that.bookId || ''
+        });
+    },
+}
+</script>

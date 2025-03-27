@@ -1,0 +1,119 @@
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+<template>
+  <div>
+    <div class="dia_loading" show="{{!webShow}}">
+      <!-- <text>页面加载中，请耐心等待...</text> -->
+    </div>
+    <web id="web" @pagefinish="fnWebFinish" @titlereceive="titlereceive" @message="fnMessage" src="{{zhichiWebSrc}}"></web>
+    <retry if="{{isShowBtn}}" is-loading="{{isLoading}}" @retry="retryHandler"></retry>
+  </div>
+</template>
+
+<style lang="less">
+.dia_loading {
+  width: 100%;
+  text-align: center;
+}
+.dia_loading text {
+  width: 100%;
+  text-align: center;
+  font-size: 34px;
+}
+</style>
+
+<script>
+import storage from '@system.storage';
+import router from '@system.router';
+import app from '@system.app'
+import webview from '@system.webview'
+export default {
+  private: {
+    // webSrc: 'https://www.sobot.com/chat/h5/v2/index.html?sysnum=50d393e83a4d46d8857e8395e774f18d&source=1',
+    webShow: false,
+    isShowBtn: false,
+    isLoading: false,
+    source: 0
+  },
+  protected: {
+    packageName: '',
+    partnerid: '',
+    // webSrc: '',
+    zhichiWebSrc: '',
+    is_vip: 0
+  },
+  onInit() {
+    let that = this;
+    // let _src = that.zhichiWebSrc;
+    // let bool = _src.indexOf('?') > 0;
+    // let packageName = '';
+    // if(that.packageName){
+    //     packageName = that.packageName.split('.').pop();
+    //     console.log(packageName)
+    // }
+    // that.zhichiWebSrc = _src + '&uname=kyy' + that.partnerid + packageName + '&is_vip=' +that.is_vip;
+    // that.zhichiWebSrc = _src;
+    storage.get({
+      key: 'headerJson',
+      success: function (data) {
+        console.log(data)
+      },
+      fail: function (data, code) {
+        console.log(`handling fail, code = ${code}`)
+      }
+    })
+    // this.$page.setTitleBar({ text: '客服' });
+  },
+  onShow() {
+    this.$app.lastOpenPage = ''
+    let that = this;
+    that.$app.$def.quickappLog([701, {
+      qmap: {
+        // id: that.activity,
+        page: 'ZhichiService',
+        webSrc: that.zhichiWebSrc
+      }
+    }], that)
+  },
+  fnWebFinish(e) { 
+    this.webShow = true;
+  },
+  titlereceive(res) {
+    let that = this;
+    if (res.title.includes('网页无法打开')) {
+      that.$page.setTitleBar({ text: '网络不给力，请重试' })
+      that.isShowBtn = true;
+      that.isLoading = true;
+    } else {
+      that.webShow = true;
+      that.$page.setTitleBar({ text: res.title });
+      that.isShowBtn = false;
+    }
+  },
+  RndNum() {
+    let charactors = '1234567890abcdefghijklmnopqrstuvwxyz';
+    let value = '', i;
+    let timestamp = new Date().getTime();
+    for (let j = 1; j <= 4; j++) {
+      i = parseInt(36 * Math.random());
+      value = value + charactors.charAt(i);
+    }
+    value = value + timestamp;
+    return value;
+  },
+  retryHandler() {
+    let that = this;
+    this.isShowBtn = true;
+    this.isLoading = false;
+    that.hidePageTimeout = setTimeout(() => {
+      router.replace({
+        uri: '/ZhichiService',
+        params: {
+          zhichiWebSrc: that.zhichiWebSrc,
+          // activity: that.activity, //活动id
+          // pageFrom: that.pageFrom,
+        }
+      })
+    }, 1000);
+  }
+}
+</script>

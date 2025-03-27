@@ -1,0 +1,4527 @@
+<import name="dialog-h5" src="../Base/dialog-h5"></import>
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="shortcut-success" src="../Base/shortcut-success"></import>
+<import name="ad-union" src="../AdUnion/index"></import>
+<import name="coin-toast" src="../Base/coin-toast"></import>
+<import name="withdraw-pop" src="./withdraw-pop"></import>
+<import name="sign-pop" src="./sign-pop"></import>
+
+<style lang="less">
+    /* 金币标题 */
+    .new-coin-wrap {
+        flex-direction: column;
+        margin-top: 100px;
+        width: 100%;
+        height: 224px;
+        background-color: #F97053;
+        .rules{
+            width: 100px;
+            height: 40px;
+            margin-top: 16px;
+            font-size: 26px;
+            color: rgba(255, 255, 255, .7);
+            text-align: center;
+            background-color: #EF6042;
+            border-top-left-radius: 100px;
+            border-bottom-left-radius: 100px;
+            align-self: flex-end;
+        }
+        .new-coin-title {
+            margin-left: 30px;
+            height: 42px;
+            font-size: 30px;
+            color: #FFFFFF;
+            line-height: 42px;
+        }
+        .new-coin-box {
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100px;
+            margin-left: 30px;
+            margin-right: 30px;
+            .new-coin-num {
+                color: #FFFEE5;
+                .coin-num-big {
+                    font-size: 72px;
+                    font-weight: bold;
+                    color: #FFFEE5;
+                    line-height: 100px;
+                    margin-right: 8px;
+                }
+                .coin-num-small {
+                    font-size: 30px;
+                    color: #FFFEE5;
+                    line-height: 86px;
+                }
+            }
+            .new-coin-btn {
+                margin-bottom: 14px;
+                width: 154px;
+                height: 54px;
+                border-radius: 100px;
+                border: 1px solid #FFFDF3;
+                background-color: #F97053;
+                text-align: center;
+                font-size: 30px;
+                color: #FFFEE5;
+                line-height: 54px;
+            }
+        }
+    }
+    /*新签到样式  */
+    .sign_popup_box {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        align-items: center;
+        justify-content: center;
+        .pop-stack-succ{
+            background-color: #F84742;
+        }
+        .pop-stack-fail{
+            background-color: #BABABA;
+        }
+        .pop-stack{
+            width: 646px;
+            border-radius: 24px;
+            .pop-close{
+                width: 40px;
+                height: 40px;
+                margin-top: 16px;
+                margin-left: 590px;
+            }
+            .pop-bg{
+                width: 646px;
+                height: 442px;
+            }
+            .pop-main{
+                flex-direction: column;
+                .pop-tit{
+                    flex-direction: column;
+                    margin-top: 168px;
+                    .tit{
+                        font-size: 48px;
+                        width: 100%;
+                        text-align: center;
+                        font-weight: bold;
+                        color: #FFFFFF;
+                        line-height: 67px;
+                    }
+                    .award{
+                        font-size: 30px;
+                        width: 100%;
+                        text-align: center;
+                        line-height: 42px;
+                        margin-top: 10px;
+                        .nol{
+                            color: #FFFFFF;
+                            line-height: 42px;
+                        }
+                        .light{
+                            color: #FFE155;
+                            line-height: 42px;
+                        }
+                    }
+                }
+                .confirm-btn{
+                    width: 540px;
+                    height: 90px;
+                    justify-content: center;
+                    align-items: center;
+                    margin-left: 53px;
+                    margin-top: 40px;
+                    margin-bottom: 32px;
+                    image{
+                        width: 540px;
+                        height: 90px;
+                    }
+                    text{
+                        font-size: 30px;
+                        font-weight: bold;
+                        color: #785459;
+                        line-height: 42px;
+                        text-align: center;
+                    }
+                }
+                .pop-activity{
+                    background-color: #ffffff;
+                    width: 606px;
+                    border-radius: 12px;
+                    padding: 20px 0px;
+                    flex-direction: column;
+                    align-items: center;
+                    margin-left: 18px;
+                    margin-top: 29px;
+                    margin-bottom: 20px;
+                    .activity-index{
+                        font-size: 30px;
+                        color: #444444;
+                        line-height: 42px;
+                        text-align: left;
+                        width: 100%;
+                        padding-left: 42px;
+                    }
+                    .sign-share{
+                        width: 520px;
+                        height: 270px;
+                        margin: 16px 0px;
+                        .bg{
+                            width: 520px;
+                            height: 270px;
+                        }
+                        .share-main{
+                            width: 520px;
+                            padding: 0px 50px;
+                            flex-direction: column;
+                            justify-content: center;
+                            .top{
+                                align-items: flex-end;
+                                justify-content: space-between;
+                                margin-top: 10px;
+                                margin-bottom: 27px;
+                                .coin-num{
+                                    font-size: 110px;
+                                    font-weight: bold;
+                                    color: #FF0300;
+                                    line-height: 81px;
+                                }
+                                .coin-txt{
+                                    width: 30px;
+                                    font-size: 30px;
+                                    font-weight: bold;
+                                    color: #FF0300;
+                                    line-height: 30px;
+                                }
+                                .share-btn{
+                                    width: 228px;
+                                    height: 76px;
+                                    align-items: center;
+                                    justify-content: center;
+                                    image{
+                                        width: 228px;
+                                        height: 76px;
+                                    }
+                                    text{
+                                        font-size: 34px;
+                                        font-weight: bold;
+                                        color: #FFFFFF;
+                                        line-height: 48px;
+                                        text-align: center;
+                                    }
+                                }
+                            }
+                            .share-line{
+                                width: 420px;
+                                height: 20px;
+                                margin-bottom: 9px;
+                            }
+                            .share-tips{
+                                align-items: center;
+                                margin-top: 6px;
+                                justify-content: space-between;
+                                .tips-left{
+                                    align-items: center;
+                                    image{
+                                        width: 20px;
+                                        height: 16px;
+                                        margin-right: 16px
+                                    }
+                                    text{
+                                        font-size: 26px;
+                                        font-weight: bold;
+                                        color: #785459;
+                                        line-height: 37px;
+                                    }
+                                }
+                                .tips-light{
+                                    font-size: 26px;
+                                    font-weight: bold;
+                                    color: #FF0300;
+                                    line-height: 37px;
+                                }
+                            }
+                        }
+                    }
+                    .sign-ad{
+                        width: 520px;
+                        height: 234px;
+                        margin: 16px 0px;
+                        .bg{
+                            width: 520px;
+                            height: 234px;
+                        }
+                        .ad-main{
+                            align-items: center;
+                            justify-content: center;
+                            width: 100%;
+                            .left{
+                                align-items: flex-end;
+                                .coin-num{
+                                    font-size: 110px;
+                                    font-weight: bold;
+                                    color: #FF0300;
+                                    line-height: 81px;
+                                }
+                                .coin-txt{
+                                    width: 30px;
+                                    font-size: 30px;
+                                    font-weight: bold;
+                                    color: #FF0300;
+                                    line-height: 30px;
+                                }
+                            }
+                            .ad-line{
+                                width: 3px;
+                                height: 140px;
+                                margin-left: 12px;
+                                margin-right: 16px;
+                            }
+                            .ad-tip{
+                                flex-direction: column;
+                                align-items: center;
+                                height: 140px;
+                                padding: 7px 0px;
+                                justify-content: space-between;
+                                .tips{
+                                    font-size: 28px;
+                                    font-weight: bold;
+                                    color: #785459;
+                                    line-height: 40px;
+                                }
+                                .ad-btn{
+                                    width: 228px;
+                                    height: 76px;
+                                    align-items: center;
+                                    justify-content: center;
+                                    image{
+                                        width: 228px;
+                                        height: 76px;
+                                    }
+                                    text{
+                                        font-size: 34px;
+                                        font-weight: bold;
+                                        color: #FFFFFF;
+                                        line-height: 48px;
+                                        text-align: center;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .activity-line{
+                        width: 100%;
+                        height: 0px;
+                        border-top-color: #FF5B60;
+                        border-top-width: 1px;
+                        border-style: dashed;
+                        margin: 15px 0;
+                    }
+                    .sign-widget{
+                        margin: 16px 0px;
+                        justify-content: center;
+                        align-items: center;
+                        image{
+                            width: 520px;
+                            height: 180px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /* 公众号任务样式 */
+    .attention-tip-btn {
+        position: fixed;
+        bottom: 120px;
+        left: 105px;
+        width: 540px;
+    }
+    .attention-tip-btn image {
+        width: 540px;
+    }
+    .attention-tip-wrap {
+        flex-direction: column;
+        position: fixed;
+        top: 100px;
+        width: 100%;
+        height: 100%;
+        flex: 1;
+        background-color: #ffffff;
+        .attention-tip {
+            flex-direction: column;
+            padding: 40px 75px 40px;
+            margin-bottom: 200px;
+        }
+        .attention-tip-title {
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: rgba(60,60,60,1);
+            line-height: 42px;       
+        }
+        .attention-tip-row {
+            margin-top: 40px;
+            margin-bottom: 28px;
+        }
+        .attention-tip-num-bg {
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            margin-top: 4px;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255,137,112,1);
+            border-radius: 32px;
+        }
+        .attention-tip-num {
+            height: 32px;
+            font-size: 26px;
+            font-weight: bold;
+            color: rgba(255,255,255,1);
+        }
+        .attention-tip-desc {
+            line-height: 37px;
+            font-size: 26px;
+            color: rgba(60,60,60,1);
+        }
+        .attention-tip-desc-dark {
+            color: rgba(250, 100, 0, 1);
+        }
+        .attention-tip-image {
+            width: 600px;
+        }
+    }
+    /* 任务完成弹框样式 */
+    .task-success-box {
+        position: fixed;
+        top: 523px;
+        left: 175px;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px;
+        width: 400px;
+        background-color: rgba(0,0,0,0.7);
+        border-radius: 24px;
+        .icon {
+            margin-bottom: 24px;
+            width: 86px;
+            height: 90px;
+        }
+        .content {
+            line-height: 40px;
+            font-size: 26px;
+            color: rgba(255,255,255,1);
+            text-align: center;
+        }
+        .content-other {
+            line-height: 40px;
+        }
+    }
+    /* 任务完成提示 */
+    .task-info-wrap {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+        .task-info-box {
+            flex-direction: column;
+            width: 640px;
+            height: 281px;
+            .task-info-stack {
+                flex-direction: column;
+                align-items: center;
+            }
+            .task-info-image {
+                width: 260px;
+                height: 178px;
+            }
+            .task-info-text {
+                margin-top: 132px;
+                font-size: 28px;
+                color: #FD7851;
+                line-height: 40px;
+            }
+            .task-info-tip {
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-end;
+                margin-top: 105px;
+                width: 640px;
+                height: 176px;
+                background-color: #3B4651;
+                border-radius: 12px;
+                .task-info-tip-content {
+                    margin-bottom: 28px;
+                    color: #FFFFFF;
+                    font-size: 34px;
+                }
+                .task-info-btn {
+                    margin-bottom: 40px;
+                    color: #FFFFFF;
+                    font-size: 34px;
+                    width: 550px;
+                    height: 80px;  
+                    .task-info-btn-stack {
+                        width: 550px;
+                        height: 80px;  
+                    }
+                    .task-info-btn-image {
+                        width: 550px;
+                        height: 80px;
+                        resize-mode: stretch;
+                        object-fit: fill;
+                    }
+                    .task-info-btn-text {
+                        margin-left: 172px;
+                        font-size: 30px;
+                        color: #FFF6D6;
+                    }
+                }
+            }
+            .task-info-tip-max { height: 296px; }
+            .task-info-tip-normal { height: 176px; }
+            .task-info-close {
+                align-self: flex-end;
+                width: 54px;
+                height: 54px;
+            }
+        }
+        .task-info-box-max { height: 401px; }
+        .task-info-box-normal { height: 281px; }
+    }
+    .root {
+        flex-direction: column;
+        background-color: rgba(246,246,246,1);
+        align-items: center;
+    }
+    .banner-stack{
+        width: 100%;
+        margin-top: 100px;
+        justify-content: center;
+        image{
+            width: 100%;
+        }
+    }
+    .block-appear{
+        width: 100%;
+        height: 10px;
+    }
+    .banner-con{
+        width: 690px;
+        height: 248px;
+        margin-top: 30px;
+    }
+    .banner {
+        width: 100%;
+        height: 100%;
+        indicator-color: rgba(212,211,217,1);
+        indicator-selected-color: rgba(255, 91, 96, 1);
+        indicator-size: 16px;
+    }
+    .banner div {
+        width: 100%;
+        height: 330px;
+        border-radius: 12px;
+    }
+    .banner image {
+        width: 100%;
+        height: 248px;
+        border-radius: 12px;
+    }
+    .signboard {
+        padding: 0 20px;
+        margin-top: 25px;
+        justify-content: space-between;
+    }
+    .signboard .item {
+        flex-direction: column;
+    }
+    .signboard .item .tip {
+        width: 62px;
+        height: 78px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/new-no-singed.png);
+        flex-direction: column;
+    }
+    .signboard .item-new {
+        flex-direction: column;
+    }
+    .signboard .item-new .tip {
+        flex-direction: column;
+        width: 80px;
+        height: 98px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/nosign-nol.png);
+    }
+    .signboard .item-new-last .tip {
+        background-image: url(https://xsmfdq.kkyd.cn/images/nosign-last.png);
+    }
+    .signboard .item .tip .text1 {
+        font-size: 24px;
+        line-height: 24px;
+        margin-top: 5px;
+        color: #FFA000;
+        text-align: center;
+    }
+    .signboard .item-new .tip .text1 {
+        color: rgba(255, 246, 214, .6);
+        font-size: 26px;
+        line-height: 37px;
+        margin-top: 56px;
+        text-align: center;
+    }
+    .signboard .signed .tip {
+        width: 62px;
+        height: 78px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/new-singed.png);
+    }
+    .signboard .signed-new .tip {
+        width: 88px;
+        height: 100px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/signed-nol.png);
+    }
+    .signboard .signed-new-last .tip {
+        background-image: url(https://xsmfdq.kkyd.cn/images/signed-last.png);
+    }
+    .signboard .signed .tip .text1{
+        color: #FFFFFF;
+    }
+    .signboard .signed-new .tip .text1{
+        color: rgba(255, 246, 214, 1);
+    }
+    .signboard .item .day {
+        line-height: 33px;
+        font-size: 24px;
+        color: #444444;
+        text-align: center;
+        margin-top: 12px;
+    }
+    .signboard .item-new .day {
+        line-height: 33px;
+        font-size: 24px;
+        color: #444444;
+        text-align: center;
+        margin-top: 12px;
+    }
+    .signboard .signed .day {
+        color: #FF5B60;
+    }
+    .signboard .signed-new .day {
+        color: #FF5B60;
+    }
+    .continued {
+        padding-bottom: 30px;
+        margin: 30px 30px 0;
+        align-items: center;
+    }
+    .continued text {
+        height: 42px;
+        font-size: 30px;
+        color: #ff6f6f;
+    }
+    .continued .icon-question {
+        width: 34px;
+        height: 34px;
+        margin-left: 10px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/icon-question.png);
+    }
+    .rule {
+        flex-direction: column;
+        margin: 30px 30px 0;
+    }
+    .rule .tit {
+        font-size: 30px;
+        font-weight: bold;
+        color: rgba(112, 112, 112, 1);
+        line-height: 34px;
+        margin-bottom: 10px;
+    }
+    .rule .p1 {
+        font-size: 26px;
+        color: rgba(112, 112, 112, 1);
+        line-height: 34px;
+    }
+    .signbtn {
+        justify-content: center;
+    }
+    .signbtn .signed-text {
+        text-align: center;
+        width: 550px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 45px;
+        font-size: 30px;
+        background-color: #E7E7E7;
+        color: #AFAFAF;
+        font-weight: bold;
+    }
+    .signbtn .signed-video {
+        background-color: rgba(255, 91, 96, 1);
+        width: 550px;
+        height: 80px;
+        border-radius:45px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+    .signbtn .signed-video .icon {
+       width: 40px;
+       height: 40px;
+       margin-right: 8px;
+       margin-top: 20px;
+    }
+    .signbtn .signed-video text {
+        text-align: center;
+        height:80px;
+        line-height: 80px;
+        font-size: 30px;
+        color: #FFFFFF;
+        font-weight: bold;
+    }
+    .signbtn image {
+        width:550px;
+        height:80px;
+        margin-top: 15px;
+    }
+    .signboard .item .noprize,
+    .signboard .signed .noprize {
+        background-image: none;
+    }
+    .sign-tit{
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .signtip {
+        justify-content: flex-start;
+        font-size: 34px;
+        color: #444444;
+        font-weight: bold;
+        line-height: 48px;
+        margin-left: 20px;
+    }
+    .signtip .high-light{
+        color: #F97053;
+    }
+    .signInfo {
+        height: 37px;
+        font-size: 26px;
+        color: #444444;
+        line-height: 37px;
+        margin-right: 25px;
+    }
+    .huodong{
+        position: fixed;
+        top: 797px;
+        width: 254px;
+        height: 89px;
+        right: 0px;
+    }
+    .huodong image{
+        width: 254px;
+        height: 89px;
+    }
+    .btn-down {
+        position: fixed;
+        top: 940px;
+        width: 254px;
+        height: 89px;
+        right: 0px;
+    }
+    .btn-show {
+        right: 0px;
+        animation-name: btnShow;
+        animation-duration: 400ms;
+        animation-timing-function: ease-out;
+    }
+    @keyframes btnShow {
+        from {
+            transform: translateX(160px);
+        }
+        to {
+            transform: translateX(0px);
+        }
+    }
+    .btn-hide {
+        right: -160px;
+        animation-name: btnHide;
+        animation-duration: 400ms;
+        animation-timing-function: ease-out;
+    }
+    @keyframes btnHide {
+        from {
+            transform: translateX(-160px);
+        }
+        to {
+            transform: translateX(0px);
+        }
+    }
+    .itemwrap {
+        width: 100%;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+    .read-award-content {
+        margin-bottom: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        width: 690px;
+        padding-left: 20px;
+        padding-bottom: 30px;
+        padding-right: 32px;
+        padding-top: 20px;
+        flex-direction: column;
+        .l {
+            flex: 1;
+            flex-direction: column;
+            .txt1 {
+                font-weight: bold;
+                text-overflow: ellipsis;
+                lines: 1;
+                height: 48px;
+                color: #444444;
+                font-size: 34px;
+                line-height: 48px;
+            }
+             .dec-content {
+                height: 54px;
+                flex-direction: row;
+                margin-bottom: 32px;
+                 .txt2 {
+                    margin-top: 12px;
+                    text-overflow: ellipsis;
+                    lines: 1;
+                    height: 37px;
+                    color: #444444;
+                    font-size: 26px;
+                    line-height: 54px;
+                    .time {
+                        color: #F97053; 
+                    }
+                }
+                .btndiv {
+                   flex: 1;
+                    flex-direction: row-reverse;
+                     .receive {
+                        width: 154px;
+                        color: #F97053;
+                        text-align: center;
+                        height: 54px;
+                        font-size: 30px;
+                        border-radius: 100px;
+                        border: 1px solid #F97053;
+                        margin-right: 1px;
+                        margin-bottom: 1px;
+                    }
+                }
+            }
+        }
+        .r {
+            width: 610px;
+            margin-left: 20px;
+            justify-content: center;
+            align-items: center;
+            .mid-progress {
+                width: 100%;
+                height: 16px;
+                margin-top: 36px;
+                border-radius: 8px;
+                background-color: #F97053;
+            }
+            .award-content {
+                height: 129px;
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-around;
+                .gold-content {
+                    flex-direction: column;
+                    .succ-gold-icon {
+                        height: 88px;
+                        width: 88px;
+                        object-fit: cover;
+                        background-image: url(https://xsmfdq.kkyd.cn/images/succ_award.png);
+                    }
+                    .wait-gold-icon {
+                        height: 88px;
+                        width: 88px;
+                        object-fit: cover;
+                        background-image: url( https://xsmfdq.kkyd.cn/images/wait_award.png);
+                        .icon-text {
+                            text-align: center;
+                            width: 100%;
+                            font-size: 32px;
+                            color: #FFECB2;
+                        }
+                    }
+                   
+                    .award-time {
+                        margin-top: 8px;
+                        height: 33px;
+                        font-size: 24px;
+                        font-weight: normal;
+                        color: #785459;
+                        line-height: 33px;
+                        text-align: center;
+                    }
+                }          
+            } 
+        }
+    }
+    .raskwrap {
+        padding-bottom: 40px;
+        flex-direction: column;
+        align-items: center;
+    }
+    .raskbox {
+        flex-direction: column;
+        width: 690px;
+        border-radius: 12px;
+        background-color: #ffffff;
+        margin-bottom: 23px;
+    }
+    .raskbox .tit {
+        width: 690px;
+        height: 90px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/xinshou-task.png);
+        background-repeat: no-repeat;
+        background-size: 50px 50px;
+        background-position: 20px 23px;
+        align-items: center;
+        border-bottom-color: #dfdfdf;
+        border-bottom-width: 1px;
+    }
+    .raskbox .timg_1 {
+        background-image: url(https://xsmfdq.kkyd.cn/images/chengjiu-task.png);
+    }
+    .raskbox .timg_2 {
+        background-image: url(https://xsmfdq.kkyd.cn/images/richang-task.png);
+    }
+    .raskbox .tit .tit1 {
+        height: 54px;
+        align-items: flex-end;
+    }
+    .raskbox .tit .text1 {
+        font-size: 36px;
+        color: #444444;
+        padding-left: 30px;
+        font-weight: bold;
+        margin-left: 60px;
+    }
+    .raskbox .tit .text2 {
+        font-size: 26px;
+        color: #444444;
+    }
+    .raskbox .item {
+        padding: 20px 0 20px 20px;
+    }
+    .raskbox .item .l {
+        flex-direction: column;
+        flex: 1;
+    }
+    .raskbox .item .l .txt1 {
+        font-size: 30px;
+        color: #444444;
+        height: 42px;
+        lines: 1;
+        text-overflow: ellipsis;
+        font-weight: bold;
+    }
+    .raskbox .item .l .txt2 {
+        font-size: 26px;
+        color: #785459;
+        height: 37px;
+        lines: 1;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+    }
+    .raskbox .item .l .txt29 {
+        font-size: 26px;
+        lines: 2;
+        line-height: 36px;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+        span {
+            color: #785459;
+        }
+        .keywordIscur{
+            color: #DE8C7B;
+        }
+    }
+    .raskbox .item .l .txt3 {
+        font-size: 26px;
+        color: rgba(255, 111, 111, 1);
+        height: 37px;
+        lines: 1;
+        text-overflow: ellipsis;
+    }
+    .raskbox .item .l .txt4 {
+        font-size: 26px;
+        font-weight: normal;
+        color: rgba(0,172,225,1);
+        line-height: 37px;
+        text-decoration: underline;
+        margin-left: 15px;
+    }
+    .raskbox .item .l .coin {
+        align-items: center;
+        margin-top: 12px;
+    }
+    .raskbox .item .l .coin .icon-coin {
+        width: 30px;
+        height: 30px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/task-coin.png);
+    }
+    .raskbox .item .l .coin .txt3 {
+        font-size: 24px;
+        color: #F97053;
+        height: 33px;
+        margin-left: 10px;
+    }
+    .raskbox .item .r {
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        width: 194px;
+    }
+    .raskbox .item .r .btn {
+        width: 154px;
+        color: #F97053;
+        text-align: center;
+        height: 54px;
+        font-size: 30px;
+        border-radius: 100px;
+        border: 1px solid #F97053;
+        margin-right: 1px;
+        margin-bottom: 1px;
+    }
+    .raskbox .item .r .receive {
+        background-color: #F97053;
+        color: rgba(255, 255, 255, 1);
+        border: 0px;
+        width: 154px;
+        text-align: center;
+        height: 54px;
+        font-size: 30px;
+        border-radius: 100px;
+        margin-right: 1px;
+    }
+    .raskbox .item .r .txt1 {
+        font-size: 24px;
+        color: rgba(74, 74, 74, 1);
+        text-align: center;
+        line-height: 33px;
+    }
+    .raskbox .item .r .txt2 {
+        font-size: 30px;
+        background-color: #E7E7E7;
+        color: #BCBCBC;
+        width: 154px;
+        text-align: center;
+        height: 54px;
+        border-radius: 100px;
+    }
+    .progress {
+        width: 154px;
+        flex-direction: column;
+        margin-bottom: 12px;
+        margin-top: 11px;
+    }
+    progress {
+        color: #ff6f6f;
+        stroke-width: 10px;
+        width: 100%;
+    }
+    .rulebox {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        left: 0;
+        top: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .rulebox .txt {
+        width: 540px;
+        background-color: rgba(255, 255, 255, 1);
+        border-radius: 16px;
+        flex-direction: column;
+        padding: 20px 30px;
+    }
+    .rulebox .txt .tit1 {
+        font-size: 36px;
+        font-weight: bold;
+        color: rgba(102, 106, 125, 1);
+        line-height: 48px;
+        margin-top: 10px;
+    }
+    .rulebox .close {
+        width: 66px;
+        height: 66px;
+        background-image: url(https://xsmfdq.kkyd.cn/images/icon-close4.png);
+        margin-top: 40px;
+    }
+    .sign_tab_box {
+        margin-bottom: 5px;
+        padding: 22px 15px 0;
+        height: 120px;
+        border-top-color: #f6f6f6;
+        border-top-width: 20px;
+        justify-content: space-around;
+    }
+    .st_li {
+        margin-left: 15px;
+        margin-right: 15px;
+        height: 68px;
+    }
+    .stl_stack {
+        width: 160px;
+        height: 68px;
+    }
+    .stl_text {
+        width: 160px;
+        flex-direction: column;
+        align-items: center;
+    }
+    .stl_txt {
+        height: 60px;
+        text-align: center;
+        font-size: 36px;
+        color: #817272;
+        line-height: 60px;
+    }
+    .stl_txt_hover {
+        font-weight: bold;
+        color: #f97053;
+    }
+    .stl_border_hover {
+        height: 4px;
+        width: 86%;
+        background-color: #f97053;
+    }
+    .stl_red_dot {
+        height: 68px;
+        width: 100%;
+        background-position: right 8px;
+        background-image: url(https://xsmfdq.kkyd.cn/html/images/new_my/icon_9.png);
+        background-repeat: no-repeat;
+        background-size: 18px;
+    }
+    .share_popup_box {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        flex-direction: column;
+    }
+    .sob_xq {
+        flex: 1;
+    }
+    .sob_box {
+        height: 300px;
+        flex-direction: column;
+        background-color: #ffffff;
+    }
+    .sob_main {
+        flex: 1;
+        height: 212px;
+        background-color: #ffffff;
+        justify-content: space-around;
+    }
+    .sobm_li {
+        height: 100%;
+        padding: 30px 10px 0;
+        flex-direction: column;
+        align-items: center;
+    }
+    .sobml_img {
+        margin-bottom: 20px;
+        height: 96px;
+        width: 96px;
+    }
+    .sobm_li text {
+        height: 40px;
+        font-size: 26px;
+        color: #444444;
+        line-height: 40px;
+    }
+    .sob_close {
+        width: 100%;
+        height: 88px;
+        background-color: #f6f6f6;
+        font-size: 36px;
+        text-align: center;
+        line-height: 88px;
+    }
+    .video-prompt-btn{
+        align-items: center;
+        margin-top: 19px;
+    }
+    .video-prompt-btn image{
+        width: 36px;
+        height: 36px;
+        margin-right: 10px;
+    }
+    .video-prompt-btn .video-con{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+    }
+    .video-prompt-btn video{
+        width: 100%;
+        height: 100%;
+    }
+    .video-prompt-text{
+        font-size: 26px;
+        font-weight: normal;
+        color: rgba(173,173,173,1);
+        line-height: 37px;
+    }
+    .video-prompt-link{
+        font-size: 26px;
+        font-weight: normal;
+        color: rgba(0,172,225,1);
+        line-height: 37px;
+        text-decoration: underline;
+    }
+    .title-bar {
+        position: fixed;
+        width: 100%;
+        height: 100px;
+        background-color: #F97053;
+        padding: 0px 30px;
+        align-items: center;
+        .title-bar-image {
+            width: 40px;
+            height: 40px;
+            margin-right: 20px;
+        }
+        .title-bar-text {
+            font-size: 36px;
+            color: rgba(255,255,255,1);
+            font-weight: bold;
+        }
+    }
+    .sign-container-wrap {
+        justify-content: center;
+        width: 100%;
+        .sign-container-img {
+            width: 100%;
+            height: 120px;
+        }
+    }
+    .sign-container{
+        width: 690px;
+        background-color: rgba(255,255,255,1);
+        border-radius: 12px;
+        flex-direction: column;
+        padding: 30px 0px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        align-items: center;
+    }
+    .sign-btn-container{
+        margin-top: 30px;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0 20px;
+    }
+    .sign-btn{
+        width: 550px;
+        height: 80px;
+        background-color: #FF5B60;
+        border-radius: 45px;
+        text-align: center;
+        align-items: center;
+        font-size: 30px;
+        font-weight: bold;
+        color: #FFFFFF;
+        margin-top: 15px;
+    }
+    .title-rule {
+        font-size: 24px;
+        color: #FFFFFF;
+        width: 92px;
+        height: 44px;
+        background-color: #FF8970;
+        border-bottom-left-radius: 100px;
+        border-top-left-radius: 100px;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .scale-x{
+        animation-name: scalex;
+        animation-duration: 400ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out ;
+    }
+    @keyframes scalex {
+        0% {
+			transform: scaleX(1);
+		}
+        50% {
+			transform: scaleX(1.03);
+		}
+		100% {
+            transform: scaleX(1);
+		}
+    }
+    .qywx-attention{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.8);
+        justify-content: center;
+        align-items: center;
+        .pop{
+            width: 700px;
+            height: 834px;
+            margin-top: -84px;
+            .pop-w{
+                width: 600px;
+                height: 750px;
+                background-color: #fff;
+                padding: 0px 50px;
+                flex-direction: column;
+                border-radius: 36px;
+                margin: 84px auto 0;
+                .attention-tip-title {
+                    text-align: center;
+                    font-size: 36px;
+                    font-weight: bold;
+                    color: #444444;
+                    line-height: 42px;
+                    margin-top: 50px;
+                }
+                .attention-tip-row {
+                    margin-top: 18px;
+                }
+                .attention-tip-num-bg {
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 15px;
+                    margin-top: 4px;
+                    width: 34px;
+                    height: 34px;
+                    background-color: #F97053;
+                    border-radius: 32px;
+                }
+                .attention-tip-num {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: rgba(255,255,255,1);
+                }
+                .attention-tip-desc {
+                    line-height: 40px;
+                    font-size: 28px;
+                    color: rgba(60,60,60,1);
+                    width: 447px;
+                }
+                .attention-tip-desc-dark {
+                    color: #F97053;
+                }
+                .attention-tip-image {
+                    width: 500px;
+                    height: 300px;
+                    margin-top: 22px;
+                }
+                .attention-btn{
+                    width: 500px;
+                    height: 90px;
+                    margin-top: 30px;
+                    justify-content: center;
+                    align-items: center;
+                    image{
+                        width: 500px;
+                        height: 90px;
+                        resize-mode: contain;
+                        object-fit: contain;
+                    }
+                    text{
+                        font-size: 34px;
+                        color: #ffffff;
+                    }
+                }
+            }
+            .close{
+                margin-left: 640px;
+                margin-top: 10px;
+                width: 54px;
+                height: 54px;
+            }
+        }
+    }
+</style>
+<template>
+    <div class="root">
+        <div class="title-bar">
+            <image src="../Common/images/icon_back_white.png" @click="fnPageBackPress" class="title-bar-image"></image>
+            <text class="title-bar-text">{{ pageTitle }}</text>
+        </div>
+        <block if="{{bShow}}">
+            <list if="attentionTipShow&&attentionType==16" class="attention-tip-wrap" @click="vagueClick">
+                <list-item type="attention" class="attention-tip">   
+                    <text class="attention-tip-title">关注奖励领取流程</text>
+                    <div class="attention-tip-row">
+                        <div class="attention-tip-num-bg"><text class="attention-tip-num">1</text></div>
+                        <text class="attention-tip-desc"><span>点击下方按钮</span><span class="attention-tip-desc-dark">“去关注”</span><span>进入微信。</span></text>
+                    </div>
+                    <div class="attention-tip-row">
+                        <div class="attention-tip-num-bg"><text class="attention-tip-num">2</text></div>
+                        <text class="attention-tip-desc"><span>点击链接“点我，点我”</span><span class="attention-tip-desc-dark">（点击“发表”无奖励）</span></text>
+                    </div>
+                    <image class="attention-tip-image" src="https://xsmfdq.kkyd.cn/images/sign-attention-first.png"></image>
+                    <div class="attention-tip-row">
+                        <div class="attention-tip-num-bg"><text class="attention-tip-num">3</text></div>
+                        <text class="attention-tip-desc">{{'关注公众号，获得' + (isCoin ? '金币' : '书币')}}。</text>
+                    </div>
+                    <image class="attention-tip-image" src="https://xsmfdq.kkyd.cn/images/sign-attention-second-new.png"></image>
+                </list-item> 
+            </list>
+            <div if="attentionTipShow&&attentionType==16" class="attention-tip-btn">
+                <image src="https://xsmfdq.kkyd.cn/images/sign-attention-btn.gif" @click="fnAttentionClick"></image>
+            </div>
+            <div if="attentionTipShow&&attentionType==30" class="qywx-attention" @click="vagueClick">
+                <stack class="pop">
+                    <div class="pop-w">
+                        <text class="attention-tip-title">关注奖励领取流程</text>
+                        <div class="attention-tip-row">
+                            <div class="attention-tip-num-bg"><text class="attention-tip-num">1</text></div>
+                            <text class="attention-tip-desc"><span>点击下方按钮</span><span class="attention-tip-desc-dark">“去关注”</span><span>进入微信。</span></text>
+                        </div>
+                        <div class="attention-tip-row">
+                            <div class="attention-tip-num-bg"><text class="attention-tip-num">2</text></div>
+                            <text class="attention-tip-desc"><span>点击链接"点击本链接，添加客服好友"</span><span class="attention-tip-desc-dark">（点击“发表”无奖励）</span></text>
+                        </div>
+                        <image class="attention-tip-image" src="https://xsmfdq.kkyd.cn/images/qywx-attention.png"></image>
+                        <stack class="attention-btn" @click="fnAttentionClick">
+                            <image src="https://xsmfdq.kkyd.cn/images/notext-btn.png"></image>
+                            <text>去关注</text>
+                        </stack>
+                    </div>
+                    <image class="close" src="https://xsmfdq.kkyd.cn/images/short-close.png" onclick="fnCloseAttention"></image>
+                </stack>
+            </div>
+            <div class="new-coin-wrap" if="isCoin">
+                <text class="rules" @click="fnRoutetoRules">规则</text>
+                <text class="new-coin-title" @appear="blockAppear" @disappear="blockDisAppear">金币数量</text>
+                <div class="new-coin-box">
+                    <text class="new-coin-num"><span class="coin-num-big">{{coinInfo && coinInfo.num ? coinInfo.num : 0}}</span><span class="coin-num-small">{{coinInfo && coinInfo.num && coinInfo.num != 0 && coinInfo.text && coinInfo.text != 0 ? ('≈' + coinInfo.text + '元') : ''}}</span></text>
+                    <text class="new-coin-btn" @click="fnRouteToCoin">去提现</text>
+                </div>
+            </div>
+            <stack class="banner-stack" if="!isCoin">
+                <div class="block-appear" @appear="blockAppear" @disappear="blockDisAppear"></div>
+                <image src="https://xsmfdq.kkyd.cn/images/sign-swiper-bk.png" if="{{oper&&oper.length}}"></image>
+                <div class="banner-con" if="{{oper&&oper.length}}">
+                    <swiper class="banner"  autoplay="true" loop="true" indicator="true">
+                        <block for="oper">
+                            <div @click="fnMessage($item,'0',$idx)" @appear="fnSwiperAppear($item)">
+                                <image src="{{$item.imgUrl}}"></image>
+                            </div>
+                        </block>
+                    </swiper>
+                </div>
+            </stack>
+            <stack class="sign-container-wrap">
+                <image if="isCoin && !isFoldAble" class="sign-container-img" src="https://xsmfdq.kkyd.cn/images/sign-bg.png"></image>
+                <div class="sign-container">
+                    <div class="sign-tit">
+                        <text class="signtip">明日签到再得<span class="high-light">{{waitAwardIndex != 8 ? signRecordVos[waitAwardIndex].num : signRecordVos[0].num}}</span>金币</text>
+                        <text class="signInfo" @click="fnOpenSignPop">已连续签到<span style="color:#F97053;">{{waitAwardIndex == 8 ? 7 : waitAwardIndex}}</span>/7天 ></text>
+                        <!-- <text if="{{!attentionTipShow&&bShow}}" class="title-rule" @click="fnShowRule">规则</text> -->
+                    </div>
+                    <div class="sign-btn-container">
+                        <div class="signbtn">
+                            <div if="{{ isShowShare && isSignShare}}" class="signed-video"   @click="signAwardShare">
+                                <image src="https://xsmfdq.kkyd.cn/images/sign_chat_icon.png" class="icon"></image>
+                                <text>分享好友再得{{shareAwardInfo.shareAwardCoin}}金币</text>
+                            </div>
+                            <div elif="{{!(isShowShare && isSignShare) && isSign > 0 && isSignAd && (signAdInfo.taskStatus === 0 || signAdInfo.taskStatus === 1) && sitenum != '4' }}"   class=" signed-video" @click="fnSignAdClick">
+                                <image src="https://xsmfdq.kkyd.cn/images/sign_video_icon.png" class="icon"></image>
+                                <text>看视频再得{{signAdInfo.taskAward + (isCoin ? '金币' : '书币')}}</text>
+                            </div>
+                            
+                            <text elif="{{ isSign > 0 }}" class="signed-text">{{signButtonText?signButtonText:'今日已签到'}}</text>
+                            <!-- <div else style="width:100%;justify-content: center;"><text class="sign-btn scale-x" @click="fnSign">点击签到</text></div> -->
+                        </div>
+                        <div class="huodong {{btnStatus=='hide'?'btn-hide':btnStatus=='show'?'btn-show':''}}  {{showReadTaskInfo?'btn-down':''}}" if="{{!isTaskInfo&&signWidget&&(signWidget.type>=1&&signWidget.type<=8||signWidget.type==14)&&!isSignVideoShow&&!isTaskVideoShow&&!isInfoVideoShow&&!isSignAdShow&&!isTaskAdShow&&!isInfoAdShow&&!shareshow&&!showSignBox}}" @click="fnMessage(signWidget,'1',0)">
+                            <image src="{{signWidget.imgUrl}}"></image>
+                        </div>
+                    </div>
+                </div>
+            </stack>
+            <div class="read-award-content" if="{{isCoin&&showReadTaskInfo}}">
+                <div class="l">
+                    <div>
+                        <text class="txt1">阅读领金币</text>
+                    </div>
+                    <div class="dec-content">
+                        <text class="txt2">今日已阅读：<span class="time">{{actualRead}}分钟</span></text>
+                         <div class="btndiv"  @click="fnToBookShell"><text class="receive">去阅读</text></div>
+                    </div>
+                </div>
+                <div class="r">
+                    <stack>
+                        <div class="mid-progress"></div>
+                        <div class="award-content">
+                            <block for="item in readTaskInfo.stageReadAwardList">
+                                <div class="gold-content" >
+                                     <div class="{{item.awardReceiveFlag==1?'succ-gold-icon':'wait-gold-icon'}}">
+                                         <text if="{{item.awardReceiveFlag!=1}}" class="icon-text">{{item.award}}</text>
+                                     </div>
+                                     <text class="award-time">{{item.duration}}分钟</text>
+                                </div>                        
+                            </block>
+                        </div>
+                    </stack>
+                </div>           
+            </div> 
+            <div class="raskwrap">
+                <block for="(index,task) in taskSetList" if="{{!(task.taskType == 2 && isDayTaskHide)}}">
+                    <div class="raskbox">
+                        <div class="tit {{task.taskType==1?'timg_1':task.taskType==2?'timg_2':''}}">
+                            <div class="tit1"><text class="text1">{{task.taskSetTitle}}</text><text if="{{task.taskType==2}}" class="text2">（每日0点重置）</text></div>
+                        </div>
+                        <div class="item" for="{{task.taskList}}" if="!((($item.taskAction==6||$item.taskAction==7||$item.taskAction==8||$item.taskAction==16||$item.taskAction==17||$item.taskAction==30||$item.taskAction==32) && isshare == 2) || (($item.taskAction==6||$item.taskAction==7||$item.taskAction==8) && !isDayShare) || ($item.taskAction==31 && !isSupportHBT) || ($item.taskAction==34 && !isInstallAppShow) || $item.taskAction==36 || $item.taskAction==4 || (($item.taskAction==3 || $item.taskAction==5 || $item.taskAction==20 || $item.taskAction==26) && isCoin) || ($item.taskAction==15 && isNewTaskVideo))">
+                            <div class="l">
+                                <div><text class="txt1">{{$item.taskTitle}}</text><text class="txt4" if="{{$item.taskAction==18&&$item.taskStatus!=1}}" @click="fnFinishRask($item.taskId,$item.taskAction,$item.taskStatus,{},$item)">查看</text></div>
+                                <text class="txt3" if="$item.taskStatus==2&&$item.taskAction == 1&&!hasOpenApp">已添加，从手机桌面打开即可领取奖励</text>
+                                <div else>
+                                    <text class="txt29" if="{{$item.taskAction==29}}">
+                                        <block for="{{(index,value) in readTipsNew}}">
+                                            <span class="{{index == 1 ? 'keywordIscur' : ''}}">{{value}}</span>
+                                        </block>
+                                    </text>
+                                    <text class="txt2" else>{{$item.tips}}</text>
+                                </div>
+                                <div class="coin" if="{{$item.taskStatus!=0&&$item.taskAward!=0}}">
+                                    <div class="icon-coin"></div> <text class="txt3">{{$item.taskAward + (isCoin ? '金币' : '书币')}}</text>
+                                </div>
+                                <div if="{{adv == 1 && $item.taskAction == 1}}" class="video-prompt-btn">
+                                    <text class="video-prompt-text">不知道怎么操作？</text>
+                                    <image src="../Common/images/video.png" onclick="playVideoPrompt"></image>
+                                    <text class="video-prompt-link" onclick="playVideoPrompt">查看操作视频</text>
+                                    <div class="video-con" if="{{videoClick}}"><video src="{{videoPrompt}}" onfullscreenchange="fullscreenchangeHandle" onfinish="finishHandle" id="video"></video></div>
+                                </div>
+                            </div>
+                            <div class="r">
+                                <block if="{{task.taskType==1}}">
+                                    <block if="{{$item.taskAction==18}}">
+                                        <div class="btndiv" if="$item.taskStatus==1" @click="fnFinishRask($item.taskId,$item.taskAction,$item.taskStatus,{},$item)"><text class="btn">去设置</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                    <block elif="{{$item.taskAction == 34 || $item.taskAction == 35}}">
+                                        <div class="btndiv" if="$item.taskStatus==1" @click="fnFinishRask($item.taskId,$item.taskAction,$item.taskStatus,{},$item)"><text class="btn">去打开</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                    <block else>
+                                        <block  if="$item.taskStatus==2&&$item.taskAction == 1&&!hasOpenApp">
+                                            <div class="btndiv"><text class="btn" @click="showOpensite">去打开</text></div>
+                                        </block>
+                                        <block else>
+                                            <div class="btndiv" if="$item.taskStatus==1" @click="fnFinishRask($item.taskId,$item.taskAction,$item.taskStatus,{},$item)"><text class="btn">去完成</text></div>
+                                            <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                            <text class="txt2" else>已领取</text>
+                                        </block>
+                                    </block>
+                                </block>
+                                <block if="{{task.taskType==2}}">
+                                    <block if="{{$item.taskAction==6||$item.taskAction==7||$item.taskAction==8}}">
+                                        <div class="btndiv" if="$item.taskStatus==1" @click="listshare('task', $idx, $item.taskTitle,$item.isshare)"><text class="btn">去分享</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                    <block elif="{{$item.taskAction==19}}">
+                                        <div class="btndiv" if="$item.taskStatus==1"><text class="btn">待完成</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                     <block elif="{{$item.taskAction==29}}">
+                                         <text class="txt1" if="$item.taskStatus!=3">{{$item.proNum}}/{{$item.totalNum}}分钟</text>
+                                        <div class="progress" if="$item.taskStatus!=3"><progress percent="{{($item.proNum/$item.totalNum)*100}}"></progress></div>
+                                         <div class="btndiv" if="$item.taskStatus==1" @click="fnFinishRask($item.taskId,$item.taskAction,$item.taskStatus,$item.bookVo,$item)"><text class="btn">去阅读</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                    <block else> 
+                                        <text class="txt1" if="$item.taskAction==4">{{$item.proNum}}/{{$item.totalNum}}分钟</text>
+                                        <div class="progress" if="$item.taskAction==4"><progress percent="{{($item.proNum/$item.totalNum)*100}}"></progress></div>
+                                        <text class="txt1" if="$item.taskAction==5">{{$item.proNum}}/{{$item.totalNum}}章</text>
+                                        <div class="progress" if="$item.taskAction==5"><progress percent="{{($item.proNum/$item.totalNum)*100}}"></progress></div>
+                                        <text class="txt1" if="$item.taskAction==15 || $item.taskAction==42">{{$item.proNum}}/{{$item.totalNum}}次</text>
+                                        <div class="progress" if="$item.taskAction==15 || $item.taskAction==42"><progress percent="{{($item.proNum/$item.totalNum)*100}}"></progress></div>
+                                        <div class="btndiv" if="$item.taskStatus==1" @click="fnFinishRask($item.taskId,$item.taskAction,$item.taskStatus,{},$item)"><text class="btn">去完成</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                </block>
+                                <block if="{{task.taskType==8}}">
+                                    <block if="{{$item.taskAction==26}}">
+                                        <div class="btndiv" if="$item.taskStatus==1" @click="fnFinishRask($item.taskId,$item.taskAction,$item.taskStatus,{},$item)"><text class="btn">去完成</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                    <block else>
+                                        <div class="btndiv" if="$item.taskStatus==1"><text class="btn">待完成</text></div>
+                                        <div class="btndiv" elif="$item.taskStatus==2" @click="fnReceiveRask($item.taskId,$item.taskAction,task.taskType,index,$idx)"><text class="receive">领取</text></div>
+                                        <text class="txt2" else>已领取</text>
+                                    </block>
+                                </block>
+                            </div>
+                        </div>
+                    </div>
+                </block>
+                <div class="rulebox" if="bRuleShow" @click="vagueClick">
+                    <div class="txt">
+                        <text class="tit1">签到规则</text>
+                        <text for="{{signRuleArr}}">{{$item}}</text>
+                    </div>
+                    <div class="close" @click="fnHideRule"></div>
+                </div>
+            </div>
+
+            <!-- 签到分享弹框 -->
+            <div class="sign_popup_box" if="{{shareshow}}" @click="vagueClick">
+                <stack class="pop-stack {{sitenum=='2'?'pop-stack-fail':'pop-stack-succ'}}">
+                    <image if="{{sitenum=='1'}}" class="pop-bg" src="https://xsmfdq.kkyd.cn/images/sign-bg-success.png"></image>
+                    <image if="{{sitenum=='2'}}" class="pop-bg" src="https://xsmfdq.kkyd.cn/images/sign-bg-fail.png"></image>
+                    <image if="{{sitenum=='3'||sitenum=='4'}}" class="pop-bg" src="https://xsmfdq.kkyd.cn/images/sign_bg_coin.png"></image>
+                    <div class="pop-main">
+                        <div class="pop-tit">
+                            <block if="{{sitenum=='1'}}">
+                                <text class="tit">签到成功</text>
+                                <text class="award"><span class="nol">获得</span><span class="light">{{sbnum}}</span><span class="nol">{{isCoin ? '金币' : ('书币，有效期为' + awardValidity + '天')}}</span></text>
+                            </block>
+                            <block if="{{sitenum=='2'}}">
+                                <text class="tit">分享失败</text>
+                                <text class="award"><span class="nol">重新分享可获得</span> <span class="light">{{shareAwardInfo.shareAwardCoin}} </span> <span class="nol">{{isCoin ? '金币' : '书币'}}</span></text>
+                            </block>
+                            <block if="{{sitenum=='3'}}">
+                                <text class="tit">分享成功</text>
+                                <text class="award"><span class="nol">获得</span><span class="light">{{shareAwardInfo.shareAwardCoin}}</span><span class="nol">{{isCoin ? '金币' : ('书币，有效期为' + awardValidity + '天')}}</span></text>
+                            </block>
+                            <block if="{{sitenum=='4'}}">
+                                <text class="tit">看视频成功</text>
+                                <text class="award"><span class="nol">获得</span><span class="light">{{signAdInfo.taskAward}}</span><span class="nol">{{isCoin ? '金币' : '书币'}}</span></text>
+                            </block>
+                        </div>
+                         <stack class="confirm-btn" @click="signAwardShare" if="{{isShowShare&&isSignShare}}">
+                            <image src="https://xsmfdq.kkyd.cn/images/sign-confirm-btn.png"></image>
+                            <text>分享好友再得{{shareAwardInfo.shareAwardCoin}}金币</text>
+                        </stack>
+                        <stack class="confirm-btn" @click="fnSignAdClick" elif="{{!isShowShare && isSign > 0 && isSignAd && (signAdInfo.taskStatus === 0 || signAdInfo.taskStatus === 1) && sitenum != '4' }}">
+                            <image src="https://xsmfdq.kkyd.cn/images/sign-confirm-btn.png"></image>
+                            <text>看视频再得{{signAdInfo.taskAward}}金币</text>
+                        </stack>
+                        <stack class="confirm-btn" @click="closepopupshow" else>  
+                            <image src="https://xsmfdq.kkyd.cn/images/sign-confirm-btn.png"></image>
+                            <text>确定</text>
+                        </stack>
+                    </div>
+                    <image class="pop-close" @click="closepopupshow" src="https://xsmfdq.kkyd.cn/images/sign-bg-close.png"></image>
+                </stack>
+            </div>
+            
+            <sign-pop if={{showSignBox}}
+                sign-record-vos="{{signRecordVos}}" 
+                video-entrance="{{isSign > 0 && isSignAd && (signAdInfo.taskStatus === 0 || signAdInfo.taskStatus === 1) && sitenum != '4'}}" 
+                share-entrance="{{isShowShare && isSignShare}}"
+                share-award-coin={{shareAwardInfo.shareAwardCoin}}
+                video-award={{signAdInfo.taskAward}}
+                @fn-close-sign-pop="fnCloseSignPop"
+                is-show-sign-remind-entrance="{{ isShowSignRemindEntrance }}"
+                sign-remind-Info="{{ signRemindInfo }}"
+             ></sign-pop>
+
+            <!-- 分享box -->
+            <div class="share_popup_box" if="{{sharetabshow}}" @click="vagueClick">
+                <div class="sob_xq"></div>
+                <div class="sob_box">
+                    <div class="sob_main">
+                        <div class="sobm_li" @click="sharefriends">
+                            <image src="https://xsmfdq.kkyd.cn/html/images/new_my/icon_15.png" class="sobml_img"></image>
+                            <text>分享给好友</text>
+                        </div>
+                        <div class="sobm_li" @click="sharecircle(false)">
+                            <image src="https://xsmfdq.kkyd.cn/html/images/new_my/icon_16.png" class="sobml_img"></image>
+                            <text>分享到朋友圈</text>
+                        </div>
+                    </div>
+                    <text class="sob_close" @click="closetabshow">取消分享</text>
+                </div>
+            </div>
+            <!-- <dialog-h5 location="{{location}}" is-coin="{{isCoin}}"></dialog-h5> -->
+        </block>
+        <back-baidu></back-baidu>
+        <shortcut-success if={{isShortpop}} type="{{shortType}}" @closeshortpop='closeshortpop'></shortcut-success>
+        <coin-toast if={{isShowToast}} message="{{toastMessage}}" time="{{toastTime}}" @close-toast='closeToast'></coin-toast>
+        <!-- <div class="task-success-box" if="{{ isTaskSuccess }}">
+            <image src="https://xsmfdq.kkyd.cn/images/video-icon-coin.png" class="icon"></image>
+            <text class="content content-other" if="taskSuccessMessage.indexOf('，') == -1">{{ taskSuccessMessage }}</text>
+            <text class="content" if="taskSuccessMessage.indexOf('，') > -1">{{ taskSuccessMessage.split('，')[0] }}</text>
+            <text class="content" if="taskSuccessMessage.indexOf('，') > -1">{{ taskSuccessMessage.split('，')[1] }}</text>
+        </div> -->
+        <div class="task-info-wrap" if="{{ isTaskInfo }}" @click="vagueClick">
+            <div class="task-info-box {{ isHasTipVideo ? 'task-info-box-max' : 'task-info-box-normal' }}">
+                <stack class="task-info-stack">
+                    <div class="task-info-tip {{ isHasTipVideo ? 'task-info-tip-max' : 'task-info-tip-normal' }}">
+                        <text class="task-info-tip-content">{{ taskSuccessMessage }}</text>
+                        <div class="task-info-btn" if="{{ isHasTipVideo }}" @click="fnInfoAdClick">
+                            <stack class="task-info-btn-stack">
+                                <image class="task-info-btn-image" src="https://xsmfdq.kkyd.cn/images/task-tip-video.png"></image>
+                                <text class="task-info-btn-text">{{ infoAdInfo ? ('看视频再得' + infoAdInfo.taskAward + (isCoin ? '金币' : '书币')) : ('看视频再得' + (isCoin ? '金币' : '书币')) }}</text>
+                            </stack>
+                        </div>
+                    </div>
+                    <image class="task-info-image" src="https://xsmfdq.kkyd.cn/images/task-tip-award.png"></image>
+                    <text class="task-info-text">领取成功</text>
+                    <image if="{{ isHasTipVideo || (isHasTipAd && hasGetTipAd) }}" class="task-info-close" src="https://xsmfdq.kkyd.cn/images/task-tip-close.png" @click="fnCloseTip"></image>
+                </stack>
+            </div>
+            <ad-union
+                if="isHasTipAd"
+                ad-unit-id="{{ tipAdId }}" 
+                ad-type="tip"
+                ad-alias="infoMessage"
+                onstart-count="fnStartCount"
+                onstop-count="fnStopCount"
+                onfn-ad-click="fnCloseTip"
+                onfn-get-ad="fnGetTipAd"
+                other-info="{{ adOtherInfo }}"
+                brand-ad-switch="{{ brandAdSwitch }}"
+            ></ad-union>
+        </div>
+        <withdraw-pop if={{isWithdrawPopShow}}></withdraw-pop>
+
+        <ad-union
+            ad-unit-id="{{ signAdId }}" 
+            ad-type="video"
+            ad-alias="signVideo"
+            video-show="{{isSignVideoShow}}"
+            video-ad-show="{{isSignAdShow}}"
+            ad-init-function="signVideoInit"
+            video-close-function="signVideoClose"
+            ad-close-function="signAdClose"
+            onvideo-show="fnVideoShow"
+            onvideo-close="fnVideoClose"
+            onvideo-ad-show="fnVideoAdShow"
+            onvideo-ad-close="fnVideoAdClose"
+            onvideo-end="fnVideoEnd"
+            onbrand-video-show="fnBrandVideoShow"
+            other-info="{{ signAdInfo }}"
+        ></ad-union>
+        <ad-union
+            ad-unit-id="{{ taskAdId }}" 
+            ad-type="video"
+            ad-alias="taskVideo"
+            video-show="{{isTaskVideoShow}}"
+            video-ad-show="{{isTaskAdShow}}"
+            ad-init-function="taskVideoInit"
+            video-close-function="taskVideoClose"
+            ad-close-function="taskAdClose"
+            onvideo-show="fnVideoShow"
+            onvideo-close="fnVideoClose"
+            onvideo-ad-show="fnVideoAdShow"
+            onvideo-ad-close="fnVideoAdClose"
+            onvideo-end="fnVideoEnd"
+            onbrand-video-show="fnBrandVideoShow"
+            other-info="{{ taskAdInfo }}"
+        ></ad-union>
+        <ad-union
+            ad-unit-id="{{ infoAdId }}" 
+            ad-type="video"
+            ad-alias="infoVideo"
+            video-show="{{isInfoVideoShow}}"
+            video-ad-show="{{isInfoAdShow}}"
+            ad-init-function="infoVideoInit"
+            video-close-function="infoVideoClose"
+            ad-close-function="infoAdClose"
+            onvideo-show="fnVideoShow"
+            onvideo-close="fnVideoClose"
+            onvideo-ad-show="fnVideoAdShow"
+            onvideo-ad-close="fnVideoAdClose"
+            onvideo-end="fnVideoEnd"
+            onbrand-video-show="fnBrandVideoShow"
+            other-info="{{ infoAdInfo }}"
+        ></ad-union>
+    </div>
+</template>
+<script>
+// import configuration from '@system.configuration';
+import device from '@system.device';
+import storage from '@system.storage';
+import router from '@system.router';
+import prompt from '@system.prompt';
+import shortcut from '@system.shortcut';
+import share from '@system.share'
+import shareSe from '@service.share';
+import app from '@system.app';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+import audio from '@system.audio';
+
+import { resources } from '../Common/js/videoPromptResources.js';
+import network from '@system.network'
+import account from '@service.account'
+import pkg from '@system.package'
+export default {
+    public: {
+        bShow: false,
+        signData: {
+            isSign: '',
+            continueDay: ''
+        },
+        isSign:false,
+        continueDay:0,
+        signWidget:'',
+        popWidget:'',
+        oper: {
+            img: '',
+            type: '',
+            typeInfo: ''
+        },
+        signRecordVos: [],
+        bRuleShow: false,
+        taskSetList: [],
+        appName: '',
+
+
+        shareActionTime: 0,
+        oshareAction: false,
+        isFirstShow: true,
+        shareEndTime: 0,
+        scallbackTime: 0,
+        sitenum: '1',
+        isshare: 2,
+        sbnum:0,
+        oissign:false,
+        /**
+         * spbbg_1  书币两倍
+         * spbbg_2  书币两倍失败
+         * spbbg_3  0书币
+         * spbbg_4  0书币失败
+         */
+        sharebg: 'spbbg_0',
+        sharebuttxt: '分享领双倍',
+        shareshow: false,
+        tabend: true,
+        sgetprovider: '',
+        shareinfo: [],
+        ogetavailableplatforms: '',
+        sharenum: 0,
+        ofastAppShareVo: {},
+
+        /**
+         * 
+         */
+        sharetabshow: false,
+        fastshowdot:{
+            tabshow_1:false,
+            tabshow_2:false,
+            tabshow_3:false
+        },
+        ajaxLock:true,
+        jobId:'',
+        videoClick:false,
+        hasSignwidget:false,
+        readTaskInfo: {},     //阅读时长任务
+        showReadTaskInfo: false, //是否展示阅读领取金币任务
+        actualRead: 0,  //实际阅读时长
+    },
+    protected: {
+        tabindex: 0,
+        fromRecharge:false,
+        location:'7',
+        shareSite:'',
+        isShowToast:false,
+		toastMessage:'已发放至您的账户',
+        toastTime:3000,
+        omap:'',
+        isSignUp:0,
+        signButtonText:'',
+        signTimeText:'',
+        receiveNum:'',
+        shareAwardNum:'',
+        awardValidity:'',
+        signRule:'',
+        signRuleArr:'',
+        sourcePage: '', // 来源页面
+        isDayShare: true,//是否支持日常分享
+        txtName: '', // APP名称 点众、河马
+    },
+    private: {
+        videoPrompt: 'https://qng.hzage.cn/others/app/guid/huawei-xsdq.mp4',
+        isVideoPlaying: false,
+        adv: 0,
+        isShortpop:false,
+        shortType:'1',
+        hasShowSuccess:false,
+        hasOpenApp:false,
+        firstrend:true,
+        hasShowOpen:false,
+        // 公众号分享任务数据
+        attentionShareVo: {},
+        attentionTipShow: false,
+        attentionArr: [], // 公众号数组
+        attentionId: 0, // 公众号id
+        pageTitle:'',
+        btnStatus:'',
+        isSignVideoLoading: false, // 签到视频加载
+        isTaskVideoLoading: false, // 任务视频加载
+        isSingleAdLoading: false, // 单个激励视频加载
+        isInfoAdLoading: false, // 提示视频加载
+        isSignVideoShow: false, // 签到视频展示
+        isTaskVideoShow: false, // 任务视频展示
+        isInfoVideoShow: false, // 提示视频展示
+        isSignAdShow: false, // 签到视频尾帧展示
+        isTaskAdShow: false, // 任务视频尾帧展示
+        isInfoAdShow: false, // 提示视频尾帧展示
+        isTaskSuccess: false, // 任务成功标识
+        taskSuccessMessage: '', // 任务成功提示
+        isSignAd: false, // 签到视频开关
+        // 签到视频信息
+        signAdInfo: {
+            taskAward: 0
+        },
+        // 签到弹窗分享奖励信息
+        shareAwardInfo: {
+            shareAwardCoin: 0
+        },
+        taskAdInfo: {}, // 任务视频信息
+        infoAdInfo: {}, // 提示视频信息
+        isNeedRefresh: false, // 需要刷新列表
+        isSingleAdTask: false, // 是否是单个激励视频任务
+        videoTimes: 0, // 视频播放时间
+        canShowPop: true, // 能否展示开屏
+        keywordBook: '',
+        readTipsNew: [], // taskAction==29,tips
+        isSignShare: false, // 签到分享支持
+        isTaskInfo: false, // 是否展示了任务完成提示
+        isHasTipVideo: false, // 是否有视频任务
+        isHasTipAd: false, // 是否有提示广告
+        hasGetTipAd: false, // 提示广告获取成功
+        isToWeb: false, // 延时请求
+        tipCloseTimeout: null, // tip关闭计时
+        adOtherInfo: {}, // 广告策略信息
+        attentionType:'',
+        ofastAppShareVoList:[],
+        isAttention: false,
+        isSupportHBT: false, // 是否支持华为服务
+        huaweiHBT: null,
+        isAdPopShow: false, // 广告弹窗显示
+        isSupportVivoPush: false, // 是否支持vivoPush
+        vivoPush: null, // vivoPush实例
+        shareAmount: '', // 奖励金额
+        shareRatio: '', // 奖励百分比
+        isDayTaskHide: false, // 屏蔽日常任务
+        isCoin: false, // 金币模式
+        isInstallAppShow: false, // 是否下载应用
+        coinInfo: {}, // 金币详情
+        urlPakVo: {}, // 提现信息
+        isSupportPayOut: 2, // 支持提现
+        isWithdrawPopShow: false, // 提现弹窗
+        isVideoShow: false, // 视频播放过
+        signAdId: '5001199000', // 签到激励视频广告位id
+        taskAdId: '5001198908', // 任务激励视频广告位id
+        infoAdId: '5001199101', // 任务完成激励视频广告位id
+        tipAdId: '5001199202', // 任务完成信息流广告位id
+        brandAdSwitch: false, // 支持新版厂商广告开关
+        showSignBox: false,  // 签到弹窗
+        isShowShare: false,   //签到分享展示
+        waitAwardIndex: 0,  //下次签到index
+        calenderbuttonText: '', // 日历备注
+        signLock: false,    // 签到锁
+        isNewTaskVideo: false, // 日常任务激励视频
+        isFoldAble: false, // 折叠屏
+
+        // 签到提醒信息
+        isShowSignRemindEntrance: false,
+        signRemindInfo: {
+            title: '',
+            remindDescription: '',
+            remindTime: '08:00'
+        },
+    },
+    blockAppear(){
+        if(this.btnStatus == 'hide'){
+            this.btnStatus = 'show'
+        }
+    },
+    blockDisAppear(){
+        if(this.btnStatus == 'show'||this.btnStatus == ''){
+            this.btnStatus = 'hide'
+        }
+    },
+    formatBrand(brand) {
+        brand = brand.toLowerCase()
+        let result = ''
+        switch(brand){
+            case 'honor':
+            case 'huawei':
+                result = 'huawei';break
+            case 'redmi':
+            case 'xiaomi':
+                result = 'xiaomi';break
+            case 'oppo':
+                result = 'oppo';break
+            case 'vivo':
+                result = 'vivo';break
+            default :
+                result = 'huawei'
+        }
+        return result
+    },
+    fullscreenchangeHandle(data) {
+        console.log('exit fullscreen',data)
+        if (!data.fullscreen) {
+            this.exitVideo()
+        }
+    },
+    finishHandle() {
+        this.exitVideo()
+        this.$app.$def.quickappLog([703, {
+            qmap:{
+                site: '2',
+            }
+        }, 'task_video_prompt'], this)
+    },
+    exitVideo(){
+        this.$element('video').pause()
+        this.videoClick = false
+        this.isVideoPlaying = false
+        network.unsubscribe()
+    },
+    //去阅读
+    fnToBookShell() {
+        router.clear();
+        router.replace({
+            uri: '/Index',
+            params: {
+                cardIndex: 0
+            }
+        })
+    },
+    playVideoPrompt() {
+        let that = this
+        this.videoClick = true
+        setTimeout(() => {
+            that.isVideoPlaying = true
+            that.$element('video').start()
+            that.$element('video').setCurrentTime({ currenttime: 0 })
+        }, 200);
+        network.subscribe({
+            callback: function (data) {
+                if (data.type !== 'wifi' && data.type!== 'none') {
+                    prompt.showToast({
+                        message: '当前处在非WiFi环境，注意流量消耗哦！',
+                        duration: 1
+                    })
+                }
+            }
+        })
+        this.$app.$def.quickappLog([702,{
+            qmap:{
+                event:'click_task_play_video'
+            }
+        },'task_video_prompt'], this);
+    },
+    onInit() {
+        let that = this;
+        try {
+            const configuration = require('@system.configuration')
+            const foldableState = configuration.getFoldableState && configuration.getFoldableState() || false;
+            if(foldableState) {
+                that.isFoldAble = foldableState === 1 || foldableState === 2
+            }
+        } catch(e) {}
+        that.$app.$def.fnCreateAd.call(that);            // 创建当前页面的广告存储对象
+        // vivopush支持判断
+        try {
+            if(account.getProvider().toLowerCase() == 'vivo' && that.$app.$def.fnVivoPushSupport(that)) {
+                account.isLogin({
+                    success: function (data) {
+                        if(data.isLogin) {
+							try {
+								that.vivoPush = require('@system.vivopush')
+								if(that.vivoPush && that.vivoPush.getstate) {
+									that.vivoPush.getstate({
+										success: function() {
+											that.isSupportVivoPush = true
+										}
+									})
+								}
+							}catch(e) {}
+                        }
+                    }
+                })
+            }
+        } catch(e) {}
+        that.$app.$def.getStorageFile(that, {
+            key: 'videoTimes',
+            success: function (data) {
+                if(data) {
+                    that.videoTimes = parseInt(data)
+                }
+            }
+        })
+        // if(that.$app && that.$app.headerJson && that.$app.headerJson.pfvc && that.$app.headerJson.pfvc >= 1077 && that.$app.headerJson.brand && (that.$app.headerJson.brand.toLowerCase() == 'huawei' || that.$app.headerJson.brand.toLowerCase() == 'honor')) {
+        //     try {
+        //         that.huaweiHBT = require('@hmscore/hms-js-hbt').default
+        //         if(that.huaweiHBT && that.huaweiHBT.agreeFollow) {
+        //             that.isSupportHBT = true
+        //         }
+        //     }catch(e) {}
+        // }else {
+        //     that.isSupportHBT = false
+        // }
+        this.fnCheckScStart()
+        that.$app.$def.getOaid().then(oaid => {
+            that.$app.isGetOaid = true
+            that.$app.oaid = oaid
+        }).catch(() => {})
+        that.gethasOpenApp()
+        that.$page.setTitleBar({backgroundColor:'#F97053'});
+        that.appName = that.$app.$data.name;
+        that.sgetprovider = shareSe.getProvider();
+        shareSe.getAvailablePlatforms({
+            success(data) {
+                for (const i in data.platforms) {
+                    console.log("platforms: " + data.platforms[i]);
+                }
+                that.ogetavailableplatforms = data.platforms;
+            },
+            fail(data, code) {
+                console.log("handling fail, code=" + code);
+                that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:"shareSe_getAvailablePlatforms_fail",
+                            thisUri:that.$page.uri,
+                            thisPage:"Sign",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+            }
+        })
+        that.signLock = false
+        that.txtName = that.$app.$data.channelCode;
+        that.loadData();
+
+        let ogetinfo = app.getInfo();
+        //获取来源
+
+        console.log(ogetinfo);
+
+        if(that.jobId){
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2170`,
+                data: {
+                    jobId:that.jobId
+                },
+                succ: function (data) {
+                    console.log('successsuccess')
+                }
+            })
+             that.$app.$def.quickappLog([703, {
+                qmap:{
+                    jobId:that.jobId,
+                    page:'Sign'
+                }
+            },'Sign'],that);
+        }
+
+        // 匹配正确的视频资源
+        that.$app.$def.getStorageFile(that,{
+            key:'headerJson',
+            success:function(data){
+                if(data) {
+                    data = JSON.parse(data)
+                    let pname = that.$app.$data.pname
+                    let brand = that.formatBrand(data.brand)
+                    that.videoPrompt = resources[pname][brand][1]
+                    that.$app.headerJson = data
+                }
+            }
+        })
+        that.$app.$def.getStorageFile(that,{
+            key:'adv',
+            success:function(data){
+                that.adv = data || 0
+                if(that.adv == 1){
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            site: '1',
+                        }
+                    }, 'task_video_prompt'], that)
+                }
+                console.log('data.adv:'+data)
+            }
+        })
+
+        that.$app.$def.quickappLog([703, {
+            qmap:{
+                page:'2',
+                infotype:ogetinfo.source.type,
+                extra:ogetinfo.source.extra
+            }
+        }, 'source'], that)
+        
+        that.$app.$def.appSourceinfoLog(that)
+
+        that.$on('signAwardVideo',that.signAwardVideo)
+        that.$on('signAwardShare',that.signAwardShare)
+
+    },
+    onDestroy() {
+        this.$app.$def.fnDestoryAd.call(this);                  // 销毁当前页面的广告实例
+    },
+    fnSign() {
+        this.toSign();
+    },
+    // 打开签到弹窗
+    fnOpenSignPop() {
+        this.showSignBox = true
+    },
+    // 关闭签到弹窗
+    fnCloseSignPop() {
+        this.showSignBox = false;
+    },
+    // 去签到
+    toSign(){
+        let that = this
+        if(!that.ajaxLock){
+            return;
+        }
+        that.ajaxLock = false;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2405',
+                data: {},
+                succ: function (res) {
+                    that.signLock = true
+                    // that.sitenum='1'
+                    // that.loadData(1)
+                    if (that.sgetprovider) {
+                        // 屏蔽分享
+                        that.isshare = res.data.isWxShare;
+                    }
+                    // that.shareshow = true;   hxz
+                    if(res.data.shareAwardNum){
+                        that.shareAwardNum = res.data.shareAwardNum
+                    }
+                    if(res.data.amount){
+                        that.shareAmount = res.data.amount
+                    }
+                    if(res.data.ratio){
+                        that.shareRatio = res.data.ratio
+                    }
+                    that.sbnum = res.data.awardNum;
+                    if(res.data.awardValidity){
+                        that.awardValidity = res.data.awardValidity
+                    }
+                    that.popWidget = res.data.signWidget||''
+                    if(res.data.signWidget){
+                        that.$app.$def.quickappLog([703, {
+                            qmap: {
+                                site: '1',
+                                position:'3'
+                            }
+                        }, 'sign_huodong'], that)
+                        if(that.popWidget.userTacticsVo&&that.popWidget.userTacticsVo.isDot=='1'){
+                            that.$app.shenceLog.log(that,'track','OperationExposure', {
+                                OperationPosition:'签到成功小挂件',
+                                OperationID:that.popWidget.operationInfo.id,
+                                OperationName:that.popWidget.operationInfo.name,
+                                OperationType:that.popWidget.type||'',
+                                BookID:that.popWidget.info||'',
+                                ActID:that.popWidget.actUrl?that.popWidget.actUrl.split('id=')[1]?that.popWidget.actUrl.split('id=')[1]:'':'',
+                                PicURL:that.popWidget.imgUrl||'',
+                                ActURL:that.popWidget.actUrl||'',
+                                StartTime:that.popWidget.operationInfo.startTime,
+                                EndTime:that.popWidget.operationInfo.endTime,
+                                TacticsId:that.popWidget.userTacticsVo?that.popWidget.userTacticsVo.tacticsId||'':'',
+                                TacticsName:that.popWidget.userTacticsVo?that.popWidget.userTacticsVo.tacticsName||'':'',
+                                SourceId:that.popWidget.userTacticsVo?that.popWidget.userTacticsVo.sourceId||'':'',
+                                SourceName:that.popWidget.userTacticsVo?that.popWidget.userTacticsVo.sourceName||'':'',
+                                ShuntId:that.popWidget.userTacticsVo?that.popWidget.userTacticsVo.shuntID||'':'',
+                                ShuntName:that.popWidget.userTacticsVo?that.popWidget.userTacticsVo.shuntName||'':''
+                            });
+                        }
+                    }
+                    if(that.isshare != 2){
+                        if(res.data.shareVoList&&res.data.shareVoList.length){
+                            that.ofastAppShareVoList = res.data.shareVoList
+                            that.shareAwardInfo = {
+                                shareAwardCoin: that.ofastAppShareVoList[0].shareAward || 0
+                            }           
+                            // if(that.ofastAppShareVo&&JSON.stringify(that.ofastAppShareVo)!='{}'){
+                                that.isSignShare = true
+                            // }
+                            let flagF = 0
+                            let flagC = 0
+                            that.ofastAppShareVoList.forEach((item,idx)=>{
+                                if(item.shareType==1){
+                                    if(that.isshare==1||that.isshare==3){
+                                        flagF = 1
+                                        that.ofastAppShareVoList.isshare=3
+                                    }
+                                }
+                                if(item.shareType==2){
+                                    if(that.isshare==1||that.isshare==4){
+                                        flagC = 1
+                                        that.ofastAppShareVoList.isshare=4
+                                    }
+                                }
+                            })
+                            if(!flagF&&!flagC){
+                                that.isSignShare = false
+                            }else if(flagF&&flagC){
+                                if(that.isshare==1){
+                                    that.ofastAppShareVoList.isshare=1
+                                }
+                            }
+                        }else{
+                            that.isSignShare = false
+                        }
+                    }
+                    // vivopush消息
+                    if(that.isSupportVivoPush) {
+                        that.$app.$def.fnVivoPush(that, '3')
+                    }
+                    that.ajaxLock = true;
+                    if(that.isCoin) {
+                        setTimeout(() => {
+                            that.loadData(1)
+                        }, 300)
+                    } else {
+                        that.loadData(1)
+                    }
+                },
+                error: function (code) {
+                    that.ajaxLock = true;
+                }
+            }
+        )
+    },
+    onReady(e) {
+		try {
+			audio.getPlayState({
+				success: function(data) {
+					if(data.state=='play'){
+						audio.pause()
+					}
+				},
+				fail: function(data, code) {
+					console.log('handling fail, code=' + code)
+				}
+			})
+		} catch (error) {
+			console.log(error)
+		}
+	},
+    onShow() {
+        // 开屏判断
+        let currentOpenTime = new Date().getTime()
+        if(!this.isVideoShow && this.$app.isOpenPageSwitch == 1 && this.$app.lastOpenPage == 'sign' && currentOpenTime - this.$app.lastOpenTime > this.$app.openPageSpace && this.canShowPop && currentOpenTime - this.$app.leavePageTime > this.$app.leavePageSpace) {
+            this.$app.lastOpenTime = currentOpenTime
+            this.$app.lastOpenPage = ''
+            router.push({
+                uri: 'Pop',
+                params: {
+                    fromPage: '/Sign',
+                }
+            })
+            return
+        }
+        console.log('------------------------------------------------', this.sourcePage,this.signLock)
+        this.$app.lastOpenPage = 'sign'
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            SourcePage: this.sourcePage,
+            Title: '签到'
+        });
+        // try {
+        //     pageEnter(this.$page.path);
+        // } catch (error) {
+        //     console.log(error)
+        // }
+        let that = this;
+        that.$page.setTitleBar({backgroundColor:'#F97053'});
+
+        //分享开始
+        if (that.oshareAction) {
+            let send = 0;
+            that.shareEndTime = Date.parse(new Date()) / 1000;
+            send = that.shareEndTime - that.shareActionTime;
+            if(that.shareEndTime == that.shareActionTime) {
+                send = that.scallbackTime
+            }
+            //分享成功
+            if (send >= that.scallbackTime) {
+                that.sitenum = '3';
+                if(that.oissign){//签到分享成功
+                    that.sharebg = 'spbbg_1';
+                    that.$app.$def.requestData(that,
+                        {
+                            interface: '/glory/fastapp/2141',
+                            data: { taskId: that.ofastAppShareVo.taskId },
+                            succ: function (res) {
+                                if(that.isCoin) {
+                                    setTimeout(() => {
+                                        that.loadData();        
+                                    }, 300)
+                                } else {
+                                    that.loadData();    
+                                }
+                                return false;
+                            }
+                        }
+                    )
+                }else{//任务分享成功
+                    that.$app.$def.requestData(that,
+                        {
+                            interface: '/glory/fastapp/2146',
+                            data: {
+                                action : that.isAttention&&that.attentionType==30?that.attentionShareVo['taskAction']:that.shareinfo[that.sharenum]['taskAction']
+                            },
+                            succ: function (res) {
+                                if(that.isCoin) {
+                                    setTimeout(() => {
+                                        that.loadData()
+                                    }, 300)
+                                } else {
+                                    that.loadData()
+                                }
+                            },
+                            error: function (code) {
+                            }
+                        }
+                    )
+                    prompt.showToast({
+                        message: "分享成功"
+                    })
+                }
+
+                
+                //分享打点
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '6',
+                        oissign:that.oissign,
+                        page: '2',
+                        send
+                    }
+                }, 'sign_share'], that)
+            } else {//分享失败
+                if(that.oissign){
+                    that.sitenum = '2';
+                    that.sharebg = 'spbbg_3';
+                    that.sharebuttxt = '分享领双倍';
+                }else{
+                    prompt.showToast({
+                        message: "分享失败"
+                    })
+                }
+                
+                //分享打点
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '7',
+                        oissign:that.oissign,
+                        page: '2',
+                        send
+                    }
+                }, 'sign_share'], that)
+            }
+            if(that.oissign){   
+                setTimeout(()=>{
+                    that.shareshow = true;
+                    that.oissign = false;
+                },1000)
+            }
+            that.oshareAction = false;
+            that.canShowPop = true
+        }else{
+            console.log(that.firstrend, that.hasShowOpen)
+            if(!that.firstrend&&that.hasShowOpen){
+                that.hasOpenApp = true
+            }
+            that.firstrend = false
+            if(!that.isFirstShow && !that.isVideoShow) {
+                if(that.isCoin) {
+                    setTimeout(() => {
+                        that.loadData();
+                    }, 300)
+                } else {
+                    that.loadData();
+                }
+            }
+        }
+        if(that.isFirstShow) {
+            that.isFirstShow = false
+        }
+        that.isVideoShow = false
+
+
+
+        //pv打点
+        that.$app.$def.quickappLog([701], that);
+        //友盟打点
+        //$umeng_stat.resume(that);
+
+
+    },
+    onHide() {
+        let that = this;
+        that.$app.leavePageTime = new Date().getTime()
+        that.$broadcast('fnReportDeepLink')
+        //分享开始
+        that.shareActionTime = Date.parse(new Date()) / 1000;
+        if (that.oshareAction) {
+            console.log(that.shareActionTime);
+            //分享打点
+            that.$app.$def.quickappLog([703, {
+                qmap: {
+                    site: '5',
+                    page: '2'
+                }
+            }, 'sign_share'], that)
+        }
+    },
+    loadData(signed) {
+        let that = this;
+        if(!that.ajaxLock && !that.isNeedRefresh){
+            return;
+        }
+        that.isNeedRefresh = false
+        that.ajaxLock = false;
+        setTimeout(() => {
+            if(that.isToWeb) {
+                that.isToWeb = false
+            }
+            that.$app.$def.requestData(that,
+                {
+                    interface: '/glory/fastapp/2404',
+                    data: {signText:1},
+                    succ: function (res) {
+                        // 提前解锁
+                        that.ajaxLock = true;
+                        that.isSign = res.data.isSign;
+                        that.actualRead = res.data.actualReadTime  //实际阅读时长
+                        that.isShowShare = res.data.shareVoList && res.data.shareVoList.length !== 0 ? true : false;
+                        // 签到提醒参数
+                        let signRemind = res.data && res.data.signRemind;
+                        that.signRemindInfo = {
+                            title: signRemind && signRemind.tip || '',
+                            remindTime: signRemind && signRemind.remindTime || '08:00',
+                            remindDescription: signRemind && signRemind.url || ''
+                        };
+                        that.isShowSignRemindEntrance = signRemind && signRemind.tip ? true : false;
+                        if (that.sgetprovider) {
+                            // 屏蔽分享
+                            that.isshare = res.data.isWxShare;
+                        }
+                        if(that.isshare != 2){
+                            if(res.data.shareVoList && res.data.shareVoList.length){
+                                that.ofastAppShareVoList = res.data.shareVoList
+                                that.shareAwardInfo = {
+                                    shareAwardCoin: that.ofastAppShareVoList[0].shareAward || 0
+                                }
+                                that.isSignShare = true;
+                                let flagF = 0
+                                let flagC = 0
+                                that.ofastAppShareVoList.forEach((item,idx)=>{
+                                    if(item.shareType==1){
+                                        if(that.isshare==1||that.isshare==3){
+                                            flagF = 1
+                                            that.ofastAppShareVoList.isshare=3
+                                        }
+                                    }
+                                    if(item.shareType==2){
+                                        if(that.isshare==1||that.isshare==4){
+                                            flagC = 1
+                                            that.ofastAppShareVoList.isshare=4
+                                        }
+                                    }
+                                })
+                                if(!flagF&&!flagC){
+                                    that.isSignShare = false
+                                }else if(flagF&&flagC){
+                                    if(that.isshare==1){
+                                        that.ofastAppShareVoList.isshare=1
+                                        }
+                                    }
+                                } else {
+                                 that.isSignShare = false
+                            }
+                        }
+                        console.log(that.isSignShare,that.isShowShare,that.signLock)
+                        // 金币模式
+                        if(!that.isSign&&!that.signLock) { //
+                            console.log('未签到--------且没锁')
+                            that.fnSign()
+                        }
+                        if(res.data.isGlod && res.data.isGlod == 1) {
+                            that.isCoin = true
+                            that.$app.isCoin = true
+                        } else {
+                            that.isCoin = false
+                            that.$app.isCoin = false
+                        }
+                        that.pageTitle = that.isCoin ? '福利中心' : '任务中心'
+                        // that.isCoin = true
+                        // that.$app.isCoin = true
+                        if(res.data.glods) {
+                            that.coinInfo = {
+                                num: res.data.glods || 0,
+                                // text: res.data.discountGlods || 0,
+                            }
+                        }
+                        if(res.data.isSupportPayOut == 1) {
+                            that.isSupportPayOut = 1
+                        }
+                        if(res.data.urlPakVo) {
+                            that.urlPakVo = res.data.urlPakVo
+                        }
+                        if(res.data.signText){
+                            that.signRule = res.data.signText
+                            that.getRuleArr()
+                        }
+                        if(res.data.signButtonText){
+                            that.signButtonText = res.data.signButtonText
+                        }
+                        if(res.data.signTimeText){
+                            that.signTimeText = res.data.signTimeText
+                        }
+                        if(res.data.receiveNum){
+                            that.receiveNum = res.data.receiveNum
+                        }
+                        // if (that.sgetprovider) {
+                        //     // 屏蔽分享
+                        //     that.isshare = res.data.isWxShare;
+                        // }
+                        // 签到视频信息
+                        if(res.data.taskVo && res.data.taskVo.taskAction) {
+                            if(res.data.taskVo.adPositionId) {
+                                that.signAdId = res.data.taskVo.adPositionId
+                            }
+                            that.isSignAd = true
+                            that.signAdInfo = res.data.taskVo;
+                        } else {
+                            that.isSignAd = false
+                        }
+                        that.taskSetList = res.data.taskSetList;
+                        res.data.taskSetList.forEach(item=>{
+                            item.taskList.forEach(i=>{
+                                if (i.taskAction === 36) {
+                                    that.readTaskInfo = i   //找到阅读时长任务
+                                    that.showReadTaskInfo = true
+                                }                
+                            })
+                        })
+                        if(that.isCoin) {
+                            that.taskSetList.forEach(item => {
+                                if(item.taskSetTitle) {
+                                    item.taskSetTitle = item.taskSetTitle.replace('任务', '福利')
+                                }
+                            })
+                        }
+                        // 任务视频信息
+                        that.taskSetList.forEach(categoryList => {
+                            // apk跳转任务判断是否已安装
+                            if(categoryList.taskSetId == 1 && categoryList.taskList) {
+                                categoryList.taskList.forEach(list => {
+                                    if(list.taskAction == 34) {
+                                        if(list.taskStatus != 1) {
+                                            that.isInstallAppShow = true
+                                        }else {
+                                            if(list.pkgName) {
+                                                that.fnCheckApk(list.pkgName).then(res => {
+                                                    if(res) {
+                                                        that.isInstallAppShow = true
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    }
+                                    if(list.taskAction == 18) {
+                                        that.calenderbuttonText = list.buttonText ? list.buttonText : '';
+                                    }
+                                })
+                            }
+                            if(categoryList.taskSetId == 2 && categoryList.taskList) {
+                                let isNewTaskVideo = false
+                                categoryList.taskList.forEach(list => {
+                                    if(list.taskAction == 29 && list.bookVo && JSON.stringify(list.bookVo) != '{}'){
+                                        list.tips = list.tips.replace('****', list.bookVo.bookName);
+                                        that.keywordBook = '《' + list.bookVo.bookName + '》';
+                                        that.tipsFilter(that.keywordBook,list.tips)
+                                    }
+                                    if(list.taskAction == 15) {
+                                        that.taskAdInfo = list
+                                    }
+                                    if(list.taskAction == 42) {
+                                        isNewTaskVideo = true
+                                        that.taskAdInfo = list
+                                        if(list.adPositionId) {
+                                            that.taskAdId = list.adPositionId
+                                        }
+                                    }
+                                })
+                                that.isNewTaskVideo = isNewTaskVideo
+                            }
+                        })
+                        // console.info("任务清单",that.taskSetList);
+                        that.scallbackTime = res.data.callbackTime;
+                        if (that.isshare != 2) {
+                            for (var i = 0; i < that.taskSetList.length; i++) {
+                                if (that.taskSetList[i].taskType == 2) {
+                                    that.shareinfo = that.taskSetList[i].taskList;
+                                    that.shareinfo.forEach((shareObj,index)=>{
+                                        if(shareObj.taskAction==6||shareObj.taskAction==7||shareObj.taskAction==8){
+                                            let flagF = 0
+                                            let flagC = 0
+                                            shareObj.shareVoList.forEach((item,idx)=>{
+                                                if(item.shareType==1){
+                                                    if(that.isshare==1||that.isshare==3){
+                                                        flagF = 1
+                                                        that.shareinfo[index].isshare = 3
+                                                    }
+                                                }
+                                                if(item.shareType==2){
+                                                    if(that.isshare==1||that.isshare==4){
+                                                        flagC = 1
+                                                        that.shareinfo[index].isshare = 4
+                                                    }
+                                                }
+                                            })
+                                            if(!flagF&&!flagC){
+                                                that.isDayShare=false
+                                                that.shareinfo=that.shareinfo.splice(index, index+1)
+                                            }else if(flagF&&flagC){
+                                                if(that.isshare==1){
+                                                    that.shareinfo[index].isshare = 1
+                                                }
+                                            }
+                                           
+                                        }
+                                    })
+                                   
+                                    if(that.tabindex == 2){
+                                        that.tabindex = i;
+                                    }
+                                    break;
+                                }
+                            }
+                        }else if(that.isshare == 2){
+                            that.tabindex = 0
+                        }
+                        that.attentionArr = []
+                        // 判断是否有公众号分享 是否显示日常任务
+                        that.taskSetList.forEach(listItem => {
+                            if(listItem.taskType == 1 && listItem.taskList) {
+                                listItem.taskList.forEach(taskItem => {
+                                    if((taskItem.taskAction == 16||taskItem.taskAction == 30) && taskItem.shareVo) {
+                                        that.attentionArr.push(taskItem)
+                                    }
+                                })
+                            }
+                            if(listItem.taskType == 2) {
+                                let taskList = listItem.taskList
+                                let shareArr = ['6','7','8','16','17','30','32']
+                                if(taskList && taskList.length) {
+                                    // 6,7,8,16,17,30,32
+                                    let isAllShare = taskList.every((item) => {
+                                        return (shareArr.indexOf(item.taskAction + '') > -1)
+                                    })
+                                    if(that.isshare == 2 && isAllShare) {
+                                        that.isDayTaskHide = true
+                                    }else {
+                                        that.isDayTaskHide = false
+                                    }
+                                }else {
+                                    that.isDayTaskHide = true
+                                }
+                            }
+                        })
+                        that.continueDay = res.data.continueDay
+                        let oper = []
+                        if(res.data.operList && res.data.operList.length > 0) {
+                            res.data.operList.forEach(item => {
+                                if((item.type >= 1 && item.type <= 8) || item.type == 14) {
+                                    oper.push(item)
+                                }
+                            })
+                        }
+                        that.oper = oper
+                        
+                        that.signWidget =  res.data.signWidget||'';
+                        if(res.data.signWidget&&!that.hasSignwidget){
+                            that.$app.$def.quickappLog([703, {
+                                qmap: {
+                                    site: '1',
+                                    position:'2'
+                                }
+                            }, 'sign_huodong'], that)
+                            if(that.signWidget.userTacticsVo&&that.signWidget.userTacticsVo.isDot=='1'){
+                                that.$app.shenceLog.log(that,'track','OperationExposure', {
+                                    OperationPosition:'签到按钮小挂件',
+                                    OperationID:that.signWidget.operationInfo.id,
+                                    OperationName:that.signWidget.operationInfo.name,
+                                    OperationType:that.signWidget.type||'',
+                                    BookID:that.signWidget.info||'',
+                                    ActID:that.signWidget.actUrl?that.signWidget.actUrl.split('id=')[1]?that.signWidget.actUrl.split('id=')[1]:'':'',
+                                    PicURL:that.signWidget.imgUrl||'',
+                                    ActURL:that.signWidget.actUrl||'',
+                                    StartTime:that.signWidget.operationInfo.startTime,
+                                    EndTime:that.signWidget.operationInfo.endTime,
+                                    TacticsId:that.signWidget.userTacticsVo?that.signWidget.userTacticsVo.tacticsId||'':'',
+                                    TacticsName:that.signWidget.userTacticsVo?that.signWidget.userTacticsVo.tacticsName||'':'',
+                                    SourceId:that.signWidget.userTacticsVo?that.signWidget.userTacticsVo.sourceId||'':'',
+                                    SourceName:that.signWidget.userTacticsVo?that.signWidget.userTacticsVo.sourceName||'':'',
+                                    ShuntId:that.signWidget.userTacticsVo?that.signWidget.userTacticsVo.shuntID||'':'',
+                                    ShuntName:that.signWidget.userTacticsVo?that.signWidget.userTacticsVo.shuntName||'':''
+                                });
+                            }
+                            that.hasSignwidget = true
+                        }
+                        if(signed){
+                            // that.signRecordVos = [];
+                            // setTimeout(function(){
+                            //     that.signRecordVos = res.data.signRecordVos; 
+                            //     that.waitAwardIndex = that.signRecordVos.findIndex((item)=>item.isSign == 0)
+                            //     console.log(that.waitAwardIndex,that.signRecordVos,'hxz-------1')
+                            //     //签到弹窗展示 
+                            //     that.showSignBox = true                      
+                            // },0)
+                            that.signRecordVos = res.data.signRecordVos; 
+                            that.waitAwardIndex = that.signRecordVos.findIndex((item)=>item.isSign == 0)!=-1?that.signRecordVos.findIndex((item)=>item.isSign == 0):8
+                            //签到弹窗展示 
+                            that.showSignBox = true  
+                        }else{
+                            that.signRecordVos = res.data.signRecordVos;
+                            that.waitAwardIndex = that.signRecordVos.findIndex((item)=>item.isSign == 0)!=-1?that.signRecordVos.findIndex((item)=>item.isSign == 0):8
+                        }
+
+                        for (let index = 0; index < that.signRecordVos.length; index++) {
+                            let item = that.signRecordVos[index];
+                            if(!item.isSign){
+                                if(that.isSign){
+                                    if(that.signRecordVos[index-1]){
+                                        that.isSignUp=that.signRecordVos[index-1].isSignUp
+                                    }else{
+                                        that.isSignUp=item.isSignUp
+                                    }
+                                }else{
+                                    that.isSignUp=item.isSignUp
+                                }
+                                break;
+                            }else{
+                                that.isSignUp=item.isSignUp
+                            }
+                        }
+                    },
+                    error: function (code) {
+                        that.ajaxLock = true;
+                    }
+                }
+            ) 
+        }, that.isToWeb ? 300 : 0)
+    },
+    getRuleArr(){
+        let that = this
+        let rule_str = ''
+        rule_str = that.signRule.replace(/↵/g,"#");
+        rule_str = rule_str.replace(/\r\n/g,"#")
+        rule_str = rule_str.replace(/\n\r/g,"#")
+        rule_str = rule_str.replace(/\r/g,"#");
+        rule_str = rule_str.replace(/\n/g,"#");
+        if(that.isCoin) {
+            rule_str = rule_str.replace(/书币/g, '金币');
+        }
+        that.signRuleArr = rule_str.split('#')
+    },
+    fnShowRule() {
+        this.bRuleShow = true;
+    },
+    fnHideRule() {
+        this.bRuleShow = false;
+    },
+    fnReceiveRask(taskId, taskAction, taskType, index, $idx) {
+        let that = this;
+        that.fnCloseTip()
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2141',
+                data: { taskId: taskId },
+                succ: function (res) {
+                    if(res.data && res.data.code === 0) {
+                        // signAdTask任务完成
+                        console.log(taskType,'任务类型------hxz')
+                        if(taskType == 'signAd') {
+                            that.sitenum = '4'
+                            that.sharebg = 'spbbg_0'
+                            // that.shareshow = true
+                            if(that.isCoin) {
+                                setTimeout(() => {
+                                    that.loadData();
+                                    that.shareshow = true
+                                }, 300)
+                            }
+                            return
+                        }
+                        that.taskSuccessMessage = (res.data && res.data.message) ? that.fnReplaceToast(res.data.message) : ('恭喜您获得' + (that.isCoin ? '金币' : '书币'))
+                        if(res.data && res.data.videoTaskVo) {
+                            if(res.data.videoTaskVo.adPositionId) {
+                                that.infoAdId = res.data.videoTaskVo.adPositionId
+                            }
+                            that.infoAdInfo = res.data.videoTaskVo
+                            that.isHasTipVideo = true
+                        }
+                        if(res.data && res.data.brandAdSwitch) {
+                            that.brandAdSwitch = true
+                        }
+                        if(res.data && res.data.xxlAdPositionId) {
+                            that.tipAdId = res.data.xxlAdPositionId 
+                        }
+                        if(res.data && res.data.adFlag == 1) {
+                            if(res.data.xxlUtVo) {
+                                that.adOtherInfo.userTacticsVo = res.data.xxlUtVo
+                            }
+                            that.isHasTipAd = true
+                        }
+                        that.isTaskInfo = true
+                        that.tipCloseTimeout = setTimeout(() => {
+                            if(!(that.isHasTipVideo || (that.isHasTipAd && that.hasGetTipAd))) {
+                                that.fnCloseTip()
+                            }
+                        }, 1500)
+                        // that.isTaskSuccess = true
+                        // setTimeout(() => {
+                        //     that.isTaskSuccess = false
+                        // }, 3000)
+                    } else {
+                        if(res.data && res.data.message) {
+                            let message = that.fnReplaceToast(res.data.message)
+                            prompt.showToast({
+                                message: message
+                            })
+                        }
+                    }
+                    if(taskType != 'signAd' && taskType != 'taskAd' && taskType != 'infoAd') {
+                        that.taskSetList[index].taskList[$idx].taskStatus = 3;
+                    }
+                    if(taskType == 'taskAd') {
+                        that.isNeedRefresh = true
+                    }
+                    if(that.isCoin) {
+                        setTimeout(() => {
+                            that.loadData();
+                        }, 300)
+                    } else {
+                        that.loadData();
+                    }
+                    return false;
+                }
+            }
+        )
+    },
+    fnFinishRask(taskId, taskAction, taskStatus, bookVo, taskItem) {
+        let that = this;
+        switch (taskAction) {
+            case 1://添加桌面
+                shortcut.hasInstalled({
+                    success:function(res){
+                        if(!res){
+                            shortcut.install({
+                                message: '将【' + that.appName + '】添加到桌面，方便下次继续阅读！',
+                                success: function () {
+                                    that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                                        IsSuccess: true,
+                                        PositionName: '签到任务添桌',
+                                        Instruction: '将【' + that.appName + '】添加到桌面，方便下次继续阅读！',
+                                        StateCode: 'return'
+                                    }); 
+                                    console.log('shortcut_install success');
+                                    //来源写入变量
+                                    that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+                                    that.fnTellServer(taskAction, false);
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap: {
+                                            site: '2',
+                                            page: '2',
+                                            sorce:'sign_shortcut'
+                                        }
+                                    }, 'shortcut'], that)
+                                    that.$app.$def.requestData(that,{
+                                        interface: `/glory/fastapp/2107`,
+                                        data: {
+                                            isas:1
+                                        },
+                                        succ: function (res) {
+                                            if(res.data.freeLimitAll){
+                                                that.$app.shortSuccessText = res.data.freeLimitAll
+                                            }
+                                            that.showShortSuccess()
+                                        },
+                                        error: function (code) {
+                                            that.showShortSuccess()
+                                        }
+                                    })
+                                    that.loadData()
+                                },
+                                fail: function (data, code) {
+                                    that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                                        IsSuccess: false,
+                                        PositionName: '签到任务添桌',
+                                        Instruction: '将【' + that.appName + '】添加到桌面，方便下次继续阅读！',
+                                        StateCode: 'return',
+                                        MsgSendCode: code,
+                                        MsgSendContent: data,
+                                    }); 
+                                    console.log('shortcut_install fail')
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap: {
+                                            site: '3',
+                                            data,
+                                            code,
+                                            page: '2',
+                                            sorce:'sign_shortcut',
+                                            source: 'shortcut_install_fail',
+                                            thisUri: that.$page.uri,
+                                            thisPage: 'Sign'
+                                        }
+                                    }, 'catch_error'], that)
+                                },
+                                complete(errmsg) {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap: {
+                                            site: '5',
+                                            errmsg: `${errmsg}`,
+                                            page: '2',
+                                            sorce:'sign_shortcut'
+                                        }
+                                    }, 'shortcut'], that)
+
+                                }
+                            })
+                            that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                                PositionName: '签到任务添桌',
+                                Instruction: '将【' + that.appName + '】添加到桌面，方便下次继续阅读！',
+                                StateCode: 'submit',
+                                DesktopState: that.$app.isAddDesktop ? 'Deleted' : 'Neversaved'
+                            }); 
+                        }else{
+                             //来源写入变量
+                            that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+                            that.fnTellServer(taskAction, false);
+                            that.$app.$def.requestData(that,{
+                                interface: `/glory/fastapp/2107`,
+                                data: {
+                                    isas:1
+                                },
+                                succ: function (res) {
+                                    if(res.data.freeLimitAll){
+                                        that.$app.shortSuccessText = res.data.freeLimitAll
+                                    }
+                                    that.showShortSuccess()
+                                },
+                                error: function (code) {
+                                    that.showShortSuccess()
+                                }
+                            })
+                            that.loadData()
+                        }
+                    }
+                })
+                
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '1',
+                        page: '2',
+                        sorce:'sign_shortcut'
+                    }
+                }, 'shortcut'], that)
+                break;
+            case 2://首次登录 本次进入签到也必须登录，所以不存在此任务  后期修改
+                router.push({
+                    uri: '/Login',
+                    params: {
+                        url: '/Sign',
+                        positionName: '登陆任务'
+                    }
+                })
+                break;
+            case 3:
+            case 26:
+                // 充值跳转活动
+                if(taskItem.goUrl) {
+                    that.isToWeb = true
+                    router.push({
+                        uri: '/Webhuodong',
+                        params: {
+                            webSrc: taskItem.goUrl,
+                            pageFrom: 'sign',
+                        }
+                    })
+                }else {
+                    if(that.fromRecharge){
+                        router.replace({
+                            uri: '/Recharge',
+                            params: {
+                                url: '/Sign',
+                                omap:that.omap
+                            }
+                        })
+                    }else{
+                        router.push({
+                            uri: '/Recharge',
+                            params: {
+                                url: '/Sign',
+                                omap:that.omap
+                            }
+                        })
+                    }
+                }
+                break;
+            case 4:
+            case 5:
+            case 20:
+                router.clear();
+                router.replace({
+                    uri: '/Index',
+                    params: {
+                        cardIndex: taskAction==20?1:0
+                    }
+                })
+                break;
+            case 29:
+                router.clear();
+                var trigger_time = that.$app.$def.getLogTime()
+                var omap = {
+                    origin:'qd',
+                    action:'2',
+                    channel_id:'qd',
+                    channel_name:'签到页',
+                    channel_pos:0,
+                    column_id:taskId,
+                    column_name:'每日推荐阅读任务',
+                    column_pos:3,
+                    content_id:bookVo.bookId,
+                    content_pos:0,
+                    content_type:'2',
+                    trigger_time:trigger_time
+                }
+                that.$app.$def.quickappLog([702, {
+                    omap:omap
+                }, 'book_click'], that)
+                router.replace({
+                    uri: '/Read',
+                    params: {
+                        bookId: bookVo.bookId,
+                        bookName: bookVo.bookName,
+                        SourcePosition: '每日推荐阅读任务',
+                        omap: omap
+                    }
+                })
+                break;
+            case 16: 
+            case 30: 
+                that.attentionType = taskAction
+                if(that.attentionTipShow) {
+                    return
+                }
+                that.attentionId = taskId 
+                that.attentionArr.forEach(item => {
+                    if(item.taskId == that.attentionId) {
+                        that.attentionShareVo = item
+                    }
+                })
+                if(taskAction==16){
+                    that.pageTitle = '关注奖励领取流程'
+                }
+                that.attentionTipShow = true
+                that.$app.shenceLog.log(that,'track','ButtonClick', {
+                    ButtonName: that.attentionShareVo.taskTitle + '关注按钮'
+                });
+                break;
+            case 18: 
+                if(taskStatus != 1){
+                    that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                        ButtonName: '查看日历',
+                        Title: '任务中心',
+                    });
+                }
+                router.push({
+                    uri: '/Schedule',
+                    params: {
+                        taskAction: taskAction,
+                        taskStatus: taskStatus,
+                        calenderbuttonText: that.calenderbuttonText,
+                    }
+                })
+                break;
+            case 15:
+                that.isSingleAdTask = false
+                that.fnTaskAdClick(false)
+                break;
+            case 42:
+                that.isSingleAdTask = false
+                that.fnTaskAdClick(false)
+                break;
+            case 13:
+                that.isSingleAdTask = true
+                that.fnTaskAdClick(true)
+                break;
+            case 31:
+                that.fnHwfuh(taskAction)
+                break;
+            // 下载任务
+            case 35:
+                that.fnDeeplinkHap(taskItem)
+                break; 
+            // 导流任务
+            case 34:
+                that.fnDeeplinkApk(taskItem)
+                break;
+            default:
+                router.clear();
+                router.replace({
+                    uri: '/Index',
+                    params: {
+                        cardIndex: 0
+                    }
+                })
+        }
+    },
+    fnHwfuh(taskAction){
+        let that = this
+        try {
+            if(that.isSupportHBT) {
+                // const HBT = require('@hmscore/hms-js-hbt').default
+                let doAgreeFollow = function() {
+                    let appId = '100709717'
+                    let pubId = 'eXPv33oyPup1TTmcqEu'
+                    let pubName = '点众阅读'
+                    let succ = function(res) {
+                        console.log(res)
+                        // prompt.showToast({
+                        //     message: JSON.stringify(res)
+                        // })
+                        if(res.errCode==0&&res.data.code==0){
+                            that.fnTellServer(taskAction, true)
+                            that.fnPostMsg(res)
+                        }else{
+                            prompt.showToast({
+                                message: '关注失败'
+                            })
+                        }
+                    }
+                    let fail = function(error){
+                        console.log(error)
+                        prompt.showToast({
+                            // message:JSON.stringify(error)
+                            message: '关注失败'
+                        })
+                    }
+                    that.huaweiHBT.agreeFollow(appId,pubId,pubName,succ,fail)
+                }
+                doAgreeFollow()
+            }
+        }catch(e){
+            console.log(e)
+        }
+    },
+    fnPostMsg(res){
+        this.$app.$def.requestData(this,
+            {
+                interface: '/glory/fastapp/2803',
+                data: { 
+                    appId: res.data.appId,
+                    openId: res.data.openId,
+                    pubId:res.data.pubId,
+                    unionId:res.data.unionId
+                },
+                succ: function (res) {
+                    
+                }
+            }
+        )
+    },
+    fnCloseAttention(){
+        this.attentionTipShow = false
+    },
+    fnAttentionClick() {
+        let that = this
+        that.listshare('attention', 0, '公众号分享',0)
+        that.pageTitle = that.isCoin ? '福利中心' : '任务中心'
+        that.attentionTipShow = false
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: that.attentionShareVo.taskTitle + '提示按钮'
+        });
+    },
+    // 上报任务完成
+    fnTellServer(taskAction, flag) {
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2146',
+                data: { action: taskAction },
+                succ: function (res) {
+                    if(flag) {
+                        if(res.data && res.data.msg) {
+                            prompt.showToast({
+                                message: that.fnReplaceToast(res.data.msg)
+                            })
+                        }
+                        if(that.isCoin) {
+                            setTimeout(() => {
+                                that.loadData()
+                            }, 300)
+                        } else {
+                            that.loadData()
+                        }
+                    }
+                }
+            }
+        )
+    },
+    checkouttab(num) {
+        this.tabindex = num;
+    },
+    closepopupshow() {
+        let that = this;
+        that.shareshow = false;
+        //分享打点
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '12',
+                page: '2',
+                sitenum:that.sitenum,
+                oissign:that.isbutshare
+            }
+        }, 'sign_share'], that)
+    },
+    closetabshow() {
+        let that = this;
+        that.sharetabshow = false;
+        //分享打点
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '13',
+                page: '2',
+                sitenum:that.sitenum,
+                oissign:that.isbutshare
+            }
+        }, 'sign_share'], that)
+    },
+    // 调用分享
+    // flag 类型 sign/task/attention
+    // num 分享编号
+    // site 标题
+    listshare(flag, num, site,isshare) {
+        let that = this;
+        if(isshare!=0){
+            that.isshare = isshare
+        }
+        that.oissign = false;
+        if(flag == 'sign') {
+            that.oissign = true;
+        }
+        if(flag == 'task') {
+            that.sharenum = num;
+        }
+        that.shareSite=site
+        console.log(num,that.sharenum,that.oissign);
+        if(flag == 'attention') {
+            that.sharecircle(true)
+        }else {
+            if (that.isshare == 1) {//如果是开关1=全部开启，点击分享按钮，则展示分享选择界面
+                that.sharetabshow = true;
+            } else if (that.isshare == 3) {//如果是开关3=只分享到好友，点击分享按钮，直接拉起好友列表
+                that.sharefriends()
+            } else if (that.isshare == 4) {//如果是开关4=只分享到朋友圈，点击分享按钮，直接拉起朋友圈
+                that.sharecircle(false)
+            }
+        }
+
+        //分享打点
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                page: '2',
+                oissign:that.oissign,
+                isAttention:flag == 'attention' ? '1' : '0' 
+            }
+        }, 'sign_share'], that)
+    },
+    //分享到微信好友
+    sharefriends() {
+        let that = this;
+        that.isAttention = false
+        let osharevo = {}
+        if (that.oissign) {
+            let shareArr = []
+            that.ofastAppShareVoList.forEach((item,idx)=>{
+                if(item.shareType==1){
+                    shareArr.push(item)
+                }
+            })
+            let random = Math.floor(Math.random() * shareArr.length)
+            that.ofastAppShareVo =  shareArr[random];
+            osharevo = that.ofastAppShareVo;
+        } else {
+            let shareArr = []
+            that.shareinfo[that.sharenum]['shareVoList'].forEach((item,idx)=>{
+                if(item.shareType==1){
+                    shareArr.push(item)
+                }
+            })
+            let random = Math.floor(Math.random() * shareArr.length)
+            osharevo = shareArr[random];
+        }
+        console.info(osharevo)
+        that.shareStatus(1)
+        try {
+            that.canShowPop = false
+            // that.oshareAction = true;
+            let shareUrl = that.fnReplaceUrl(osharevo.shareUrl)
+            shareSe.share({
+                shareType: 0,
+                title: osharevo.title,
+                summary: osharevo.remark,
+                imagePath: osharevo.img,
+                targetUrl: shareUrl,
+                platforms: ['WEIXIN'],
+                success: function (data) {
+
+                    // shareActionTime
+                    // oshareAction
+                    // shareEndTime
+                    that.oshareAction = true;
+                    console.log('handling success')
+                    that.shareStatus(2)
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '3',
+                            page: '2',
+                            type:'1',
+                            oissign:that.oissign,
+                            osharevo
+                        }
+                    }, 'sign_share'], that)
+                    that.$app.shenceLog.log(that,'track','Share', {
+                        ShareSite: that.shareSite || '',
+                        SharePlatforms: 'WEIXIN',
+                        ShareType: 0,
+                        ShareTitle: osharevo.title || '',
+                        ShareSummary: osharevo.remark || '',
+                        ShareTargetUrl: osharevo.shareUrl || '',
+                        ShareChannelCode: osharevo.shareChannelCode || '',
+                        IsSuccess: true,
+                        Msg:''
+                    });
+                },
+                fail: function (data, code) {
+                    that.oshareAction = false;
+                    prompt.showToast({
+                        message: '分享失败'
+                    })
+
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '4',
+                            page: '2',
+                            type:'1',
+                            oissign:that.oissign,
+                            osharevo,
+                            source: 'shareSe_share_fail',
+                            thisUri: that.$page.uri,
+                            thisPage: 'Sign',
+                            data,
+                            code
+                        }
+                    }, 'catch_error'], that)
+                    that.$app.shenceLog.log(that,'track','Share', {
+                        ShareSite: that.shareSite || '',
+                        SharePlatforms: 'WEIXIN',
+                        ShareType: 0,
+                        ShareTitle: osharevo.title || '',
+                        ShareSummary: osharevo.remark || '',
+                        ShareTargetUrl: osharevo.shareUrl || '',
+                        ShareChannelCode: osharevo.shareChannelCode || '',
+                        IsSuccess: false,
+                        Msg: `failMess=${data},code=${code}`
+                    });
+                }
+            })
+        } catch (e) {
+            that.canShowPop = false
+            // that.oshareAction = true;
+            share.share({
+                type: 'text/html',
+                data: osharevo.title + '\r\n' + osharevo.remark + '\r\n<a href="' + osharevo.shareUrl + '">小说大全</a>',
+                success: function (data) {
+                    that.oshareAction = true;
+                    console.log('handling success')
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '10',
+                            page: '2',
+                            oissign:that.oissign,
+                            type:'1',
+                            osharevo
+                        }
+                    }, 'sign_share'], that)
+                },
+                fail: function (data, code) {
+                    that.oshareAction = false;
+                    prompt.showToast({
+                        message: '分享失败'
+                    })
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '11',
+                            page: '2',
+                            oissign:that.oissign,
+                            type:'1',
+                            osharevo,
+                            source: 'share_share_fail',
+                            thisUri: that.$page.uri,
+                            thisPage: 'Sign',
+                            data,
+                            code
+                        }
+                    }, 'catch_error'], that)
+                    console.log(`handling fail, code = ${code}`)
+                }
+            });
+        }
+        that.sharetabshow = false;
+
+        //分享打点
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '2',
+                page: '2',
+                oissign:that.oissign,
+                type:'1',
+                osharevo
+            }
+        }, 'sign_share'], that)
+
+
+    },
+    //分享到微信朋友圈
+    sharecircle(isAttention = false) {
+        let that = this;
+        let osharevo = {}
+        that.isAttention = isAttention
+        if(isAttention) {
+            osharevo = that.attentionShareVo.shareVo;
+        }else if(that.oissign) {
+            let shareArr = []
+            that.ofastAppShareVoList.forEach((item,idx)=>{
+                if(item.shareType==2){
+                    shareArr.push(item)
+                }
+            })
+            let random = Math.floor(Math.random() * shareArr.length)
+            that.ofastAppShareVo =  shareArr[random];
+            osharevo = that.ofastAppShareVo;
+        }else {
+            let shareArr = []
+            that.shareinfo[that.sharenum]['shareVoList'].forEach((item,idx)=>{
+                if(item.shareType==2){
+                    shareArr.push(item)
+                }
+            })
+            let random = Math.floor(Math.random() * shareArr.length)
+            osharevo = shareArr[random];
+        }
+        console.info(osharevo)
+        that.shareStatus(1, isAttention)
+        try {
+            that.canShowPop = false
+            // that.oshareAction = true;
+            console.log('sharecircle', isAttention)
+            let shareUrl = that.fnReplaceUrl(osharevo.shareUrl)
+            shareSe.share({
+                shareType: 0,
+                title: osharevo.title,
+                summary: osharevo.remark,
+                imagePath: osharevo.img,
+                targetUrl: shareUrl,
+                platforms: ['WEIXIN_CIRCLE'],
+                success: function (data) {
+                    if(!isAttention||that.attentionType==30) {
+                        that.oshareAction = true;
+                    }
+                    console.log('handling success')
+                    that.shareStatus(2)
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '3',
+                            page: '2',
+                            oissign:that.oissign,
+                            type:'2',
+                            osharevo,
+                            isAttention: isAttention ? '1' : '0'
+                        }
+                    }, 'sign_share'], that)
+                    that.$app.shenceLog.log(that,'track','Share', {
+                        ShareSite: that.shareSite || '',
+                        SharePlatforms: 'WEIXIN_CIRCLE',
+                        ShareType: 0,
+                        ShareTitle: osharevo.title || '',
+                        ShareSummary: osharevo.remark || '',
+                        ShareTargetUrl: osharevo.shareUrl || '',
+                        ShareChannelCode: osharevo.shareChannelCode || '',
+                        IsSuccess: true,
+                        Msg: ''
+                    });
+                },
+                fail: function (data, code) {
+                    that.oshareAction = false;
+                    prompt.showToast({
+                        message: '分享失败'
+                    })
+                    console.log(`handling fail, code = ${code}`)
+
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '4',
+                            page: '2',
+                            oissign:that.oissign,
+                            type:'2',
+                            osharevo,
+                            source: 'shareSe_share_fail',
+                            thisUri: that.$page.uri,
+                            thisPage: 'Sign',
+                            data,
+                            code,
+                            isAttention: isAttention ? '1' : '0'
+                        }
+                    }, 'catch_error'], that)
+                    that.$app.shenceLog.log(that,'track','Share', {
+                       ShareSite: that.shareSite || '',
+                       SharePlatforms: 'WEIXIN_CIRCLE',
+                       ShareType: 0,
+                       ShareTitle: osharevo.title || '',
+                       ShareSummary: osharevo.remark || '',
+                       ShareTargetUrl: osharevo.shareUrl || '',
+                       ShareChannelCode: osharevo.shareChannelCode || '',
+                       IsSuccess: false,
+                       Msg: `failMess=${data},code=${code}`
+                    });
+                }
+            })
+        } catch (e) {
+            that.canShowPop = false
+            // that.oshareAction = true;
+            share.share({
+                type: 'text/html',
+                data: osharevo.title + '\r\n' + osharevo.remark + '\r\n<a href="' + osharevo.shareUrl + '">小说大全</a>',
+                success: function (data) {
+                    that.oshareAction = true;
+                    console.log('handling success')
+
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '10',
+                            page: '2',
+                            oissign:that.oissign,
+                            type:'2',
+                            osharevo
+                        }
+                    }, 'sign_share'], that)
+                },
+                fail: function (data, code) {
+                    that.oshareAction = false;
+                    prompt.showToast({
+                        message: '分享失败'
+                    })
+                    console.log(`handling fail, code = ${code}`)
+
+                    //分享打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            site: '11',
+                            page: '2',
+                            oissign:that.oissign,
+                            type:'2',
+                            osharevo,
+                            source: 'share_share_fail',
+                            thisUri: that.$page.uri,
+                            thisPage: 'Sign',
+                            data,
+                            code
+                        }
+                    }, 'catch_error'], that)
+                }
+            });
+        }
+        that.sharetabshow = false;
+
+        //分享打点
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '2',
+                page: '2',
+                oissign:that.oissign,
+                type:'2',
+                osharevo
+            }
+        }, 'sign_share'], that)
+
+    },
+    onBackPress() {
+        let that = this
+        setTimeout(() => {
+            that.fnPageBackPress()
+        }, 0)
+        return true;        
+    },
+    fnPageBackPress() {
+        let that = this
+        if(that.isWithdrawPopShow) {
+            that.isWithdrawPopShow = false
+            return true;
+        }
+        if(that.showSignBox) {  //签到弹窗
+            this.showSignBox = false
+            return true
+        }
+        if(that.shareshow) {  //奖励弹窗
+            this.shareshow = false
+            return true
+        }
+        if(that.isAdPopShow) {
+            that.isAdPopShow = false
+            that.$broadcast('closeExtra')
+            return true;
+        }
+        if(that.isVideoPlaying){
+            this.exitVideo()
+            return true;
+        }
+        if(that.isSignVideoShow || that.isTaskVideoShow || that.isInfoVideoShow){
+            that.$broadcast(that.isSignVideoShow ? 'signVideoClose' : that.isTaskVideoShow ? 'taskVideoClose' : 'infoVideoClose')
+            return true;
+        }
+        if(that.isSignAdShow || that.isTaskAdShow || that.isInfoAdShow) {
+            that.$broadcast(that.isSignAdShow ? 'signAdClose' : that.isTaskAdShow ? 'taskAdClose' : 'infoAdClose')
+            return true;
+        }
+        if(that.isTaskInfo) {
+            that.fnCloseTip()
+            return true
+        }
+        if(that.attentionTipShow) {
+            that.pageTitle = that.isCoin ? '福利中心' : '任务中心'
+            that.attentionTipShow = false
+            return true 
+        }
+        if(that.isShortpop){
+            that.isShortpop = false
+            return true
+        }
+        console.log('video play backPress')
+        console.info(`触发：onBackPress`);
+        let routerlen = router.getLength();
+        console.info(routerlen);
+        if(routerlen <= 1){
+            router.replace({
+                uri:'/Index'
+            })
+            return true;
+        }else{
+            router.back()
+        }
+    },
+    fnMessage(obj,position,index){
+        // let json = JSON.parse(res.message);
+        let that=this;
+        if(position=='1'&&this.btnStatus=='hide'){
+            this.btnStatus='show'
+            return
+        }
+        switch(obj.type){
+            case 1: //书籍阅读页
+                var trigger_time = that.$app.$def.getLogTime()
+                var omap = {
+                    origin:'qd',
+                    action:'2',
+                    channel_id:'qd',
+                    channel_name:'签到页',
+                    channel_pos:0,
+                    column_id:obj.id,
+                    column_name:position=='0'?'签到页顶部banner运营位':position=='1'?'签到按钮小挂件运营位':'签到成功小挂件运营位',
+                    column_pos:position,
+                    content_id:obj.info,
+                    content_pos:index,
+                    content_type:'2',
+                    trigger_time:trigger_time
+                }
+                router.push({
+                    uri:'/Read',
+                    params:{
+                        bookId:obj.info,
+                        activity:obj.id, //活动id
+                        SourcePosition:position=='0'?'签到页顶部banner运营位':position=='1'?'签到按钮小挂件运营位':'签到成功小挂件运营位',
+                        omap:omap
+                    }
+                })
+                that.$app.$def.quickappLog([702, {
+                    omap:omap
+                }, 'book_click'], that)
+                break;
+            case 2: // web
+                that.isToWeb = true
+                router.push({
+                    uri:'/Webhuodong',
+                    params:{
+                        webSrc:obj.actUrl,
+                        activity:obj.id, //活动id
+                        pageFrom:'sign',
+                        OperationPosition:position=='0'?'签到页顶部banner':position=='1'?'签到按钮小挂件':'签到成功小挂件',
+                        OperationID:obj.operationInfo.id,
+                        OperationName:obj.operationInfo.name,
+                        OperationType:obj.type||'',
+                        StartTime:obj.operationInfo.startTime,
+                        EndTime:obj.operationInfo.endTime
+                        
+                    }
+                })
+                break;
+            case 4: //充值页
+                router.push({
+                    uri:'/Recharge',
+                    params:{
+                        activity:obj.id //活动id
+                    }
+                })
+                break;
+            case 6:
+                var trigger_timeD = that.$app.$def.getLogTime()
+                var omapD = {
+                    origin:'qd',
+                    action:'2',
+                    channel_id:'qd',
+                    channel_name:'签到页',
+                    channel_pos:0,
+                    column_id:obj.id,
+                    column_name:position=='0'?'签到页顶部banner运营位':position=='1'?'签到按钮小挂件运营位':'签到成功小挂件运营位',
+                    column_pos:position,
+                    content_id:obj.info,
+                    content_pos:index,
+                    content_type:'1',
+                    trigger_time:trigger_timeD
+                }
+                router.push({
+                    uri: '/BookDetail',
+                    params: {
+                        bookId: obj.info,
+                        SourcePosition:position=='0'?'签到页顶部banner运营位':position=='1'?'签到按钮小挂件运营位':'签到成功小挂件运营位',
+                        omap:omapD,
+                        sourcePage: position=='0'?'签到页顶部banner运营位':position=='1'?'签到按钮小挂件运营位':'签到成功小挂件运营位'
+                    }
+                })
+                that.$app.$def.quickappLog([702, {
+                    omap:omapD
+                }, 'book_click'], that)
+                break;
+            case 14:
+                if(obj.isAddDesktop){
+                    shortcut.hasInstalled({
+                        success:function(res){
+                            if(res){
+                                that.$app.$def.requestData(that,{
+                                    interface: `/glory/fastapp/2107`,
+                                    data: {
+                                        isas:1
+                                    },
+                                    succ: function (res) {
+                                        if(res.data.freeLimitAll){
+                                            let message = that.fnReplaceToast(res.data.freeLimitAll)
+                                            that.loadData()
+                                            that.showToast(message)
+                                        }
+                                    }
+                                })
+                            }else{
+                                that.fnAddShortcut(obj)
+                            }
+                        }
+                    })
+                }else{
+                    that.fnAddShortcut(obj)
+                }
+                break;
+            default:
+                router.push({
+                    uri: '/Index',
+                })
+        }
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '2',
+                obj:obj,
+                position:position
+            }
+        }, 'sign_huodong'], that)
+        if(obj.userTacticsVo&&obj.userTacticsVo.isDot=='1'){
+            that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: position=='1' ? '签到页顶部banner': position=='2' ? '签到按钮小挂件' : '签到成功小挂件',
+                OperationID: obj.operationInfo.id || '',
+                OperationName: obj.operationInfo.name || '',
+                OperationType: obj.type + '' || '',
+                BookID: obj.info || '',
+                ActID: obj.actUrl ? obj.actUrl.split('id=')[1] ? obj.actUrl.split('id=')[1] : '' : '',
+                PicURL: obj.imgUrl || '',
+                ActURL: obj.actUrl || '',
+                StartTime: obj.operationInfo.startTime || '',
+                EndTime: obj.operationInfo.endTime || '',
+                TacticsId: obj.userTacticsVo ? obj.userTacticsVo.tacticsId || '' : '',
+                TacticsName: obj.userTacticsVo ? obj.userTacticsVo.tacticsName || '' : '',
+                SourceId: obj.userTacticsVo ? obj.userTacticsVo.sourceId || '' : '',
+                SourceName: obj.userTacticsVo ? obj.userTacticsVo.sourceName || '' : '',
+                ShuntId: obj.userTacticsVo ? obj.userTacticsVo.shuntID || '' : '',
+                ShuntName: obj.userTacticsVo ? obj.userTacticsVo.shuntName || '' : '',
+                BookName: obj.bookName || '',
+				ChaptersID: obj.chapterId || ''
+            });
+        }
+    },
+    shareStatus(status, isAttention = false){
+        let that = this
+        let obj = {
+            status: status
+        }
+        if(status == 1 && isAttention && that.attentionShareVo) {
+            obj.taskId = that.attentionShareVo.taskId
+        }
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2407',
+                data: obj,
+                succ: function (res) {
+                    console.log(res)
+                }
+            }
+        )
+    },
+	closeshortpop(){
+		this.isShortpop = false
+	},
+	showShortSuccess(){
+		if(!this.hasShowSuccess){
+			this.shortType = '1'
+			this.isShortpop = true
+			this.hasShowSuccess = true
+		}
+    },
+    showOpensite(){
+        this.shortType = '2'
+        this.isShortpop = true
+        this.hasShowOpen = true
+        storage.set({
+            key:'hasOpenApp',
+            value:'1'
+        })
+    },
+    gethasOpenApp(){
+        let that = this
+        storage.get({
+            key:'hasOpenApp',
+            success:function(res){
+                if(res){
+                    that.hasOpenApp = true
+                }
+            }
+        })
+    },
+    fnBrandVideoShow() {
+        this.isVideoShow = true
+    },
+    fnVideoShow(evt) {
+        if(evt.detail.adAlias === 'signVideo') {
+            this.isSignVideoShow = true
+            this.isVideoShow = true
+        }
+        if(evt.detail.adAlias === 'taskVideo') {
+            this.isTaskVideoShow = true
+            this.isVideoShow = true
+        }
+        if(evt.detail.adAlias === 'infoVideo') {
+            this.isInfoVideoShow = true
+            this.isVideoShow = true
+        }
+    },
+    fnVideoClose(evt) {
+        let that = this
+        if(evt.detail.adAlias === 'signVideo') {
+            this.isSignVideoShow = false
+        }
+        if(evt.detail.adAlias === 'taskVideo') {
+            this.isTaskVideoShow = false
+        }
+        if(evt.detail.adAlias === 'infoVideo') {
+            this.isInfoVideoShow = false
+        }
+        if(evt.detail.adAlias === 'taskVideo' && !that.isSingleAdTask) {
+            that.$app.$def.getStorageFile(that, {
+                key: 'videoTimes',
+                success: function (data) {
+                    if(data) {
+                        that.videoTimes = parseInt(data)
+                    }
+                }
+            })
+        }
+    },
+    fnVideoAdShow(evt) {
+        if(evt.detail.adAlias === 'signVideo') {
+            this.isSignAdShow = true
+        }
+        if(evt.detail.adAlias === 'taskVideo') {
+            this.isTaskAdShow = true
+        }
+        if(evt.detail.adAlias === 'infoVideo') {
+            this.isInfoAdShow = true
+        }
+    },
+    fnVideoAdClose(evt) {
+        if(evt.detail.adAlias === 'signVideo') {
+            this.isSignAdShow = false
+            this.fnVideoEnd({
+                detail: {
+                    adAlias: 'signVideo',
+                    isEnded: evt.detail.isEnded
+                }
+            })
+        }
+        if(evt.detail.adAlias === 'taskVideo') {
+            this.isTaskAdShow = false
+            this.fnVideoEnd({
+                detail: {
+                    adAlias: 'taskVideo',
+                    isEnded: evt.detail.isEnded
+                }
+            })
+        }
+        if(evt.detail.adAlias === 'infoVideo') {
+            this.isInfoAdShow = false
+            this.fnVideoEnd({
+                detail: {
+                    adAlias: 'infoVideo',
+                    isEnded: evt.detail.isEnded
+                }
+            })
+        }
+    },
+    fnVideoEnd(evt) {
+        let ret = evt.detail
+        let that = this
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '3',
+                adAlias: ret.adAlias,
+                isEnded: ret.isEnded
+            }
+        }, 'service_ad'], that)
+        if(ret.isEnded == 'true') {
+            if(ret.adAlias == 'taskVideo') {
+                console.log('taskVideo激励视频任务完成')
+                // 任务完成上报
+                if(this.isSingleAdTask) {
+                    this.fnTellServer(13, true)
+                }else {
+                    let taskInfo = this.taskAdInfo
+                    this.fnReceiveRask(taskInfo.taskId, taskInfo.taskAction, 'taskAd')
+                    that.$app.$def.getStorageFile(that, {
+                        key: 'videoTimes',
+                        success: function (data) {
+                            if(data) {
+                                that.videoTimes = parseInt(data)
+                            }
+                        }
+                    })
+                }
+            }
+            if(ret.adAlias == 'signVideo') {
+                console.log('signVideo激励视频任务完成')
+                let signInfo = this.signAdInfo
+                this.fnReceiveRask(signInfo.taskId, signInfo.taskAction, 'signAd')
+            }
+            if(ret.adAlias == 'infoVideo') {
+                console.log('infoVideo激励视频任务完成')
+                let infoAdInfo = this.infoAdInfo
+                this.fnReceiveRask(infoAdInfo.taskId, infoAdInfo.taskAction, 'infoAd')
+            }
+        }else {
+            if(ret.adAlias == 'taskVideo' && !that.isSingleAdTask) {
+                that.$app.$def.getStorageFile(that, {
+                    key: 'videoTimes',
+                    success: function (data) {
+                        if(data) {
+                            that.videoTimes = parseInt(data)
+                        }
+                    }
+                })
+            }
+            if(ret.adAlias == 'infoVideo') {
+                that.fnCloseTip()
+            }
+            console.log('激励视频任务没完成')
+        }
+    },
+    // 签到弹窗关闭 看视频领取奖励
+    signAwardVideo(){
+        this.showSignBox = false
+        this.fnSignAdClick()
+    },
+    // 签到弹窗关闭 分享领取奖励
+    signAwardShare(){
+        this.showSignBox = false
+        this.listshare('sign', 0, '签到分享',this.ofastAppShareVoList.isshare)
+    },
+    fnSignAdClick() {
+        console.log('观看视频')
+        let that = this
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: '签到激励视频点击'
+        });
+        if(that.isSignVideoLoading) {
+            prompt.showToast({
+                message: '任务视频获取失败，请稍后重试！'
+            })
+            return
+        }
+        that.isSignVideoLoading = true
+        setTimeout(() => {
+            that.isSignVideoLoading = false
+        }, 3000)
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                adType: 'signAd',
+            }
+        }, 'service_ad'], that)
+        that.$broadcast('signVideoInit')
+    },
+    fnTaskAdClick(isSingleTask = false) {
+        let that = this
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: '任务激励视频点击'
+        });
+        if(isSingleTask && that.isSingleAdLoading) {
+            prompt.showToast({
+                message: '任务视频获取失败，请稍后重试！'
+            })     
+            return
+        }
+        // 多次判断时间
+        let remainTimes = 0
+        let isLoading = false
+        let nowTime = new Date().getTime()
+        if(that.taskAdInfo.countDown && that.videoTimes) {
+            remainTimes = Math.ceil((that.taskAdInfo.countDown * 1000 - (nowTime - that.videoTimes)) / 1000)
+            if(remainTimes > 0) {
+                isLoading = true
+            }else {
+                isLoading = false
+            }
+        }
+        if(!isSingleTask && (isLoading || that.isTaskVideoLoading)) {
+            prompt.showToast({
+                message: remainTimes && remainTimes > 0 ? '还有' + remainTimes + '秒可完成下次任务' : '任务视频获取失败，请稍后重试！'
+            })   
+            return
+        }
+        if(isSingleTask) {
+            that.isSingleAdLoading = true
+            setTimeout(() => {
+                that.isSingleAdLoading = false
+            }, 3000)
+        }
+        if(!isSingleTask) {
+            that.isTaskVideoLoading = true
+            setTimeout(() => {
+                that.isTaskVideoLoading = false
+            }, 3000)
+        }
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                adType: 'taskAd',
+            }
+        }, 'service_ad'], that)
+        that.$broadcast('taskVideoInit', {
+            single: isSingleTask ? 1 : 0
+        })
+    },
+    fnInfoAdClick() {
+        let that = this
+        that.$app.shenceLog.log(that,'track','ButtonClick', {
+            ButtonName: '信息流激励视频点击'
+        });
+        if(that.isInfoVideoLoading) {
+            prompt.showToast({
+                message: '任务视频获取失败，请稍后重试！'
+            })
+            return
+        }
+        that.isInfoVideoLoading = true
+        setTimeout(() => {
+            that.isInfoVideoLoading = false
+        }, 3000)
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                adType: 'infoAd',
+            }
+        }, 'service_ad'], that)
+        that.$broadcast('infoVideoInit')
+    },
+    showToast(msg){
+        this.toastMessage = msg
+		this.isShowToast = true
+	},
+	closeToast(){
+		this.isShowToast = false
+    },
+    fnAddShortcut(obj) {
+        let that = this;
+        let award = ''
+        let awardJson = ''
+        awardJson = JSON.parse(obj.info)
+        switch(awardJson.benefitType) {
+            case 1:
+                award = awardJson.quota+(that.isCoin ? '金币' : '书币')
+                break;
+            case 2:
+                award = '免费阅读'+awardJson.memberQuota+'天'
+                break;
+            case 3:
+                award = awardJson.couponName
+                break;
+            case 4:
+                award = '免费阅读'+awardJson.duration+'小时'
+                break;
+        } 
+        that.systemtext = `创建桌面图标后，可领取${award}奖励`
+        shortcut.install({
+            message: that.systemtext,
+            success: function () {
+                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                    IsSuccess: true,
+                    PositionName: '书架弹窗',
+                    Instruction: that.systemtext,
+                    StateCode: 'return'
+                }); 
+                //来源写入变量
+                that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+                prompt.showToast({
+                    message: '创建桌面图标成功'
+                })
+                that.fnTellServer(1, true);
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '2',
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        sorce:'dialog_shortcut'
+                    }
+                }, 'shortcut'], that)
+                that.$app.$def.requestData(that,{
+                    interface: `/glory/fastapp/2107`,
+                    data: {
+                        isas:1
+                    },
+                    succ: function (res) {
+                        if(res.data.atTip&&that.shortbtntype==2){
+                            that.$app.shortSuccessText = res.data.atTip
+                        }
+                        if(res.data.freeLimitAll){
+                            that.$app.shortSuccessText = res.data.freeLimitAll
+                        }
+                        that.showShortSuccess()
+                    },
+                    error: function (code) {
+                        that.showShortSuccess()
+                    }
+                })
+            },
+            fail: function (data, code) {
+                console.log('shortcut_install fail')
+                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                    IsSuccess: false,
+                    PositionName: '书架弹窗',
+                    Instruction: that.systemtext,
+                    StateCode: 'return',
+                    MsgSendCode: code,
+                    MsgSendContent: data,
+                    
+                }); 
+                prompt.showToast({
+                    message: '创建桌面图标失败'
+                })
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '3',
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        source:'dialog_shortcut',
+                        thisUri: that.$page.uri,
+                        thisPage: 'short-btn',
+                        data,
+                        code
+                    }
+                }, 'shortcut'], that)
+            },
+            complete(errmsg) {
+                that.$app.$def.quickappLog([703, {
+                    qmap: {
+                        site: '5',
+                        errmsg: `${errmsg}`,
+                        page: that.systemtext,
+                        cIndex:that.chapterIndex,
+                        sorce:'dialog_shortcut'
+                    }
+                }, 'shortcut'], that)
+            }
+        })
+        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+            PositionName: '书架弹窗',
+            Instruction: that.systemtext,
+            StateCode: 'submit',
+            DesktopState: that.$app.isAddDesktop ? 'Deleted' : 'Neversaved'
+        }); 
+        that.$app.$def.quickappLog([702, {
+            qmap: {
+                site: '1',
+                page: that.systemtext,
+                cIndex:that.chapterIndex,
+                sorce:'dialog_shortcut'
+            }
+        }, 'shortcut'], that)
+    },
+    // 过滤关键字
+    tipsFilter(keyword,tips){
+        let that = this;
+        that.readTipsNew = [];
+        that.readTipsNew = tips.replace(keyword, '%%' + keyword + '%%').split('%%');
+    },
+    // 关闭奖励提示
+    fnCloseTip() {
+        this.isTaskInfo = false
+        this.isHasTipVideo = false
+        this.isHasTipAd = false
+        this.hasGetTipAd = false
+        clearTimeout(this.tipCloseTimeout)
+    },
+    // 获取提示广告成功
+    fnGetTipAd() {
+        this.hasGetTipAd = true
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    },
+    fnStartCount() {
+        this.isAdPopShow = false
+    },
+    fnStopCount() {
+        this.isAdPopShow = true
+    },
+    // 分享地址宏替换
+    fnReplaceUrl(url) {
+        let time = new Date().getTime()
+        return url.replace('__OPTIME__', time)
+    },
+    /**
+     * 金币替换书币
+     * @param {String} message 弹窗文案
+     */
+    fnReplaceToast(message) {
+        if(this.isCoin && message) {
+            message = message.replace(/书币/g, '金币')
+        }
+        return message
+    },
+    /**
+     * 跳转hap
+     * @param {Object} taskInfo 任务信息
+     */
+    fnDeeplinkHap(taskInfo) {
+        if(!taskInfo.deepLinkUrl) {
+            return
+        }
+        router.push({
+            uri: taskInfo.deepLinkUrl
+        })
+        this.fnTellServer(taskInfo.taskAction, true)
+    },
+    /**
+     * 跳转apk
+     * @param {Object} taskInfo 任务信息
+     */
+    fnDeeplinkApk(taskInfo) {
+        let that = this
+        if(!taskInfo.pkgName || !taskInfo.deepLinkUrl) {
+            prompt.showToast({
+                message: '应用未安装'
+            })
+            return
+        }
+        that.fnCheckApk(taskInfo.pkgName).then(res => {
+            if(res) {
+                router.push({
+                    uri: taskInfo.deepLinkUrl
+                })
+                that.fnTellServer(taskInfo.taskAction, true)
+            }
+        })
+    },
+    /**
+     * 检测apk是否安装
+     * @param {String} packageName 包名
+     * @return {Boolean} 
+     */
+    fnCheckApk(packageName) {
+        return new Promise((resolve, reject) => {
+            if(!packageName) {
+                resolve(0)
+            }
+            if(!packageName) {
+                return
+            }
+            pkg.hasInstalled({
+                package: packageName,
+                success: function(data) {
+                    if(data.result) {
+                        resolve(1)
+                    }else {
+                        resolve(0)
+                    }
+                },
+                fail: function(data, code) {
+                    resolve(0)
+                }
+            })
+        })
+    },
+    /**
+     * 跳转提现页面
+     */
+    fnRouteToCoin() {
+        let that = this
+        if(that.isSupportPayOut && that.isSupportPayOut == 1) {
+            router.push({
+                uri: '/DespositWithdraw',
+                params: {
+                    urlPakVo: JSON.stringify(that.urlPakVo)
+                }
+            })
+        }else {
+             router.push({
+                uri: '/Withdraw'
+            })
+        }
+        that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+            PositionName: '去提现',
+            ButtonName: that.isSupportPayOut && that.isSupportPayOut == 1 ? '跳转提现页面' : '提现弹窗',
+            ButtonContent: '去提现',
+        });
+    },
+    // 跳转规则h5
+    fnRoutetoRules(){
+        this.$page.setTitleBar({backgroundColor:'rgba(255, 255, 255, 1)'});
+        this.$app.lastOpenPage = ''
+        setTimeout(()=>{
+            router.push({
+                uri: this.$app.api + `/huodong/quickapp/free_agreement/welfare_rules.html?channelCode=${this.txtName}`
+            })
+        },0)
+    },
+    fnCheckScStart() {
+        let that = this
+        if(!that.$app.isScStart) {
+            shortcut.hasInstalled({
+                success: function(res) {
+                    let fnGetCreateTime = that.$app.$def.fnGetCreateTime.call(that)
+                    let fnGetInstallTime = that.$app.$def.fnGetInstallTime.call(that)
+                    Promise.all([fnGetCreateTime, fnGetInstallTime]).then(result => {
+                        if(result[0] || result[1]) {
+                            that.$app.shenceLog.fnSetCommonArgs({
+                                RegisterDate: result[0] || result[1] 
+                            })
+                        }
+                        let property = {
+                            StartPath: that.$page.uri,
+                            BookID: that.bookId ? that.bookId : '无',
+                            DesktopState: res ? 'Saved' : 'Notsaved',
+                        }
+                        that.$app.shenceLog.log(that, 'appLaunch', '', property);
+                        that.$app.isScStart = true
+                    })
+                },
+                fail: function() {
+                    that.$app.$def.quickappLog([703, {
+                        site: '6',
+                    }, 'get_shortcut_install_fail'], that);
+                }
+            })
+        }
+    },
+    // 顶部banner曝光
+    fnSwiperAppear(item){
+        let that = this
+        that.$app.$def.quickappLog([703, {
+            qmap: {
+                site: '1',
+                position:'1'
+            }
+        }, 'sign_huodong'], that)
+        if(item.userTacticsVo && item.userTacticsVo.isDot == '1'){
+            that.$app.shenceLog.log(that,'track','OperationExposure', {
+                OperationPosition: '签到页顶部banner',
+                OperationID: item.operationInfo.id,
+                OperationName: item.operationInfo.name,
+                OperationType: item.type||'',
+                BookID: item.info||'',
+                ActID: item.actUrl ? item.actUrl.split('id=')[1] ? item.actUrl.split('id=')[1]:'':'',
+                PicURL: item.imgUrl||'',
+                ActURL: item.actUrl||'',
+                StartTime: item.operationInfo.startTime,
+                EndTime: item.operationInfo.endTime,
+                TacticsId: item.userTacticsVo ? item.userTacticsVo.tacticsId||'':'',
+                TacticsName: item.userTacticsVo ? item.userTacticsVo.tacticsName||'':'',
+                SourceId: item.userTacticsVo ? item.userTacticsVo.sourceId||'':'',
+                SourceName: item.userTacticsVo ? item.userTacticsVo.sourceName||'':'',
+                ShuntId: item.userTacticsVo ? item.userTacticsVo.shuntID||'':'',
+                ShuntName: item.userTacticsVo ? item.userTacticsVo.shuntName||'':''
+            });
+        }
+    },
+}
+</script>

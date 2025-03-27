@@ -1,0 +1,42 @@
+<template>
+    <div class="web-view-wrap">
+        <web if="canWebViewShow" class="web-view" src="{{ webSrc }}" useragent="{{ userAgent }}" @titlereceive="fnReveiveTitle"></web>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .web-view-wrap {
+        width: 100%;
+        height: 100%;
+        .web-view {
+            width: 100%;
+            height: 100%; 
+        }
+    }
+</style>
+
+<script>
+export default {
+    protected: {
+        webSrc: '',
+        userAgent: '',
+    },
+    private: {
+        canWebViewShow: false,
+    },
+    onInit() {
+        if(this.webSrc) {
+            this.canWebViewShow = true
+        }
+    },
+    fnReveiveTitle(e) {
+        if(e.title) {
+            this.$page.setTitleBar({
+                text: e.title
+            })
+        }
+    },
+}
+</script>
+
+

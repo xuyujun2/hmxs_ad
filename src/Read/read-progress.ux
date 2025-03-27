@@ -1,0 +1,122 @@
+<template>
+    <div class="read-progress-wrap">
+        <div class="read-progress" @click="fnReadAwardClick">
+            <stack class="award-stack {{ !readAwardObj.isNewAwardStyle ? (task.awardReceiveFlag == 1 ? 'award-stack-complete' : 'award-stack-width') : ''}}">
+                <div class="award-bg {{total >= task.duration ? 'award-bg-dark' : ''}} {{ task.awardReceiveFlag == 1 ? 'award-bg-complete' : '' }}">
+                    <div if="total < task.duration && task.awardReceiveFlag != 1 && !readAwardObj.isNewAwardStyle" class="award-progress" style="width: {{total / task.duration * 100}}%;"></div>
+                    <div if="total < task.duration && task.awardReceiveFlag != 1 && !!readAwardObj.isNewAwardStyle" class="award-progress" style="width: {{total / task.duration * readAwardText.length * 20}}px;"></div>
+                </div>
+                <div class="award-box">
+                    <image class="award-icon" src="{{!readAwardObj.isNewAwardStyle ? 'https://xsmfdq.kkyd.cn/images/gold_icon.png' : readAwardObj.readAwardIconUrl}}"></image> 
+                    <text class="award-text {{type ? 'award-text-dark' : ''}} {{!readAwardObj.isNewAwardStyle ? (task.awardReceiveFlag == 1 ? 'award-text-complete' : 'award-text-width') : ''}}">{{!readAwardObj.isNewAwardStyle ? (task.awardReceiveFlag == 1 ? '领取更多金币' : task.award + '金币') : readAwardText}}</text> 
+                </div>
+            </stack>
+        </div>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .read-progress-wrap {
+        justify-content: flex-end;
+        position: fixed;
+        top: 25px;
+        right: 30px;
+        width: 400px;
+        height: 40px;
+    }
+    .read-progress {
+        height: 40px;
+        .award-stack {
+            flex-direction: column;
+            justify-content: center;
+            height: 40px;
+            .award-bg {
+                margin-left: 20px;
+                height: 40px;
+                border-top-right-radius: 20px;
+                border-bottom-right-radius: 20px;
+                background-color: rgba(153, 153, 153, 0.2);
+                .award-progress {
+                    height: 40px;
+                    border-top-right-radius: 20px;
+                    border-bottom-right-radius: 20px;
+                    background-color: rgba(153, 153, 153, 0.4);
+                }
+            }
+            .award-bg-dark {
+                background-color: rgba(153, 153, 153, 0.5);
+            }
+            .award-bg-complete {
+                background-color: #FFD06D;
+            }
+            .award-box {
+                align-items: center;
+                height: 40px;
+                .award-icon {
+                    width: 40px;
+                    height: 40px;
+                }
+                .award-text {
+                    padding-left: 20px;
+                    padding-right: 20px;
+                    height: 40px;
+                    line-height: 40px;
+                    text-align: center;
+                    font-size: 24px;
+                    color: #555555;
+                }
+                .award-text-dark {
+                    color: #c2c2c2;
+                }
+                .award-text-width {
+                    padding-left: 0px;
+                    padding-right: 10px;
+                    width: 160px;
+                }
+                .award-text-complete {
+                    padding-left: 0px;
+                    padding-right: 10px;
+                    width: 200px;  
+                }
+            }
+        }
+        .award-stack-width {
+            width: 200px;
+        }
+        .award-stack-complete {
+            width: 240px;
+        }
+    }
+</style>
+
+<script>
+export default {
+    props: {
+        type: {
+            type: Boolean,
+            default: false
+        },
+        task: {
+            type: Object,
+            required: true
+        },
+        total: {
+            type: Number | String,
+            default: 0
+        },
+        readAwardObj: {
+            type: Object,
+            required: false 
+        },
+        readAwardText: {
+            type: String,
+            required: false
+        },  
+    },
+    fnReadAwardClick() {
+        this.$emit('enterToAwardCenter')
+    },
+}
+</script>
+
+

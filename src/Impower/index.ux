@@ -1,0 +1,424 @@
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+ <template>
+    <div class="wrap" id="wrap">
+        <retry if="isShowBtn" is-loading="{{isLoading}}" @retry="retryHandler"></retry>
+    </div>
+</template>
+<style>
+    .wrap {
+        width: 100%;
+        height: 100%;
+        flex: 1;
+    }
+</style>   
+<script>
+import device from '@system.device';
+import fetch from '@system.fetch';
+import storage from '@system.storage';
+import file from '@system.file';
+import router from '@system.router';
+import prompt from '@system.prompt'
+import app from '@system.app';
+import push from '@service.push';
+import shortcut from '@system.shortcut';
+import pkg from '@system.package';
+
+export default {
+    private: {
+        config:null,
+        device:{
+            ei: '',
+            mac: '',
+            brand: '',
+            model: '',
+            utdid: '',
+            utdidTmp:''
+        },
+        userId:'',
+        ctime:'',
+        t:'',
+        isShowBtn:false,
+        isLoading:false,
+		// reloadNum:0,
+        showTime:null,
+        stopTimer:null,
+        currentStep: 0,
+        stepTimeout: null,
+   },
+   public: {
+        channelCode:'dz_hmxs',
+        jumpPage:'Index',
+        bookId:'',
+        chapterId:'',
+        chapterName:'',
+        uuid:'',
+        bookshelfStyle:'',
+        jobId:'',
+        isJump:false,
+        isAuthorize:1,
+        sid:'',
+        isOlder:1,
+        calledPlatform:'',
+        urlFrom:'',
+        pullMode:'',
+        shence:'',
+        isScLogin: false,
+        isUnion:'',
+        noback:0,
+        wenjuanFlag: '',
+        wenjuanSrc: '',
+        isAdShow: 0,
+        source:'',
+        vid: '',
+        landJson:'', // 落地页携带参数
+        back_pkg: '',
+        back_name: '',
+        back_url: '',
+        oppoLock: 0, // oppo锁屏启动
+        clickid: ''
+    },
+    onShow() {
+        let that = this;
+        that.$app.lastOpenPage = ''
+        that.$app.$def.quickappLog([701, {
+            qmap:{
+                sorce:'onShow',
+                isJump:that.isJump,
+                channelCode:that.channelCode,
+                bookId:that.bookId,
+                chapterId:that.chapterId,
+                sid:that.sid,
+                uuid:that.uuid,
+                jobId:that.jobId,
+                jumpPage:that.jumpPage,
+                pullMode:that.pullMode
+            }
+        }], that)
+        that.isJump = true;
+        that.reTryTimeout()
+    },
+    onHide() {},
+    onInit(e) {
+        let that = this;
+        that.stepTimeout = setTimeout(() => {
+            that.fnReportError()
+        }, 3000)
+        try {
+            let startScene = that.$app.startScene
+            if(that.jobId || that.vid) {
+                startScene = 'push'
+            }
+            if(startScene == 'shortcut' && that.bookId) {
+                startScene = 'url'
+            }
+            if(startScene != 'shortcut' && startScene != 'push') {
+                startScene = 'url'
+                if(!(that.bookId && /^110[0-9]*$/.test(that.bookId))) {
+                    startScene = 'other'
+                }
+            }
+            that.$app.startScene = startScene
+        } catch (err) {}
+        that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+            SessionId: that.clickid || new Date().getTime() + '_' + (Math.random() + '').slice(2, 5)
+        })
+        let {source} = app.getInfo()
+        that.$app.sourceInfo['infoType'] = source.type
+        that.$app.sourceInfo['sourceCid'] = that.channelCode
+        that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+            SourceChannel: that.channelCode || ''
+        })
+        that.$app.sourceInfo['uuid'] = that.uuid
+        that.$app.sourceInfo['pullMode'] = that.pullMode
+        that.$app.sourceInfo['landJson'] = that.landJson
+        //上报投放所需字段
+        if(e&&e.param){
+            let pullJsonArr = []
+            let pullJson = {}
+            pullJsonArr = e.param.split('|')
+            for (let i = 0; i < pullJsonArr.length; i++) {
+                let element = pullJsonArr[i];
+                if(element){
+                    pullJson[element] = e[element] || ''
+                }
+            }
+            that.$app.sourceInfo['pullJson'] = pullJson
+        } 
+        storage.get({
+            key: 'sensorsdata2015_quickapp',
+            success: function(res) {
+                if (res) {
+                    let data = JSON.parse(res)
+                    if (that.shence) {
+                        if (data.first_id && data.first_id != that.shence) {
+                            that.$app.$def.sLogout()
+                            that.isScLogin = true
+                            that.$app.sensors.identify(that.shence, true);
+                        } else if (!data.first_id) {
+                            that.isScLogin = true
+                            that.$app.sensors.identify(that.shence, true);
+                        }
+                    } else {
+                        if (!data.first_id) {
+                            that.isScLogin = true
+                        }
+                    }
+                } else {
+                    that.isScLogin = true
+                    if (that.shence) {
+                        that.$app.sensors.identify(that.shence, true);
+                    }
+                }
+            }
+        })
+        if(that.back_pkg) {
+            pkg.hasInstalled({
+                package: that.back_pkg,
+                success: function(data) {
+                    if(data.result) {
+                        that.$app.isBackGdt = true
+                        that.$app.backGdtText = that.back_name
+                        that.$app.backGdtUrl = that.back_url
+                    }
+                }
+            })
+        }
+        if(that.urlFrom=='baidu'){
+            that.$app.isFromBaidu = true
+        }
+        if(that.chapterId){
+            that.sid = that.chapterId
+            that.chapterId = ''
+        }
+        that.config=that.$app.$data;
+        that.isShowBtn = false;
+        //获取来源
+        that.$app.$def.quickappLog([701, {
+            qmap:{
+                sorce:'onInit'
+            }
+        }], that)
+        if(that.uuid){
+            that.$app.$def.quickappLog([703, {
+                qmap:{
+                   uuid:that.uuid,
+                   sorce:'impower',
+                   pullMode:that.pullMode
+                }
+            }, 'uuid'], that)
+        }
+        that.getsourceinfo();
+        that.currentStep = 13
+        that.$app.$def.getUserIdLogic(that);
+        if(that.jobId){
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2170`,
+                data: {
+                    jobId:that.jobId
+                },
+                succ: function (data) {
+                    console.log('successsuccess')
+                }
+            })
+            that.$app.$def.quickappLog([703, {
+                qmap:{
+                    jobId:that.jobId,
+                    page:'impower'
+                }
+            },'impower'],that);
+        }
+
+    },
+    onReady() {
+        setTimeout(() => {
+            this.fnGetProperty()
+        }, 0)
+    },
+    onDestroy() {
+        clearTimeout(this.stepTimeout)
+    },
+    goIndex(type){
+        let that = this;
+        clearTimeout(that.stopTimer);
+        router.clear();
+       if(that.jumpPage.toLowerCase()=='read'){
+            var trigger_time = that.$app.$def.getLogTime()
+            var omap = {
+                origin:that.jobId?'push':'tgsj',
+                action:'2',
+                channel_id:that.jobId?that.jobId:that.$app.sourceInfo['sourceCid'],
+                channel_name:that.jobId?that.jobId:that.$app.sourceInfo['sourceCid'],
+                channel_pos:0,
+                column_id:that.jobId?that.jobId:that.$app.sourceInfo['sourceCid'],
+                column_name:that.jobId?that.jobId:that.$app.sourceInfo['sourceCid'],
+                column_pos:0,
+                content_id:that.bookId,
+                content_pos:0,
+                content_type:'2',
+                trigger_time:trigger_time
+            }
+            that.$app.$def.quickappLog([702, {
+                omap:omap
+            }, 'book_click'], that)
+            that.$app.$def.quickappLog([703, {
+                qmap:{
+                    type:type,
+                    thisUri:that.$page.uri,
+                }
+            }, 'lvgoRead'], that)
+            router.replace({
+                uri:'/Read',
+                params:{
+                    isAdShow: that.isAdShow,
+                    oppoLock: that.oppoLock,
+                    onBackPressToPage:'/Index',
+					bookId:that.bookId,
+                    chapterId:that.chapterId,
+                    sid:that.sid,
+                    chapterName:that.chapterName,
+                    channelCode:that.channelCode,
+                    SourcePosition:'注册页',
+                    isAuthorize:that.isAuthorize,
+                    fromPlace:'login',
+                    omap:omap
+                }
+            })
+        }else{
+            that.$app.$def.quickappLog([703, {
+                qmap:{
+                    type:type,
+                    thisUri:that.$page.uri,
+                }
+            }, 'lvgoIndex'], that)
+            
+            router.replace({
+                uri:'/Index'
+            })
+        }
+    },
+    reTryTimeout(){
+        let that = this
+        that.stopTimer=setTimeout(function(){
+            clearTimeout(that.stepTimeout)
+            that.isShowBtn = true;
+            that.isLoading = true;
+            that.$app.$def.quickappLog([703, {
+                qmap:{
+                    thisUri:that.$page.uri,
+                }
+            }, 'lvstop'], that)
+        }, 2000);
+    },
+    getsourceinfo(){
+        let that = this;
+        let ogetinfo = app.getInfo();
+        //获取来源
+        that.$app.$def.quickappLog([703, {
+            qmap:{
+                page:'10',
+                infotype:ogetinfo.source.type,
+                extra:ogetinfo.source.extra
+            }
+        }, 'source'], that)
+    },
+    getpustid(triggersite){
+        
+        let that = this;
+        let regId = '';
+        //推送
+        let getProvider = push.getProvider();
+        push.subscribe({
+            success: function(data) {
+                regId = data.regId;
+                let isPush = 2
+                storage.get({
+                    key:'isPush',
+                    success(res){
+                        if(res==1){
+                            isPush=1
+                        }
+                        that.$app.$def.requestData(that,{
+                            interface: `/glory/fastapp/2107`,
+                            data: {
+                                pushCid:data.regId,
+                                provider:isPush==2?getProvider:`${getProvider}_none`
+                            },
+                            succ: function (data) {},
+                            error: function (code) {}
+                        })
+                    }
+                })
+                
+
+
+                //获取设备信息失败打点
+                that.$app.$def.quickappLog([703, {
+                    qmap:{
+                        page:'10',
+                        site:'1',
+                        data,
+                        triggersite
+                    }
+                }, 'push_id'], that)
+            },
+            fail: function(data, code) {
+
+                //获取设备信息失败打点
+                that.$app.$def.quickappLog([703, {
+                    qmap:{
+                        page:'10',
+                        site:'2',                       
+                        triggersite,
+                        source:'push_subscribe_fail',
+                        thisUri: that.$page.uri,
+                        data,
+                        code
+                    }
+                }, 'catch_error'], that)
+            },
+            complete: function(data, code) {
+
+            }
+        })
+
+        push.on({
+            callback: function(ret) {}
+        })
+    },
+    onBackPress(){
+        return true
+    },
+    retryHandler(){
+        this.goIndex('click');
+    },
+    fnGetProperty() {
+        console.log('----------fnGetProperty----------提前获取配置信息')
+        let that = this
+        if(that.$element("wrap") && that.$element("wrap").getBoundingClientRect) {
+            that.$element("wrap").getBoundingClientRect({
+                success: function(data) {
+                    if(data.width && data.height && data.height > data.width) {
+                        console.log('----------fnGetProperty----------提前获取配置信息成功', data)
+                        storage.set({
+                            key: 'property',
+                            value: JSON.stringify(data)
+                        })
+                    }
+                },
+            })
+        }
+    },
+    fnReportError() {
+        if(!this.$valid) {
+            return
+        }
+        this.$app && this.$app.$def && this.$app.$def.quickappLog && this.$app.$def.quickappLog([703, {
+            qmap: {
+                step: this.currentStep,
+                page: 'Impower',
+            }
+        }, 'serious_error'], this);
+    },
+}
+
+</script>

@@ -1,0 +1,1345 @@
+<import name="autonym-pop" src="./autonym-pop"></import>
+<import name="withdraw-standard-pop" src="./withdraw-standard-pop.ux"></import>
+<import name="ad-union" src="../AdUnion/index"></import>
+<template>
+    <div class="withdraw-wrap">
+        <div class="withdraw-title-bar">
+            <image class="withdraw-image" src="../Common/images/icon_back_black.png" @click="fnPageBackPress"></image>
+            <text class="withdraw-title">{{ pageTitle }}</text>
+        </div>
+        <stack class="withdraw-message">
+            <image src="https://xsmfdq.kkyd.cn/images/withdraw_bg.png" class="withdraw-bg"></image>
+            <div class="coin-content">
+                <div class="coin-message">
+                    <text class="coin-amount">{{goldNum}}</text>
+                    <text class="coin-title">金币数量</text>
+                </div>
+                <div class="record" @click="toRecord"><text class="width-record">提现记录 ></text></div>
+            </div>
+        </stack>
+        <div class="bound" if="withdrawInfo.payChannel === 2 || withdrawInfo.payChannel === 1">
+            <div class="bound-left" if="isBind">
+                <image src="{{boundInfo.headpic}}" class="icon"></image>
+                <text class="bound-withdraw">{{boundInfo.nickname}}</text>
+            </div>
+            <div class="bound-left" else>
+                <image src="https://xsmfdq.kkyd.cn/images/wechat_icon.png" class="icon"></image>
+                <text class="bound-withdraw">提现至微信零钱</text>
+            </div>
+            <div class="bound-right {{isBind?'has-bind':''}}">
+                <text class="bound-text-else" if="isBind">已绑定</text>
+                <text class="bound-text" @click="fnToBindHandle('weChat')" else>去绑定</text>
+            </div>
+        </div>
+        <div class="bound" if="withdrawInfo.payChannel === 3">
+            <div class="bound-left" if="isAliPayBind">
+                <image src="{{ aliPayBindInfo.headPic }}" class="icon"></image>
+                <text class="bound-withdraw">{{ aliPayBindInfo.nickName }}</text>
+            </div>
+            <div class="bound-left" else>
+                <image src="https://xsmfdq.kkyd.cn/images/hmxs/alipay-icon.png" class="icon"></image>
+                <text class="bound-withdraw">提现至支付宝</text>
+            </div>
+            <div class="bound-right {{isAliPayBind ? 'has-bind':''}}">
+                <text class="bound-text-else" if="isAliPayBind">已绑定</text>
+                <text class="bound-text" @click="fnToBindHandle('aliPay')" else>去绑定</text>
+            </div>
+        </div>
+        <div class="bound-content">
+            <text class="bount-title">提现金额</text>
+            <div class="bound-list">
+                <block for="withdrawList">
+                    <div class="withdraw-card {{$item.id === withdrawInfo.id ? 'active' : ''}}" @click="fnChangeWithdraw($item)">
+                        <div class="tip" if="$item.corner">
+                            <text class="tips">{{$item.corner}}</text>
+                        </div>
+                        <text class="withdraw-num {{!$item.corner? 'tipTop' : ''}} {{$item.id === withdrawInfo.id ? 'active-text' : ''}}">{{$item.cashoutAmount}}元</text>
+                        <text class="withdraw-des {{$item.id === withdrawInfo.id ? 'active-text' : ''}}" if="$item.bottomDesc">{{$item.bottomDesc}}</text>
+                    </div>
+                </block>
+            </div>
+            <div class="withdraw-rules" if=withdrawInfo.serviceFeeScale>
+                <image src="https://xsmfdq.kkyd.cn/images/hmxs/rules-icon.png" class="withdraw-rules-icon"></image>
+                <text class="withdraw-rules-text">手续费{{ withdrawInfo.serviceFeeScale }}%，实际打款{{ withdrawInfo.actualAmount}}元</text>
+            </div>
+        </div>
+        <div class="withdraw-pannel">
+            <div class="withdraw-describe" if="withdrawDesc">
+                <text class="withdraw-describe-text">{{ withdrawDesc }}</text>
+            </div>
+            <div class="withdraw-btn">
+                <text class="need-coin">≈{{withdrawInfo.useGoldCoinNum?withdrawInfo.useGoldCoinNum:0}}金币</text>
+                <div class="immediately-withdraw">
+                    <text class="btn-text" @click="fnToWithdraw">立即兑现</text>
+                </div>
+            </div>
+        </div>
+        <autonym-pop if={{autonym}} @autonym-submit="fnAutonymSubmit"></autonym-pop>
+        <div class="noBound-pop" if="bound">
+            <image class="pop-close" src="https://xsmfdq.kkyd.cn/images/pop_close.png" @click="fnClosePop"></image>
+            <div class="pop-box">
+                <image src="https://xsmfdq.kkyd.cn/images/not_bound.png" class="pop-top"></image>
+                <text class="pop-title">还未绑定微信提现账号</text>
+                <text class="reminder">请绑定<span class="active">微信提现账号</span>后重试</text>
+                <div class="btn">
+                    <text class="cancel" @click="fnClosePop">取消</text>
+                    <text class="tobind" @click="fnToBindHandle('weChat')">去绑定</text>
+                </div>
+            </div>
+        </div>
+        <div class="success-pop" if="withdrawPopShow">
+            <image class="pop-close" src="https://xsmfdq.kkyd.cn/images/pop_close.png" @click="fnClosePop"></image>
+            <div class="pop-box">
+                <image src="https://xsmfdq.kkyd.cn/images/withdraw_success.png" class="pop-top-success"></image>
+                <text class="pop-title-success">成功兑换<span class="active">{{successNum}}</span>元现金元宝！</text>
+                <text class="reminder">元宝兑换的现金将在<span class="active">1-3</span>个工作日内打款至</text>
+                <text class="reminder">您的{{ payChannel === 1 || payChannel === 2 ? '微信' : '支付宝' }}账户，请注意查收！</text>
+                <div class="btn">
+                    <text class="get-coin" @click="fnClosePop">好的</text>
+                </div>
+            </div>
+        </div>
+         <div class="flow-pop" if="flowPop">
+            <div class="pop-box">
+                <image class="pop-close" src="https://xsmfdq.kkyd.cn/images/pop_close.png" @click="fnClosePop"></image>
+                <div class="flow-title">
+                    <image src="https://xsmfdq.kkyd.cn/images/solid_left.png" class="flow-left"></image>
+                    <text class="flow-text">提现账号绑定流程</text>
+                    <image src="https://xsmfdq.kkyd.cn/images/solid_right.png" class="flow-right"></image>
+                </div>
+                <div class="flow-des">
+                    <image src="https://xsmfdq.kkyd.cn/images/one_icon.png" class="number"></image>
+                    <text class="flow-des-one">点击下方按钮‘去绑定’进入微信。</text>
+                </div>
+                <div class="flow-des" style="margin-top:32px;">
+                    <image src="https://xsmfdq.kkyd.cn/images/two_icon.png" class="number"></image>
+                    <text class="flow-des-one">点击链接‘点击绑定提现账号’。</text>
+                </div>
+                <text class="tip">点击‘发表’无奖励</text>
+                <image src="https://xsmfdq.kkyd.cn/images/flow_two_bg.png" class="flow-two"></image>
+                <div class="flow-des" style="margin-top:29px;">
+                    <image src="https://xsmfdq.kkyd.cn/images/three_icon.png" class="number"></image>
+                    <text class="flow-des-one">输入验证码‘<span class="active">{{userid}}</span>’，绑定提现账户。</text>
+                </div>
+                <image src="https://xsmfdq.kkyd.cn/images/flow_three_bg.png" class="flow-two"></image>
+                <text class="bindBtn" @click="fnBindNow">去绑定</text>
+            </div>
+        </div>
+        <ad-union
+            if="withdrawVideoInfo.withdrawVideoSwitch"
+            ad-unit-id="{{withdrawAdPositionId}}" 
+            ad-type="video"
+            ad-alias="withdrawVideo"
+            video-show="{{ withdrawVideoInfo.withdrawVideoShow }}"
+            video-ad-show="{{ withdrawVideoInfo.withdrawAdShow }}"
+            ad-init-function="withdrawVideoInit"
+            video-close-function="withdrawVideoClose"
+            ad-close-function="withdrawAdClose"
+            onvideo-show="fnVideoShow"
+            onvideo-close="fnVideoClose"
+            onvideo-ad-show="fnVideoAdShow"
+            onvideo-ad-close="fnVideoAdClose"
+            onvideo-end="fnVideoEnd"
+            onbrand-video-show="fnBrandVideoShow"
+        ></ad-union>
+        <withdraw-standard-pop 
+            if="{{ isShowStandardPop }}" 
+            onclose-pop="fnCloseStandardPop"
+            standard-pop-obj="{{ standardPopObj }}"
+            current-type="{{ conditionType }}"
+            @appear="fnPopAppear"
+            onvideo-play="fnWithdrawVideoButtonClick"
+        ></withdraw-standard-pop>
+    </div>
+</template>
+
+<style scoped lang="less">
+ .withdraw-wrap {
+    flex-direction: column;
+    background-color: #F6F6F6;
+    padding-bottom: 31px;
+    align-items: center;
+    width: 100%;
+    margin-top: 100px;
+    .withdraw-message {
+        width: 690px;
+        height: 202px;
+        border-radius: 12px;
+        margin-top: 32px;      
+        .withdraw-bg {
+           width: 100%;
+           height: 100%; 
+        }
+        .coin-content {
+            flex-direction: row;
+            justify-content: space-between;
+            height: 100%;
+            width: 100%;
+            padding-top: 40px;
+            padding-left: 24px;
+            padding-right: 24px;
+            .coin-message {
+                flex-direction: column;
+                .coin-amount {
+                    height: 78px;
+                    font-size: 56px;
+                    font-weight: bold;
+                    color: #FFFEE5;
+                    line-height: 78px;
+                } 
+                .coin-title {
+                    height: 40px;
+                    font-size: 28px;
+                    color: #FFFEE5;
+                    line-height: 40px;
+                }
+            }
+            .record {
+                flex-direction: column;
+                margin-top: 41px;
+                .width-record {
+                    height: 40px;
+                    font-size: 28px;
+                    color: #FFFEE5;
+                    line-height: 40px;
+                }
+            }
+        }
+    }
+    .bound {
+        width: 690px;
+        height: 114px;
+        background-color: #FFFFFF;
+        border-radius: 12px;
+        margin-top: 30px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        .bound-left {
+            margin-left: 24px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            .icon {
+                height: 57px;
+                width: 57px;
+                margin-right: 16px;
+                object-fit: cover;
+            }
+            .bound-withdraw {
+                height: 40px;
+                font-size: 28px;
+                font-weight: bold;
+                color: #333333;
+                line-height: 40px;
+            }
+        }
+        .bound-right {
+            width: 160px;
+            height: 64px;
+            background-color: #F97053;
+            border-radius: 32px;
+            margin-right: 24px;   
+            .bound-text {
+                width: 100%;
+                height: 64px;
+                text-align: center;
+                font-size: 28px;
+                font-weight: bold;
+                color: #FFFFFF;
+                line-height: 64px
+            }
+        }
+        .has-bind {
+            background-color: #E7E7E7;
+            .bound-text-else {
+                 width: 100%;
+                height: 64px;
+                text-align: center;
+                font-size: 28px;
+                font-weight: bold;
+                color: #BCBCBC;
+                line-height: 64px
+            }
+        }
+    }
+    .bound-content {
+        width: 690px;
+        flex-direction: column;
+        padding-top: 32px;
+        background-color: #ffffff;
+        margin-top: 30px;
+        margin-bottom: 262px;
+        border-radius: 12px;
+        .bount-title {
+            height: 45px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #222222;
+            line-height: 45px;
+            margin-left: 24px;
+        }
+        .bound-list {
+            flex-direction: row;
+            justify-content:flex-start;
+            flex-wrap: wrap;
+            width: 100%;
+            padding-left: 24px;
+            margin-top: 24px;
+            .withdraw-card {
+                width: 306px;
+                height: 156px;
+                background-color: #F6F6F6;
+                border: 2px solid #F6F6F6;
+                border-radius: 8px;
+                margin-bottom: 24px;
+                margin-right: 22px;
+                flex-direction: column;
+                .tip {
+                    width: 158px;
+                    height: 40px;
+                    margin-top: -2px;
+                    margin-left: -2px;
+                    background-color: #EA6805;
+                    border-top-left-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                    .tips {
+                        text-align: center;
+                        height: 40px;
+                        width: 100%;
+                        font-size: 24px;
+                        font-weight: 400;
+                        color: #FFFFFF;
+                        line-height: 40px;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                }
+                .withdraw-num {
+                    width: 100%;
+                    text-align: center;
+                    height: 56px;
+                    font-size: 40px;
+                    font-weight: bold;
+                    color: #222222;
+                    line-height: 56px;
+                    margin-top: 12px;
+                }
+                .tipTop {
+                    margin-top: 52px;
+                }
+                .withdraw-des {
+                    width: 100%;
+                    text-align: center;
+                    height: 30px;
+                    font-size: 22px;
+                    color: #BCBCBC;
+                    line-height: 30px;
+                }
+                .active-text {
+                    color: #F97053;
+                }
+            }
+            .active {
+                background-color: #FFF0DF;
+                border: 2px solid #F0C1A1;
+            }
+        }
+        .withdraw-rules{
+            margin-bottom: 32px;
+            height: 32px;
+            width: 100%;
+            align-items: center;
+            .withdraw-rules-icon {
+                width: 32px;
+                height: 32px;
+                margin: 0 16px 0 24px;
+            }
+            .withdraw-rules-text {
+                height: 32px;
+                font-size: 26px;
+                color: #333333;
+                line-height: 32px;
+            }
+        }
+    }
+    .withdraw-pannel {
+        width: 750px;
+        position: fixed;
+        bottom: 0px;
+        background-color: #ffffff;
+        flex-direction: column;
+        .withdraw-describe {
+            width: 100%;
+            background-color: rgba(255, 238, 224, 1);
+            .withdraw-describe-text {
+                font-size: 24px;
+                color: #FA5805;
+                line-height: 30px;
+                padding: 16px 32px;
+            }
+        }
+        .withdraw-btn {
+            width: 750px;
+            height: 140px;
+            flex-direction: row;
+            justify-content: space-between;
+            .need-coin {
+                height: 45px;
+                font-size: 32px;
+                color: #333333;
+                line-height: 45px;
+                margin-top: 38px;
+                margin-left: 40px;
+            }
+            .immediately-withdraw {
+                width: 323px;
+                height: 88px;
+                background-color: #F97053;
+                border-radius: 44px;
+                margin-top: 16px;
+                margin-right: 40px;
+                .btn-text {
+                    width: 100%;
+                    text-align: center;
+                    height: 88px;
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #FFFFFF;
+                    line-height: 88px;
+                }
+            }
+        }
+    }
+    .noBound-pop {
+       flex-direction: column;
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .7); 
+        .pop-close {
+            align-self:flex-end;
+            position: fixed;
+            top: 387px;
+            right: 60px;
+            width: 54px;
+            height: 54px;
+        }
+        .pop-box {
+            flex-direction: column;
+            align-items: center;
+            width: 646px;
+            height: 538px;
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            margin-top: 379px;
+            .pop-top {
+                width: 370px;
+                height: 220px;
+                object-fit: cover;
+            }
+            .pop-title {
+                width: 100%;
+                text-align: center;
+                height: 56px;
+                font-size: 40px;
+                font-weight: bold;
+                color: #222222;
+                line-height: 56px;
+                margin-top: 16px;
+            }
+            .reminder {
+                width: 100%;
+                height: 42px;
+                text-align: center;
+                margin-top: 10px;
+                font-size: 30px;
+                color: #222222;
+                line-height: 42px;
+            }
+            .active {
+                color: #F97053;
+            }
+            .btn {
+                flex-direction: row;
+                justify-content: center;
+                margin-top: 64px;
+                height: 90px;
+                width: 100%;
+                .cancel {
+                    width: 260px;
+                    height: 90px;
+                    background-color: #E7E7E7;
+                    border-radius: 45px;
+                    font-size: 32px;
+                    color: #817272;
+                    line-height: 90px;
+                    text-align: center;
+                    border-radius: 45px;
+                    margin-right: 20px;
+                }
+                .tobind {
+                     width: 260px;
+                    height: 90px;
+                    background-color: #F97053;
+                    border-radius: 45px;
+                    font-size: 32px;
+                    color: #ffffff;
+                    line-height: 90px;
+                    text-align: center;
+                    border-radius: 45px;
+                }
+                .get-coin {
+                    width: 540px;
+                    height: 90px;
+                    background-color: #F97053;
+                    border-radius: 45px;
+                    font-size: 32px;
+                    color: #ffffff;
+                    line-height: 90px;
+                    text-align: center;
+                    border-radius: 45px;
+                }
+            }
+        }
+    }
+    .success-pop {
+        flex-direction: column;
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .7); 
+        .pop-close {
+            align-self:flex-end;
+            position: fixed;
+            top: 387px;
+            right: 60px;
+            width: 54px;
+            height: 54px;
+        }
+         .pop-box {
+            flex-direction: column;
+            align-items: center;
+            width: 646px;
+            height: 538px;
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            margin-top: 379px;
+            .pop-top-success {
+                width: 224px;
+                height: 155px;
+                object-fit: cover;
+                margin-top: 19px;
+            }
+            .pop-title-success {
+                width: 100%;
+                text-align: center;
+                height: 50px;
+                font-size: 36px;
+                font-weight: bold;
+                color: #222222;
+                line-height: 50px;
+                margin-top: 21px;
+                .active {
+                    color: #F97053;
+                }
+            }
+            .reminder {
+                width: 100%;
+                height: 42px;
+                text-align: center;
+                margin-top: 15px;
+                font-size: 28px;
+                color: #222222;
+                line-height: 42px;
+                .active {
+                    color: #F97053;
+                }
+            }
+            .active {
+                color: #F97053;
+            }
+            .btn {
+                flex-direction: row;
+                justify-content: center;
+                margin-top: 64px;
+                height: 90px;
+                width: 100%;
+                .cancel {
+                    width: 260px;
+                    height: 90px;
+                    background-color: #E7E7E7;
+                    border-radius: 45px;
+                    font-size: 32px;
+                    color: #817272;
+                    line-height: 90px;
+                    text-align: center;
+                    border-radius: 45px;
+                    margin-right: 20px;
+                }
+                .tobind {
+                     width: 260px;
+                    height: 90px;
+                    background-color: #F97053;
+                    border-radius: 45px;
+                    font-size: 32px;
+                    color: #ffffff;
+                    line-height: 90px;
+                    text-align: center;
+                    border-radius: 45px;
+                }
+                .get-coin {
+                    width: 540px;
+                    height: 90px;
+                    background-color: #F97053;
+                    border-radius: 45px;
+                    font-size: 32px;
+                    color: #ffffff;
+                    line-height: 90px;
+                    text-align: center;
+                    border-radius: 45px;
+                }
+            }
+        }
+    }
+    .flow-pop {
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .7); 
+        .pop-box {
+            flex-direction: column;
+            width: 646px;
+            height: 1020px;
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            .pop-close {
+                align-self:flex-end;
+                margin-top: 8px;
+                margin-right: 8px;
+                width: 54px;
+                height: 54px;
+            }
+            /* margin-top: 150px; */
+            .flow-title {
+                flex-direction: row;
+                justify-content: center;
+                height: 45px;
+                align-items: center;
+                margin-top: -20px;
+                 .flow-left {
+                    width: 100px;
+                    height: 4px;
+                }
+                .flow-text {
+                    height: 45px;
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #222222;
+                    line-height: 45px;
+                    margin-left: 24px;
+                    margin-right: 24px;
+                }
+                .flow-right {
+                    width: 100px;
+                    height: 4px;
+                }
+            }
+            .flow-des {
+                flex-direction: row;
+                height: 48px;
+                margin-top: 40px;
+                align-items: center;
+                .number {
+                    width: 48px;
+                    height: 48px;
+                    margin-right: 8px;
+                    margin-left: 53px;
+                }
+                .flow-des-one {
+                    height: 40px;
+                    font-size: 28px;
+                    color: #222222;
+                    line-height: 40px;
+                    .active {
+                        color: #F97053;
+                    }
+                }
+            }
+            .tip {
+                height: 33px;
+                font-size: 24px;
+                color: #F97053;
+                line-height: 33px;
+                margin-left: 109px;
+                margin-top: 8px;
+            }
+            .flow-two {
+                width: 540px;
+                height: 226px;
+                margin-top: 16px;
+                margin-left: 53px;
+            }
+            .bindBtn {
+                width: 540px;
+                height: 90px;
+                background-color: #F97053;
+                border-radius: 45px;
+                margin-top: 31px;
+                margin-left: 53px;
+                text-align: center;
+                font-size: 32px;
+                color: #FFFFFF;
+                line-height: 90px;
+            }
+        }
+    }
+    .withdraw-title-bar {
+        position: fixed;
+        width: 100%;
+        height: 100px;
+        background-color: #fff;
+        padding: 0px 30px;
+        align-items: center;
+        .withdraw-image {
+            width: 40px;
+            height: 40px;
+            margin-right: 20px;
+        }
+        .withdraw-title {
+            color: #222;
+            font-size: 36px;
+            font-weight: bold;
+        }
+    }
+ }
+</style>
+
+<script>
+    import storage from '@system.storage';
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    import shareSe from '@service.share';
+    import app from '@system.app';
+    import pkg from '@system.package'
+    export default {
+        private: {
+            withdrawList: [],
+            withdrawInfo: {},                       // 选中提现金额
+            autonym: false,                         // 实名认证弹窗
+            bound: false,                           // 是否绑定弹窗
+            flowPop: false,                         // 绑定流程弹窗
+            userid: '',                             // 用户id后四位
+            sgetprovider: '',                       // 厂商品牌名
+            goldNum: 0,                             // 金币数量
+            boundInfo: {},                          // 绑定信息
+            isBind: false,                          // 是否绑定
+            meetCoin: false,                        // 金额是否满足提现
+            isAutonym: false,                       // 是否实名
+            withdrawPopShow: false,                 // 提现成功弹窗
+            successNum: 0,                          // 提现成功金额
+            shareVo: {},                            // 分享内容
+            isShowToast: 0,                         // 是否需要绑定成功toast
+            isWithdrawLoading: false,               // 提现loding
+
+            // 提现激励视频及策略信息
+            withdrawTactics: {},                   // 提现策略信息
+            withdrawVideoInfo: {
+                withdrawVideoSwitch: false,        // 提现激励视频开关
+                withdrawVideoShow: false,          // 提现视频是否展示
+                withdrawAdShow: false,             // 提现视频尾帧是否展示
+                isWithdrawVideoLoading: false,     // 提现视频加载
+            },
+            withdrawAdPositionId: '5001199101',    // 提现激励视频广告位Id
+
+            // 提现门槛及支付宝相关信息
+            conditionType: -1,                     // 当前项的门槛类型
+            // 弹窗文案相关
+            standardPopObj: {
+                standardPopButtonText: '',             // 弹窗按钮文案
+                standardPopTitle: '',                  // 弹窗标题
+                standardPopContent: '',                // 弹窗内容
+            },
+            isAliPayBind: false,                       // 支付宝是否绑定,
+            isShowStandardPop: false,                  // 是否展示提现门槛弹窗
+            aliPayBindInfo: {},                        // 支付宝绑定相关信息
+            withdrawDesc: '',                          // 提现说明
+            aliPayCallbackUrl: '',                     // 支付宝授权回调域名
+            aliPayAppId: '',                           // 支付宝应用ID
+            payChannel: '',                            // 当前金额提现渠道
+            isVideoShow: false,                        // 激励视频是否展示
+            pageTitle: ''                              // 页面标题
+        },
+        onInit() {
+            let userid = this.$app.headerJson.userId
+            this.userid = userid.substring(userid.length - 4)
+            this.sgetprovider = shareSe.getProvider();
+            this.$app.$def.fnCreateAd.call(this);
+            this.pageTitle = '提现';
+        },
+        onShow() {
+            this.$app.lastOpenPage = ''
+            this.$app.$def.quickappLog([701], this)
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '提现'
+            })
+            if(!this.isVideoShow) {
+               this.getBindMessage()
+            }
+            this.isVideoShow = false;
+        },
+        onBackPress() {
+            let that = this;
+            setTimeout(() => {
+                that.fnPageBackPress()
+            }, 0)
+            return true
+        },
+        onDestroy() {
+          this.$app.$def.fnDestoryAd.call(this);
+        },
+        /**
+         * 选择提现金额
+         * @param {Object} val 提现金额
+         */
+        fnChangeWithdraw(val) {
+            this.withdrawInfo = val;
+            this.withdrawTactics = {
+                userTacticsVo: this.withdrawInfo && this.withdrawInfo.userTacticsVo || {},
+                operationInfo: this.withdrawInfo && this.withdrawTactics.operationInfo || {}
+            } 
+            this.fnWithdrawDes()
+            if(this.goldNum >= this.withdrawInfo.useGoldCoinNum) {
+                this.meetCoin = true
+                return 
+            }
+            this.meetCoin = false
+        },
+        // 关闭弹窗
+        fnClosePop() {
+            this.bound =  false
+            this.flowPop = false
+            this.autonym = false
+            this.withdrawPopShow = false
+        },
+        //去提现记录
+        toRecord() {
+            router.push({
+                uri: '/WithdrawRecord'
+            })
+        },
+
+        // 去绑定微信
+        fnToBindWechat() {   
+            if(this.bound) {
+                this.bound = false
+            } 
+            this.flowPop = true
+        },
+        //立即绑定 分享
+        fnBindNow() {
+            let that = this
+            if(that.sgetprovider){
+                shareSe.share({
+                shareType: 0,
+                title: that.shareVo.title,
+                summary: that.shareVo.remark?that.shareVo.remark:'',
+                imagePath: that.shareVo.img,
+                targetUrl: that.shareVo.shareUrl,
+                platforms: ['WEIXIN_CIRCLE'],
+                success: function (data) {
+                    console.log('handling success')
+
+                    },
+                fail: function (data, code) {
+                    prompt.showToast({
+                        message: '分享失败'
+                    })
+                    console.log(`handling fail, code = ${code}`)
+
+                    }
+                })
+            } else {
+                prompt.showToast({
+                    message: '您的手机暂不支持微信分享，请联系客服处理。'
+                })
+            }
+        },
+
+        //提交实名信息
+        fnAutonymSubmit(val) {
+            let that = this
+            that.fnToBindHandle('autonym')
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2855`,
+                data: {
+                   realName: val.detail.trueName,  //姓名
+                   idCard: val.detail.idNumber,   //身份证
+                },
+                succ: function (res) {                  
+                    if(res.retCode == 0 && res.data) {
+                        //刷新提现信息
+                        that.getBindMessage()
+                        that.autonym = false    //关闭实名信息弹窗
+                         prompt.showToast({
+                            message: '实名认证成功'
+                        })
+                        return
+                    }
+                    //实名失败弹窗展示
+                    //  prompt.showToast({
+                    //     message: data.retMsg
+                    // })
+                }
+            })
+        },
+
+        // 点击提现
+        fnToWithdraw(){
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', { 
+                ButtonName: '提现',                                                                                                                                         // 按钮名称                                                                                                                                         // 按钮名称                                                                                                   
+                OperationID: this.withdrawTactics.operationInfo && this.withdrawTactics.operationInfo.id || '',                                                             // 运营位id
+                OperationName: `${this.withdrawInfo.cashoutAmount}元`,                                                                                                      // 运营位名称
+                OperationPosition: '提现页面',                                                                                                                               // 运营位位置                                                                                                                              // 按钮文案
+                SourceId: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.sourceId || '',                                                          // 策略层id
+                SourceName: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.sourceName || '',                                                      // 策略层名称
+                TacticsId: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.tacticsId || '',                                                        // 策略id
+                TacticsName: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.tacticsName || '',                                                    // 策略名称
+                ShuntId: this.withdrawTactics.userTacticsVo && (this.withdrawTactics.userTacticsVo.ShuntID || this.withdrawTactics.userTacticsVo.shuntID) || '',            // 分流Id
+                ShuntName: this.withdrawTactics.userTacticsVo && (this.withdrawTactics.userTacticsVo.ShuntName || this.withdrawTactics.userTacticsVo.shuntName) || ''       // 分流名称
+            })
+            if(!this.meetCoin) {
+                this.conditionType = 0;
+                this.standardPopObj.standardPopTitle = '金币不足';
+                this.standardPopObj.standardPopContent = `余额不足, 还差${this.withdrawInfo.useGoldCoinNum - this.goldNum}金币`;
+                this.standardPopObj.standardPopButtonText = '去赚钱';
+                this.isShowStandardPop = true;
+                return
+            }
+            this.fnWithdrawThresholdHandle();
+        },
+
+        // 提现接口
+        withdrawDeposit() {
+            let that =  this
+            if(that.isWithdrawLoading) {
+                return
+            }
+            that.isWithdrawLoading = true
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2856`,
+                data: {
+                   amountId: that.withdrawInfo.id,               // 金额Id
+                   smdid: that.$app.fnGetSmdid(),                // 数美设备标识
+                   multiChannelFlag: true,                       // 多渠道提现标识
+                   dataHashVal: that.withdrawInfo.dataHashVal    // 关键数据hash值
+                },
+                succ: function (data) {
+                    that.isWithdrawLoading = false
+                    if(data.data.retCode == 1) {
+                        that.successNum = that.withdrawInfo.cashoutAmount;
+                        that.payChannel = that.withdrawInfo.payChannel;   // 当前金额提现渠道           
+                        //提现成功弹窗展示
+                        that.withdrawPopShow = true
+                        //刷新信息
+                        that.getBindMessage();
+                        return 
+                    }
+                    if(data.data.retCode === 11 || data.data.retCode === 12) {
+                        that.getBindMessage();
+                    }
+                    //提现失败弹窗展示
+                    prompt.showToast({
+                        message: data.data.retMsg
+                    })
+                },
+                 error: function () {
+                    that.isWithdrawLoading = false
+                }
+            })
+        },
+        //获取绑定信息
+        getBindMessage() {
+            let that =  this
+            that.$app.$def.requestData(that,{
+                interface: `/glory/fastapp/2854`,
+                data: {
+                    multiChannelFlag: true
+                },
+                succ: function (data) {
+                    if(data.retCode == 0 && data.data) {
+                        that.isBind = data.data.wechatBindInfo ? true : false   // 是否绑定
+                        that.goldNum = data.data.goldCoinNum || 0
+                        that.boundInfo = data.data.wechatBindInfo
+                        that.isAutonym = data.data.realNameStatus
+                        that.withdrawList = data.data.cashOutAmountList || []
+                        that.withdrawInfo = data.data.cashOutAmountList.length ? data.data.cashOutAmountList[0] : {}
+                        that.shareVo = data.data.shareVo
+                        if(that.withdrawInfo.useGoldCoinNum && that.goldNum >= that.withdrawInfo.useGoldCoinNum) {
+                            that.meetCoin = true
+                        } else {
+                            that.meetCoin = false
+                        }
+                        if(that.isBind) {     //判断是否需要toast
+                            that.flowPop = false
+                            that.bound = false              
+                            if(that.isShowToast == 1) {
+                                prompt.showToast({
+                                    message: '绑定成功'
+                                })
+                                that.isShowToast = 2
+                            }
+                            that.isShowToast = 2
+                        } else {
+                            that.isShowToast = 1
+                        }
+                        that.fnInitWithdrawVideo(data.data);
+                        that.fnAlipayBindInfoHandle(data.data)
+                        that.fnWithdrawDes()
+                        that.withdrawTactics = {
+                            userTacticsVo: that.withdrawInfo && that.withdrawInfo.userTacticsVo || {},
+                            operationInfo: that.withdrawInfo && that.withdrawTactics.operationInfo || {}
+                        } 
+                    }
+                }
+            })
+        },
+        /**
+         * 提现门槛视频信息处理
+         * @param   {Object}    withdrawVideoInfo      [提现激励视频信息]
+        */
+        fnInitWithdrawVideo(withdrawVideoInfo) {
+            this.withdrawVideoInfo.withdrawVideoSwitch = true
+            if(withdrawVideoInfo.adPositionId) {
+                this.withdrawAdPositionId = withdrawVideoInfo.adPositionId;
+            }
+        },
+        /**
+         * 支付宝相关信息处理
+         * @param   {Object}    aliPayBindInfo         [支付宝绑定信息]
+        */
+        fnAlipayBindInfoHandle(aliPayBindInfo) {
+            this.aliPayAppId = aliPayBindInfo.zfbAppId || '';
+            this.aliPayCallbackUrl = aliPayBindInfo.zfbCallbackUrl || '';
+            if(aliPayBindInfo && aliPayBindInfo.zfbBindInfo && JSON.stringify(aliPayBindInfo.zfbBindInfo) !== '{}') {
+                this.isAliPayBind = true;
+                this.aliPayBindInfo = {
+                    nickName: aliPayBindInfo.zfbBindInfo.nickname || '',
+                    headPic: aliPayBindInfo.zfbBindInfo.headpic || 'https://xsmfdq.kkyd.cn/images/hmxs/default-user-headpic.png'
+                }
+            }
+        },
+        // 去绑定支付宝
+        fnToBindAliPay() {
+            let that = this;
+            that.fnHasInstallPkg('com.eg.android.AlipayGphone').then(res => {
+                if(res === 1) { 
+                    that.fnPullAliPay()
+                } else {
+                    prompt.showToast({
+                        message: '安装支付宝后可发起打款'
+                    });
+                }
+            })
+        },
+        // 关闭提现门槛弹窗
+        fnCloseStandardPop() {
+            this.isShowStandardPop = false;
+        },
+        // 厂商视频广告展示
+        fnBrandVideoShow() {
+            this.isVideoShow = true          
+        },
+        /**
+         * 视频展示
+         * @param   {Object}    evt      [事件对象]
+        */
+        fnVideoShow(evt) {
+            if(evt.detail.adAlias === 'withdrawVideo') {
+                this.withdrawVideoInfo.withdrawVideoShow = true
+                this.isVideoShow = true
+            }
+        },
+        /**
+         * 视频关闭
+         * @param   {Object}    evt      [事件对象]
+        */
+        fnVideoClose(evt) {
+            let that = this
+            if(evt.detail.adAlias === 'withdrawVideo') {
+                this.withdrawVideoInfo.withdrawVideoShow = false
+            }
+        },
+        /**
+         * 视频广告展示
+         * @param   {Object}    evt      [事件对象]
+        */
+        fnVideoAdShow(evt) {
+            if(evt.detail.adAlias === 'withdrawVideo') {
+               this.withdrawVideoInfo.withdrawAdShow = true
+            }
+        },
+        /**
+         * 视频广告关闭
+         * @param   {Object}    evt      [事件对象]
+        */
+        fnVideoAdClose(evt) {
+            if(evt.detail.adAlias === 'withdrawVideo') {
+                this.withdrawVideoInfo.withdrawAdShow = false
+                this.fnVideoEnd(evt)
+            }
+        },
+        /**
+         * 视频播放结束
+         * @param   {Object}    evt      [事件对象]
+        */
+        fnVideoEnd(evt) {
+            if(evt.detail.adAlias == 'withdrawVideo' && evt.detail.isEnded == 'true') {
+                this.getBindMessage()
+            }
+        },
+        // 观看提现门槛视频
+        fnWithdrawVideoButtonClick() {
+            if(this.withdrawVideoInfo.isWithdrawVideoLoading) {
+                prompt.showToast({
+                    message: '提现激励视频获取失败，请稍后重试！'
+                })
+                return
+            }
+            this.withdrawVideoInfo.isWithdrawVideoLoading = true
+            setTimeout(() => {
+                this.withdrawVideoInfo.isWithdrawVideoLoading = false
+            }, 3000)
+            this.$broadcast('withdrawVideoInit')
+        },
+        // 提现门槛处理
+        fnWithdrawThresholdHandle() {
+            let difference
+            let thresholdArr = this.withdrawInfo.restrictions;
+            if(thresholdArr && thresholdArr.length) {
+                for(let i = 0; i < thresholdArr.length; i ++ ){
+                    difference = thresholdArr[i].conditionType !== 14 ? thresholdArr[i].conditionNum - thresholdArr[i].userCurrentNum : thresholdArr[i].conditionNum - this.$app.videoPlayInfo.videoPlayTimes;
+                    if(difference > 0) {
+                        this.conditionType = thresholdArr[i].conditionType;
+                        break
+                    } else {
+                       this.conditionType = -1 
+                    }
+                }
+                switch(this.conditionType) {
+                    case  11:
+                        this.standardPopObj.standardPopTitle = '连续签到天数不足'
+                        this.standardPopObj.standardPopContent = `签到天数不足, 还需签到${difference}天`
+                        this.standardPopObj.standardPopButtonText = '去签到'
+                        this.isShowStandardPop = true
+                        break;
+                    case  12:
+                        this.standardPopObj.standardPopTitle = '阅读时长不足'
+                        this.standardPopObj.standardPopContent = `阅读时长不足, 还需阅读${difference}分钟`
+                        this.standardPopObj.standardPopButtonText = '去阅读'
+                        this.isShowStandardPop = true
+                        break;
+                    case  13:
+                        this.standardPopObj.standardPopTitle = '累计阅读时长不足'
+                        this.standardPopObj.standardPopContent = `累计阅读时长不足，继续阅读吧～`
+                        this.standardPopObj.standardPopButtonText = '去阅读'
+                        this.isShowStandardPop = true
+                        break;
+                    case  14:
+                        this.standardPopObj.standardPopTitle = '观看激励视频次数不足'
+                        this.standardPopObj.standardPopContent = `观看激励视频次数不足, 还需观看${difference}个`
+                        this.standardPopObj.standardPopButtonText = '播放视频'
+                        this.isShowStandardPop = true
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                this.conditionType = -1
+            }
+            if(this.conditionType === -1) {
+                this.fnSelectPayChannel()
+            }
+        },
+        // 选择提现渠道
+        fnSelectPayChannel() {
+            let that = this;
+            if(that.withdrawInfo.payChannel === 2 || that.withdrawInfo.payChannel === 1) {
+                if (!that.isBind) {                                         //如果没绑定，展示提示去绑定弹窗
+                    that.bound = true
+                    return
+                }
+
+                if(that.isBind && that.withdrawInfo.payChannel === 1 && !that.isAutonym) {       //如果绑定了并且金额满足，但是没填写实名信息，展示实名信息弹窗
+                    that.autonym = true
+                    return 
+                }
+      
+                that.withdrawDeposit()
+            }
+
+            if(that.withdrawInfo.payChannel === 3) {
+                if(that.isAliPayBind) {
+                    that.withdrawDeposit()
+                } else {
+                    that.fnHasInstallPkg('com.eg.android.AlipayGphone').then(res => {
+                        if(res === 1) { 
+                            prompt.showToast({
+                                message: '请点击上方绑定按钮，绑定支付宝后发起提现'
+                            })        
+                        } else {
+                            prompt.showToast({
+                                message: '安装支付宝后可发起打款'
+                            })        
+                        }
+                    })                                    
+                }
+            }
+        },
+        // 拉起支付宝授权
+        fnPullAliPay() {
+            let userId = this.$app.headerJson.userId;
+            let appId = this.aliPayAppId;
+            let callbackUrl = this.aliPayCallbackUrl;
+            let redirectUrl = encodeURIComponent(`${callbackUrl}/huodong/free/alipay/shouquan.html`);
+            let url = encodeURIComponent(`https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id=${appId}&scope=auth_user&redirect_uri=${redirectUrl}?state=${userId}`);
+            let deeplink = `alipays://platformapi/startapp?appId=20000067&url=${url}`;
+
+            router.push({
+                uri: deeplink
+            })
+        },
+        /**
+         * 判断支付宝安装状态
+         * @param   {String}    pkgName      [包名]
+        */
+        fnHasInstallPkg(pkgName) {
+            let that = this
+            return new Promise((resolve, reject) => {
+                if(!pkgName) {
+                    resolve(0)
+                }
+                if(!pkgName) {
+                    return
+                }
+                pkg.hasInstalled({
+                    package: pkgName,
+                    success: function(data) {
+                        if(data.result) {
+                            resolve(1)
+                        }else {
+                            resolve(0)
+                        }
+                    },
+                    fail: function(data, code) {
+                        resolve(0)
+                    }
+                })
+            })
+        },
+        // 提现说明处理
+        fnWithdrawDes(){
+            let thresholdArr = this.withdrawInfo.restrictions;
+            if(thresholdArr && thresholdArr.length) {
+                let str = `${this.withdrawInfo.cashoutAmount}元提现说明: `
+                for(let i = 0; i < thresholdArr.length; i++) {
+                    switch(thresholdArr[i].conditionType) {
+                        case  11:
+                            str += `连续签到${thresholdArr[i].conditionNum}天(已签到${thresholdArr[i].userCurrentNum}天)，`
+                        break;
+                        case  12:
+                            str += `当日阅读时长达到${thresholdArr[i].conditionNum}分钟(已阅读${thresholdArr[i].userCurrentNum}分钟)，`
+                        break;
+                        case  13:
+                            str += `累计阅读时长达到${thresholdArr[i].conditionNum}分钟(已阅读${thresholdArr[i].userCurrentNum}分钟)，` 
+                        break;
+                        case  14:
+                            str += `观看激励视频${thresholdArr[i].conditionNum}次(已观看${this.$app.videoPlayInfo.videoPlayTimes}次)，`
+                        default:
+                            str += ''
+                        break
+                    }
+                }
+                this.withdrawDesc = str.slice(0, -1) + '。'
+            } else{
+                this.withdrawDesc = ''
+            }
+        },
+        // 弹窗曝光
+        fnPopAppear() {
+            this.$app.shenceLog.log(this, 'track', 'PopupExposure', {
+                Type: '引导弹窗',
+                Title: this.standardPopObj.standardPopTitle,
+                OperationID: this.withdrawTactics.operationInfo && this.withdrawTactics.operationInfo.id || '',                                                         // 运营位id
+                OperationName: this.withdrawTactics.operationInfo && this.withdrawTactics.operationInfo.name || '',                                                     // 运营位名称
+                SourceId: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.sourceId || '',                                                      // 策略层id
+                SourceName: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.sourceName || '',                                                  // 策略层名称
+                TacticsId: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.tacticsId || '',                                                    // 策略id
+                TacticsName: this.withdrawTactics.userTacticsVo && this.withdrawTactics.userTacticsVo.tacticsName || '',                                                // 策略名称
+                ShuntId: this.withdrawTactics.userTacticsVo && (this.withdrawTactics.userTacticsVo.ShuntID || this.withdrawTactics.userTacticsVo.shuntID) || '',        // 分流Id
+                ShuntName: this.withdrawTactics.userTacticsVo && (this.withdrawTactics.userTacticsVo.ShuntName || this.withdrawTactics.userTacticsVo.shuntName) || ''   // 分流名称
+            })
+        },
+        /**
+         * 去绑定按钮点击事件
+         * @param   {String}    bindType      [绑定类型]
+        */
+        fnToBindHandle(bindType) {
+            let that = this;
+            let buttonName, buttonContent
+            if(bindType === 'aliPay') {
+                buttonName = '绑定'
+                buttonContent = '绑定支付宝'
+                that.fnToBindAliPay()
+            }
+            if(bindType === 'weChat') {
+                buttonName = '绑定'
+                buttonContent = '绑定微信'
+                that.fnToBindWechat()
+            }
+            if(bindType === 'autonym') {
+                buttonName = '绑定'
+                buttonContent = '实名认证'
+            }
+            that.$app.shenceLog.log(that, 'track', 'ButtonClick', { 
+                ButtonName: buttonName,                                                                                                                                 // 按钮名称                                                                                                   
+                OperationID: that.withdrawTactics.operationInfo && that.withdrawTactics.operationInfo.id || '',                                                         // 运营位id
+                ButtonContent: buttonContent,                                                                                                                           // 按钮文案
+                SourceId: that.withdrawTactics.userTacticsVo && that.withdrawTactics.userTacticsVo.sourceId || '',                                                      // 策略层id
+                SourceName: that.withdrawTactics.userTacticsVo && that.withdrawTactics.userTacticsVo.sourceName || '',                                                  // 策略层名称
+                TacticsId: that.withdrawTactics.userTacticsVo && that.withdrawTactics.userTacticsVo.tacticsId || '',                                                    // 策略id
+                TacticsName: that.withdrawTactics.userTacticsVo && that.withdrawTactics.userTacticsVo.tacticsName || '',                                                // 策略名称
+                ShuntId: that.withdrawTactics.userTacticsVo && (that.withdrawTactics.userTacticsVo.ShuntID || that.withdrawTactics.userTacticsVo.shuntID) || '',        // 分流Id
+                ShuntName: that.withdrawTactics.userTacticsVo && (that.withdrawTactics.userTacticsVo.ShuntName || that.withdrawTactics.userTacticsVo.shuntName) || ''   // 分流名称
+            })
+        },
+        // 点击页面返回箭头方法
+        fnPageBackPress() {
+            if(this.autonym || this.bound || this.flowPop || this.withdrawPopShow) {  //1.实名弹窗 2.未绑定弹窗 3. 金币不足弹窗 4.绑定流程弹窗 5.提现成功弹窗 
+                this.fnClosePop()
+                return
+            }
+
+            if(this.isShowStandardPop) {
+                this.isShowStandardPop = false
+                return 
+            }
+
+            if(this.withdrawVideoInfo.withdrawVideoShow) {
+                this.$broadcast('withdrawVideoClose')
+                return
+            }
+
+            if(this.withdrawVideoInfo.withdrawAdShow) {
+                this.$broadcast('withdrawAdClose')
+                return
+            }
+            router.back()
+        }
+    }
+</script>

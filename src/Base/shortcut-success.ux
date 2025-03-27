@@ -1,0 +1,185 @@
+<template>
+    <div>
+        <div class="root" @click="vagueClick">
+            <image class="close" @click="closePop" src="https://xsmfdq.kkyd.cn/images/short-close.png"></image>
+            <stack class="award-head">
+                <image if="{{type==1&&shortSuccessText}}" src="https://xsmfdq.kkyd.cn/images/short-success-head.png"></image>
+                <text if="{{type==1&&shortSuccessText}}" class="award-text">{{shortSuccessText}}</text>
+                <div class="content {{type==1&&shortSuccessText?'content-1':'content-2'}}">
+                    <div class="site" if="{{type==2}}">
+                        <div class="row"><text class="text">第</text><text class="num">1</text><text class="text">步：回到手机桌面</text></div>
+                        <div class="row"><text class="text">第</text><text class="num">2</text><text class="text">步：打开{{apppName}}</text></div>
+                    </div>
+                    <text class="success" if="{{type==3&&successTipTop&&successTipTop.length}}" style="margin-top:0px"><span class="black">{{successTipTop[0]}}</span><span class="yell" if="{{successTipTop[1]}}">{{successTipTop[1]}}</span><span class="black" if="{{successTipTop[2]}}">{{successTipTop[2]}}</span></text>
+                    <text class="success" if="{{type==3&&!(successTipTop&&successTipTop.length)}}" style="margin-top:0px"><span class="black">阅读进度已保存。下次请</span><span class="yell">从手机桌面打开【{{apppName}}】继续阅读。</span></text>
+                    <image style="margin-top:{{type==1?'0px':'37px'}}" src="https://xsmfdq.kkyd.cn/images/shorticon-{{txtName}}.png"></image>
+                    <text class="success" if="{{type==1&&successTipBot&&successTipBot.length}}"><span class="black">{{successTipBot[0]}}</span><span class="yell" if="{{successTipBot[1]}}">{{successTipBot[1]}}</span><span class="black" if="{{successTipBot[2]}}">{{successTipBot[2]}}</span></text>
+                    <text class="success" if="{{type==1&&!(successTipBot&&successTipBot.length)}}"><span class="black">添加成功，下次可直接</span><span class="yell">从手机桌面打开【{{apppName}}】</span></text>
+                    <text class="success-tip" if="{{isCoin && type == 1}}">红包已到账，可在福利中心领取并提现</text>
+                    <text class="know" @click="closePop">我知道了</text>
+                </div>
+            </stack>
+        </div>
+    </div>
+</template>
+<style lang='less'>
+    .root{
+        width:100%;
+        height:100%;
+        background-color:rgba(0,0,0,0.7);
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        flex-direction: column;
+        align-items: flex-end;
+        padding: 0px 55px;
+        .award-head{
+            width: 652px;
+            justify-content: center;
+            margin-bottom: 120px;
+            image{
+                width: 652px;
+                height: 237px;
+            }
+            .award-text{
+                margin-top: 122px;
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(255,255,255,1);
+                line-height:50px;
+                height: 50px;
+            }
+        }
+        .close{
+            width: 54px;
+            height: 54px;
+            margin-bottom: 30px;
+        }
+        .content{
+            width:544px;
+            background-color:#ffffff;
+            flex-direction: column;
+            align-items: center;
+            padding: 36px;
+            padding-bottom: 36px;
+            .site{
+                flex-direction: column;
+                justify-content: center;
+                .row{
+                    width: 100%;
+                    flex-direction: row;
+                    justify-content: flex-start;
+                    align-items: center;
+                    .num{
+                        width:36px;
+                        height:36px;
+                        background-color:rgba(18,121,246,1);
+                        color: #ffffff;
+                        text-align: center;
+                        font-size:26px;
+                        border-radius: 36px;
+                        margin: 0 6px;
+                    }
+                    .text{
+                        font-size:30px;
+                        color:rgba(34,44,69,1);
+                        line-height:48px;
+                    }
+                }
+            }
+            image{
+                width:260px;
+                height:486px;
+            }
+            .success{
+                width:510px;
+                font-size:30px;
+                line-height:48px;
+                margin-top: 32px;
+                text-align: center;
+                .black{
+                    color:#222C45;
+                    font-size:30px;
+                    line-height:48px;
+                }
+                .yell{
+                    color:#FA6400;
+                    font-size:30px;
+                    line-height:48px;
+                }
+            }
+            .success-tip {
+                width: 544px;
+                margin-top: 8px;
+                height: 42px;
+                font-size: 28px;
+                color: #FF631C;
+                line-height: 42px;
+                text-align: center;
+            }
+            .know{
+                width:420px;
+                height:90px;
+                background-color:rgba(18,121,246,1);
+                border-radius:47px;
+                font-size:36px;
+                color:rgba(255,255,255,1);
+                line-height:94px;
+                margin-top: 36px;
+                text-align: center;
+            }
+        }
+        .content-1{
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            margin-top: 189px;
+        }
+        .content-2{
+            border-radius:24px;
+            margin-top: 30px;
+        }
+    }
+</style>
+
+<script>
+    import prompt from '@system.prompt';
+
+    export default {
+        props: ['type','successTipTop','successTipBot'],
+        data: {
+          apppName:'',
+          shortSuccessText:'',
+          isCoin: false,
+        },
+        onInit() {
+            this.isCoin = this.$app.isCoin
+            this.apppName=this.$app.$data.name
+            this.txtName = this.$app.$data.channelCode;
+            this.brand = this.$app.headerJson.brand.toLowerCase()
+            this.shortSuccessText = this.isCoin ? this.$app.shortSuccessText.replace(/书币/g, '金币') : this.$app.shortSuccessText
+            switch(this.brand){
+                case 'honor':
+                case 'huawei':
+                    this.brand = 'huawei';break
+                case 'redmi':
+                case 'xiaomi':
+                    this.brand = 'xiaomi';break
+                case 'oppo':
+                    this.brand = 'oppo';break
+                case 'vivo':
+                    this.brand = 'vivo';break
+                default :
+                    this.brand = 'huawei'
+            }
+        },
+        closePop(){
+            this.$app.shortSuccessText = ''
+            this.$emit('closeshortpop')
+        },
+        vagueClick(){
+            console.log('为了解决部分机型滑动穿透的问题')
+        },
+    }
+</script>

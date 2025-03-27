@@ -1,0 +1,140 @@
+<template>
+    <div class="recharge-notice" @click="vagueClick">
+        <div class="title">
+            <div></div>
+            <text>购买章节</text>
+            <div></div>
+        </div>
+        <text class="chapter">{{chapter}}</text>
+        <stack class="price">
+            <image src="https://xsmfdq.kkyd.cn/images/coin-bg.png"></image>
+            <text><span class="big">{{price}}</span><span class="small">书币</span></text> 
+        </stack>
+        <text class="coin">剩余书币：{{coin}}书币</text>
+        <div class="button" @click="goRecharge">
+            <text>书币不足，去充值</text>
+        </div>
+        <div class="control">
+            <!-- <text @click="prevclick">上一章</text> -->
+            <text @click="toDirectory">目录</text>
+            <!-- <text @click="nextclick">下一章</text> -->
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .recharge-notice{
+        flex-direction: column;
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: #ffffff;
+        .title{
+            align-items: center;
+            justify-content: center;
+            margin-top: 120px;
+            div{
+                width:148px;
+                height:1px;
+                background-color: #979797;
+            }
+            text{
+                font-size:30px;
+                color:rgba(68,68,68,1);
+                margin: 0 25px;
+            }
+        }
+        .chapter{
+            font-size:36px;
+            font-weight:bold;
+            color:rgba(68,68,68,1);
+            margin-top: 174px;
+        }
+        .price{
+            width:341px;
+            height:192px;  
+            margin-top: 36px;
+            image{
+                width:341px;
+                height:192px;  
+            }
+            text{
+                 width:341px;
+                height:192px;  
+                font-size:60px;
+                font-weight:bold;
+                color:rgba(255,3,0,1);
+                text-align: center;
+                .big{
+                    font-size: 60px;
+                }
+                .small{
+                    font-size: 30px;
+                }
+            }
+        }
+        .coin{
+            font-size:30px;
+            color:rgba(186,186,186,1);
+            margin-top: 36px;
+        }
+        .button{
+            width:540px;
+            height:80px;
+            background:linear-gradient(90deg,rgba(255,182,115,1) 0%,rgba(254,112,90,1) 100%);
+            border-radius:47px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 88px;
+            text{
+                font-size:36px;
+                color:rgba(255,255,255,1);
+            }
+        }
+        .control{
+            margin-top: 65px;
+            /* width: 60%;
+            justify-content: space-between; */
+            text{
+                font-size: 30px;
+                color: #fe9166;
+            }
+        }
+    }
+</style>
+
+<script>
+import storage from '@system.storage';
+import router from '@system.router';
+export default {
+    props:[
+        'coin',
+        'price',
+        'chapter'
+    ],
+    data:{
+        
+    },
+
+    onInit(){
+    },
+    goRecharge(){
+        console.log('==================')
+        this.$emit('toRecharge')
+    },
+    toDirectory(){
+        this.$parent().routerurl('/Directory')
+    },
+    prevclick(){
+        this.$emit('hideNotice')
+        this.$parent().fnLodeChapterInfo(this.$parent().bookId,this.$parent().preChapterId,'prev')
+    },
+    nextclick(){
+        this.$emit('hideNotice')
+        this.$parent().fnNextChapter()
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    }
+}
+</script>

@@ -1,0 +1,116 @@
+<template>
+    <div class="retain-popup-wrap">
+        <stack class="popup-box">
+            <div class="popup-content">
+                <image class="award-icon" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-award-icon.png"></image>
+                <text class="title">{{ title }}</text>
+                <div class="btns" if="btns && btns.length">
+                    <text class="btn {{ $idx ? 'btn-margin' : '' }}" for="btn in btns" style="{{ btn.style || '' }}" @click="fnBtnClick(btn.value)">{{ btn.text }}</text>
+                </div>
+            </div>
+            <image class="close-icon" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-adwall-close-icon.png" @click="fnBtnClick(-1)"></image>
+        </stack>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .retain-popup-wrap {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.75);
+        .popup-box {
+            justify-content: flex-end;
+            width: 646px;
+            border-radius: 24px;
+            background-color: #fff;
+            .popup-content {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                .award-icon {
+                    width: 88px;
+                    height: 88px;
+                    margin-top: 59px;
+                }
+                .title {
+                    height: 45px;
+                    line-height: 45px;
+                    margin-top: 24px;
+                    color: #333;
+                    font-size: 32px;
+                    font-weight: 500;
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+                .btns {
+                    justify-content: center;
+                    margin-top: 66px;
+                    margin-bottom: 32px;
+                    .btn {
+                        align-items: center;
+                        justify-content: center;
+                        width: 260px;
+                        height: 80px;
+                        color: #fff;
+                        font-size: 32px;
+                        text-align: center;
+                        border-radius: 45px;
+                        background-color: #FA5805;
+                    }
+                    .btn-margin {
+                        margin-left: 20px;
+                    }
+                }
+            }
+            .close-icon {
+                width: 54px;
+                height: 54px;
+                margin-top: 8px;
+                margin-right: 8px;
+            }
+        }
+    }
+</style>
+
+<script>
+export default {
+    props: {
+        title: {                                            // 弹窗标题
+            type: String,
+            required: false,
+            default: ''
+        },
+        /**
+         * btn.value
+         * -1: 关闭弹窗，0：放弃奖励，1：领取奖励
+        */
+        btns: {                                             // 按钮组
+            type: Array,
+            required: false,
+            default: []
+        },
+    },
+    data () {
+        return {
+            isBtnClick: false,                              // 按钮防连点
+        }
+    },
+    /**
+     * 按钮点击
+     * @param   {Number}    type    [点击类型]
+    */
+    fnBtnClick (type) {
+        if (this.isBtnClick) {
+            return false;
+        }
+        this.isBtnClick = true;
+        setTimeout(() => this.isBtnClick = false, 2000);
+        this.$emit('btnClick', type);
+    },
+}
+</script>

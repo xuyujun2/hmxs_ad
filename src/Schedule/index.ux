@@ -1,0 +1,459 @@
+<template>
+  <div class="container">
+    <div class="top-setting">
+      <div class="top-banner">
+        <text class="top-banner-pname">{{packageName}}</text>
+        <div class="top-banner-sub-title">
+          <text>每日读书计划</text>
+          <div class="top-banner-reset" if="{{taskStatus!=1}}" onclick="openReset">
+            <image src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAXCAMAAAAm/38fAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAPBQTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////5dXC4QAAAFB0Uk5TAP/9Acn61xUEGOEGCCT3++m2DCBDEuMi8/arkfErsLkOjp05hk3ZJXOljMM+RphnGnc05krAHXG6Jzbgz2lg0TK9gVpv3u1tiT1B06jMUsb/NNbTAAABY0lEQVR4nGVS53qCQBDcpQiINAHFgl3sYo01MRpjT/L+b5M7sOXL/ri9b4e53Z0BIAizqw/7LMy54bTNwj0KlSySyFdUcmoX5VaP5RAjfpFiy32eQe/lCihRLT0X7U0kmnuXzYqjja6AueAtmqWkSM5kVOvcnuLw7dFw4OhucGHtkc6Tb+TjdmLFKYOvS4Tau6x2OLahnE4h8tMRKxaZVMQYAB0mOoDeEpFhEBczEPKkxAGH6zoZr454KMT7DGYA4h9dZEDHKu3fwhbduIERiSQBERw80tsZm3SSiZqokSQS4M4YQ8gQrgwOjVcp6NG0n3powVSe+2+qH5Aa5ywahXAP1eiwYoZJees52Vyo7lSilVz29+0YVU7d9uTQjq+/WiVuhigJ9URFU2ZyoC7fvgN8yRXNUmKYc+Vk09GsJwc536AOcv70yUGwDw4pMpkNTz1P1x4NoVb6XH0DWF52fAr/kl9kkyN7rL/ZhwAAAABJRU5ErkJggg=="></image>
+            <text>重新设置</text>
+          </div>
+        </div>
+      </div>
+      <div class="top-setting-panel">
+        <div class="top-setting-item">
+          <image src="https://xsmfdq.kkyd.cn/images/time-start.png"></image>
+          <text class="label">开始</text>
+          <!-- <select class="picker" onchange="startTimePickerChange">
+                        <option for="{{item in timeData}}" value="{{item.value}}" selected="{{item.value === startTime}}">{{item.key}}</option>
+                    </select> -->
+          <div class="time" if="{{taskStatus!=1}}"><text>{{startTime}}</text></div>
+          <picker else class="picker" type="time" selected="" value="{{startTime}}" onchange="startTimePickerChange"></picker>
+          <text class="tip">系统将于此时间进行提醒</text>
+        </div>
+        <div class="top-setting-item margin-40">
+          <image src="https://xsmfdq.kkyd.cn/images/time-end.png"></image>
+          <text class="label">结束</text>
+          <!-- <select class="picker" onchange="endTimePickerChange">
+                        <option for="{{item in timeData}}" value="{{item.value}}" selected="{{item.value === endTime}}">{{item.key}}</option>
+                    </select> -->
+          <div class="time" if="{{taskStatus!=1}}"><text>{{endTime}}</text></div>
+          <picker else class="picker" type="time" selected="" value="{{endTime}}" onchange="endTimePickerChange"></picker>
+        </div>
+      </div>
+    </div>
+    <div class="user-tips">
+      <text class="user-tips-title">温馨提示</text>
+      <div class="user-tips-item">
+        <div class="order-number">
+          <text>1</text>
+        </div>
+        <div class="tips-content">
+          <text>成功设置看书日历后，系统将在你设置的时间发出推送通知，类似如下（不同手机不一样）：</text>
+          <image src="https://xsmfdq.kkyd.cn/images/hmxs-calendar-alert.png"></image>
+        </div>
+      </div>
+      <div class="user-tips-item">
+        <div class="order-number">
+          <text>2</text>
+        </div>
+        <div class="tips-content">
+          <text>如您需要修改看书日历，请先找到手机上的“日历” APP，删除本条日程，然后再点击本页上方的“重新设置”。</text>
+        </div>
+      </div>
+    </div>
+    <div class="footer-fixed">
+      <div class="footer-warp">
+        <text if="{{taskStatus==1}}" class="footer-tip">保存时如出现权限申请，请选择允许</text>
+        <div if="{{taskStatus==1}}" class="footer-btn save" onclick="saveSetting"><text>保存</text></div>
+        <div class="footer-btn saved" if="{{taskStatus!=1}}"><text>已设置</text></div>
+      </div>
+    </div>
+  </div>
+</template>
+<style lang="less" scoped>
+.container {
+  padding: 30px;
+  flex-direction: column;
+}
+.top-banner {
+  width: 690px;
+  height: 180px;
+  padding: 30px;
+  background-image: url(https://xsmfdq.kkyd.cn/images/banner-bk-standard.png);
+  background-position: left top;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  flex-direction: column;
+  &-pname {
+    font-size: 30px;
+    color: #ffffff;
+  }
+  &-sub-title {
+    align-items: center;
+    & > text {
+      font-size: 48px;
+      color: #ffffff;
+    }
+  }
+  &-reset {
+    width: 157px;
+    height: 44px;
+    background-color: rgba(106, 119, 228, 1);
+    border-radius: 22px;
+    align-items: center;
+    margin-left: 24px;
+    justify-content: center;
+    & image {
+      width: 24px;
+    }
+    & text {
+      margin-left: 5px;
+      font-size: 24px;
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+}
+.top-setting {
+  flex-direction: column;
+  &-panel {
+    width: 690px;
+    height: 253px;
+    border: 4px solid rgba(152, 162, 255, 1);
+    border-top-width: 0px;
+    flex-direction: column;
+    padding-top: 30px;
+    padding-left: 30px;
+  }
+  &-item {
+    align-items: center;
+    & image {
+      width: 40px;
+      height: 40px;
+      margin-right: 12px;
+    }
+    & .label {
+      font-size: 26px;
+      color: rgba(68, 68, 68, 1);
+      margin-right: 20px;
+    }
+    & .picker {
+      width: 190px;
+      height: 72px;
+      border-radius: 2px;
+      border: 1px solid rgba(212, 211, 217, 1);
+      font-size: 26px;
+      color: rgba(68, 68, 68, 1);
+      padding: 10px;
+      margin-right: 20px;
+      justify-content: center;
+      text-align: center;
+    }
+    & .time {
+      width: 190px;
+      height: 72px;
+      border-radius: 2px;
+      padding: 10px;
+      margin-right: 20px;
+      justify-content: center;
+      text-align: center;
+      & text {
+        font-size: 26px;
+        color: rgba(68, 68, 68, 1);
+      }
+    }
+    & .tip {
+      font-size: 26px;
+      color: rgba(68, 68, 68, 0.5);
+    }
+  }
+}
+.margin-40 {
+  margin-top: 40px;
+}
+.user-tips {
+  flex-direction: column;
+  margin-bottom: 141px;
+  & text {
+    color: rgba(68, 68, 68, 1);
+    opacity: 0.6;
+    font-size: 26px;
+    line-height: 40px;
+  }
+  &-title {
+    height: 37px;
+    font-size: 26px;
+    color: rgba(68, 68, 68, 1);
+    line-height: 37px;
+    margin-top: 38px;
+  }
+  &-item {
+    margin-top: 26px;
+    align-items: flex-start;
+    & .order-number {
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(68, 68, 68, 1);
+      border-radius: 30px;
+      opacity: 0.6;
+      justify-content: center;
+      align-items: center;
+      margin-right: 25px;
+      margin-top: 10px;
+      & text {
+        font-size: 22px;
+        color: rgba(68, 68, 68, 1);
+        opacity: 1;
+      }
+    }
+  }
+  & .tips-content {
+    flex-direction: column;
+    & image {
+      margin-top: 20px;
+    }
+  }
+}
+.footer {
+  &-fixed {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+  }
+  &-warp {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+  }
+  &-tip {
+    width: 100%;
+    height: 57px;
+    font-size: 26px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: rgba(255, 255, 255, 1);
+    color: rgba(68, 68, 68, 0.6);
+    line-height: 37px;
+    /* opacity: 0.6; */
+    text-align: center;
+  }
+  &-btn {
+    width: 670px;
+    height: 84px;
+    border-radius: 42px;
+    justify-content: center;
+    & text {
+      font-size: 30px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 1);
+      line-height: 42px;
+    }
+  }
+}
+.save {
+  background-color: rgba(255, 137, 112, 1);
+  & text {
+    color: rgba(255, 255, 255, 1);
+  }
+}
+.saved {
+  background-color: rgba(242, 242, 242, 1);
+  & text {
+    color: rgba(212, 211, 217, 1);
+  }
+}
+</style>
+<script>
+import prompt from '@system.prompt';
+import calendar from '@system.calendar';
+import storage from '@system.storage';
+const PAGE_STATUS = {
+  // 页面初始状态
+  'INIT': 0,
+  // 用户点击保存至相关操作完成之间的状态
+  'EDITING': 1,
+  // 用户已设置看书日历
+  'SETTED': 2,
+}
+export default {
+  private: {
+    packageName: '',
+    startTime: '20:00',
+    startHour: 20,
+    startMinute: 0,
+    endTime: '21:00',
+    endHour: 21,
+    endMinute: 0,
+    pageStatus: PAGE_STATUS.INIT,
+    pageStatusMap: PAGE_STATUS,
+    curStatus:1
+  },
+  public: {
+    taskAction: '',
+    // TODO: 用户是否完成本任务标志，从任务页传递过来
+    taskStatus: 1,
+    calenderbuttonText: '',
+  },
+  onInit() {
+    let that = this
+    this.packageName = this.$app.$data.name
+    storage.get({
+      key: 'scheduleRecord',
+      success: function (data) {
+        if (data) {
+          data = JSON.parse(data)
+          that.startTime = data.startTime
+          that.startHour = data.startHour
+          that.startMinute = data.startMinute
+          that.endTime = data.endTime
+          that.endHour = data.endHour
+          that.endMinute = data.endMinute
+          that.pageStatus = that.pageStatusMap.SETTED
+        }
+      },
+      fail: function () {
+        that.startTime = '20:00'
+        that.startHour = 20
+        that.startMinute = 0
+        that.endTime = '21:00'
+        that.endHour = 21
+        that.endMinute = 0
+      }
+    })
+  },
+  onShow() {
+    this.$app.lastOpenPage = ''
+    this.$app.shenceLog.log(this, 'pageShow', '', {
+      Title: '日历提醒'
+    });
+  },
+  startTimePickerChange(data) {
+    this.startHour = data.hour
+    this.startMinute = data.minute
+    this.startTime = `${this.formatNumber(data.hour)}:${this.formatNumber(data.minute)}`
+  },
+  endTimePickerChange(data) {
+    this.endHour = data.hour
+    this.endMinute = data.minute
+    this.endTime = `${this.formatNumber(data.hour)}:${this.formatNumber(data.minute)}`
+  },
+  validTime(start, end) {
+    console.log('开始校验：', start, end)
+    let message = ''
+    if (start.hour > end.hour || start.hour == end.hour && start.minute > end.minute) {
+      message = '结束时间不能早于开始时间'
+    }else if(start.hour == end.hour && start.minute == end.minute){
+      message = '结束时间不能等于开始时间'
+    }
+    if (message != '') {
+      prompt.showToast({
+        message: message
+      })
+      return false
+    }
+    return true
+  },
+  formatNumber(num) {
+    return num < 10 ? '0' + num : num
+  },
+  saveSetting() {
+    let customdata = {
+      ButtonName: '看书日历-保存',
+      Title: '看书日历',
+    }
+    this.$app.shenceLog.log(this, 'track', 'ButtonClick', customdata);
+    if (this.validTime({ hour: this.startHour, minute: this.startMinute }, { hour: this.endHour, minute: this.endMinute })) {
+      let that = this
+      this.pageStatus = this.pageStatusMap.EDITING
+      let startTime = new Date()
+      startTime.setHours(this.startHour, this.startMinute, 0)
+      let endTime = new Date()
+      endTime.setHours(this.endHour, this.endMinute, 0)
+      let title = `【${this.packageName || ''}】每日读书计划`
+      calendar.insert({
+        title: title,
+        startDate: '' + startTime.getTime(),
+        endDate: '' + endTime.getTime(),
+        description: that.calenderbuttonText,
+        remindMinutes: [0],
+        rrule: 'FREQ=DAILY;',
+        success: function (data) {
+          that.pageStatus = that.pageStatusMap.SETTED
+          that.taskStatus = 2
+          storage.set({
+            key: 'scheduleRecord',
+            value: JSON.stringify({
+              startTime: that.startTime,
+              startHour: that.startHour,
+              startMinute: that.startMinute,
+              endTime: that.endTime,
+              endHour: that.endHour,
+              endMinute: that.endMinute,
+            }),
+          })
+          let customdata = {
+            STime: that.startTime,
+            ETime: that.endTime,
+            IsSuccess: true,
+            Title: title,
+            Instruction: that.calenderbuttonText,
+          }
+          that.$app.shenceLog.log(that, 'track', 'InsertCalendar', customdata);
+          // TODO: 用户未完成，且设置日历成功，通知后台用户已完成任务
+          that.curStatus == 1 && that.postPlayStatus()
+          prompt.showToast({
+            message: '设置成功'
+          })
+        },
+        cancel: function () {
+          prompt.showToast({
+            message: '设置被取消'
+          })
+        },
+        fail: function (e) {
+          let message = ''
+          if (e == 'invalid date') {
+            message = '时间选择有误，请重新选择'
+          }
+          let customdata = {
+            STime: that.startTime,
+            ETime: that.endTime,
+            IsSuccess: false,
+            Title: title,
+            Instruction: that.calenderbuttonText,
+          }
+          that.$app.$def.quickappLog([703,{
+              qmap: {
+                  STime: that.startTime,
+                  ETime: that.endTime,
+                  title: title,
+                  error: e
+              }
+          },'insert_calendar_error'],that)
+          that.$app.shenceLog.log(that, 'track', 'InsertCalendar', customdata);
+          prompt.showToast({
+            message: message || '设置失败，请重新尝试'
+          })
+        }
+      })
+    }
+  },
+  openReset() {
+    let customdata = {
+      ButtonName: '看书日历-重新设置',
+      Title: '看书日历',
+    }
+    this.$app.shenceLog.log(this, 'track', 'ButtonClick', customdata);
+    this.curStatus = 2
+    this.taskStatus = 1
+    this.pageStatus = this.pageStatusMap.INIT
+  },
+  postPlayStatus() {
+    let that = this
+    this.$app.$def.requestData(this,
+      {
+        interface: '/glory/fastapp/2146',
+        data: {
+          action: this.taskAction
+        },
+        succ: function (res) {
+          if (res.data.status != 1) {
+            that.taskStatus = res.data.status
+          }
+        }
+      }
+    )
+  },
+}
+</script>

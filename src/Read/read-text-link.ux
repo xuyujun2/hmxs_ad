@@ -1,0 +1,134 @@
+<template>
+  <div class="container {{night?'night':''}}" onappear="appearHandle" onclick="clickHandle">
+    <div class="content">
+      <image src="{{textLink.iconUrl}}" class="icon"></image>
+      <text class="tipText">{{textLink.showText}}</text>
+    </div>
+    <div class="button"><text>{{textLink.buttonText}}</text></div>
+  </div>
+</template>
+<style lang="less">
+.container {
+  width: 670px;
+  height: 72px;
+  margin: 30px 10px 10px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 0 13px;
+  align-items: center;
+  justify-content: space-between;
+  & .content {
+    flex: 1;
+    align-items: center;
+    height: 72px;
+  }
+  & image {
+    width: 35px;
+  }
+  & .tipText {
+    width: 440px;
+    height: 72px;
+    line-height: 72px;
+    margin-left: 13px;
+    lines: 1;
+    font-size: 26px;
+    color: rgba(68, 68, 68, 1);
+    text-overflow: ellipsis;
+  }
+  & .button {
+    width: 136px;
+    height: 50px;
+    background-color: rgba(255, 91, 96, 1);
+    border-radius: 4px;
+    justify-content: center;
+    & text {
+      font-size: 26px;
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+}
+.night{
+  opacity: .5;
+}
+</style>
+<script>
+import router from '@system.router'
+export default {
+  props: ['textLink', 'bookId', 'chapterId', 'chapterIndex','operationName','night','userTacticsVo','bookName'],
+  appearHandle() {
+    if(this.userTacticsVo.isDot=='1'){
+      this.$app.shenceLog.log(this, 'track', 'OperationExposure', {
+        OperationPosition: '章末文字链',
+        OperationID: 16,
+        OperationName: this.operationName,
+        OperationType: '',
+        BookID: '',
+        ActID: (this.textLink.jumpType == 0 && this.textLink.jumpUrl && this.textLink.jumpUrl.split('id=')[1]) ? this.textLink.jumpUrl.split('id=')[1] : '',
+        PicURL: '',
+        ActURL: '',
+        StartTime: new Date().getTime(),
+        EndTime: new Date().getTime(),
+        ChaptersNum: this.chapterIndex || '',
+        RBookID: this.bookId || '',
+        TacticsId:this.userTacticsVo.tacticsId||'',
+        TacticsName:this.userTacticsVo.tacticsName||'',
+        SourceId:this.userTacticsVo.sourceId||'',
+        SourceName:this.userTacticsVo.sourceName||'',
+        ShuntId:this.userTacticsVo.shuntID||'',
+        ShuntName:this.userTacticsVo.shuntName||'',
+        ChaptersID: this.chapterId,
+      });
+    }
+  },
+  clickHandle() {
+    let that = this
+    let opClickData = {
+      OperationType: '',
+      OperationID: 16,
+      OperationName: that.operationName || '',
+      OperationPosition: '章末文字链',
+      ChaptersNum: that.chapterIndex || '',
+      TacticsId: that.userTacticsVo.tacticsId || '',
+      TacticsName: that.userTacticsVo.tacticsName || '',
+      SourceId: that.userTacticsVo.sourceId || '',
+      SourceName: that.userTacticsVo.sourceName || '',
+      ShuntId: that.userTacticsVo.shuntID || '',
+      ShuntName: that.userTacticsVo.shuntName || '',
+      ActID: (that.textLink.jumpType == 0 && that.textLink.jumpUrl && that.textLink.jumpUrl.split('id=')[1]) ? that.textLink.jumpUrl.split('id=')[1] : '',
+      BookID:  that.bookId || '',
+      BookName: that.bookName || '',
+      ChaptersID: that.chapterId || ''
+    }
+    if(that.userTacticsVo.isDot=='1'){
+      this.$app.shenceLog.log(this, 'track', 'OperationClick', opClickData);
+    }
+    if (this.textLink.jumpType == 0) {
+      this.$dispatch('audioToPage')
+      router.push({
+        uri: '/Webhuodong',
+        params: {
+          webSrc: this.textLink.jumpUrl,
+          OperationPosition: '章末文字链',
+          OperationID: 16,
+          OperationName: that.operationName,
+          OperationType: '',
+          pageFrom:'read'
+        }
+      })
+    } else {
+      this.$dispatch('audioToPage')
+      router.push({
+        uri: '/Recharge',
+        params: {
+          url: '/Read',
+          bookId: that.bookId,
+          chapterId: that.chapterId,
+          pageFrom: 'read',
+          SourcePosition: '章末文字链',
+          bookName: that.bookName
+        }
+      })
+    }
+  }
+}
+</script>

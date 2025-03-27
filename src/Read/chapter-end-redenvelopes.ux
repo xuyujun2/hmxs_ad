@@ -1,0 +1,115 @@
+
+<style lang="less" scoped>
+    .red-task-wrap {
+        width: 702px;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        .red-task-header {
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 53px;
+            margin-top: 450px;
+            .red-header-background {
+                width: 100%;
+                height:74px;
+                margin-top: 22px;
+            }
+            .red-task-text {
+                height: 58px;
+                font-size: 48px;
+                font-weight: bold;
+                color: #D41100;
+                line-height: 58px;
+            }
+        }
+        .red-task-content {
+            width: 100%;
+            justify-content: space-between;
+            height: 270px;
+            .red-task-item, .red-task-item-light {
+                width: 214px;
+                height: 270px;
+                flex-direction: column;
+                justify-content: flex-end;
+                align-items: center;
+                background-image: url('https://xsmfdq.kkyd.cn/images/hmxs/alipay-red.png');
+                .red-item-text, .red-item-text-light {
+                    height: 36px;
+                    font-size: 30px;
+                    font-weight: bold;
+                    color: rgba(255, 248, 209, .9);
+                    line-height: 36px;
+                    margin-bottom: 64px;
+                }
+                .red-item-text-light {
+                    color: rgba(255, 248, 209, .4)
+                }
+            }
+            .red-task-item-light {
+                background-image: url('https://xsmfdq.kkyd.cn/images/hmxs/alipay-red-light.png');
+            }
+        }
+    }
+</style>
+
+<template>
+    <div class="red-task-wrap">
+        <stack class="red-task-header" if="title">
+            <image src="https://xsmfdq.kkyd.cn/images/hmxs/red-title-background.png" class="red-header-background"></image>
+            <text class="red-task-text">{{ title }}</text>
+        </stack>
+        <div class="red-task-content" if="taskArray.length">
+            <block for="(index, item) in taskArray" if="index >= minShowIndex && index < minShowIndex + 3">
+                <div class="red-task-item {{ item.awardStatus === 2 ? 'red-task-item-light' : ''}}" @click="fnClickItem(item ,index)">
+                    <text class="red-item-text {{ item.awardStatus === 2 ? 'red-item-text-light' : ''}}">{{ item.awardStatus ===  0 ? '点击提现' :  item.awardStatus ===  1 ? '领取' :  '已到账'}}</text>
+                </div>
+            </block>
+        </div>
+    </div>
+    
+</template>
+
+<script>
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    export default {
+        props: {
+           // 红包任务数组
+           taskArray: {
+               type: Array,
+               default: [],
+               required: false
+           },
+           // 红包任务标题
+           title: {
+               type: String,
+               default: '',
+               required: false
+           },
+           // 红包任务已点击次数
+           clickCompletedNum: {
+               type: Number,
+               default:  0,
+               required: false
+           }
+        },
+        onInit() {
+          this.fnRedShowArrayHandle()
+        },
+        data: {
+          minShowIndex:  -1      //  红包任务最小展示位序
+        },
+        /**
+         * 点击支付宝红包
+         * @param   {Object}    item      [红包对象]
+        */
+        fnClickItem(item) {
+            this.$emit('cerClick',  {idx: item.idx})
+        },
+        // 红包任务展示数据处理
+        fnRedShowArrayHandle() {
+            this.minShowIndex = Math.floor(this.clickCompletedNum / 3) * 3
+        }
+    }
+</script>

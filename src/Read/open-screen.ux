@@ -1,0 +1,604 @@
+<import name="ad-union" src="../AdUnion/index"></import>
+
+<template>
+    <div class="open-screen-extra">
+        <div if="canShow" class="open-screen {{isNewOpenStyle && isGetAd ? 'open-screen-bg' : ''}}">
+            <stack if="{{isDefalut || (!isDefalut && popInfo && popInfo.type == 15 && !isGetAd)}}" class="open-screen-default">
+                <image class="kaiping" src="../Common/slogan.png"></image>
+                <div class="verDisplay">
+                    <text>Copyright&copy; 2023 {{appName}} | {{' V' + versionName}}</text>
+                </div>
+            </stack>
+            <div if="{{!isDefalut}}" class="open-screen-wrap {{popInfo.type == 15 && !isGetAd ? 'open-screen-hide' : ''}}">
+                <div if="{{popInfo && popInfo.type == 15}}" class="open-screen-ad {{popInfo.type == 15 && !isGetAd || isDoubleOpenAdShow ? 'open-screen-ad-hide' : ''}}">
+                    <ad-union
+                        if="!normalOpen.hasClose"
+                        ad-unit-id="{{ openAdId }}"
+                        ad-type="open"
+                        ad-alias="readOpen"
+                        is-warm="normal"
+                        onstart-count="fnStartCount"
+                        onstop-count="fnStopCount"
+                        onfn-get-ad="fnGetAd('normal')"
+                        onfn-get-insert-eye-ad="fnGetInsertEyeAd"
+                        onfn-ad-click="fnAdHasClick('normalOpen')"
+                        onfn-ad-close="fnAdClose"
+                        is-cache-info="{{ isCacheInfo }}"
+                        other-info="{{ popInfo }}"
+                        from-page="{{ fromPage }}"
+                        request-time="{{ adRequestTime }}"
+                        brand-ad-switch="{{ brandAdSwitch }}"
+                        is-new-open-style="{{ isNewOpenStyle }}"
+                        is-system-open-style="{{ isDoubleOpen }}"
+                        has-show-time="{{ !isNewOpenStyle && startTimesCount && !isDoubleOpenAdShow && !normalOpen.hasClick }}"
+                        skip-time="{{ popInfo.countdown || 5 }}"
+                        count-time="{{ curTimes }}"
+                        is-ad-show="{{ !isNewOpenStyle && startTimesCount && !isDoubleOpenAdShow && !normalOpen.hasClick || isNewOpenStyle }}"
+                    ></ad-union>
+                </div>
+                <div if="{{popInfo && popInfo.type == 15 && isDoubleOpen}}" class="open-screen-ad {{popInfo.type == 15 && !isGetAd || !isDoubleOpenAdShow ? 'open-screen-ad-hide' : ''}}">
+                    <ad-union
+                        ad-unit-id="{{ doubleOpenAdId }}"
+                        ad-type="open"
+                        ad-alias="readOpen"
+                        is-warm="normal"
+                        onstart-count="fnStartCount"
+                        onstop-count="fnStopCount"
+                        onfn-get-ad="fnGetAd('doubleOpenAd')"
+                        onfn-ad-click="fnAdHasClick('doubleOpen')"
+                        onfn-ad-close="fnAdClose"
+                        is-cache-info="{{ isCacheInfo }}"
+                        other-info="{{ popInfo }}"
+                        from-page="{{ fromPage }}"
+                        request-time="{{ adRequestTime }}"
+                        brand-ad-switch="{{ brandAdSwitch }}"
+                        is-new-open-style="{{ isNewOpenStyle }}"
+                        is-double-open="{{ isDoubleOpen }}"
+                        has-show-time="{{ !isNewOpenStyle && startTimesCount && isDoubleOpenAdShow && isPageShow }}"
+                        count-time="{{ curTimes }}"
+                        is-ad-show="{{ !isNewOpenStyle && startTimesCount && isDoubleOpenAdShow && isPageShow }}"
+                    ></ad-union>
+                </div>
+                <div if="popInfo && popInfo.type != 15" class="open-screen-content" @click="fnClickPop">
+                    <image class="open-screen-image" src="{{popInfo.imgUrl}}"></image>
+                </div>
+                <text if="!isNewOpenStyle && showTimesCount && ((popInfo && popInfo.type != 15) || (popInfo && popInfo.type == 15 && isGetAd && !isHideCountdown))" class="open-screen-close  {{ isBottomCloseBtn ? 'close-bottom' : 'close-top' }}" @click="fnRouterBack">
+                    <span if="curTimes !== 0">{{curTimes}}</span>
+                    <span>  跳过</span>
+                </text>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .open-screen {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 1);
+        .open-screen-default {
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            .kaiping {
+                width: 238px;
+                margin-bottom: 360px;
+            }
+            .verDisplay {
+                margin-bottom: 60px;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                align-self: flex-end;
+                text {
+                    text-align: center;
+                    font-size: 26px;
+                    color: rgba(0, 0, 0, .5);
+                    line-height: 37px;
+                }
+            }
+        }
+        .open-screen-wrap {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            .open-screen-ad {
+                width: 100%;
+                height: 100%;
+            }
+            .open-screen-ad-hide {
+                width: 0px;
+                height: 0px; 
+            }
+            .open-screen-content {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;       
+                .open-screen-image {
+                    width: 100%;
+                    height: 100%;
+                    /* resize-mode: stretch;
+                    object-fit: fill; */
+                }
+            }
+        }
+        .open-screen-hide {
+            width: 0px;
+            height: 0px;
+        }
+       .open-screen-close {
+            position: fixed;
+            right: 16px;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0 16px;
+            line-height: 59px;
+            height: 59px;
+            border-radius: 30px;
+            justify-content: center;
+            align-items: center;
+            span {
+                font-size: 24px;
+                color: #ffffff;
+                text-align: center;
+            }
+        }
+        .close-top {
+            top: 120px;
+        }
+        .close-bottom {
+            bottom: 240px;
+        }
+    }
+    .open-screen-bg {
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, .7);
+    }
+</style>
+
+<script>
+    import app from '@system.app';
+    import router from '@system.router'
+    export default {
+        props: {
+            // 来源页面
+            fromPage: {
+                type: String,
+                required: false,
+                default: '/Index'
+            }
+        },
+        data: {
+            appName: '', // 应用名称
+            versionName: '', // 版本名称
+            isDefalut: true, // 是否是默认开屏展示
+            autoCloseTimeout: null, // 自动跳转回原页面
+            autoCloseInterval: null, // 倒计时结束转回原因面
+            popInfo: {}, // 开屏信息
+            showTimesCount: false, // 是否显示倒计时
+            curTimes: 3, // 倒计时剩余时间
+            countdownTimes: 3,
+            isGetAd: false, // 是否获取广告
+            isCacheInfo: false,
+            canShow: true,
+            isAdPopShow: false, // 广告弹窗显示
+            loadLimit: 3000, // 超时时长，默认3000ms
+            adRequestTime: 3000, // 广告剩余请求时间
+            openAdId: '5001203404', // 开屏广告广告位id
+            brandAdSwitch: false, // 支持新版厂商广告开关
+            isNewOpenStyle: false, // 启用新样式
+            startTimesCount: false, // 开启倒计时
+            isDoubleOpen: false, // 双开屏
+            doubleOpenAdId: '5001203404', // 双开屏广告位id
+            isDoubleOpenAdLoad: false, // 双开屏加载
+            isDoubleOpenAdShow: false, // 双开屏展示
+            isPageShow: false, // 页面曝光
+            isNeedTimesCount: false, // 需要启动倒计时
+            normalOpen: { // 第一个开屏
+                canClose: false, // 是否可以关闭
+                hasClose: false, // 是否已经关闭
+                hasClick: false, // 是否已经点击过
+            },
+            doubleOpen: { // 第二个开屏
+                canClose: false,
+                hasClose: false,
+                hasClick: false,
+            },
+            isBottomCloseBtn: false,  // 关闭按钮是否底部展示
+            isHideCountdown : false,  // 是否隐藏倒计时
+            isDoubleHideCountdown: false, // 是否隐藏双开屏的第二个开屏的倒计时
+            isDoubleBottomCloseBtn: false, // 第二个开屏的关闭按钮是否底部展示
+        },
+        // 页面初始化
+        onInit() {
+            let that = this
+            let appInfo = app.getInfo();
+            that.appName = appInfo.name;
+            that.versionName = appInfo.versionName;
+            that.$off('openScreenPopClose')
+            that.$on('openScreenPopClose', this.fnOpenScreenPopClose);
+            that.$off('doubleOpenAdShow')
+            that.$on('doubleOpenAdShow', this.fnDoubleOpenAdShow);
+            // 页面展示状态
+            that.$off('pageShowChange')
+            that.$on('pageShowChange', this.fnPageShowChanged)
+            // 第二次按 返回键，先清除定时器
+            that.$off('clearOpenScreenInterval')
+            that.$on('clearOpenScreenInterval', this.clearOpenScreenInterval)
+            // 自动回退
+            clearTimeout(that.autoCloseTimeout)
+            that.autoCloseTimeout = setTimeout(() => {
+                that.$emit('closeOpenScreen')
+                that.canShow = false
+            }, 3000)
+            // 获取开屏信息
+            that.fnGetPopInfo()
+        },
+        onDestroy() {
+            clearTimeout(this.autoCloseTimeout);
+        },
+        fnStartCount() {
+            let that = this
+            that.isAdPopShow = false
+            that.autoCloseInterval = setInterval(() => {
+                that.fnCountDown();
+            }, 1000);
+            that.$emit('closeOpenScreenPop')
+        },
+        fnStopCount() {
+            this.isAdPopShow = true
+            clearTimeout(this.autoCloseInterval)
+            this.$emit('showOpenScreenPop')
+        },
+        fnOpenScreenPopClose() {
+            let that = this
+            that.isAdPopShow = false
+            that.autoCloseInterval = setInterval(() => {
+                that.fnCountDown();
+            }, 1000);
+            that.$broadcast('closeExtra')
+        },
+        // 获取开屏信息
+        fnGetPopInfo() {
+            let that = this
+            let startRequestTime = new Date().getTime()
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2401',
+                data: { 
+                    location: '19', // 注册后loading
+                    isWarm: 0,
+                    openAdControl: 1,
+                },
+                succ: function (res) {
+                    if(res.data && JSON.stringify(res.data) != '{}') {
+                        that.$app.fnSetMisclickConf({                                                       // 设置误触频次控制
+                            misClickTotalFrequency: res.data.misClickTotalFrequency,                        // 误触总频次限制
+                            misClickAdPosition: res.data.misClickAdPosition,                                // 各广告位置误触频次限制
+                            misClickIntervalTime: res.data.misClickIntervalTime,                            // 时间间隔（秒）
+                        });
+                        if(res.data.autoTriggerChapterNum) {
+                            that.$app.autoClickReadTime = res.data.autoTriggerChapterNum
+                        }
+                        if(!res.data.countdown || res.data.countdown < 3) {                                 // 倒计时最小为3s
+                            res.data.countdown = 3;
+                        }
+                        // 广告首先获取数据
+                        // res.data.type = 15
+                        if(res.data.type == 15) {
+                            clearTimeout(that.autoCloseTimeout)
+                            if(res.data.baiduSDKFlag){
+                                that.$app.fnInitBaiduSDK();                                     // 初始化百度sdk
+                            }
+                            if(res.data.xmDeviation) {
+                                that.$app.setAppData('adClickOffsetConfInfo', res.data.xmDeviation);
+                            }
+                            that.$app.brandAdPreloadSwitch = !!res.data.brandAdPreloadSwitch
+                            if(res.data.brandAdSwitch) {
+                                that.brandAdSwitch = true
+                            }
+                            if(res.data.adPositionId) {
+                                that.openAdId = res.data.adPositionId
+                            }
+                            if(res.data.doubleOpenAdId) {
+                                that.doubleOpenAdId = res.data.doubleOpenAdId
+                            }
+                            if(res.data.loadTime) {
+                                that.loadLimit = res.data.loadTime
+                            }
+                            let endRequestTime = new Date().getTime()
+                            that.adRequestTime = that.loadLimit - (endRequestTime - startRequestTime)
+                            if(that.adRequestTime < 0) {
+                                that.$emit('closeOpenScreen')
+                                that.canShow = false
+                                return
+                            }
+                            // 启用新样式判断
+                            that.isNewOpenStyle = res.data.readPageAdIsNewStyle ? true : false
+                            // res.data.doubleOpenAd = true
+                            // that.isNewOpenStyle = false
+                            // res.data.countdown = 30
+                            that.isDoubleOpen = res.data.doubleOpenAd && !that.isNewOpenStyle ? true : false
+                            that.popInfo = res.data
+                            that.isDefalut = false
+                            setTimeout(() => {
+                                if(!that.isGetAd && that.isDoubleOpenAdLoad && that.isDoubleOpen) {
+                                    that.fnDoubleOpenAdShow()
+                                    return
+                                }
+                                if(!that.isGetAd && !that.isDoubleOpen || !that.isGetAd && !that.isDoubleOpenAdLoad && that.isDoubleOpen) {
+                                    that.$emit('closeOpenScreen')
+                                    that.canShow = false
+                                }
+                            }, that.adRequestTime)
+                        }
+                        // 非广告直接渲染
+                        if(res.data.type >= 1 && res.data.type <= 8) {
+                            clearTimeout(that.autoCloseTimeout)
+                            that.popInfo = res.data
+                            that.fnSetTimesCount()
+                            that.isDefalut = false
+                            that.$emit('openScreenBack')
+                        }
+                        if((res.data.type >= 1 && res.data.type <= 8) && that.popInfo && JSON.stringify(that.popInfo) != '{}') {
+                            that.$app.$def.quickappLog([703, {
+                                qmap: {
+                                    type: 'show',
+                                    activity: that.popInfo.id,
+                                    imgType: that.popInfo.type
+                                }
+                            }, 'openscreen'], that)
+                            that.$app.shenceLog.log(that, 'track', 'OperationExposure', {
+                                OperationPosition: 'loading页',
+                                OperationID: that.popInfo.operationInfo.id,
+                                OperationName: that.popInfo.operationInfo.name,
+                                OperationType: that.popInfo.type,
+                                BookID: that.popInfo.info || '',
+                                ActID: that.popInfo.actUrl ? that.popInfo.actUrl.split('id=')[1] ? that.popInfo.actUrl.split('id=')[1] : '' : '',
+                                PicURL: that.popInfo.imgUrl || '',
+                                ActURL: that.popInfo.actUrl || '',
+                                Countdown: that.countdownTimes,
+                                StartTime: that.popInfo.operationInfo.startTime,
+                                EndTime: that.popInfo.operationInfo.endTime,
+                                TacticsId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsId ? that.popInfo.userTacticsVo.tacticsId : '',
+                                TacticsName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsName ? that.popInfo.userTacticsVo.tacticsName : '',
+                                SourceId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceId ? that.popInfo.userTacticsVo.sourceId : '',
+                                SourceName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceName ? that.popInfo.userTacticsVo.sourceName : '',
+                                ShuntId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntID ? that.popInfo.userTacticsVo.shuntID : '',
+                                ShuntName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntName ? that.popInfo.userTacticsVo.shuntName : ''
+                            });
+                        }
+                    }else {
+                        that.$emit('closeOpenScreen')
+                        that.canShow = false
+                    }
+                },
+                error: function () {
+                    that.$emit('closeOpenScreen')
+                    that.canShow = false
+                }
+            })
+        },
+        // 广告已获取
+        fnGetAd(tag = 'normal', event) {
+            if(tag === 'doubleOpenAd') {
+                this.$emit('needDoubleOpenAd')
+                this.isDoubleHideCountdown = event && event.detail && event.detail.hasMisClick;
+                this.isDoubleBottomCloseBtn = event && event.detail && event.detail.isBottomCloseBtn;
+                this.isDoubleOpenAdLoad = true
+                return
+            }
+            this.isHideCountdown = event && event.detail && event.detail.hasMisClick;
+            this.isBottomCloseBtn = event && event.detail && event.detail.isBottomCloseBtn;
+            this.isGetAd = true
+            let chn_type = event && event.detail && event.detail.chn_type;
+            if(!this.isNewOpenStyle && chn_type !== 'SDK_BAIDU') {
+                this.fnSetTimesCount()
+            }
+            this.$emit('openScreenBack')
+        },
+        // 展示双开屏
+        fnDoubleOpenAdShow() {
+            if(!this.isPageShow) {
+                this.isNeedTimesCount = true;
+                return ;
+            }
+            if(!this.normalOpen.hasClose) {
+                this.normalOpen.hasClose = true;                                    // 标记第一个开屏为已关闭状态
+            }
+            this.isBottomCloseBtn = this.isDoubleBottomCloseBtn;
+            this.isHideCountdown = this.isDoubleHideCountdown;
+            this.$emit('showDoubleOpenAd')
+            this.isDoubleOpenAdShow = true
+            this.isGetAd = true
+            this.fnSetTimesCount()
+            this.$emit('openScreenBack')
+            this.$broadcast('doubleOpenAdHasShow');                                 // 向广告组件广播双开屏展示事件，用于计算开屏展示时长
+        },
+        fnGetInsertEyeAd() {
+            this.isGetAd = true
+            clearTimeout(this.autoCloseTimeout)
+        },
+        // 广告点击上报
+        fnClickReport() {
+            let that = this
+            that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: '阅读页开屏',
+                OperationID: that.popInfo.operationInfo.id,
+                OperationName: that.popInfo.operationInfo.name,
+                OperationType: that.popInfo.type,
+                BookID: that.popInfo.info || '',
+                ActID: that.popInfo.actUrl ? that.popInfo.actUrl.split('id=')[1] ? that.popInfo.actUrl.split('id=')[1] : '' : '',
+                PicURL: that.popInfo.imgUrl || '',
+                ActURL: that.popInfo.actUrl || '',
+                Countdown: that.countdownTimes,
+                StartTime: that.popInfo.operationInfo.startTime,
+                EndTime: that.popInfo.operationInfo.endTime,
+                TacticsId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsId ? that.popInfo.userTacticsVo.tacticsId : '',
+                TacticsName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsName ? that.popInfo.userTacticsVo.tacticsName : '',
+                SourceId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceId ? that.popInfo.userTacticsVo.sourceId : '',
+                SourceName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceName ? that.popInfo.userTacticsVo.sourceName : '',
+                ShuntId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntID ? that.popInfo.userTacticsVo.shuntID : '',
+                ShuntName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntName ? that.popInfo.userTacticsVo.shuntName : '',
+                BookName: that.popInfo.bookName || '',
+            }); 
+        },
+        // 设置倒计时
+        fnSetTimesCount() {
+            let that = this
+            if(that.popInfo.skip == 1) {
+                that.showTimesCount = true
+            }
+            that.startTimesCount = true
+            that.countdownTimes = that.popInfo.countdown
+            that.curTimes = that.popInfo.countdown
+            clearInterval(that.autoCloseInterval)
+            that.autoCloseInterval = setInterval(() => {
+                that.fnCountDown();
+            }, 1000);
+        },
+        // 倒计时
+        fnCountDown() {
+            let that = this
+            that.curTimes--
+            if(that.curTimes <= 0) {
+                that.fnRouterBack()
+            }
+        },
+        // 第二次按返回键 先清除定时器
+        clearOpenScreenInterval(){
+            clearInterval(this.autoCloseInterval)
+        },
+        // 回退页面
+        fnRouterBack() {
+            if (this.isDoubleOpenAdShow) {
+                if (this.doubleOpen.hasClose) {
+                    return ;
+                }
+                this.doubleOpen.hasClose = true;                                        // 如果双开屏展示，认为是双开屏的返回。否则是第一个开屏的返回
+            } else {
+                if (this.normalOpen.hasClose) {
+                    return ;
+                }
+                this.normalOpen.hasClose = true;
+            }
+            clearInterval(this.autoCloseInterval);
+            if (this.isDoubleOpenAdLoad && !this.isDoubleOpenAdShow) {
+                this.fnDoubleOpenAdShow();
+                return ;
+            }
+            if (this.$valid) {
+                this.$emit('closeOpenScreen');
+            }
+            this.canShow = false;
+        },
+        // 点击开屏
+        fnClickPop() {
+            let that = this
+            switch(that.popInfo.type) {
+                case 1: // 书籍阅读页
+                    var trigger_time = that.$app.$def.getLogTime()
+                    var omap = {
+                        origin:'kp',
+                        action:'2',
+                        channel_id:'rqd_kp',
+                        channel_name:'热启动开屏',
+                        channel_pos:1,
+                        column_id:that.popInfo.id,
+                        column_name:'热启动开屏',
+                        column_pos:0,
+                        content_id:that.popInfo.info,
+                        content_pos:0,
+                        content_type:'2',
+                        trigger_time:trigger_time
+                    }
+                    that.$app.$def.quickappLog([702, {
+                        omap: omap
+                    }, 'book_click'], that)
+                    router.clear()
+                    router.replace({
+                        uri: '/Read',
+                        params: {
+                            bookId: that.popInfo.info,
+                            activity: that.popInfo.id,
+                            SourcePosition: '开屏页',
+                            omap: omap
+                        }
+                    })
+                    that.canShow = false
+                    break;
+                case 2: // web
+                    router.replace({
+                        uri: '/Webhuodong',
+                        params: {
+                            webSrc: that.popInfo.actUrl,
+                            activity: that.popInfo.id,
+                            pageFrom: 'pop',
+                            OperationPosition: '开屏页',
+                            OperationID: that.popInfo.operationInfo && that.popInfo.operationInfo.id ? that.popInfo.operationInfo.id : '',
+                            OperationName: that.popInfo.operationInfo && that.popInfo.operationInfo.type ? that.popInfo.operationInfo.type : '',
+                            OperationType: that.popInfo.type || '',
+                            StartTime: that.popInfo.operationInfo && that.popInfo.operationInfo.startTime ? that.popInfo.operationInfo.startTime : '',
+                            EndTime: that.popInfo.operationInfo && that.popInfo.operationInfo.endTime ? that.popInfo.operationInfo.endTime : '',
+                        }
+                    })
+                    that.canShow = false
+                    break;
+                case 4: // 充值页
+                    router.replace({
+                        uri: '/Recharge',
+                        params:{
+                            activity: that.popInfo.id,
+                        }
+                    })
+                    that.canShow = false
+                    break;
+                default:
+                    that.fnRouterBack()
+            }
+            that.fnClickReport()
+        },
+        fnPageShowChanged(evt) {
+            this.isPageShow = evt.detail || false;
+            if(this.isPageShow) {                                                   // 页面展示时
+                if(this.isNeedTimesCount) {
+                    this.fnDoubleOpenAdShow();                                      // 由于页面处于隐藏状态导致双开屏未展示成功，需要重新展示双开屏
+                    this.isNeedTimesCount = false;
+                    return ;
+                }
+                if (this.normalOpen.canClose && !this.normalOpen.hasClose || this.doubleOpen.canClose && !this.doubleOpen.hasClose) {
+                    this.fnRouterBack();                                            // 第一个开屏 或者 第二个开屏由于点击过可以关闭了，执行关闭方法
+                }
+                return ;
+            }
+            if (this.normalOpen.hasClick && !this.normalOpen.hasClose) {            // 页面隐藏时，如果开屏点击过，且没有关闭，标记为可以关闭
+                this.normalOpen.canClose = true;
+                clearInterval(this.autoCloseInterval);
+            }
+            if (this.normalOpen.hasClose && this.doubleOpen.hasClick && !this.doubleOpen.hasClose) {
+                this.doubleOpen.canClose = true;
+                clearInterval(this.autoCloseInterval);
+            }
+        },
+        // 广告点击回调
+        fnAdHasClick(tag) {
+            if (tag && typeof tag === 'string' && this[tag]) {
+                this[tag].hasClick = true;                                          // 标记对应的开屏已经点击过
+            }
+        },
+        // 广告关闭回调
+        fnAdClose() {
+            this.fnRouterBack();
+        },
+    }
+</script>
+
+

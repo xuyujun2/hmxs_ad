@@ -1,0 +1,365 @@
+<template>
+   <div class="once-price-wrap" @click="vagueClick">
+       <div class="box">
+           <div class="title-wrap">
+               <text class="title">该章节是付费章节，你尚未购买</text>
+               <image class="close" @click="fnClosePop" src="https://xsmfdq.kkyd.cn/images/close-btn-grey.png"></image>
+           </div>
+            <div class="once-price" @click="fnChangeType('oncePrice')">
+                <div class="op-title-wrap">
+                    <div class="op-title">
+                        <text class="op-title-text">购买整本书</text>
+                        <text class="op-tag">{{priceInfo.remark}}</text>
+                    </div>
+                    <text class="op-desc">{{priceInfo.price + '元/本，含后续更新章节'}}</text>
+                </div>
+                <image class="select" src="{{type == 'oncePrice' ? 'https://xsmfdq.kkyd.cn/images/order-edit-select.png' : 'https://xsmfdq.kkyd.cn/images/order-edit-nolm.png'}}"></image>
+           </div>
+            <div class="pop-order"  @click="fnChangeType('popOrder')">
+                <div class="po-wrap">
+                    <text class="po-title">按章订购</text>
+                    <text class="po-desc">{{priceInfo.amount + '书币/章，整本书约需要' + priceInfo.totalPrice + '元以上'}}</text>
+                </div>
+                <image class="select" src="{{type == 'popOrder' ? 'https://xsmfdq.kkyd.cn/images/order-edit-select.png' : 'https://xsmfdq.kkyd.cn/images/order-edit-nolm.png'}}"></image>
+           </div>
+           <div class="btn-wrap" @click="fnConfirm">
+               <stack>
+                    <image class="btn-img" src="https://xsmfdq.kkyd.cn/images/once-price-btn.png"></image>
+                    <text class="btn-text">确定</text>
+               </stack>
+           </div>
+       </div>
+       <div class="give-up-pop" if="giveUpPopShow">
+           <div class="gu-box">
+                <text class="gu-title">提示</text>
+                <text class="gu-desc">选择书币订购章节以后，将不能够再选择购买整本书，确认继续吗？</text>
+                <div class="gu-btn">
+                    <text class="gu-cancle" @click="fnCanclePop">再想想</text>
+                    <text class="gu-confirm" @click="fnPopOrder">确认</text>
+                </div>
+           </div>
+       </div>
+   </div>
+</template>
+<style scoped lang="less">
+    .give-up-pop {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background-color: rgba(0, 0, 0, .8);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        .gu-box {
+            width: 560px;
+            height: 350px;
+            background-color: #FFFFFF;
+            border-radius: 24px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            .gu-title {
+                margin-top: 30px;
+                height: 58px;
+                font-size: 36px;
+                font-weight: 400;
+                color: #444444;
+                line-height: 58px;
+                text-align: center;
+            }
+            .gu-desc {
+                margin-top: 34px;
+                margin-bottom: 44px;
+                width: 480px;
+                height: 100px; 
+                font-size: 28px;
+                font-weight: 400;
+                color: #737373;
+                line-height: 50px; 
+            }
+            .gu-btn {
+                width: 560px;
+                height: 84px;
+                .gu-cancle {
+                    width: 280px;
+                    height: 84px;
+                    background-color: #F2F2F2;
+                    border-bottom-left-radius: 24px;
+                    font-size: 30px;
+                    font-weight: 400;
+                    color: #BABABA;
+                    line-height: 84px;
+                    text-align: center;
+                }
+                .gu-confirm {
+                    width: 280px;
+                    height: 84px;
+                    background-color:rgba(246,87,92,1);
+                    border-bottom-right-radius: 24px;
+                    font-size: 30px;
+                    font-weight: 400;
+                    color: #FFFFFF;
+                    line-height: 84px;
+                    text-align: center;
+                }
+            }
+        }
+    }
+    .once-price-wrap {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background-color: rgba(0, 0, 0, .8);
+        flex-direction: column;
+        justify-content: flex-end;
+        .box {
+            width: 750px;
+            padding: 50px 30px 30px 30px;
+            background-color: #FFFFFF;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            flex-direction: column;
+            .title-wrap {
+                margin-bottom: 90px;
+                padding: 0px 20px;
+                justify-content: space-between;
+                .title {
+                    height: 42px;
+                    font-size: 30px;
+                    font-weight: 400;
+                    color: #444444;
+                    line-height: 42px;
+                    opacity: 0.6;
+                }
+                .close {
+                    width: 42px;
+                    height: 42px;
+                }
+            }
+            .once-price {
+                padding: 0px 10px 0px 20px;
+                justify-content: space-between;
+                align-items: center;
+                height: 110px;
+                margin-bottom: 90px;
+                .op-title-wrap {
+                    flex: 1;
+                    height: 110px;
+                    flex-direction: column;
+                    .op-title {
+                        flex: 1;
+                        margin-bottom: 12px;
+                        height: 56px;
+                        align-items: center;
+                        .op-title-text {
+                            height: 56px;
+                            font-size: 40px;
+                            font-weight: 500;
+                            color: #444444;
+                            line-height: 56px;
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                        .op-tag {
+                            margin-left: 20px;
+                            padding: 0px 8px;
+                            text-align: center;
+                            height: 42px;
+                            font-size: 24px;
+                            font-weight: 500;
+                            color: #FFFFFF;
+                            line-height: 42px;
+                            background-color: #FF0300;
+                            border-radius: 4px;
+                        }
+                    }
+                    .op-desc {
+                        height: 42px;
+                        font-size: 30px;
+                        font-weight: 400;
+                        color: #444444;
+                        line-height: 42px;
+                        opacity: 0.6;
+                    }
+                }
+            }
+            .pop-order {
+                padding: 0px 10px 0px 20px;
+                justify-content: space-between;
+                align-items: center;
+                height: 110px;
+                margin-bottom: 95px;
+                .po-wrap {
+                    flex: 1;
+                    height: 110px;
+                    flex-direction: column;
+                    .po-title {
+                        margin-bottom: 12px;
+                        height: 56px;
+                        font-size: 40px;
+                        font-weight: 500;
+                        color: #444444;
+                        line-height: 56px;
+                    } 
+                    .po-desc {
+                        height: 42px;
+                        font-size: 30px;
+                        font-weight: 400;
+                        color: #444444;
+                        line-height: 42px;
+                        opacity: 0.6;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+            .btn-wrap {
+                align-items: center;
+                justify-content: center;
+                width: 690px;
+                height: 90px;   
+                stack {
+                    align-items: center;
+                    justify-content: center;
+                    width: 690px;
+                    height: 90px;   
+                    .btn-img {
+                        width: 690px;
+                        height: 90px;   
+                    }
+                    .btn-text {
+                        text-align: center;
+                        font-size: 34px;
+                        font-weight: 400;
+                        color: #FFFFFF;
+                        line-height: 90px;    
+                    }
+                }
+            }
+            .select {
+                margin-left: 12px;
+                width: 54px;
+                height: 54px;
+            }
+        }
+    }
+</style>
+<script>
+    import router from '@system.router'
+    // import prompt from '@system.prompt'
+    export default {
+        props: {
+            bookId: {
+                type: String | Number,
+                required: true,
+            },
+            chapterId: {
+                type: String | Number,
+                required: true,
+            },
+            chapterIndex: {
+                type: String | Number,
+                required: true,
+            },
+            omap: {
+                type: String | Object,
+                required: false,
+            },
+            // 放弃弹窗展示
+            giveUpPopShow: {
+                type: Boolean,
+                required: false,
+                default: false
+            },
+            // 购买信息
+            priceInfo: {
+                type: String | Object,
+                required: false,
+                default: ''
+            },
+            // 书籍名称
+            bookName: {
+                type: String,
+                required: false,
+                default: ''
+            }
+        },
+        data: {
+            type: 'oncePrice' // 是否是整本购买
+        },
+        onInit() {
+            let that = this
+        },
+        // 修改选择
+        fnChangeType(type) {
+            let that = this
+            let typeCache = type
+            if(that.type != type) {
+                that.type = type
+            }
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                PositionName: '整本书一口价购买弹窗',
+                ButtonName: '选择购买方式',
+                ButtonContent: typeCache == 'oncePrice' ? '购买整本书' : '书币订购',
+                BookID: that.bookId || '',
+            });
+        },
+        // 关闭弹层
+        fnClosePop() {
+            this.$emit('closeOncePrice')
+        },
+        // 确认选择
+        fnConfirm() {
+            let that = this
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                PositionName: '整本书一口价购买弹窗',
+                ButtonName: '确认购买方式',
+                ButtonContent: that.type == 'oncePrice' ? '购买整本书' : '书币订购',
+                BookID: that.bookId || '',
+            });
+            if(this.type == 'oncePrice') {
+                router.push({
+                    uri:'/AdvancePay',
+                    params:{
+                        bookId: this.bookId,
+                        chapterId: this.chapterId,
+                        chapterIndex: this.chapterIndex,
+                        omap: this.omap,
+                        type: 'oncePrice',
+                        bookName: that.bookName || ''
+                    }
+                })
+            }else {
+                this.$emit('giveUpShow')
+            }
+        },
+        fnCanclePop() {
+            let that = this
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                PositionName: '整本书一口价购买弹窗',
+                ButtonName: '书币订购二次确认',
+                ButtonContent: '再想想',
+                BookID: that.bookId || '',
+            });
+            this.$emit('closeGiveUp')
+        },
+        fnPopOrder() {
+            let that = this
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                PositionName: '整本书一口价购买弹窗',
+                ButtonName: '书币订购二次确认',
+                ButtonContent: '确认',
+                BookID: that.bookId || '',
+            });
+            this.$emit('toPopOrder')
+        },
+        vagueClick() {
+            console.log('为了解决部分机型滑动穿透的问题')
+        }
+    }
+</script>
+

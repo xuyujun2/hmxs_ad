@@ -1,0 +1,229 @@
+<template>
+    <div>
+        <div class="pop-task" if="{{popStyle==1}}" @click="vagueClick">
+            <stack class="pop-stack">
+                <div class="pop-w">
+                    <text class="title">温馨提示</text>
+                    <text class="content">{{'每日做任务，可领取免费' + (isCoin ? '金币' : '书币')}}</text>
+                    <div class="button" onclick="toMask"><text>去做任务</text></div>
+                </div>
+                <image class="close" src="https://xsmfdq.kkyd.cn/images/close-btn-grey.png" onclick="fnCloseTask"></image>
+            </stack>
+        </div>
+        <div class="pop-task-2" else @click="vagueClick">
+            <stack class="pop-stack">
+                <image class="top-bg" src="https://xsmfdq.kkyd.cn/images/redbagcoin-pic.png"></image>
+                <div class="pop-w">
+                    <text class="title">{{title}}</text>
+                    <text class="content">{{description}}</text>
+                    <div class="button" onclick="toMask"><text>去做任务</text></div>
+                </div>
+                <image class="close" src="../Common/images/normal-close.png" onclick="fnCloseTask"></image>
+            </stack>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .pop-task-2{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.8);
+        justify-content: center;
+        align-items: center;
+        .pop-stack{
+            width:750px;
+            justify-content: center;
+            margin-top: 20px;
+            .top-bg{
+                width: 329px;
+                height: 182px;
+            }
+            .pop-w{
+                margin-top: 114px;
+                width:500px;
+                background-color:rgba(255,255,255,1);
+                border-radius:12px;
+                flex-direction: column;
+                align-items: center;
+                .title{
+                    font-size:36px;
+                    font-weight:bold;
+                    color:rgba(68,68,68,1);
+                    line-height:48px;
+                    margin-top: 40px;
+                    text-align: center;
+                }
+                .content{
+                    margin-top: 53px;
+                    font-size:30px;
+                    color:rgba(68,68,68,1);
+                    line-height:42px;
+                    width: 420px;
+                }
+                .button{
+                    width:400px;
+                    height:80px;
+                    background-color:rgba(255,137,112,1);
+                    border-radius:42px;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 53px 0 40px;
+                    text{
+                        font-size:34px;
+                        color:#FFFFFF;
+                    }
+                }
+            }
+            .close{
+                margin-left: 600px;
+                width: 54px;
+                height: 54px;
+            }
+        }
+    }
+    .pop-task{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.8);
+        justify-content: center;
+        align-items: flex-end;
+        .pop-stack{
+            width:750px;
+            .pop-w{
+                width:750px;
+                background-color:rgba(255,255,255,1);
+                border-top-left-radius: 36px;
+                border-top-right-radius: 36px;
+                flex-direction: column;
+                align-items: center;
+                .title{
+                    margin-top: 36px;
+                    font-size:44px;
+                    font-weight:bold;
+                    color:rgba(68,68,68,1);
+                }
+                .content{
+                    margin-top: 45px;
+                    font-size:36px;
+                    color:#FF5B60;
+                }
+                .button{
+                    width: 200px;
+                    height: 60px;
+                    border: 1px solid #F97053;
+                    border-radius: 48px;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 76px 0;
+                    text{
+                        font-size:30px;
+                        color:#F97053;
+                    }
+                }
+            }
+            .close{
+                margin-left: 666px;
+                margin-top: 30px;
+                width: 54px;
+                height: 54px;
+            }
+        }
+    }
+
+</style>
+
+<script>
+import router from '@system.router';
+export default {
+    props: ['title','description','popStyle','userType','bookId','omap','bookName','chapterId'],
+    data: {
+        isCoin: false,
+    },
+    onInit() {
+        let that = this
+        that.isCoin = that.$app.isCoin
+        that.$app.$def.quickappLog([703, {
+            qmap:{
+                site: '1'
+            }
+        }, 'task_pop'], that)
+        if(that.popStyle==1){
+            that.$app.shenceLog.log(that,'track','OperationExposure', {
+                OperationPosition:'放弃充值挽留弹窗',
+                OperationName:'通用样式',
+                BookID: that.bookId,
+                ChaptersID: that.chapterId,
+            }); 
+        }else{
+            that.$app.shenceLog.log(that,'track','OperationExposure', {
+                OperationPosition:'放弃充值挽留弹窗',
+                OperationName:`阅读页${that.bookId?'内':'外'}-${that.userType?'已':'未'}做过任务`,
+                BookID: that.bookId,
+                ChaptersID: that.chapterId,
+            }); 
+        }
+    },
+    fnCloseTask(){
+        let that = this
+        that.fnOperationClick('关闭')
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: '2'
+            }
+        }, 'task_pop'], that)
+        let routerlen = router.getLength();
+        if (routerlen <= 1) {
+            router.replace({
+                uri: '/Index'
+            })
+        }else{
+            router.back()
+        }
+    },
+    toMask(){
+        let that =this
+        that.fnOperationClick('去做任务')
+        that.$app.$def.quickappLog([702, {
+            qmap:{
+                site: '3'
+            }
+        }, 'task_pop'], that)
+        router.replace({
+            uri: '/Sign',
+            params:{
+                fromRecharge:true,
+                omap:that.omap,
+                soucePage: '充值页-去做任务'
+            }
+		})
+    },
+    fnOperationClick(ButtonName){
+        let that = this
+        if(that.popStyle==1){
+            that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: '放弃充值挽留弹窗',
+                OperationName: '通用样式',
+                ButtonName: ButtonName,
+                ChaptersID : that.chapterId || '',
+                BookID: that.bookID || '',
+                BookName: that.bookName || ''
+            }); 
+        }else{
+            that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: '放弃充值挽留弹窗',
+                OperationName: `阅读页${that.bookId?'内':'外'}-${that.userType?'已':'未'}做过任务`,
+                ButtonName: ButtonName,
+                ChaptersID : that.chapterId || '',
+                BookID: that.bookID || '',
+                BookName: that.bookName || ''
+            }); 
+        }
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    }
+}
+</script>
+

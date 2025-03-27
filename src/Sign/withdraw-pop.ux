@@ -1,0 +1,81 @@
+<template>
+    <div>
+        <div class="withdraw-pop" @click="fnClick" if="isPopShow">
+            <image class="pop-close" src="https://xsmfdq.kkyd.cn/images/recharge-operation-close.png" @click="fnClosePop"></image>
+            <div class="pop-box">
+                <image class="pop-image" src="https://xsmfdq.kkyd.cn/images/withdraw-pop.png"></image>
+                <text class="pop-text">提现功能正在开发中</text>
+                <text class="pop-text">敬请期待！</text>
+                <text class="pop-btn" @click="fnClosePop">知道了</text>
+            </div>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .withdraw-pop {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .7);
+        .pop-close {
+            align-self: flex-end;
+            margin-bottom: 24px;
+            margin-right: 85px;
+            width: 54px;
+            height: 54px;
+        }
+        .pop-box {
+            flex-direction: column;
+            align-items: center;
+            width: 580px;
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            .pop-image {
+                margin-bottom: 48px;
+                width: 580px;
+                height: 292px;
+            }
+            .pop-text {
+                margin-bottom: 16px;
+                height: 45px;
+                font-size: 32px;
+                color: #444444;
+                line-height: 45px;
+                text-align: center;
+            }
+            .pop-btn {
+                margin-top: 45px;
+                margin-bottom: 32px;
+                width: 484px;
+                height: 90px;
+                background-color: #F97053;
+                border-radius: 44px;
+                font-size: 32px;
+                color: #FFFFFF;
+                line-height: 90px;
+                text-align: center;
+            }
+        }
+    }
+</style>
+
+<script>
+export default {
+    props:[],
+    data: {
+        isPopShow: true,
+    },
+    onInit() {
+        this.isPopShow = true
+    },
+    fnClick() {},
+    fnClosePop() {
+        this.isPopShow = false
+        this.$parent().isWithdrawPopShow = false
+    },
+}
+</script>
+

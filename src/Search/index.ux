@@ -1,0 +1,1480 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="associate" src="./associate"></import>
+<import name="paid-tag" src="../Component/tag.ux"></import>
+
+<template>
+    <div class="search-root">
+        <!-- 搜索框 -->
+        <div class="search-wrap">
+            <div class="search-bg">
+                <image class="search-icon" @click="fnSearch('','btn')" src="https://xsmfdq.kkyd.cn/images/search/search-icon.png"></image>
+				<input type="text" id="keyword" class="search-input" value="{{keyword}}" placeholder="{{placeholder}}" enterkeytype="search" maxlength="20" @enterkeyclick="fnSearch('','btn')" @change="fnValueChange" />
+				<image class="search-close" if="keyword" @click="fnSearchClear" src="https://xsmfdq.kkyd.cn/images/search/search-close.png"></image>
+            </div>
+            <text class="search-btn" @click="fnSearch('','btn')">搜索</text>
+        </div>
+        <!-- 搜索中提示 -->
+        <div class="search-loading-wrap" if="isLoading">
+            <div class="search-loading">
+                <text class="search-loading-text">正在搜索中...</text>
+            </div>
+        </div>
+        <!-- onscrollbottom="fnLoadHot('hotList')" -->
+        <div class="default-list" if="!isEmptyShow && !isAssociateShow && !isSearchShow && !isLoading">
+            <!-- 热词 -->
+            <!-- type="hotTitle" -->
+            <div class="hot-title" if="hotArr && hotArr.length > 0">
+                <text class="hot-title-text">热门搜索</text>
+                <!-- @click="fnLoadHot('hotKeyword')" -->
+                <text class="hot-title-change" if="hotStorage && hotStorage.length > 10" @click="fnRenderHot">换一换</text>
+            </div>
+            <!-- type="hotWrap{{hotNum}}" -->
+            <div class="hot-wrap {{ (historyArr && historyArr.length > 0) ? '' : 'hot-wrap-radius' }}" if="hotArr && hotArr.length > 0">
+                <div class="hot-box">
+                    <div class="hot-item" for="(hotIndex, hotItem) in hotArr" if="hotIndex < 10">
+                        <text class="hot-item-text" @click="fnToSearch('hot', hotIndex)">{{ hotItem.name }}</text>
+                        <image class="hot-item-tag" if="hotItem.tag && hotItem.tag === 1" src="https://xsmfdq.kkyd.cn/images/search/search-hot-icon.png"></image>
+                        <image class="hot-item-tag" if="hotItem.tag && hotItem.tag === 2" src="https://xsmfdq.kkyd.cn/images/search/search-recommend-icon.png"></image>
+                        <image class="hot-item-tag" if="hotItem.tag && hotItem.tag === 3" src="https://xsmfdq.kkyd.cn/images/search/search-update-icon.png"></image>
+                    </div>
+                </div>
+            </div>
+            <!-- 历史 -->
+            <!-- type="historyTitle" -->
+            <div class="history-title" if="historyArr && historyArr.length > 0">
+                <text class="history-title-text">搜索历史</text>
+                <image class="history-title-clear" @click="fnDelHistory" src="https://xsmfdq.kkyd.cn/images/search/search-delete.png"></image>
+            </div>
+            <!-- type="historyWrap{{historyNum}}" -->
+            <div class="history-wrap" if="historyArr && historyArr.length > 0">
+                <div class="history-box">
+                    <block for="(historyIndex, historyItem) in historyArr" if="historyIndex < 10">
+                        <text class="history-item-text" @click="fnToSearch('history', historyIndex)">{{ historyItem }}</text>
+                    </block>
+                </div>
+            </div>
+            <!-- 热搜推荐列表 -->
+            <!-- type="historyListTitle" -->
+            <div class="hot-list-title" if="hotList && hotList.length > 0">
+                <image class="hot-list-title-icon" src="https://xsmfdq.kkyd.cn/images/search/search-hot.png"></image>
+                <div class="hot-list-title-more" @click="fnRouterToRank('hot')">
+                    <text class="hot-list-title-text">查看全部榜单</text>
+                    <image class="hot-list-title-arrow" src="https://xsmfdq.kkyd.cn/images/search/search-hot-more.png"></image>
+                </div>
+            </div>
+            <!-- type="historyListItem{{hotIndex < 3 ? hotIndex : (isHotAll && hotIndex == hotList.length - 1) ? '3' : ''}}" -->
+            <div class="hot-list-item {{hotIndex == 0 ? 'hot-list-item-first' : '' }} {{isHotAll && hotIndex == hotList.length - 1 ? 'hot-list-item-last' : ''}}" for="{{(hotIndex, hotItem) in hotList}}" if="hotList && hotList.length > 0" @appear="bookAppear(hotItem, 'rank','搜索排行',5,hotIndex)" @click="fnRouterToBook(hotItem, 'rank','搜索排行',5,hotIndex)">
+                <div class="hot-list-rank">
+                    <image if="hotIndex == 0" class="hot-list-rank-icon" src="https://xsmfdq.kkyd.cn/images/search/search-top-1.png"></image>
+                    <image if="hotIndex == 1" class="hot-list-rank-icon" src="https://xsmfdq.kkyd.cn/images/search/search-top-2.png"></image>
+                    <image if="hotIndex == 2" class="hot-list-rank-icon" src="https://xsmfdq.kkyd.cn/images/search/search-top-3.png"></image>
+                    <text class="hot-list-rank-text {{hotIndex == 0 ? 'hot-list-first' : hotIndex == 1 ? 'hot-list-second' : hotIndex == 2 ? 'hot-list-third' : ''}}">{{hotIndex + 1}}</text>
+                </div>
+                <div class="hot-list-content">
+                    <stack>
+                        <image class="hot-list-cover" src="{{hotItem.coverWap}}"></image>
+                        <paid-tag if="hotItem.iconType === '10'" tag="{{ hotItem.iconDesc }}"></paid-tag>
+                    </stack>
+                    <div class="hot-list-wrap">
+                        <stack>
+                            <image if="hotIndex == 0" src="https://xsmfdq.kkyd.cn/images/search/search-hot-bg1.png" class="hot-list-bg"></image>
+                            <image if="hotIndex == 1" src="https://xsmfdq.kkyd.cn/images/search/search-hot-bg2.png" class="hot-list-bg"></image>
+                            <image if="hotIndex == 2" src="https://xsmfdq.kkyd.cn/images/search/search-hot-bg3.png" class="hot-list-bg"></image>
+                            <div class="hot-list-detail">
+                                <text class="hot-list-name">{{hotItem.bookName}}</text>
+                                <text class="hot-list-number {{ hotIndex <= 2 ? 'hot-list-number-top' : '' }}">{{hotItem.hot}}</text>
+                            </div>
+                        </stack>
+                    </div>
+                </div>
+            </div>
+            <!-- <list-item type="defaultLoadMore" class="default-loading-more" if="hotList && hotList.length > 0 && isHotAll">
+                <text class="default-loading-text">已经是全部了</text>
+		    </list-item> -->
+        </div>
+        <!-- 无结果推荐列表 -->
+        <!-- onscrollbottom="fnLoadEmptyList" -->
+        <div class="empty-list" if="isEmptyShow">
+            <!-- 搜索无结果 -->
+            <!-- type="emptyWrap" -->
+            <div class="empty-wrap">
+                <image class="empty-icon" src="https://xsmfdq.kkyd.cn/images/search/search-empty.png"></image>
+                <text class="empty-text" if="emptyList && emptyList.length > 0">抱歉，未找到相关结果为您推荐以下热门好书</text>
+                <text class="empty-text-none" else>抱歉，未找到相关结果</text>
+            </div>
+            <!-- type="emptyListTitle" -->
+            <div class="empty-list-title" if="emptyList && emptyList.length > 0">
+                <text class="empty-list-title-text">全站热门好书</text>
+                <text class="empty-list-more" @click="fnRouterToRank('empty')">更多</text>
+            </div>
+            <!-- type="emptyListItem" -->
+            <div class="empty-list-item" for="{{(hotIndex, hotItem) in emptyList}}" if="emptyList && emptyList.length > 0" @appear="bookAppear(hotItem, 'empty','无结果推荐',4,hotIndex)" @click="fnRouterToBook(hotItem, 'empty','无结果推荐',4,hotIndex)">
+                <stack>
+                    <image class="empty-list-cover" src="{{hotItem.coverWap}}"></image>
+                    <paid-tag if="hotItem.iconType === '10'" tag="{{ hotItem.iconDesc }}"></paid-tag>
+                </stack>
+                <div class="empty-list-detail">
+                    <div class="empty-list-top">
+                        <text class="empty-list-name">{{hotItem.bookName}}</text>
+                        <text class="empty-list-number">{{hotItem.hot}}</text>
+                    </div>
+                    <text class="empty-list-desc">{{hotItem.introduction}}</text>
+                    <text class="empty-list-author">{{hotItem.author}}</text>
+                </div>
+            </div>
+            <!-- <list-item type="defaultLoadMore" class="default-loading-more" if="isEmptyAll">
+                <text class="default-loading-text">已经是全部了</text>
+		    </list-item> -->
+        </div>
+        <!-- 联想列表 -->
+        <list class="associate-list" if="isAssociateShow" @scroll="fnAssociateScroll">
+            <list-item type="associate{{associateIndex}}{{random}}" for="{{(associateIndex, associateItem) in associateList}}" class="associate-item" @appear="fnAssociateAppear(associateItem, associateIndex)" @click="fnAssociateClick(associateItem, associateIndex)">
+                <block if="{{ associateItem.type === '2' }}">
+                    <image class="associate-icon" src="https://xsmfdq.kkyd.cn/images/search/search-associate-author.png"></image>
+                    <associate keyword="{{keyword}}" word="{{associateItem.title}}" type="associate-author"></associate>
+                    <text class="associate-type">「作者」</text>
+                </block>
+                <block elif="{{ associateItem.type === '3' }}">
+                    <image class="associate-icon" src="https://xsmfdq.kkyd.cn/images/search/search-associate-tag.png"></image>
+                    <associate keyword="{{keyword}}" word="{{associateItem.title}}" type="associate-author"></associate>
+                    <text class="associate-type">「标签」</text>
+                </block>
+                <block else>
+                    <stack>
+                        <image class="associate-cover" src="{{associateItem.cover}}"></image>
+                        <div style="transform-origin: 0px 0px;transform: scale(0.75);">
+                            <paid-tag if="associateItem.iconType === '10'" tag="{{ associateItem.iconDesc }}"></paid-tag>
+                        </div>
+                    </stack>
+                    <div class="associate-info {{associateItem.bookAlias ? 'associate-info-more' : ''}}">
+                        <associate keyword="{{keyword}}" word="{{associateItem.title}}" type="associate-name"></associate>
+                        <div class="associate-book-alias-wrap" if="{{associateItem.bookAlias}}">
+                            <text class="associate-book-alias">又名：</text>
+                            <associate  keyword="{{keyword}}" word="{{associateItem.bookAlias}}" type="associate-book-alias"></associate>
+                        </div>
+                        <associate keyword="{{keyword}}" word="{{associateItem.authorName}}" type="associate-role"></associate>
+                    </div>
+                    <text class="associate-type">「书籍」</text>
+                </block>
+            </list-item>
+        </list>
+        <!-- 搜索列表 -->
+        <list class="search-list" if="isSearchShow && searchList && searchList.length > 0" onscrollbottom="fnLoadMoreData">
+            <list-item type="search{{searchIndex}}{[searchNum}}" for="{{(searchIndex, searchItem) in searchList}}" class="search-item" @appear="bookAppear(searchItem, 'search','搜索结果',1,searchIndex)" @click="fnRouterToBook(searchItem, 'search','搜索结果',1,searchIndex)">
+                <div class="search-cover-wrap">
+                    <stack class="search-cover-stack">
+                        <image class="search-cover" src="{{searchItem.coverWap}}"></image>
+                        <paid-tag if="searchItem.iconType === '10'" tag="{{ searchItem.iconDesc }}"></paid-tag>
+                        <!-- <image if="searchItem.iconType === '2'" class="search-cover-tag" src="https://xsmfdq.kkyd.cn/images/search/search-tag-free.png"></image> -->
+                        <!-- <image if="iconType === '4'" class="search-cover-tag" src="https://xsmfdq.kkyd.cn/images/search/search-tag-recommend.png"></image> -->
+                        <!-- <image if="iconType === '5'" class="search-cover-tag" src="https://xsmfdq.kkyd.cn/images/search/search-tag-supreme.png"></image> -->
+                        <!-- <image if="iconType === '6'" class="search-cover-tag" src="https://xsmfdq.kkyd.cn/images/search/search-tag-update.png"></image> -->
+                        <!-- <image if="searchItem.iconType === '0'" class="search-cover-tag" src="https://xsmfdq.kkyd.cn/images/search/search-tag-serialize.png"></image>
+                        <image if="searchItem.iconType === '1'" class="search-cover-tag" src="https://xsmfdq.kkyd.cn/images/search/search-tag-finish.png"></image> -->
+                    </stack>
+                </div>
+                <div class="search-box">
+                    <div class="search-title-wrap">
+                        <associate keyword="{{keyword}}" word="{{searchItem.bookName}}" type="search-name"></associate>
+                        <text class="search-number">{{searchItem.hot}}</text>
+                    </div>
+                    <div class="search-role-wrap" if="searchItem.protagonist">
+                        <!-- <text class="search-role">主角：</text> -->
+                        <associate keyword="{{keyword}}" word="{{searchItem.protagonist}}" type="search-role"></associate>
+                    </div>
+                    <div class="search-book-alias-wrap" if="searchItem.bookAlias">
+                        <text class="search-book-alias">又名：</text>
+                        <associate keyword="{{keyword}}" word="{{searchItem.bookAlias}}" type="search-book-alias"></associate>
+                    </div>
+                    <text class="search-desc {{searchItem.protagonist && searchItem.bookAlias ? 'search-desc-short' : ''}}">{{searchItem.introduction}}</text>
+                    <div class="search-author-wrap">
+                        <associate keyword="{{keyword}}" word="{{searchItem.author}}" type="search-author"></associate>
+                        <div class="search-tags-wrap">
+                            <block for="(i, tag) in searchItem.tag" if="i < 4">
+                                <text class="search-tag {{i % 4 == 0 ? 'search-tag-1' : i % 4 == 1 ? 'search-tag-2' : i % 4 == 2 ? 'search-tag-3' : 'search-tag-4'}}">{{tag}}</text>
+                            </block>
+                        </div>
+                    </div>
+                </div>
+            </list-item>
+            <list-item type="loadMore" class="loading-more">
+				<div if="{{isLoadingMore}}">
+					<progress type="circular"></progress>
+					<text class="loading-more-text loading-more-left">正在加载中</text>
+				</div>
+				<div else>
+                    <text class="loading-all-text" if="{{isSearchAll}}">已经是全部了</text>
+					<text class="loading-more-text" if="{{!isSearchAll}}" @click="fnLoadMoreData">上拉加载更多</text>
+				</div>
+			</list-item>
+        </list>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .search-root {
+        flex-direction: column;
+        width: 100%;
+        /* height: 100%; */
+        background-color: rgba(245,245,245,1);
+        .search-wrap {
+            padding: 30px 30px 40px;
+            height: 134px;
+            background-color: rgba(255,255,255,1);
+            .search-bg {
+                flex: 1;
+                align-items: center;
+                height: 64px;
+                background-color: rgba(246,246,246,1);
+                border-radius: 32px;
+                .search-icon {
+                    margin-left: 14px;
+                    margin-right: 12px;
+                    width: 40px;
+                    height: 40px;   
+                }
+                .search-close {
+                    margin-left: 12px;
+                    margin-right: 14px;
+                    width: 40px;
+                    height: 40px;
+                }
+                .search-input {
+                    flex: 1;
+                    height: 64px;
+                    font-size: 28px;
+                    color: rgba(68,68,68,1);
+                }
+            }
+            .search-btn {
+                margin-left: 24px;
+                height: 64px;
+                font-size: 30px;
+                font-weight: bold;
+                color: rgba(249,112,83,1);
+            }
+        }
+        .search-loading-wrap {
+            flex-direction: column;
+            /* height: 100%;     */
+            .search-loading {
+                align-items: center;
+                justify-content: center;
+                background-color: rgba(255,255,255,1);
+                height: 88px;
+                border-bottom-left-radius: 24px;
+                border-bottom-right-radius: 24px;
+                .search-loading-text {
+                    height: 48px;
+                    font-size: 28px;
+                    color: rgba(68,68,68,1);
+                }
+            }
+        }
+        .empty-wrap {
+            justify-content: center;
+            margin-bottom: 20px;
+            background-color: rgba(255,255,255,1);
+            height: 137px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            .empty-icon {
+                margin-right: 24px;
+                width: 96px;
+                height: 96px;
+            } 
+            .empty-text { 
+                width: 300px;
+                height: 96px;
+                font-size: 28px;
+                color: rgba(68,68,68,1);
+                line-height: 48px; 
+                lines: 2;
+                text-overflow: ellipsis;
+            }
+            .empty-text-none {
+                margin-top: 24px;
+                height: 48px;
+                font-size: 28px;
+                color: rgba(68,68,68,1);
+                line-height: 48px; 
+                lines: 1;
+                text-overflow: ellipsis;  
+            }
+        }
+        .empty-list {
+            flex-direction: column;
+            /* height: 100%; */
+            .empty-list-title {
+                align-items: center;
+                justify-content: space-between;
+                padding: 18px 30px 24px;
+                border-top-left-radius: 24px;
+                border-top-right-radius: 24px;
+                background-color: rgba(255,255,255,1);
+                .empty-list-title-text {
+                    font-size: 32px;
+                    height: 60px;
+                    font-weight: bold;
+                    color: rgba(68,68,68,1);
+                }
+                .empty-list-more {
+                    font-size: 28px;
+                    height: 60px;
+                    color: rgba(249,112,83,1);
+                }
+            }
+            .empty-list-item {
+                padding: 0 30px 40px;
+                height: 246px;
+                background-color: rgba(255,255,255,1);
+                .empty-list-cover {
+                    margin-right: 24px;
+                    width: 154px;
+                    height: 206px;
+                    border-radius: 4px; 
+                }
+                .empty-list-detail {
+                    flex: 1;
+                    flex-direction: column;
+                    .empty-list-top {
+                        align-items: center;
+                        justify-content: space-between;
+                        height: 60px;
+                        .empty-list-name {
+                            flex: 1;
+                            height: 60px;
+                            font-size: 28px;
+                            font-weight: bold;
+                            color: rgba(68,68,68,1);
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                        .empty-list-number {
+                            height: 60px;
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: rgba(249,112,83,1);
+                        }
+                    }
+                    .empty-list-desc {
+                        flex: 1;
+                        margin-bottom: 30px;
+                        height: 72px;
+                        font-size: 24px;
+                        color: rgba(85,85,85,1);
+                        line-height: 36px;
+                        lines: 2;
+                        text-overflow: ellipsis;
+                    }
+                    .empty-list-author {
+                        height: 32px;
+                        font-size: 24px;
+                        color: rgba(175,175,175,1);
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+        }
+        .default-list {
+            flex-direction: column;
+            /* height: 100%; */
+            margin-bottom: 20px;
+        }
+        .hot-title {
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            background-color: rgba(255,255,255,1);
+            height: 45px;
+            .hot-title-text {
+                height: 45px;
+                font-size: 32px;
+                font-weight: bold;
+                color: rgba(68,68,68,1);
+            }
+            .hot-title-change {
+                width: 110px;
+                background-color: rgba(255,242,239,1);
+                border-radius: 20px;
+                height: 45px;
+                font-size: 24px;
+                color: rgba(249,112,83,1);
+                text-align: center;
+            }
+        }
+        .hot-wrap {
+            flex-direction: column;
+            background-color: rgba(255,255,255,1);
+            padding: 20px 30px 50px;
+            .hot-box {
+                flex-wrap: wrap;
+                .hot-item {
+                    align-items: center;
+                    height: 80px;
+                    width: 50%;
+                    .hot-item-text {
+                        height: 80px;
+                        font-size: 28px;
+                        color: rgba(68,68,68,1);
+                    }
+                    .hot-item-tag {
+                        margin-left: 6px;
+                        width: 32px;
+                        height: 32px;
+                    }
+                }
+            }
+        }
+        .hot-wrap-radius {
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+        }
+        .history-title {
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgba(255,255,255,1);
+            padding: 0px 30px;
+            height: 45px;
+            .history-title-text {
+                height: 45px;
+                font-size: 32px;
+                font-weight: bold;
+                color: rgba(68,68,68,1);
+            }
+            .history-title-clear {
+                width: 40px;
+                height: 40px;
+            }
+        }
+        .history-wrap {
+            flex-direction: column;
+            background-color: rgba(255,255,255,1);
+            padding: 40px 30px 30px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            .history-box {
+                flex-wrap: wrap;
+                .history-item-text {
+                    margin-right: 20px;
+                    margin-bottom: 20px;
+                    padding: 0 20px;
+                    height: 44px;
+                    background-color: rgba(246,246,246,1);
+                    border-radius: 22px;   
+                    font-size: 28px;
+                    color: rgba(127,127,127,1);
+                }
+            }
+        }
+        .hot-list-title {
+            margin: 50px 0px 30px;
+            padding: 0px 30px 0px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            height: 62px;
+            .hot-list-title-icon {
+                width: 264px;
+                height: 62px;
+            }
+            .hot-list-title-more {
+                align-items: center;
+                height: 62px;
+                .hot-list-title-text {
+                    height: 62px;
+                    font-size: 26px;
+                    color: rgba(102,102,102,1);
+                }
+                .hot-list-title-arrow {
+                    margin-left: 8px;
+                    width: 10px;
+                    height: 18px;
+                }
+            }
+        }
+        .hot-list-item {
+            margin: 0px 30px;
+            padding-top: 16px;
+            padding-bottom: 16px;
+            padding-left: 30px;
+            padding-right: 30px;
+            background-color: rgba(255,255,255,1);
+            /* height: 154px; */
+            .hot-list-rank {
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                margin-right: 24px;
+                width: 60px;
+                height: 122px;
+                .hot-list-rank-icon {
+                    margin-bottom: 2px;
+                    width: 16px;
+                    height: 10px;
+                }
+                .hot-list-rank-text {
+                    font-size: 30px;
+                    color: rgba(186,186,186,1);
+                    font-weight: bold;
+                }
+                .hot-list-first { color: rgba(222,185,80,1); }
+                .hot-list-second { color: rgba(164,182,199,1); }
+                .hot-list-third { color: rgba(221,159,112,1); }
+            }
+            .hot-list-content {
+                flex: 1;
+                align-items: center;
+                height: 122px;
+                .hot-list-cover {
+                    width: 90px;
+                    height: 122px;
+                    border-radius: 4px;
+                }
+                .hot-list-wrap {
+                    flex: 1;
+                    align-items: center;
+                    height: 122px;
+                    .hot-list-detail {
+                        flex-direction: column;
+                        justify-content: center;
+                        margin-left: 27px;
+                        .hot-list-name {
+                            height: 32px;
+                            font-size: 28px;
+                            font-weight: bold;
+                            color: rgba(51,51,51,1);
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                        .hot-list-number {
+                            margin-top: 16px;
+                            height: 24px;
+                            font-size: 22px;
+                            color: rgba(178,182,183,1);
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                        .hot-list-number-top {
+                            color: rgba(251,118,31,1);
+                        }
+                    }
+                    .hot-list-bg {
+                        width: 485px;
+                        height: 122px;
+                    }
+                }
+            }
+        }
+        .hot-list-item-first {
+            padding-top: 40px;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+        }
+        .hot-list-item-last {
+            padding-bottom: 40px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+        }
+        .default-loading-more {
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            height: 32px;
+            .default-loading-text {
+                height: 32px; 
+                font-size: 24px;
+                color: rgba(175,175,175,1);
+            }
+        }
+        .associate-list {
+            height: 100%;
+            flex-direction: column;
+            background-color: rgba(255,255,255,1);
+            padding: 0 30px;
+            .associate-item {
+                flex: 1;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 40px;
+                height: 122px;
+                .associate-cover {
+                    margin-right: 24px;
+                    width: 90px;
+                    height: 122px;         
+                }
+                .associate-info {
+                    flex: 1;
+                    margin-top: 20px;
+                    flex-direction: column;
+                    height: 122px;
+                    .associate-book-alias-wrap {
+                        margin-top: 13px;
+                        margin-bottom: 13px;
+                        height: 32px;
+                    }
+                    .associate-book-alias {
+                        height: 32px;
+                        font-size: 24px;
+                        color: #444444;
+                    }
+                }
+                .associate-info-more {
+                    margin-top: 0px;
+                }
+                .associate-icon {
+                    margin-right: 24px;
+                    width: 90px;
+                    height: 90px;
+                }
+                .associate-type {
+                    margin-left: 10px;
+                    height: 34px;
+                    font-size: 26px;
+                    color: rgba(178,182,183,1);
+                }
+            }
+        }
+        .search-list {
+            height: 100%;
+            flex-direction: column;
+            background-color: rgba(255,255,255,1);
+            padding: 10px 30px 0px;
+            .search-item {
+                flex: 1;
+                margin-bottom: 40px;
+                height: 206px;
+                .search-cover-wrap {
+                    margin-right: 24px;
+                    width: 154px;
+                    height: 206px;
+                    border-radius: 4px;
+                    .search-cover-stack {
+                        flex: 1;
+                    }
+                    .search-cover {
+                        width: 154px;
+                        height: 206px;
+                        border-radius: 4px;
+                    }
+                    .search-cover-tag {
+                        margin-top: 10px;
+                        width: 72px;
+                        height: 30px;
+                    }
+                }
+                .search-box {
+                    flex-direction: column;
+                    flex: 1;
+                    height: 206px;
+                    .search-title-wrap {
+                        flex: 1;
+                        align-items: center;
+                        margin-bottom: 12px;
+                        height: 40px;
+                        .search-number {
+                            margin-left: 6px;
+                            height: 40px;
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: rgba(249,112,83,1);
+                        }
+                    }
+                    .search-role-wrap {
+                        align-items: center;
+                        margin-bottom: 6px;
+                        height: 32px;
+                        .search-role {
+                            height: 32px;
+                            font-size: 24px;
+                            color: rgba(85,85,85,1);
+                        }
+                    }
+                    .search-book-alias-wrap {
+                        align-items: center;
+                        margin-bottom: 6px;
+                        height: 32px;
+                        .search-book-alias {
+                            height: 32px;
+                            font-size: 24px;
+                            color: rgba(85,85,85,1);
+                        }
+                    }
+                    .search-desc {
+                        margin-bottom: 12px;
+                        height: 72px;
+                        font-size: 24px;
+                        color: rgba(85,85,85,1);
+                        line-height: 36px;
+                        lines: 2;
+                        text-overflow: ellipsis;
+                    }
+                    .search-desc-short {
+                        margin-bottom: 10px;
+                        height: 36px;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .search-author-wrap {
+                        flex: 1;
+                        align-items: center;
+                        justify-content: space-between;
+                        height: 32px;
+                        .search-tag {
+                            margin-left: 10px;
+                            padding: 0px 5px;
+                            height: 30px;
+                            font-size: 20px;
+                            color: rgba(175,175,175,1);
+                            border-width: 1px;
+                            border-color: rgba(175,175,175,1);
+                            text-align: center;
+                        }
+                        .search-tag-1 {
+                            color: #8BB9AB;
+                            border-color: #8BB9AB;
+                        }
+                        .search-tag-2 {
+                            color: #F2C2C5;
+                            border-color: #F2C2C5;
+                        }
+                        .search-tag-3 {
+                            color: #A4C6F0;
+                            border-color: #A4C6F0;
+                        }
+                        .search-tag-4 {
+                            color: #E1BD87;
+                            border-color: #E1BD87;
+                        }
+                    }
+                }
+            }
+        }
+        .loading-more {
+            align-items: center;
+           	justify-content: center;
+            margin-bottom: 30px;
+            height: 40px; 
+            .loading-more-text {
+                height: 40px; 
+                font-size: 28px;
+                color: #5599ff;
+            }
+            .loading-all-text {
+                height: 40px; 
+                font-size: 24px;
+                color: rgba(175,175,175,1);
+            }
+            .loading-more-left {
+                margin-left: 12px;
+            }
+        }
+    }
+</style>
+
+<script>
+    import _ from '../Common/js/common.js'
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    export default {
+        private: {
+            keyword: '', // 搜索关键词
+            historyStorage: [], // 搜索历史缓存
+            historyArr: [], // 搜索历史
+            hotStorage: [], // 热词缓存
+            hotArr: [], // 热词
+            
+            placeholder: '搜索书名/角色/标签/作者', // 默认提示
+            isDefault: false, // 是否默认搜索词
+            hasSearch: false, // 是否搜索过
+            isNoAssociate: false, // 搜索结果页不联想
+            clickToSearch: false, // 热词/历史搜索不联想
+            
+            isLoadingEmpty: false, // 无结果更多
+            isEmptyShow: false, // 无结果展示
+            emptyList: [], // 无结果列表
+            isEmptyAll: false, // 是否获取所有无结果
+            emptyPage: 1, // 无结果当前页数
+
+            isLoadingAssociate: false, // 是否在联想中
+            isAssociateShow: false, // 联想列表展示
+            isAssociateTimeout: false, // 联想计时器
+            associateList: [], // 联想列表
+
+            isLoading: false, // 是否在搜索中
+            isSearchShow: false, // 搜索结果展示
+            searchList: [], // 搜索列表
+            isLoadingMore: false, // 搜索更多
+            isSearchAll: false, // 是否获取所有搜索
+            searchPage: 1, // 搜索当前页数
+
+            isLoadingHot: false, // 热词更多
+            hotList: [], // 热门书籍列表
+            isHotAll: false, // 是否获取所有热词
+            hotPage: 1, // 热词当前页数
+
+            // hotNum: 0, // 热词防止复用
+            // historyNum: 0, // 搜索历史防止复用
+            random: 0, // 联想防止复用
+            searchNum: 0, // 搜索防止复用
+            hotRankId: '', // 是否存在榜单信息
+            emptyRankId: '', // 是否存在榜单信息
+            isFirstLink: true, // 首次联想,
+            column_id:'',
+            column_name:'',
+            column_pos:''
+        },
+        onInit() {
+            // this.fnGetDeviceInfo()
+            this.$page.setTitleBar({ text: '搜索' })
+            // 读取搜索历史
+            this.fnGetHistory()
+            // 加载热词
+            this.fnLoadHot('all')
+        },
+        onShow() {
+            // PV打点
+            this.$app.lastOpenPage = ''
+            this.$app.$def.quickappLog([701], this);
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '搜索'
+            });
+        },
+        onReady() {
+            // 默认弹出搜索框
+            let that = this
+            setTimeout(() => {
+                that.$element('keyword') && that.$element('keyword').focus({ focus: true });
+            }, 0)
+        },
+        // 返回键触发
+        onBackPress() {
+            setTimeout(() => {
+                let routerLength = router.getLength()
+                if(routerLength <= 1) {
+                    router.replace({
+                        uri: '/Index'
+                    })
+                }else{
+                    router.back()
+                }
+            }, 0)
+            return true
+        },
+        // 获取设备信息 
+        fnGetDeviceInfo() {
+            let that = this
+            if(that.$app.isGetDeviceInfo) {
+                that.brand = that.$app.deviceInfo.brand.toLowerCase()
+            } else {
+                that.$app.$def.getDeviceInfo().then(deviceInfo => {
+                    that.$app.isGetDeviceInfo = true
+                    that.$app.deviceInfo = deviceInfo
+                    that.brand = that.$app.deviceInfo.brand.toLowerCase()
+                }).catch(() => {})
+            } 
+        },
+        // 加载热词
+        fnLoadHot: _.throttle(function(type) {
+            let that = this;
+            let data = {}
+            if(type == 'hotList' && that.isHotAll) {
+                return
+            }
+            if(type == 'all' || type == 'hotList') {
+                that.isLoadingHot = true
+                data.index = that.hotPage
+            }
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2522',
+                data: data,
+                succ: function (res) {
+                    let resData = res.data
+                    if(type == 'all' && resData.keywordDefault) {
+                        if(typeof resData.keywordDefault === 'object') {
+                            if(resData.keywordDefault.length > 0 && resData.keywordDefault[0]) {
+                                that.placeholder = resData.keywordDefault[0]
+                                that.isDefault = resData.keywordDefault[0]   
+                            }
+                        } else {
+                            that.placeholder = resData.keywordDefault
+                            that.isDefault = resData.keywordDefault
+                        }
+                    }
+                    if(type == 'all' || type == 'hotKeyword') {
+                        that.hotStorage = resData.keywordHot
+                        that.fnRenderHot()
+                    }
+                    if((type == 'all' || type == 'hotList')) {
+                        if(resData.recommendHots && resData.recommendHots.length > 0) {
+                            that.hotList.length > 0 ? that.hotList = that.hotList.concat(resData.recommendHots) : that.hotList = resData.recommendHots 
+                        }
+                        if(!resData.isMore) {
+                            that.isHotAll = true
+                        }
+                        that.hotRankId = resData.rankId
+                        that.hotPage++
+                        that.isLoadingHot = false
+                    }
+                },
+                error: function () {
+                    if((type == 'all' || type == 'hotList')) {
+                        that.isLoadingHot = false
+                    }
+                }
+            })
+        }, 300),
+        // 渲染热词
+        fnRenderHot() {
+            let hotStorage = this.hotStorage
+            let hotArr = []
+            if(!hotStorage || hotStorage.length == 0) {
+                return
+            }
+            if(hotStorage.length > 10) {
+                hotStorage = hotStorage.sort(function() {
+                    return Math.random() - 0.5
+                }).slice(0, 10)
+            }
+            hotStorage.forEach((item) => {
+                hotArr.push({
+                    name: item.name && item.name.length > 10 ? item.name.substring(0, 10) : item.name,
+                    tag: item.tag
+                })
+            })
+            // this.hotArr = []
+            // this.hotNum++
+            this.hotArr = hotArr          
+        },
+        // 渲染搜索历史
+        fnRenderHistory() {
+            let historyStorage = this.historyStorage
+            let historyArr = []
+            historyStorage.forEach((item, index) => {
+                historyArr.push(item.length > 10 ? item.substring(0, 10) + '...' : item)
+            })
+            // this.historyArr = []
+            // this.historyNum++
+            this.historyArr = historyArr
+        },
+        // 读取搜索历史
+        fnGetHistory() {
+            let that = this
+            let historyStorage = []
+            that.$app.$def.getStorageFile(that, {
+                key: 'aHistoryKeyword',
+                success: function(data) {
+                    try {
+                        historyStorage = JSON.parse(data)
+                    } catch(err) {
+                        historyStorage = []
+                    }
+                    that.historyStorage = historyStorage
+                    that.fnRenderHistory()
+                },
+                fail: function(data, code) {
+                    that.historyStorage = []
+                    that.fnRenderHistory()
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            source: 'getStorage_key_aHistoryKeyword_fail',
+                            thisUri: that.$page.uri,
+                            thisPage: 'SrhPage',
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+                }
+            })
+        },
+        // 设置搜索历史
+        fnSetHistory(search) {
+            let that = this
+            let keyword = search
+            let historyStorage = that.historyStorage
+            if(!keyword) {
+                return
+            }
+            // 20字限制
+            if(keyword.length > 20) {
+                keyword = keyword.substring(0, 20)
+            }
+            historyStorage.unshift(keyword)
+            // 搜索历史去重
+            historyStorage = that.fnUniqueArr(historyStorage)
+            // 10条限制
+            if (historyStorage.length > 10) {
+                historyStorage = historyStorage.slice(0, 10)
+            }
+            that.$app.$def.setStorageFile(that, {
+                key: 'aHistoryKeyword',
+                value: historyStorage
+            })
+            that.historyStorage = historyStorage
+            that.fnRenderHistory()
+        },
+        // 删除搜索历史
+        fnDelHistory() {
+            let that = this
+            that.historyArr = []
+            that.historyStorage = []
+            that.$app.$def.deleteStorageFile(that, {
+                key: 'aHistoryKeyword',
+                success: function() {},
+                fail: function(data, code) {
+                    that.$app.$def.quickappLog([703, {
+                        qmap: {
+                            source: 'deleteStorage_key_aHistoryKeyword_fail',
+                            thisUri: that.$page.uri,
+                            thisPage: 'SrhPage',
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+                }
+            })
+        },
+        // 数组去重
+        fnUniqueArr(arr) {
+            var ret = [...new Set(arr)]
+            return ret
+        },
+        // 初始化搜索
+        fnInitSearch() {
+            this.hasSearch = false
+            this.isNoAssociate = false
+            // this.clickToSearch = false
+
+            this.isLoadingEmpty = false
+            this.isEmptyShow = false
+            this.emptyList = []
+            this.isEmptyAll = false
+            this.emptyPage = 1
+
+            this.isLoadingAssociate = false
+            this.isAssociateShow = false
+            this.associateList = []
+            clearTimeout(this.isAssociateTimeout)
+
+            this.isLoading = false
+            this.isSearchShow = false
+            this.searchList = []
+            this.isLoadingMore = false
+            this.isSearchAll = false
+            this.searchPage = 1
+        },
+        // 清空搜索词
+        fnSearchClear() {
+            // if(this.isLoading) {
+            //     return
+            // }
+            this.keyword = ''
+            this.fnInitSearch()
+        },
+        // 输入值发生变化
+        fnValueChange(e) {
+            let that = this
+            let keyword = e.value
+            if(!keyword) {
+                that.keyword = ''
+                that.fnInitSearch();
+                return
+            }
+            that.keyword = keyword;
+            that.isNoAssociate = false
+            // 搜索中不联想
+            if(that.clickToSearch) {
+                that.clickToSearch = false
+                return
+            }
+            if(that.isLoading) {
+                return
+            }
+            if(that.isFirstLink) {
+                that.isFirstLink = false
+                that.fnAssociate();
+                return
+            }
+            // 联想请求不重复
+            clearTimeout(that.isAssociateTimeout)
+            that.isAssociateTimeout = setTimeout(() => {
+                that.fnAssociate();
+            }, 100)
+        },
+        // 指定搜索
+        fnToSearch(flag, index) {
+            let that = this
+            let keyword = ''
+            if(flag == 'hot') {
+                that.column_id='hot'
+                that.column_name='热门搜索'
+                that.column_pos=3
+                that.$app.shenceLog.log(that,'track','ButtonClick', {
+                    ButtonName: '点击热词'
+                });
+                keyword = that.hotStorage && that.hotStorage[index] && that.hotStorage[index].name ? that.hotStorage[index].name : ''
+            }
+            if(flag == 'history') {
+                keyword = that.historyStorage && that.historyStorage[index] ? that.historyStorage[index] : ''
+            } 
+            that.keyword = keyword
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '3',
+                    keyword: keyword,
+                    type: flag == 'hot' ? 'hot' : flag == 'history' ? 'history' : ''
+                }
+            }, 'search_page'], that)
+            that.clickToSearch = true
+            that.fnSearch('',flag == 'hot' ? 'hot':'btn')
+        },
+        // 点击搜索
+        fnSearch(searchType,pos) {
+            let that = this
+            if(pos=='btn'){
+                that.column_id='search'
+                that.column_name='搜索结果'
+                that.column_pos=1
+            }else if(pos=='tag'){
+                that.column_id='tag'
+                that.column_name='联想作者标签'
+                that.column_pos=2
+            }
+            that.$element('keyword') && that.$element('keyword').focus({ focus: false });
+            if(that.isLoading) {
+                prompt.showToast({
+                    message: '正在搜索，请稍等...'
+                })
+                return
+            }
+            let search = that.keyword
+            if((!search || !search.replace(/\s+/g, '')) && that.isDefault) {
+                search = that.isDefault
+                that.keyword = that.isDefault
+            }
+            if(!search || !search.replace(/\s+/g, '')) {
+                prompt.showToast({
+                    message: '搜索内容不能为空'
+                })
+                return
+            }
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+                ButtonName: '点击搜索',
+                Keywords: search,
+            });
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '1',
+                    keyword: search,
+                    default: search == that.isDefault ? 'true' : 'false'
+                }
+            }, 'search_page'], that)
+            that.fnInitSearch()
+            that.fnSetHistory(search)
+            that.isLoading = true
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2520',
+                data: {
+                    keyword: search,
+                    index: that.searchPage,
+                    searchType: searchType ? searchType : ''
+                    // searchType: '',
+                    // size: 15,
+                },
+                succ: function (res) {
+                    if(!that.isLoading) {
+                        that.isLoading = false
+                        return
+                    }
+                    // 模拟数据
+                    let resData = res.data
+                    console.log(resData)
+                    if(resData.searchType === 5 || !resData.bookList || (resData.bookList && resData.bookList.length == 0)) {
+                        that.emptyList = resData.bookList
+                        that.hasSearch = true
+                        that.isEmptyAll = true
+                        that.isEmptyShow = true
+                        that.isAssociateShow = false
+                        that.isNoAssociate = true
+                        that.isLoading = false
+                        that.emptyRankId = resData.rankId
+                        that.$app.$def.quickappLog([703, {
+                            qmap: {
+                                keyword: search
+                            }
+                        }, 'search_empty'], that)
+
+                        return 
+                    }
+                    if(resData.bookList && resData.bookList.length > 0) {
+                        if(that.searchList.length > 0) {
+                            that.searchList = that.searchList.concat(resData.bookList)
+                        } else {
+                            that.searchList = []
+                            that.searchNum = Math.random().toString().slice(-3)
+                            that.searchList = resData.bookList
+                        }
+                        that.searchPage++
+                    }
+                    if(!resData.isMore) {
+                        that.isSearchAll = true
+                    }
+                    that.hasSearch = true
+                    that.isSearchShow = true
+                    that.isAssociateShow = false
+                    that.isNoAssociate = true
+                    that.isLoading = false
+                },
+                error: function () {
+                    that.hasSearch = true
+                    that.isEmptyShow = true
+                    that.isAssociateShow = false
+                    that.isNoAssociate = true
+                    that.isLoading = false
+                    // that.fnLoadEmptyList()
+                },
+                notEqualZero: function() {
+                    that.hasSearch = true
+                    that.isEmptyShow = true
+                    that.isAssociateShow = false
+                    that.isNoAssociate = true
+                    that.isLoading = false
+                }
+            })
+        },
+        // 加载更多搜索数据
+        fnLoadMoreData() { 
+            let that = this
+            if(that.isSearchAll) {
+                return
+            }
+            let search = that.keyword
+            that.isLoadingMore = true
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2520',
+                data: {
+                    keyword: search,
+                    index: that.searchPage,
+                },
+                succ: function (res) {
+                    if(!that.isLoadingMore) {
+                        that.isLoadingMore = false
+                        return
+                    }
+                    // 模拟数据
+                    let resData = res.data
+                    if(resData.bookList && resData.bookList.length > 0) {
+                        that.searchList.length > 0 ? that.searchList = that.searchList.concat(resData.bookList) : that.searchList = resData.bookList 
+                        that.searchPage++
+                    }
+                    if(!resData.isMore) {
+                        that.isSearchAll = true
+                    }
+                    that.isLoadingMore = false
+                },
+                error: function () {
+                    that.isLoadingMore = false
+                }
+            })
+        },  
+        // 加载无结果
+        fnLoadEmptyList() {
+            let that = this
+            if(that.isEmptyAll) {
+                return
+            }
+            let search = that.keyword
+            that.isLoadingEmpty = true
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2520',
+                data: {
+                    keyword: search,
+                    index: that.emptyPage,
+                    searchType: 5,
+                },
+                succ: function (res) {
+                    if(!that.isLoadingEmpty) {
+                        that.isLoadingEmpty = false
+                        return
+                    }
+                    // 模拟数据
+                    let resData = res.data
+                    if(resData.bookList && resData.bookList.length > 0) {
+                        that.emptyList.length > 0 ? that.emptyList = that.emptyList.concat(resData.bookList) : that.emptyList = resData.bookList 
+                        that.emptyPage++
+                    }
+                    if(!resData.isMore) {
+                        that.isEmptyAll = true
+                    }
+                    that.isLoadingEmpty = false
+                },
+                error: function () {
+                    that.isLoadingEmpty = false
+                }
+            })
+        },
+        // 搜索联想词
+        fnAssociate() {
+            let that = this
+            // if(that.brand === 'huawei' || that.brand === 'honor') {
+            //     that.isAssociateShow = false
+            // }
+            that.isLoadingAssociate = true
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2521',
+                data: {
+                    keyword: that.keyword,
+                },
+                succ: function (res) {
+                    if(!that.isLoadingAssociate || that.isNoAssociate) {
+                        that.isLoadingAssociate = false
+                        return
+                    }   
+                    let resData = res.data
+                    // 模拟数据
+                    that.associateList = []
+                    that.random = Math.random().toString().slice(-3)
+                    that.associateList = resData
+                    that.isLoadingAssociate = false
+                    that.isAssociateShow = true
+                    if(that.hasSearch) {
+                        that.isEmptyShow = false
+                        that.isSearchShow = false
+                    }
+                },
+                error: function () {
+                    that.isLoadingAssociate = false
+                }
+            })
+        },
+        // 联想曝光
+        fnAssociateAppear(item, index) {
+            if(item.type == '1') {
+                this.bookAppear(item, 'associate', '联想结果', 0, index)                
+            }
+        },
+        // 联想点击
+        fnAssociateClick(item,index) {
+            if(item.type === '2' || item.type === '3') {
+                if(item.title != this.keyword) {
+                    this.clickToSearch = true
+                }
+                this.keyword = item.title
+                this.fnSearch(item.type,'tag')
+            }else {
+                this.fnRouterToBook(item, 'associate','联想结果',0,index)
+                // this.fnRouterToRead(item)
+            }
+        },
+        // 联想滑动时关闭键盘
+        fnAssociateScroll(e) {
+            if(e.scrollState == 1 || e.scrollState == 2) {
+                this.$element('keyword').focus({ focus: false });
+            }
+        },
+        // 跳转排行榜
+        fnRouterToRank(type) {
+            let that = this
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '2',
+                    path: 'Rank',
+                }
+            }, 'search_page'], that)
+            router.push({
+                uri: 'Rank',
+                params: {
+                    SourcePosition: '搜索页',
+                    sourcePage: '搜索页',
+                    rankId: type === 'hot' ? that.hotRankId : that.emptyRankId
+                }
+            })
+        },
+        // 书籍曝光
+        bookAppear(item, type = '', column_name, column_pos, content_pos){
+            let that = this
+            let trigger_time = that.$app.$def.getLogTime()
+            let omap = {
+                origin:'ssym',
+                action:'1',
+                channel_id:'gjc',
+                channel_name:that.keyword,
+                channel_pos:0,
+                column_id:type=='search'?that.column_id:type,
+                column_name:type=='search'?that.column_name:column_name,
+                column_pos:type=='search'?that.column_pos:column_pos,
+                content_id:item.bookId,
+                content_pos:content_pos,
+                content_type:'1',
+                trigger_time:trigger_time
+            }
+            that.$app.$def.quickappLog([706, {
+                omap: omap
+            }], that)
+        },
+        // 跳转书籍详情
+        fnRouterToBook(item, type = '',column_name,column_pos,content_pos) {
+            let that = this
+            let trigger_time = that.$app.$def.getLogTime()
+            let omap = {
+                origin:'ssym',
+                action:'2',
+                channel_id:'gjc',
+                channel_name:that.keyword,
+                channel_pos:0,
+                column_id:type=='search'?that.column_id:type,
+                column_name:type=='search'?that.column_name:column_name,
+                column_pos:type=='search'?that.column_pos:column_pos,
+                content_id:item.bookId,
+                content_pos:content_pos,
+                content_type:'1',
+                trigger_time:trigger_time
+            }
+            that.$app.$def.quickappLog([702, {
+                omap:omap
+            }, 'book_click'], that)
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '2',
+                    path: 'BookDetail',
+                    type: type,
+                    bookId: item.bookId,
+                    keyword: that.keyword,
+                    index: content_pos
+                }
+            }, 'search_page'], that)
+            router.push({
+                uri: '/BookDetail',
+                params: {
+                    bookId: item.bookId,
+                    bookAlias: item.bookAlias ? item.bookAlias : '',
+                    SourcePosition: '搜索页',
+                    sourcePage: '搜索页',
+                    omap:omap
+                }
+            })
+        },
+        // 跳转阅读页
+        fnRouterToRead(item) {
+            let that = this
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '2',
+                    path: 'Read',
+                }
+            }, 'search_page'], that)
+            router.push({
+                uri: '/Read',
+                params: {
+                    bookId: item.bookId,
+                    SourcePosition: '搜索页',
+                }
+            })   
+        },
+    }
+</script>
+
+
+
+    

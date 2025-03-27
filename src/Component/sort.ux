@@ -1,0 +1,664 @@
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+<import name="paid-tag" src="./tag.ux"></import>
+
+<template>
+	<stack class="sort-wrap">
+		<div class="sort-bg-extra"></div>
+		<div class="sort-bg-wrap">
+			<image class="sort-bg" src="https://xsmfdq.kkyd.cn/images/hmxs/top-bg.png"></image>
+		</div>
+		<div class="sort-content">
+			<block if="{typeOneVoList && typeOneVoList.length}">
+				<div class="first-cate">
+					<block for="{{typeOneVoList}}" >
+						<text class="tab {{firstIndex === $idx ? 'select' : ''}}" @click="fnSelectCate(1, $idx)">{{$item.categoryName}}</text>
+					</block>
+					<image if="isSearchOpen && !isFold" class="search" @click="fnRouteToSearch" src="../Common/images/search.png"></image>
+				</div>
+				<div class="othet-cate">
+					<text class="all {{secondIndex == -1 ? 'select' : ''}}" @click="fnSelectAll(2)">全部</text>
+					<list id="secondlist">
+						<list-item class="cates" type="cates" for="{{secondCates}}" @click="fnSelectCate(2, $idx)">
+							<text class="cate {{secondIndex == $idx ? 'select-cate' : ''}}">{{$item.title}}</text>
+						</list-item>
+					</list>
+				</div>
+				<div show="{{secondIndex != -1 && thirdCates.length}}" class="othet-cate">
+					<text class="all {{thirdIndex == -1 ? 'select' : ''}}" @click="fnSelectAll(3)">全部</text>
+					<list id="thirdlist">
+						<list-item class="cates" type="cates" for="{{thirdCates}}" @click="fnSelectCate(3, $idx)">
+							<text class="cate {{thirdIndex == $idx ? 'select-cate' : ''}}">{{$item.title}}</text>
+						</list-item>
+					</list>
+				</div>
+				<div class="othet-cate">
+					<text class="all {{fourthIndex == -1 ? 'select' : ''}}" @click="fnSelectAll(4)">全部</text>
+					<list>
+						<list-item class="cates" for="fourthCates" type="cates"  @click="fnSelectCate(4, $idx)">
+							<text class="cate {{fourthIndex == $idx ? 'select-cate' : ''}}">{{$item}}</text>
+						</list-item>
+					</list>
+				</div>
+				<list class="book-wrap" id="list" @scrollbottom="fnLoadMore">
+					<list-item class="book" type="book_{{loadNum}}" for="{{bookList}}" @appear="fnBookAppear($item, $idx)" @click="fnRouteToBookDetail($item, $idx)">
+						<stack class="cover-stack" >
+							<image class="cover" src="{{$item.coverWap}}"></image>
+							<paid-tag if="$item.iconType === '10'" tag="{{ $item.iconDesc }}"></paid-tag>
+						</stack>
+						<div class="book-detail">
+							<text class="title">{{$item.bookName}}</text>
+							<div class="auth-wrap">
+								<text class="left">
+									<span class="left-light">{{$item.status}}</span>
+									<span class="left-text">·{{$item.totalWordSize}}字</span>
+								</text>
+								<text class="right">{{$item.clickNum}}</text>
+							</div>
+							<text class="des">{{$item.introduction}}</text>
+						</div>
+					</list-item>
+					<list-item type="fnLoadMore" class="load-more">
+						<div if="{{isLoadingBook}}">
+							<progress type="circular"></progress>
+							<text>正在加载中</text>
+						</div>
+						<div if="{{!isLoadingBook}}">
+							<text if="{{!isMore}}" style="color: #A1A3A5;">{{ bookList.length > 0 ? '已经是全部了' : '敬请期待精品图书' }}</text>
+							<text else>上拉加载更多</text>
+						</div>
+					</list-item>
+				</list>
+			</block>
+		</div>
+		<retry if="{{isError}}" is-loading="{{isBtnShow}}" @retry="fnRetryHandler"></retry>
+	</stack>
+</template>
+
+<style lang="less">
+	.sort-wrap {
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		flex: 1;
+		.sort-bg-extra {
+			width: 100%;
+			height: 110px;
+			background-color: #F7F4FF;
+		}
+		.sort-bg-wrap {
+			margin-top: 110px;
+			width: 100%;
+			height: 300px;
+			.sort-bg {
+				width: 100%;
+				height: 300px;
+			}
+		}
+		.sort-content {
+			flex-direction: column;
+			width: 100%;
+			height: 100%;
+		}
+		.first-cate {
+			align-items: center;
+			margin-bottom: 24px;
+			padding-left: 8px;
+			width: 100%;
+			height: 110px;
+			background-color: #F7F4FF;
+			.tab {
+				padding: 0px 32px;
+				height: 110px;
+				font-size: 36px;
+				color: #5A5A64;
+				line-height: 110px;
+			}
+			.select {
+				font-size: 44px;
+				font-weight: bold;
+				color: #222222;
+			}
+			.search {
+				margin-left: 32px;
+				width: 40px;
+				height: 40px;
+			}
+		}
+		.othet-cate {
+			align-items: center;
+			margin-bottom: 24px;
+			padding: 0px 32px;
+			width: 100%;
+			.all {
+				padding: 0px 27px;
+				height: 56px;
+				line-height: 56px;
+				font-size: 28px;
+				color: #5A5A64;
+				text-align: center;
+				background-color: transparent;
+			}
+			.select {
+				font-weight: bold;
+				border-radius: 32px;
+				background-color: #F3EEFF;
+			}
+			list {
+				flex-direction: row;
+				flex: 1;
+				height: 56px;
+				.cates {
+					align-items: center;
+					.cate {
+						padding: 0 27px;
+						height: 56px;
+						line-height: 56px;
+						font-size: 28px;
+						color: #5A5A64;
+						text-align: center;
+						background-color: transparent;
+					}
+					.select-cate {
+						font-weight: bold;
+						border-radius: 32px;
+						background-color: #F3EEFF;
+					}
+				}
+			}
+		}
+		.book-wrap {
+			flex: 1;
+			margin-top: 16px;
+			.book {
+				margin-bottom: 40px;
+				padding-left: 32px;
+				padding-right: 32px;
+				.cover-stack {
+					margin-right: 24px;
+					width: 160px;
+					height: 214px;
+					border-radius: 6px;
+					border: 1px solid rgba(211, 215, 216, 0.1);
+				}
+				.cover {
+					width: 160px;
+					height: 214px;
+					border-radius: 6px;
+				}
+				.book-detail {
+					flex-direction: column;
+					width: 500px;
+					height: 214px;
+					.title {
+						margin-top: 8px;
+						font-size: 32px;
+						font-weight: bold;
+						color: #222222;
+						height: 45px;
+						line-height: 45px;
+						lines: 1;
+						text-overflow: ellipsis;
+					}
+					.des {
+						margin-top: 16px;
+						font-size: 28px;
+						color: #8E8E98;
+						height: 80px;
+						line-height: 40px;
+						lines: 2;
+						text-overflow: ellipsis;
+					}
+					.auth-wrap {
+						margin-top: 16px;
+						justify-content: space-between;
+						align-items: center;
+						height: 40px;
+						.left {
+							font-size: 28px;
+							height: 40px;
+							line-height: 40px;
+							lines: 1;
+							flex: 1;
+							text-overflow: ellipsis;
+						}
+						.left-text {
+							color: #8E8E98;
+						}
+						.left-light {
+							color: #785AF6;
+						}
+						.right {
+							font-size: 28px;
+							color: #FF631C;
+							height: 40px;
+							line-height: 40px;
+						}
+					}
+				}
+			}
+			.load-more {
+				justify-content: center;
+				margin: 30px;
+				height: 64px;
+			}
+			.load-more text {
+				font-size: 28px;
+				color: #59f;
+			}
+		}
+	}
+</style>
+
+<script>
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+	export default {
+		props: [
+			'currentIndex',
+			'isSearchOpen',
+			'isCoin',
+			'isFold'
+		],
+		data: {
+			hasLoad: false, // 已加载数据
+			isError: false, // 网络错误
+			isBtnShow: false, // 重试按钮显示
+			autoRetryCount: 0, // 自动重试次数
+			typeOneVoList: [],
+			secondCates: [],
+			thirdCates: [],
+			fourthCates: ['完本','连载'],
+			bookList: [], // 书籍列表
+			firstIndex: 0,
+			secondIndex: -1,
+			thirdIndex: -1,
+			fourthIndex: -1,
+			pageNum: 1,
+			isMore: false,
+			isLoadingBook: false, // 加载书籍
+			currentTab: 2, // 当前TAB值
+			loadNum: 0, // 解决曝光埋点不上报的问题
+		},
+		onInit() {
+			this.currentTab = this.isCoin ? 3 : 2
+			this.firstIndex = this.$app.headerJson.readPref == 2 ? 1 : 0
+			//充值列表
+			this.fnLoadData();
+			this.$watch('currentIndex', 'fnWatchCurrentIndex')
+		},
+		fnWatchCurrentIndex(newValue, oldValue) {
+			if(newValue === this.currentTab) {
+				if(this.hasLoad) {
+					this.fnDealTag(false)
+				}
+			}
+		},
+		// 请求tag数据
+		fnLoadData() {
+			let that = this;
+			this.$app.$def.ajax(that, '2162', {
+				data: {},
+				succ(data) {
+					that.isError = false;
+					that.hasLoad = true
+					that.typeOneVoList = data.typeOneVoList;
+					that.fnDealTag(true)
+				},
+				err() {
+					that.isError = true;
+					if (that.autoRetryCount >= 1) {
+						that.isBtnShow = true;
+						return
+					}
+					that.autoRetryCount++
+					setTimeout(() => {
+						that.fnLoadData()
+					}, 1000)
+				}
+			});
+		},
+		fnLoadMore() {
+			if(this.isMore) {
+				this.pageNum++
+				this.fnLoadBook()
+			}
+		},
+		fnRouteToSearch() {
+			router.push({
+				uri: '/Search'
+			})
+		},
+		/**
+         * 标签选中处理
+         * @param {Number} level 标签层级
+		 * @param {Number} index 标签索引
+         */
+		fnSelectCate(level, index) {
+			if(level == 1) {
+				if(this.firstIndex == index) {
+					return false
+				}
+				this.firstIndex = index
+				this.secondIndex = -1
+				this.thirdIndex = -1
+				this.fourthIndex = -1
+				this.secondCates = this.typeOneVoList[this.firstIndex].typeTwoVos
+				this.thirdCates = []
+				setTimeout(() => {
+					this.$element('secondlist') && this.$element('secondlist').scrollTo({ index: 0 })
+				}, 0)
+				this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+					ButtonName: '分类频道点击',
+					ButtonContent: this.typeOneVoList[this.firstIndex].categoryName,
+					PositionName: '分类一级标签',
+					Title: '分类页'
+				});
+			} else if(level == 2) {
+				if(this.secondIndex == index) {
+					return false
+				}
+				this.secondIndex = index
+				this.thirdIndex = -1
+				this.thirdCates = this.secondCates[this.secondIndex].categoryMark
+				setTimeout(() => {
+					this.$element('secondlist') && this.$element('secondlist').scrollTo({ index: index < 1 ? index : index - 1 })
+				}, 0)
+				this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+					ButtonName: '分类标签点击',
+					ButtonContent: this.secondCates[this.secondIndex].title,
+					PositionName: '分类二级标签',
+					Title: '分类页-' + this.typeOneVoList[this.firstIndex].categoryName
+				});
+			} else if(level == 3) {
+				if(this.thirdIndex == index) {
+					return false
+				}
+				this.thirdIndex = index
+				setTimeout(() => {
+					this.$element('thirdlist') && this.$element('thirdlist').scrollTo({ index: index < 1 ? index : index - 1 })
+				}, 0)
+				this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+					ButtonName: '分类标签点击',
+					ButtonContent: this.thirdCates[this.thirdIndex].title,
+					PositionName: '分类三级标签',
+					Title: '分类页-' + this.typeOneVoList[this.firstIndex].categoryName
+				});
+			} else {
+				if(this.fourthIndex == index) {
+					return false
+				}
+				this.fourthIndex = index
+				this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+					ButtonName: '分类标签点击',
+					ButtonContent: this.fourthCates[this.fourthIndex],
+					PositionName: '分类四级标签',
+					Title: '分类页-' + this.typeOneVoList[this.firstIndex].categoryName
+				});
+			}
+			this.pageNum = 1
+			this.bookList = []
+			setTimeout(() => {
+				this.$element('list') && this.$element('list').scrollTo({ index: 0 })
+			}, 0)
+			this.fnLoadBook()
+			this.$app.$def.quickappLog([702, {
+				qmap: {
+					level,
+					index
+				}
+			}, 'sort_click'], this)
+		},
+		/**
+         * 选中全部处理
+         * @param {Number} level 标签层级
+         */
+		fnSelectAll(level) {
+			if(level == 2) {
+				if(this.secondIndex == -1) {
+					return false
+				}
+				this.secondIndex = -1
+				this.thirdIndex = -1
+				setTimeout(() => {
+					this.$element('secondlist') && this.$element('secondlist').scrollTo({ index: 0 })
+				}, 0)
+			} else if(level == 3) {
+				if(this.thirdIndex == -1) {
+					return false
+				}
+				this.thirdIndex = -1
+				setTimeout(() => {
+					this.$element('thirdlist') && this.$element('thirdlist').scrollTo({ index: 0 })
+				}, 0)
+			} else {
+				if(this.fourthIndex == -1) {
+					return false
+				}
+				this.fourthIndex = -1
+			}
+			this.pageNum = 1
+			this.bookList = []
+			setTimeout(() => {
+				this.$element('list') && this.$element('list').scrollTo({ index: 0 })
+			}, 0)
+			this.fnLoadBook()
+			this.$app.$def.quickappLog([702, {
+				qmap: {
+					level
+				}
+			}, 'sort_all'], this)
+		},
+		// 请求书籍数据
+		fnLoadBook() {
+			let that = this;
+			let firstIndex = that.firstIndex
+			let secondIndex = that.secondIndex
+			let thirdIndex = that.thirdIndex
+			let fourthIndex = that.fourthIndex
+			let pageNum = that.pageNum
+			that.isLoadingBook = true
+			that.$app.$def.ajax(that, '2163', {
+				data: {
+					flag: '0',
+					id: that.typeOneVoList[that.firstIndex] ? that.typeOneVoList[that.firstIndex].categoryId : '',
+					cid: that.secondCates[that.secondIndex] ? that.secondCates[that.secondIndex].cid : '',
+					tid: that.thirdCates[that.thirdIndex] ? that.thirdCates[that.thirdIndex].markId : '',
+					status: that.fourthIndex == -1 ? '': that.fourthIndex == 0 ? 2 : 1,
+					index: that.pageNum
+				},
+				succ(data) {
+					that.loadNum++
+					if(data.books) {
+						if(firstIndex != that.firstIndex || secondIndex != that.secondIndex || thirdIndex != that.thirdIndex || fourthIndex != that.fourthIndex) {
+							return false
+						}
+						if(pageNum == 1) {
+							that.bookList = data.books
+						} else {
+							that.bookList = that.bookList.concat(data.books)
+						}
+					}
+					that.isMore = data.isMore
+					that.isLoadingBook = false
+				},
+				err() {
+					that.isLoadingBook = false					
+				}
+			})
+		},
+		/**
+         * 处理标签选中
+         * @param {Boolean} isFirstLoad 是否第一次进入分类页面
+         */
+		fnDealTag(isFirstLoad) {
+			let that = this
+			let bookTagCache = that.$app.getAppData('bookTagCache')
+			let isMatchSecondTag = false // 传过来的二级标签 在分类的二级栏目上 能否找到对应的值
+			let isMatchThirdTag = false
+			if(bookTagCache && bookTagCache.needReplace) {
+				let typeOneVoList = that.typeOneVoList
+				for(let i = 0; i < typeOneVoList.length; i++) {
+					if(isMatchSecondTag || isMatchThirdTag) {
+						break;
+					}
+					let typeTwoVos = typeOneVoList[i].typeTwoVos || []
+					for(let j = 0; j < typeTwoVos.length; j++) {
+						if(isMatchSecondTag || isMatchThirdTag) {
+							break;
+						}
+						if(bookTagCache.secondTagId == typeTwoVos[j].cid && !isMatchSecondTag) {
+							isMatchSecondTag = true
+							that.firstIndex = i
+							that.secondCates = typeOneVoList[i].typeTwoVos
+							that.secondIndex = j
+							that.thirdCates = []
+							that.thirdIndex = -1
+							setTimeout(() => {
+								that.$element('secondlist') && that.$element('secondlist').scrollTo({ index: j - 1 < 0 ? j : j - 1 })
+							}, 200)
+						}
+						let categoryMark = typeTwoVos[j].categoryMark || []
+						for(let k = 0; k < categoryMark.length; k++) {
+							if(bookTagCache.thirdTagId == categoryMark[k].markId && !isMatchThirdTag) {
+								if(!isMatchSecondTag) {
+									that.firstIndex = i
+									that.secondCates = typeOneVoList[i].typeTwoVos
+									that.secondIndex = j
+									that.thirdCates = []
+									that.thirdIndex = -1
+									setTimeout(() => {
+										that.$element('secondlist') && that.$element('secondlist').scrollTo({ index: j - 1 < 0 ? j : j - 1 })
+									}, 200)
+								}
+								isMatchThirdTag = true
+								that.thirdCates = that.secondCates[j].categoryMark
+								that.thirdIndex = k
+								setTimeout(() => {
+									that.$element('thirdlist') && that.$element('thirdlist').scrollTo({ index: k - 1 < 0 ? k : k - 1 })
+								}, 200)
+								break;
+							}
+						}
+					}
+				}
+				if(!isFirstLoad && !isMatchSecondTag && !isMatchThirdTag) {
+					that.firstIndex = 0
+					that.secondIndex = -1
+					that.thirdIndex = -1
+					that.secondCates = that.typeOneVoList[that.firstIndex].typeTwoVos
+					that.thirdCates = []
+					setTimeout(() => {
+						that.$element('secondlist') && that.$element('secondlist').scrollTo({ index: 0 })
+					}, 200)
+					return
+				}
+				if(isMatchSecondTag && !isMatchThirdTag) {
+					that.thirdCates = that.secondCates[that.secondIndex].categoryMark
+				}
+				if(isMatchSecondTag || isMatchThirdTag) {
+					that.pageNum = 1
+					that.bookList = []
+					setTimeout(() => {
+						that.$element('list') && that.$element('list').scrollTo({ index: 0 })
+					}, 0)
+				}
+			}
+			that.$app.setAppData('bookTagCache', {
+				needReplace: false
+			})
+			if(isFirstLoad && !isMatchSecondTag && !isMatchThirdTag) {
+				that.secondCates = that.typeOneVoList[that.firstIndex].typeTwoVos
+			}
+			that.fnLoadBook()
+		},
+		/**
+         * 书籍曝光
+         * @param {Object} bookInfo 书籍信息
+		 * @param {Number} position 位置索引
+         */
+		fnBookAppear(bookInfo, position) {
+			let trigger_time = this.$app.$def.getLogTime()
+			let omap = {
+				origin: 'fl',
+				action: '1',
+				channel_id: this.typeOneVoList[this.firstIndex].categoryId,
+				channel_name: this.typeOneVoList[this.firstIndex].categoryName,
+				channel_pos: this.firstIndex,
+				column_id: this.secondIndex == -1 ? '-1': this.secondCates[this.secondIndex].cid,
+				column_name: this.secondIndex == -1 ? '全部' : this.secondCates[this.secondIndex].title,
+				column_pos: this.secondIndex == -1 ? 0 : this.secondIndex + 1,
+				content_id: bookInfo.bookId,
+				content_pos: position,
+				content_type: '1',
+				trigger_time: trigger_time,
+				three_type_id: this.thirdIndex == -1 ? '-1' : this.thirdCates[this.thirdIndex].markId,
+				three_type_name: this.thirdIndex == -1 ? '全部' : this.thirdCates[this.thirdIndex].title,
+				three_type_pos: this.thirdIndex == -1 ? 0 : this.thirdIndex + 1,
+				four_type_name: this.fourthIndex == -1 ? '全部' : this.fourthCates[this.fourthIndex],
+				four_type_pos: this.fourthIndex == -1 ? 0 : this.fourthIndex + 1,
+			}
+			this.$app.$def.quickappLog([706, {
+				omap: omap
+			}], this)
+		},
+		/**
+         * 跳转书籍详情
+         * @param {Object} bookInfo 书籍信息
+		 * @param {Number} position 位置索引
+         */
+		fnRouteToBookDetail(bookInfo, position) {
+			let trigger_time = this.$app.$def.getLogTime()
+			let omap = {
+				origin: 'fl',
+				action: '2',
+				channel_id: this.typeOneVoList[this.firstIndex].categoryId,
+				channel_name: this.typeOneVoList[this.firstIndex].categoryName,
+				channel_pos: this.firstIndex,
+				column_id: this.secondIndex == -1 ? '-1' : this.secondCates[this.secondIndex].cid,
+				column_name: this.secondIndex == -1 ? '全部':this.secondCates[this.secondIndex].title,
+				column_pos: this.secondIndex == -1 ? 0 : this.secondIndex + 1,
+				content_id: bookInfo.bookId,
+				content_pos: position,
+				content_type: '1',
+				trigger_time: trigger_time,
+				three_type_id: this.thirdIndex == -1 ? '-1' : this.thirdCates[this.thirdIndex].markId,
+				three_type_name: this.thirdIndex == -1 ? '全部' : this.thirdCates[this.thirdIndex].title,
+				three_type_pos: this.thirdIndex == -1 ? 0 : this.thirdIndex + 1,
+				four_type_name: this.fourthIndex == -1 ? '全部' : this.fourthCates[this.fourthIndex],
+				four_type_pos: this.fourthIndex == -1 ? 0 : this.fourthIndex + 1,
+			}
+			router.push({
+				uri: '/BookDetail',
+				params: {
+					bookId: bookInfo.bookId,
+					SourcePosition: '分类页面',
+					omap: omap,
+					sourcePage: '分类页面'
+				}
+			})
+			this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+				Title: '分类-' + this.typeOneVoList[this.firstIndex].categoryName,
+				ButtonName: '分类页-查看书籍',
+				BookID: bookInfo.bookId || '',
+				BookName: bookInfo.bookName || ''
+			});
+			this.$app.$def.quickappLog([702, {
+				omap: omap
+			}, 'book_click'], this)
+		},
+		fnRetryHandler() {
+			this.isBtnShow = false;
+			setTimeout(() => {
+				this.fnLoadData();
+			}, 1000)
+			try {
+				this.$app.$def.quickappLog([703, {
+					qmap: {
+						type: 'retry',
+						thisUri: this.$page.uri,
+					}
+				}, 'lvgoSort'], this)
+			} catch(error) {}
+		}
+	}
+</script>

@@ -1,0 +1,872 @@
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+<import name="pop-order" src="../Base/pop-order"></import>
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="once-price" src="../Base/once-price"></import>
+
+<template>
+    <div class="directory_box" id="directoryList">
+        <div class="directory_tit">
+            <text class="directory_tit_txt">共{{ntotalChapters}}章</text>
+            <select class="directory_select" @change="changelist" id="changelist" if="directoryselect.length > 0" @touchstart="renderBookList">
+                <option for="(index,item) in directoryselect" value="{{index}}" class="directory_select_option" selected="{{selectIndex == index ? true : false}}">{{item.tip}}</option>
+            </select>
+        </div>
+        <list class="dire_list_box" id="listContent" onscrollbottom="scrollbottom">
+            <block for="(index,item) in directoryList">
+                <list-item type="list-item-{{index}}" class="dire_li"  @click="routerread('/Read',index)" onappear="fnappear(index)">
+                    <text class="dire_li_txt {{item.isCharge == 1 ? 'dire_li_charge' : ''}}  {{item.chapterId == schapterId ? 'dire_li_select' : ''}} {{item.isCache ? 'spec-color' : ''}}">{{item.chapterName}}</text>
+                    <image show="{{item.isCharge == 1}}" src="https://xsmfdq.kkyd.cn/images/icon-lock.png"></image>
+                </list-item>
+            </block>
+            <!-- 加载更多 -->
+            <list-item type="loadMore" class="load-more" if="{{hasList}}">
+                <div if="{{loadMore}}">
+                    <progress type="circular"></progress>
+                    <text>正在加载中</text>
+                </div>
+                <div else>
+                    <text>{{toEnd?'已经到底部了':'上拉加载更多'}}</text>
+                </div>
+            </list-item>
+        </list>
+        <!-- 切换章节未获取到数据时，显示loading -->
+        <div class="loading_container" if="chapter_loading">
+            <div class="load_box" >
+                <progress type="circular"></progress>
+                <text>loading</text>
+            </div>
+        </div>
+         <!-- 页面加载错误  -->
+        <retry if="{{isShowBtn}}" is-loading="{{isLoading}}"  @retry="retryHandler"></retry>
+        <pop-order if="{{orderShow}}" viptips="{{orderObj.viptips}}" unit="{{orderObj.unit}}" chapter="{{orderObj.chapter}}" price="{{orderObj.price}}" coin="{{orderObj.coin}}" enough="{{orderObj.enough}}" bookid="{{bookId}}" bookname="{{orderObj.bookname}}"  @to-recharge-auto="toRechargeAuto" @close-orderpop="closeOrderpop"></pop-order>
+        <once-price if="{{oncePriceShow}}" book-id="{{bookId}}" chapter-id="{{chapterId}}" chapter-index="{{chapterIndex}}" omap="{{omap}}" give-up-pop-show={{giveUpPopShow}} price-info={{oncePriceInfo}} @close-once-price="fnCloseOncePrice" @give-up-show="fnGiveUpShow" @close-give-up="fnCloseGiveUp" @to-pop-order="fnToPopOrder"></once-price>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+
+<style lang="less">
+    .loading_container{
+        position:fixed;
+        left:0;
+        top:0;
+        right:0;
+        bottom:0;
+        justify-content: center;
+        align-items: center;
+        .load_box{
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+    
+     .load-more {
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+        border-color: #bbbbbb;
+        border-bottom-width: 1px;
+  }
+
+    .directory_box {
+        
+        padding: 0;
+        flex-direction: column;
+        columns: 1; 
+         justify-content:flex-start; 
+    }
+
+    .directory_tit {
+        padding: 0 40px 0 30px;
+        height: 100px;
+    }
+
+    .directory_tit_txt {
+        flex: 1;
+        height: 100px;
+        font-size: 36px;
+        color: #333;
+        line-height: 100px;
+    }
+
+    .directory_select {
+        padding: 20px;
+        width: 320px;
+        height: 100px;
+        /* font-size: 30px; */
+        color: #3a4a5a;
+    }
+
+    .directory_select_option {
+        margin: 5px 0;
+        padding: 20px 30px;
+        height: 100px;
+        font-size: 30px;
+        color: #3a4a5a;
+        line-height: 100px;
+    }
+
+    .dire_list_box {
+        flex-direction: column;
+        flex: 1;
+        /* align-items:flex-start; */
+    }
+
+    .dire_li {
+        margin: 0 28px;
+        height: 100px;
+        border-bottom-color: #eee;
+        border-bottom-width: 1px;
+        align-items:center;
+    }
+    .dire_li image{
+        width:40px;height:40px;
+    }
+    .dire_li_txt {
+        flex: 1;
+        height: 100px;
+        lines: 1;
+        text-overflow: ellipsis;
+        font-size: 28px;
+        color: #BABABA;
+        line-height: 100px;
+
+    }
+
+    .spec-color{
+        color:#444444;
+    }
+    .dire_li_select {
+        color: #4bf;
+    }
+</style>
+
+
+<script>
+    import storage from '@system.storage';
+    import device from '@system.device';
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    import file from '@system.file';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+
+    export default {
+        private: {
+            sbookId: '',
+            schapterId: '',
+            schapterOffset: 100,
+            schapterEndId: '',
+            schapterbgId: '',
+            sneedBlockList: 1,
+            directoryList: [],
+            directoryselect: [],
+            ntotalChapters: '',
+            selectIndex: 0,
+            sequence: false,
+            userHeaderJson: '',
+            loadMore:false,
+            toEnd:false,
+            renderDirList:true,
+            scrobottomType:false,
+            touchSelect:false,
+            isBottom:false,
+            chapter_loading:true,
+            hasList:false,
+            scrollCount:0,
+            isShowBtn:false,
+            isLoading:false,
+            reloadNum:0,
+            oncePriceShow: false, // 整本购买弹窗
+            canOncePrice: false, // 整本购买信息
+            oncePriceInfo: '', // 整本购买信息
+            giveUpPopShow: false, // 整本挽留弹窗
+            oncePriceExtraInfo: '', // 2151回调信息
+            isToRecharge: false,
+        },
+        protected: {
+            tit: '',
+            // bookId: '11000000029',
+            // chapterId: '100912',
+            bookId: '',
+            chapterId: '',
+            isLowerShelf:'',
+            pageFrom:'',
+            orderObj:{},
+            autoPay:'',
+            confirmPay:1,
+            orderShow:false,
+            cindex:'',
+            isbookde:false,
+            SourcePosition:'',
+            omap:'',
+            isUpdateOmap:1,
+            bookName:'',
+            startIndex: 1,
+            endIndex: 100,
+            chapterIndex:1
+        },
+
+        
+        //表示ViewModel的数据已经准备好，可以开始使用页面中的数据
+        onInit(e) {
+            let that = this;
+            if(this.omap!='' && typeof(this.omap)=='string'){
+                this.omap = JSON.parse(this.omap)
+            }
+            this.$app.lastOpenPage = ''
+            console.log('that.SourcePositionSourcePositionSourcePositionSourcePosition')
+            console.log(that.SourcePosition)
+            this.getisAutopay()
+            that.$page.setTitleBar({ text: '目录' });
+            that.sbookId = that.bookId;
+            that.schapterId = that.chapterId;
+
+            that.ajax('2112', {
+                data: {
+                    bookId: that.sbookId,
+                    startIndex:that.startIndex,
+                    endIndex:that.endIndex
+                },
+                succ(data) {
+                    that.isShowBtn = false;
+                    if (!that.ntotalChapters){
+                        that.ntotalChapters = data.totalChapters;
+                    }
+                    that.fnGetBlockList()
+                    that.chapterlist(true,true);
+                },
+                err(data) {
+                    that.isShowBtn = true;
+                    that.isLoading = true;
+                    console.log('mulu',data);
+                }
+            });
+
+
+            // storage.get({
+            //     key: 'headerJson',
+            //     success: (data) => {
+            //         data = data ? JSON.parse(data) : '';
+            //         that.userHeaderJson = data;
+            //     }
+            // })
+            that.$app.$def.getStorageFile(that,{
+                key:'headerJson',
+                success:function(data){
+                    data = data ? JSON.parse(data) : '';
+                    that.userHeaderJson = data;
+                }
+            });
+
+        },
+
+        //表示ViewModel的模板已经编译完成，可以开始获取DOM节点（如：this.$element(idxxx) )
+        onReady(e) {
+             console.log(`onReady==========${this.sequence}`);
+             this.$element('listContent').scrollTo({ index:50 });
+
+        },
+
+        //页面被切换重新显示时调用
+        onShow(e) {            
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '目录'
+            });
+            // pageEnter(this.$page.path);
+            console.log(`onReady==========${this.sequence}`);
+            let that = this;
+            if(that.isToRecharge) {
+                 that.giveUpPopShow = false
+            }
+            that.isToRecharge = false
+            if(this.$app.isOncePrice == 1) {
+                this.giveUpPopShow = false
+                this.oncePriceShow = false
+                this.$app.isOncePrice = 0
+                if(!that.isbookde){
+                    router.clear()
+                }
+                router.replace({
+                    uri: '/Read',
+                    params: {
+                        chapterName: that.directoryList[that.cindex].chapterName,
+                        bookId: that.sbookId,
+                        chapterId: that.directoryList[that.cindex].chapterId,
+                        pageFrom:that.pageFrom,
+                        SourcePosition:that.SourcePosition,
+                        omap:that.omap,
+                        isUpdateOmap:that.isUpdateOmap,
+                        first_reading:that.oncePriceExtraInfo.data.first_reading
+                    }
+                })
+            }
+            new Promise((resolve, reject) => {
+
+                // storage.get({
+                //     key: 'headerJson',
+                //     success: function (data) {
+                //         resolve(data);
+                //     }
+                // })
+                that.$app.$def.getStorageFile(that,{
+                    key:'headerJson',
+                    success:function(data){
+                        resolve(data);
+                    }
+                })
+
+            }).then((res) => {
+                that.userHeaderJson = JSON.parse(res);
+            })
+            this.$app.$def.quickappLog([701,{omap:that.omap}], this);
+            //$umeng_stat.resume(this);
+        },
+        onHide() {
+            // pageLeave(this.$page.path);
+            //$umeng_stat.pause(this);
+        },
+        //页面被销毁时调用，被销毁的可能原因有：用户从当前页面返回到上一页，或者用户打开了太多的页面，框架自动销毁掉部分页面，避免占用资源
+        onDestroy(e) {
+        },
+
+        //当用户点击返回实体按键、左上角返回菜单、调用返回API时触发该事件
+        onBackPress(e) {
+            let that = this
+            setTimeout(function(){
+                if(that.giveUpPopShow) {
+                    that.giveUpPopShow = false
+                    return true
+                }
+                if(that.oncePriceShow) {
+                    that.oncePriceShow = false
+                    return true
+                }
+                if(that.orderShow){
+                    that.orderShow = false
+                    that.$app.$def.quickappLog([702, {
+                        qmap: {
+                            site: '5',
+                            enough:that.orderObj.enough,
+                            unit:that.orderObj.unit,
+                            bookid:that.bookid
+                        }
+                    }, 'autopay'], that)
+                }else{
+                    router.back()
+                }
+            },0)
+            
+            return true
+        },
+
+        //当使用原生的顶部标题栏时，可以通过manifest.json中的menu属性配置是否显示右上角的菜单
+        onMenuPress(e) {
+
+        },
+        fnGetBlockList(){
+            let that = this
+            let ntotalChapters = +that.ntotalChapters
+            let partNum = Math.floor(ntotalChapters/100)
+            let overNum = ntotalChapters%100
+            console.log(ntotalChapters,partNum,overNum)
+            let directoryArr = []
+            for (let index = 0; index < Math.floor(ntotalChapters/100); index++) {
+                let partObj = {}
+                partObj.startIndex = index*100+1
+                partObj.endIndex = (index+1)*100
+                partObj.tip = `第${partObj.startIndex}-${partObj.endIndex}章`
+                directoryArr.push(partObj)
+                if (parseInt(that.chapterIndex) >= parseInt(partObj.startIndex) && parseInt(that.chapterIndex) <= parseInt(partObj.endIndex)) {
+                    that.startIndex = partObj.startIndex
+                    that.endIndex = partObj.endIndex
+                    that.selectIndex = index;
+                }
+            }
+            if(overNum!=0){
+                let partObj = {}
+                partObj.startIndex = partNum*100+1
+                partObj.endIndex = ntotalChapters
+                partObj.tip = `第${partObj.startIndex}-${partObj.endIndex}章`
+                directoryArr.push(partObj)
+                if (parseInt(that.chapterIndex) >= parseInt(partObj.startIndex) && parseInt(that.chapterIndex) <= parseInt(partObj.endIndex)) {
+                    that.startIndex = partObj.startIndex
+                    that.endIndex = partObj.endIndex
+                    that.selectIndex = partNum;
+                }
+            }
+            that.directoryselect = directoryArr
+            console.log(that.directoryselect,that.chapterIndex,that.startIndex,that.endIndex)
+        },
+        changelist(e) {
+            let that = this;
+            if(that.directoryselect.length > 0 && this.touchSelect == true) {
+                that.selectIndex = +e.newValue;
+                that.startIndex = that.directoryselect[e.newValue].startIndex;
+                that.endIndex = that.directoryselect[e.newValue].endIndex;
+                // console.info("非onappear进入",this.renderDirList);
+                that.chapterlist(true,false);
+                console.info("切换章节进入",that.selectIndex);
+                that.isBottom = false;
+                that.toEnd = false;
+            }else {
+                // return false;
+                console.info("loamore或者滑动变换章节列表",this.touchSelect);
+            }
+        },
+        chapterlist(isselect,init) {
+            let that = this;
+            console.info('是否touchselect',this.touchSelect);
+            if(that.touchSelect){
+                that.chapter_loading = true;
+            }
+            that.ajax('2112', {
+                data: {
+                    bookId: that.sbookId,
+                    startIndex:that.startIndex,
+                    endIndex:that.endIndex
+                },
+                succ(data) {
+                    that.fnGetDirectory().then(res=>{
+                        that.renderList(data,isselect,init,res)
+                    },err=>{
+                        that.renderList(data,isselect,init)
+                    })
+                },
+                err(data) {
+                    console.log('mulu',data);
+                    that.isBottom = false
+                }
+            })
+        },
+        renderList(data,isselect,init,res){
+            let that = this
+            that.chapter_loading = false;
+            that.hasList = true
+            //  console.info("fnres",res);
+            //  console.info('是否初始化select',init);
+            if( isselect == true ){
+                that.directoryList = data.chapterList;
+                if( init == true) {
+                    console.info("首次进入渲染列表");
+                    that.directoryList.forEach((value,index) =>{
+                        if( value.chapterId == that.chapterId ){
+                            // console.info("查询到相应章节",value,index);
+                            setTimeout(() => {
+                                that.$element('listContent').scrollTo({ index:index });
+                            }, 100);
+                        }else{
+                            // console.info('未查询到章节',this.chapterId);
+                        }
+                    });
+                } else {
+                    console.info("select点击进入");
+                    setTimeout(() => {
+                        that.$element('listContent').scrollTo({ index:0 });
+                    }, 0);
+                    
+                }
+                
+            }else {
+                console.info("loadMore进入")
+                that.directoryList = that.directoryList.concat( data.chapterList ? data.chapterList : '');
+                that.isBottom = false;
+                that.loadMore = false;
+            }
+            // console.info("初始化章节==》",that.directoryList,data);
+            if(res){
+                 console.log(res)
+                if(res.userId==that.userHeaderJson.userId){
+                    res.directory.forEach((curi,i)=>{
+                        console.log(curi.cid)
+                        that.directoryList.forEach((curj,j)=>{
+                            if(curi.cid==curj.chapterId){
+                                that.directoryList[j].isCache = true
+                            }
+                        })
+                    })
+                }
+            }
+            if (!that.ntotalChapters){
+                that.ntotalChapters = data.totalChapters;
+            }
+            if(that.directoryList[that.directoryList.length-1].chapterIndex == that.directoryselect[that.directoryselect.length-1].endIndex){
+                that.toEnd = true;
+                that.loadMore = false;
+                that.isBottom = true
+            }
+        },
+        fnGetDirectory(){
+            let that = this;
+            return new Promise((resolve,reject)=>{
+                file.readText({
+                    uri: `internal://files/books/b${that.bookId}/directory.text`,
+                    success: function(data) {
+                        try{
+                            let directory = JSON.parse(data.text)
+                            resolve(directory)
+                        }catch{
+                            reject() 
+                        }
+                    },
+                    fail: function(data, code) {
+                       reject(code) 
+                       that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:"file_readText_fail",
+                            thisUri:that.$page.uri,
+                            thisPage:"Directory",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)                     
+                    }
+                })
+            })
+        },
+        
+        routerread(url, index) {
+            let that = this;
+            that.cindex = index
+            if(that.isLowerShelf==='0'){
+                router.replace({
+                    uri: '/ReadEnd',
+                    params: {
+                        bookId: that.sbookId,
+                        isLowerShelf:that.isLowerShelf,
+                        bookName:that.bookName
+                    }
+                })
+                return false;
+            }
+            if (that.directoryList[that.cindex].isCharge == 1) {
+                that.ajax('2151', {
+                    data: {
+                        confirmPay: that.confirmPay,
+                        autoPay: that.autoPay,
+                        bookId: that.sbookId,
+                        chapterId: that.directoryList[that.cindex].chapterId,
+                        uuid:that.$app.sourceInfo['uuid'],
+                        pullMode:that.$app.sourceInfo['pullMode'],
+                        omap:JSON.stringify(that.omap),
+                        isUpdate:that.isUpdateOmap,
+                        isBr: 0,
+                        hmManualAddFlag: 1, // 670支持手动加书架，此字段服务端用于版本判断
+                    },
+                    succ(data) {
+                        console.info(data);
+                        // 是否支持整本购买
+                        if(data.fpTip) {
+                            that.canOncePrice = true
+                            that.oncePriceInfo = data.oncePriceVo
+                            that.oncePriceExtraInfo = {
+                                data: data,
+                                index: index,
+                            }
+                        }else {
+                            that.canOncePrice = false
+                            that.oncePriceInfo = ''
+                            that.oncePriceExtraInfo = ''
+                        }
+                        if (data.orderPage && (data.status == 5 || data.status == 4)) {
+                            if(data.status == 4 && data.orderPage.action==2){
+                                if(that.canOncePrice) {
+                                    that.oncePriceShow = true
+                                    that.$app.shenceLog.log(that,'track','PopupExposure', {
+                                        PositionName: '整本书一口价购买弹窗',
+                                        BookID: that.bookId,
+                                        BookName: that.bookName,
+                                        ChaptersNum: that.chapterIndex,
+                                        Instruction: that.oncePriceInfo ? (that.oncePriceInfo.price + '元 vs ' + that.oncePriceInfo.totalPrice + '元') : ''
+                                    });
+                                }else {
+                                    that.fnGoRecharge(data, index)
+                                }
+                            }else{
+                                that.showOrder(data,data.status == 5?true:false)                                
+                            }
+                            return false;
+                        }
+                         if(!that.isbookde){
+                            router.clear()
+                        }
+                        router.replace({
+                            uri: url,
+                            params: {
+                                chapterName: that.directoryList[that.cindex].chapterName,
+                                bookId: that.sbookId,
+                                chapterId: that.directoryList[that.cindex].chapterId,
+                                pageFrom:that.pageFrom,
+                                SourcePosition:that.SourcePosition,
+                                omap:that.omap,
+                                isUpdateOmap:that.isUpdateOmap,
+                                first_reading:data.first_reading,
+                                prePage: 'Directory'
+                            }
+                        })
+                    },
+                    err(data) {
+                        console.log('mulu',data);
+                    }
+                })
+                return false;
+            }
+            if(!that.isbookde){
+                router.clear()
+            }
+            router.replace({
+                uri: url,
+                params: {
+                    chapterName: that.directoryList[that.cindex].chapterName,
+                    bookId: that.sbookId,
+                    chapterId: that.directoryList[that.cindex].chapterId,
+                    pageFrom:that.pageFrom,
+                    SourcePosition:that.SourcePosition,
+                    omap:that.omap,
+                    isUpdateOmap:that.isUpdateOmap,
+                    prePage: 'Directory'
+                }
+            })
+        },
+        showOrder(data,enough){
+            let that = this  
+            that.orderObj.price = data.orderPage.price
+            that.orderObj.coin = data.orderPage.totalNum
+            that.orderObj.chapter = data.orderPage.chapterName
+            that.orderObj.unit = data.orderPage.unit
+            that.orderObj.bookname = data.orderPage.bookName
+            that.orderObj.chapterId = data.orderPage.chapterId
+            that.orderObj.viptips = data.orderPage.vipTips
+            //余额是否充足
+            that.orderObj.enough = enough
+            if(that.canOncePrice) {
+                that.oncePriceShow = true
+                that.$app.shenceLog.log(that,'track','PopupExposure', {
+                    PositionName: '整本书一口价购买弹窗',
+                    BookID: that.bookId,
+                    BookName: that.bookName,
+                    ChaptersNum: that.chapterIndex,
+                    Instruction: that.oncePriceInfo ? (that.oncePriceInfo.price + '元 vs ' + that.oncePriceInfo.totalPrice + '元') : ''
+                });
+            }else {
+                that.orderShow = true
+            }
+        },
+        ajax(routercode, obj) {
+            let that = this;
+            that.$app.$def.requestData(that,
+                {
+                    interface: `/glory/fastapp/${routercode}`,
+                    data: obj.data,
+                    succ: function (res) {
+                        if (res.retCode == 0) {
+                            obj.succ(res.data);
+                        }
+                    },
+                    error: function (code) {                                         
+                        obj.err(code);
+                    }
+                }
+            )
+        },
+        scrollbottom() {
+            console.log('=========bottom=========',this.isBottom)
+            if(!this.isBottom){
+                this.isBottom = true
+                this.loadMore = true;
+                this.scrobottomType = true;
+                this.touchSelect = false;
+                if (!this.sequence) {
+                    this.sequence = true;
+                }
+                if (this.directoryselect.length > 0) {
+                        this.selectIndex = this.selectIndex +1;
+                        console.info('现在的索引',this.selectIndex);
+                        if(this.selectIndex >= this.directoryselect.length){
+                        this.selectIndex = this.directoryselect.length-1;
+                        // this.toEnd = true;
+                        // this.loadMore = false;
+                        // return false;
+                    }
+                    this.startIndex =this.directoryselect[this.selectIndex].startIndex;
+                    this.endIndex =this.directoryselect[this.selectIndex].endIndex;
+                    this.chapterlist(false,false);
+                }
+                this.scrobottomType = false;
+            }
+        },
+        fnappear(index){
+            // console.log('fnappear')
+            this.touchSelect = false;
+            this.scrollCount++;
+            if(this.scrobottomType == true || this.scrollCount <=1){
+                return false;
+            }
+            // console.info("显示的list-item==>",index,this.directoryList);
+            if(this.directoryList.length) {
+                if (this.directoryList[index].chapterIndex  && parseInt(this.directoryselect[this.selectIndex].startIndex) && parseInt(this.directoryList[index].chapterIndex) < this.directoryselect[this.selectIndex].startIndex) {
+                    this.selectIndex -=1;
+                    console.log('this.selectIndex',this.selectIndex)
+                    if(this.selectIndex < 0) {
+                        this.selectIndex = 0;
+                    }
+                }else if(this.directoryList[index].chapterIndex && parseInt(this.directoryselect[this.selectIndex].endIndex) && parseInt(this.directoryList[index].chapterIndex) > this.directoryselect[this.selectIndex].endIndex){
+                    this.selectIndex +=1;
+                    console.log('this.selectIndex',this.selectIndex)
+                    if(this.selectIndex >= this.directoryselect.length){
+                        this.selectIndex = this.directoryselect.length-1;
+                    }
+                    
+                }else {
+                    this.renderDirList = true;
+                }
+            }
+        },
+        renderBookList(){
+            // console.info('click啦');
+            this.touchSelect = true;
+            this.scrollCount = 0;
+        },
+        retryHandler(){
+            let that = this;
+            this.isShowBtn= true;
+            this.isLoading = false;
+            setTimeout(() => {
+                router.replace({
+                    uri:'/Directory',
+                    params:{
+                        bookId: that.bookId,
+                        chapterId: that.chapterId,
+                        isLowerShelf:that.isLowerShelf,
+                        pageFrom:that.bopageFromokId,
+                        SourcePosition:that.SourcePosition,
+                        omap:that.omap,
+                        isUpdateOmap:that.isUpdateOmap
+                    }
+                })
+            }, 1000);
+        }
+        ,
+         toRechargeAuto(data){
+            let that = this
+            let auto = data.detail.auto
+            console.log(auto)
+            router.push({
+                uri: '/Recharge',
+                params: {
+                    url: '/Read',
+                    unit: that.orderObj.unit,
+                    amount: that.orderObj.price,
+                    bookId: that.bookId,
+                    chapterId: that.orderObj.chapterId,
+                    pageFrom: that.pageFrom,
+                    auto: auto,
+                    SourcePosition: that.SourcePosition,
+                    omap: that.omap,
+                    isUpdateOmap: that.isUpdateOmap,
+                    bookName: that.bookName
+                }
+            })
+        },
+        getisAutopay(){
+            let that = this
+            if(!that.autoPay){
+                storage.get({
+                    key:'booksAutopay',
+                    success:function(res){
+                        if(res){
+                            try{
+                                that.autoPay=1
+                                let arr = JSON.parse(res)
+                                console.log(arr)
+                                arr.forEach((cur,index)=>{
+                                    if(cur.bId==that.bookId){
+                                        that.autoPay=cur.autoPay
+                                    }
+                                })
+                            }catch{
+                                that.autoPay=1
+                            }
+                            
+                        }else{
+                            that.autoPay=1
+                        }
+                    },
+                    fail(){
+                        that.autoPay=1
+                    }
+                })
+            }else{
+                that.autoPay=1
+            }
+
+        },
+        closeOrderpop(){
+            this.giveUpPopShow = false
+            this.orderShow = false
+        },
+        fnNextChapter(confirmPay,autoPay){
+            let that = this
+            if(confirmPay){
+                that.confirmPay = 2
+            }else{
+                that.confirmPay = 1
+            }
+            if(autoPay){
+                that.autoPay = autoPay
+            }
+            that.routerread('/Read',that.cindex)
+        },
+        // 关闭整本购买
+        fnCloseOncePrice() {
+            this.giveUpPopShow = false
+            this.oncePriceShow = false
+        },
+        // 展示整本购买挽留
+        fnGiveUpShow() {
+            this.giveUpPopShow = true
+        },
+        // 关闭整本购买挽留
+        fnCloseGiveUp() {
+            this.giveUpPopShow = false
+        },
+        // 放弃整本购买
+        fnToPopOrder() {
+            let { data, index } = this.oncePriceExtraInfo
+            this.oncePriceShow = false
+            if(data.status == 5) {
+                this.orderShow = true
+            }
+            if(data.status == 4) {
+                if(data.orderPage.action == 1) {
+                    this.orderShow = true
+                }else {
+                    this.fnGoRecharge(data, index)
+                }
+            }
+        },
+        // 去充值
+        fnGoRecharge(data, index) {
+            let that = this
+            that.isToRecharge = true
+            router.push({
+                uri: '/Recharge',
+                params: {
+                    url: '/Read',
+                    unit: data.orderPage.unit,
+                    amount: data.orderPage.price,
+                    bookId: that.sbookId,
+                    chapterId: that.directoryList[index].chapterId,
+                    pageFrom: that.pageFrom,
+                    SourcePosition: that.SourcePosition,
+                    omap: that.omap,
+                    isUpdateOmap: that.isUpdateOmap,
+                    bookName: that.bookName
+                }
+            })
+        },
+    };
+
+
+</script>

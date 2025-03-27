@@ -1,0 +1,192 @@
+<template>
+    <div class="adwall-entry-popup-wrap">
+        <stack class="popup-stack">
+            <image class="bg" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-read-adwall-entry-popup-bg.png"></image>
+            <image class="close" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-read-adwall-popup-close-icon.png" @click="fnClose"></image>
+            <div class="content-box">
+                <div class="award-box">
+                    <stack class="award-item" if="awardTime">
+                        <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-read-award-no-ad-bg.png"></image>
+                        <text class="text">{{ awardTime }}分钟免广告</text>
+                    </stack>
+                    <stack class="award-item" if="awardCoin" style="margin-left: {{ awardTime ? '16px' : '0' }};">
+                        <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-read-award-coin-bg.png"></image>
+                        <text class="text">{{ awardCoin }}金币</text>
+                    </stack>
+                </div>
+                <div class="end-time-box">
+                    <text class="title">{{ awardTime && awardCoin ? '双重' : '限时' }}奖励，仅限本小时</text>
+                    <text class="end-time-text">{{ endTime }}结束</text>
+                </div>
+            </div>
+            <div class="btn">
+                <stack class="btn-box" @click="fnConfirm">
+                    <image class="img" src="https://xsmfdq.kkyd.cn/images/hmxs/hmxs-read-popup-adwall-entry-btn.png"></image>
+                    <text class="text">看资讯领{{ awardTime && awardCoin ? '双重' : '限时' }}奖励</text>
+                </stack>
+            </div>
+            <text class="desc">本时间段最多可获取{{ maxCount }}次限时奖励</text>
+        </stack>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .text-style {
+        width: 100%;
+        text-align: center;
+        height: 45px;
+        line-height: 45px;
+        color: #FF2830;
+        font-size: 32px;
+    }
+    .adwall-entry-popup-wrap {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.7);
+        .popup-stack {
+            justify-content: flex-end;
+            width: 646px;
+            height: 885px;
+            .bg {
+                width: 100%;
+                height: 100%;
+            }
+            .close {
+                width: 54px;
+                height: 54px;
+            }
+            .content-box {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                margin-top: 246px;
+                .award-box {
+                    justify-content: center;
+                    .award-item {
+                        width: 242px;
+                        height: 196px;
+                        .icon {
+                            width: 100%;
+                            height: 100%;
+                        }
+                        .text {
+                            margin-top: 127px;
+                            .text-style();
+                        }
+                    }
+                }
+                .end-time-box {
+                    flex-direction: column;
+                    margin-top: 32px;
+                    .title {
+                       .text-style();
+                        font-weight: 500;
+                    }
+                    .end-time-text {
+                        margin-top: 21px;
+                        .text-style();
+                    }
+                }
+            }
+            .btn {
+                justify-content: center;
+                width: 100%;
+                height: 114px;
+                margin-top: 674px;
+                .btn-box {
+                    width: 478px;
+                    height: 100%;
+                    .img {
+                        width: 100%;
+                        height: 100%;
+                    }
+                    .text {
+                        align-items: center;
+                        width: 100%;
+                        height: 100%;
+                        text-align: center;
+                        color: #C50008;
+                        font-size: 36px;
+                        font-weight: 500;
+                    }
+                }
+            }
+            .desc {
+                width: 100%;
+                height: 40px;
+                line-height: 40px;
+                margin-top: 812px;
+                text-align: center;
+                color: #FFEDC3;
+                font-size: 28px;
+            }
+        }
+    }
+</style>
+
+<script>
+export default {
+    props: {
+        award: {
+            type: Array,
+            required: false,
+            default: []
+        },
+        maxCount: {
+            type: Number,
+            required: false,
+            default: 4
+        },
+    },
+    onInit() {
+        this.endTime = this.fnDateFormat(Date.now() + 3600000); // 结束时间，当前时间 + 1小时
+        let awardTime = 0,
+            awardCoin = 0;
+        (this.award || []).map(item => {
+            awardTime += item.reduceAdMinute || 0;
+            awardCoin += item.goldCoinNum || 0;
+        });
+        this.awardTime = awardTime;                             // 免广时长奖励
+        this.awardCoin = awardCoin;                             // 金币奖励
+    },
+    data () {
+        return {
+            endTime: '',                                        // 结束时间
+            awardTime: 0,                                       // 免广时长奖励
+            awardCoin: 0,                                       // 金币奖励
+            isBtnClick: false,                                  // 按钮是否点击
+        }
+    },
+    // 弹窗关闭按钮点击
+    fnClose () {
+        if (this.isBtnClick) {
+            return false;
+        }
+        this.isBtnClick = true;
+        this.$emit('fnClose');
+    },
+    // 底部进入激励墙确认按钮点击
+    fnConfirm () {
+        if (this.isBtnClick) {
+            return false;
+        }
+        this.isBtnClick = true;
+        this.$emit('fnEnterAdWall');
+    },
+    // 格式化时间戳
+    fnDateFormat (timestamp) {
+        if (!timestamp) {
+            return '--:--';
+        }
+        let now = new Date(timestamp)
+        let h = now.getHours();
+        let m = now.getMinutes();
+        return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+    },
+}
+</script>

@@ -1,0 +1,170 @@
+<template>
+    <div>
+        <div class="withdraw-pop" @click="fnClick">
+            <image class="pop-close" src="https://xsmfdq.kkyd.cn/images/pop_close_icon.png" @click="fnClosePop"></image>
+            <div class="pop-box">
+                <image class="pop-image" src="https://xsmfdq.kkyd.cn/images/identity_card.png"></image>
+                <div class="autonym-title">
+                    <image src="https://xsmfdq.kkyd.cn/images/solid_left.png" class="solid-left"></image>
+                    <text class="autonym-text">实名认证</text>
+                    <image src="https://xsmfdq.kkyd.cn/images/solid_right.png" class="solid-right"></image>
+                </div>
+                <text class="pop-text">根据国家税务局要求，提现需填写身份证信息</text>
+                <div class="inputMes">
+                    <input class="inputContent" type="text" placeholder="姓名" value="{{trueName}}" @change="getValName"></input>
+                </div>
+                 <div class="inputMes">
+                    <input class="inputContent" type="text" placeholder="身份证号" value="{{idNumber}}" @change="getValId"></input>
+                 </div>
+                <text class="input-error">{{inputWrong ? ('*' + wrongText + '输入错误，请重新输入') : ''}}</text>
+                <text class="pop-btn" @click="fnConfirm">提交</text>
+            </div>
+        </div>
+    </div>
+</template>
+<style scoped lang="less">
+    .withdraw-pop {
+        flex-direction: column;
+        /* justify-content: center; */
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .7);
+        .pop-close {
+            align-self:flex-end;
+            position: fixed;
+            top: 294px;
+            right: 60px;
+            width: 54px;
+            height: 54px;
+        }
+        .pop-box {
+            flex-direction: column;
+            align-items: center;
+            width: 646px;
+            height: 752px;
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            margin-top: 286px;
+            .pop-image {
+                width: 646px;
+                height: 178px;
+            }
+            .autonym-title {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                height: 56px;
+                align-items: center;
+                margin-top: 24px;
+                .solid-left {
+                    width: 100px;
+                    height: 4px;
+                }
+                .autonym-text {
+                    height: 56px;
+                    font-size: 40px;
+                    font-weight: bold;
+                    color: #222222;
+                    line-height: 56px;
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+                .solid-right {
+                    width: 100px;
+                    height: 4px;
+                }
+            }
+            .pop-text {
+                width: 100%;
+                height: 37px;
+                font-size: 26px;
+                color: #F97053;
+                line-height: 37px;
+                text-align: center;
+                margin-top: 8px;
+            }
+            .inputMes {
+                width: 540px;
+                height: 90px;
+                background-color: #FFFFFF;
+                border-radius: 4px;
+                border: 1px solid #CCCCCC;
+                display: flex;
+                align-items: center;
+                margin-top: 24px;              
+                .inputContent {
+                    width: 100%;
+                    height: 45px;
+                    margin-left: 24px;
+                    placeholder-color:#999999;
+                }
+            }
+            .input-error {
+                width: 100%;
+                height: 37px;
+                font-size: 26px;
+                color: #F97053;
+                line-height: 37px;
+                margin-top: 24px;
+                padding-left: 53px;
+                display: flex;
+            }
+            .pop-btn {
+                margin-top: 24px;
+                margin-bottom: 32px;
+                width: 540px;
+                height: 90px;
+                background-color: #F97053;
+                border-radius: 44px;
+                font-size: 32px;
+                color: #FFFFFF;
+                line-height: 90px;
+                text-align: center;
+            }
+        }
+    }
+</style>
+
+<script>
+export default {
+    props:[],
+    data: {
+        trueName: '',     //姓名
+        idNumber: '',      //身份证
+        inputWrong: false,   //是否输入错误
+        wrongText: '',   // 错误信息
+    },
+    onInit() {
+        this.inputWrong = false
+    },
+    fnClick() {},
+    fnClosePop() {
+        this.$parent().autonym = false
+    },
+    getValName(e) {
+        this.trueName = e.text
+    },
+    getValId(e) {
+        this.idNumber = e.text
+        this.inputWrong = false 
+    },
+    //提交身份信息
+    fnConfirm() {
+        let reg = /(^([1-6][1-9]|50)\d{4}(18|19|20)\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^([1-6][1-9]|50)\d{4}\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}$)$/
+        if (this.trueName == '') {
+            this.wrongText = '姓名'
+            this.inputWrong = true 
+            return false; 
+        } else if (reg.test(this.idNumber) === false) {
+            this.wrongText = '身份证号' 
+            this.inputWrong = true 
+            return false; 
+        } else {
+            this.inputWrong = false 
+            this.$emit('autonymSubmit', {trueName: this.trueName, idNumber: this.idNumber})
+        }
+    }
+}
+</script>

@@ -1,0 +1,128 @@
+<template>
+    <div class="shortcut-warning" @click="vagueClick">
+        <stack class="pop">
+            <div class="pop-w">
+                <text class="title">警告：请务必添加到手机桌面！</text>
+                <text class="des {{(cutSupport.vivoSupport || cutSupport.oppoSupport || cutSupport.huaweiSupport) ? 'des-bottom' : ''}}"><span class="black">若不添加手机桌面，下次阅读找不到阅读入口，书币可能会丢失。</span><span class="red">最终导致您无法继续阅读！</span></text>
+                <block if="{{cutSupport.vivoSupport || cutSupport.oppoSupport || cutSupport.huaweiSupport}}">
+                    <onekey-shortcut-new 
+                        btnwidth="500px" 
+                        btnheight="90px" 
+                        btnfontsize="36px" 
+                        btnradius="90px" 
+                        btncolor="#ffffff" 
+                        btnbgcolor="#F96053"
+                        buttexto="去添加"
+                        buttextv="添加桌面"
+                        cut-support="{{cutSupport}}" 
+                        chapter-index="{{chapterIndex}}"
+                        position="warning"
+                        @oneshortcomplete="{{oneshortComplete}}">
+                    </onekey-shortcut-new>
+                </block>
+                <image else class="confirm" src="https://xsmfdq.kkyd.cn/images/warning-goadd-btn.png" onclick="fnConfirm"></image>
+            </div>
+            <image class="warning" src="https://xsmfdq.kkyd.cn/images/short-warning.png"></image>
+            <image class="close" src="https://xsmfdq.kkyd.cn/images/short-close.png" onclick="fnClose"></image>
+        </stack>
+    </div>
+</template>
+<style scoped lang="less">
+.shortcut-warning{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,.8);
+    justify-content: center;
+    align-items: center;
+   .pop{
+        width:600px;
+        height:644px;
+        .pop-w{
+            width:600px;
+            height:543px;
+            background-color: #fff;
+            padding: 0px 50px;
+            flex-direction: column;
+            border-radius:36px;
+            margin-top: 101px;
+            .title{
+                font-size:35px;
+                color:rgba(255,3,0,1);
+                line-height:50px;
+                margin-top: 129px;
+            }
+            .des-bottom {
+                margin-bottom: 30px;
+            }
+            .des{
+                margin-top: 35px;
+                text-indent: 2em;
+                .black{
+                    color:rgba(41,41,41,1);
+                    font-size:28px;
+                    line-height:48px;
+                }
+                .red{
+                    color: #FF0300;
+                    font-size:28px;
+                    line-height:48px;
+                }
+            }
+            .confirm{
+                margin-top: 40px;
+                width: 100%;
+                height: 90px;
+            }
+        }
+        .warning{
+            margin-left: 166px;
+            width: 268px;
+            height: 200px;
+        }
+        .close{
+            margin-left: 546px;
+            margin-top: 10px;
+            width: 54px;
+            height: 54px;
+        }
+   }
+}
+</style>
+
+<script>
+import storage from '@system.storage';
+import router from '@system.router';
+export default {
+    props: [
+        'warningLevel',
+        'cutSupport',
+        'chapterIndex',
+    ],
+    onInit() {},
+    fnConfirm(){
+        let that = this
+        if(that.warningLevel==1){
+            that.$app.$def.quickappLog([702, {
+                qmap:{
+                    site: '2'
+                }
+            }, 'warning_add'], that)
+            that.$emit('shortconfirm')
+        }else if(that.warningLevel==2){
+            that.$emit('downloadapk')
+        }
+    },
+    fnClose() {
+        this.$emit('warningClose')
+    },
+    vagueClick(){
+        console.log('为了解决部分机型滑动穿透的问题')
+    },
+    oneshortComplete(evt) {
+        if(evt && evt.detail && evt.detail.position == 'warning') {
+            this.$emit('oneshortcomplete', evt)
+        }
+    },
+}
+</script>

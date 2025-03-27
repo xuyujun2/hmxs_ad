@@ -1,0 +1,212 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div class='renew-wrap'>
+        <div class="renew-box">
+            <div class="renew-info">
+                <text class="renew-title">自动续订</text>
+                <text class="renew-desc">{{isAutoRenew ? '关闭后，包月到期不再扣费' : '如需开启，请重新至充值列表开通'}}</text>
+            </div>
+            <image if="{{isAutoRenew}}" @click="fnPopShow" class="renew-switch" src="../Common/images/auto-btn-open.png"></image>
+            <image else class="renew-switch" @click="fnRouterToRecharge" src="../Common/images/auto-btn-close.png"></image>
+        </div>
+        <div class="renew-box-line"></div>
+        <div class="renew-pop-wrap" if="isPopShow">
+            <div class="renew-pop-box">
+                <text class="renew-pop-tip">关闭自动续订后，包月到期将不再享受所有书免费阅读特权。您是否确定取消？</text>
+                <div @click="fnClosePop" class="renew-pop-btn">
+                    <stack class="renew-pop-stack">
+                        <image class="renew-pop-bg" src="../Common/images/list-btn.png"></image>
+                        <text class="renew-pop-over">继续享受免费特权</text>
+                    </stack>
+                </div>
+                <text @click="fnCancleRenew" class="renew-pop-give">不用了，以后再说</text>
+            </div>
+        </div>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .renew-wrap {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        background-color: #ffffff;
+        .renew-box {
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            padding: 26px 30px 26px 40px;
+            height: 138px;
+            .renew-info {
+                flex: 1;
+                flex-direction: column;
+                height: 86px;
+                .renew-title {
+                    margin-bottom: 12px;
+                    height: 42px;
+                    font-size: 30px;
+                    font-weight: bold;
+                    color: rgba(68,68,68,1);
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+                .renew-desc {
+                    height: 32px;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: rgba(186,186,186,1);
+                    lines: 1;
+                    text-overflow: ellipsis;
+                }
+            }
+            .renew-switch {
+                width: 92px;
+                /* height: 58px; */
+            }
+        }
+        .renew-box-line {
+            width: 690px;
+            height: 1px;
+            background-color: rgba(102, 106, 125, 0.2);
+        }
+        .renew-pop-wrap {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            .renew-pop-box {
+                flex-direction: column;
+                justify-content: center;
+                padding: 50px 48px 52px;
+                width: 600px;
+                background-color: rgba(255,255,255,1);
+                border-radius: 24px;
+                .renew-pop-tip {
+                    margin-bottom: 38px;
+                    width: 504px;
+                    /* height: 96px; */
+                    font-size: 28px;
+                    color: rgba(39,41,50,1);
+                    line-height: 48px;
+                }
+                .renew-pop-btn {
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 40px;
+                    width: 504px;
+                    height: 80px;
+                    .renew-pop-stack {
+                        align-items: center;
+                        justify-content: center;
+                    } 
+                    .renew-pop-bg {
+                        width: 444px;
+                        height: 80px;   
+                        border-radius: 40px;
+                    }
+                    .renew-pop-over {
+                        font-size: 30px;
+                        font-weight: bold;
+                        color: rgba(255,255,255,1);
+                    }
+                }
+                .renew-pop-give {
+                    height: 42px;
+                    font-size: 30px;
+                    color: rgba(175,175,175,1);
+                    text-align: center;
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    export default {
+        private: {
+            isAutoRenew: true, // 续费开关是否开启
+            isPopShow: false, // 确认弹框是否展示
+            isLoading: false, // 解约中
+        },
+        onInit() {
+            this.$page.setTitleBar({ 
+                text: '包月订购设置',
+                backgroundColor: '#FF8970',
+                textColor: '#FFFFFF'
+            })
+        },
+        onshow() {
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '包月订购'
+            });
+            this.$app.$def.quickappLog([701], this);
+        },
+        fnPopShow() {
+            this.isPopShow = true
+        },
+        fnClosePop() {
+            this.isPopShow = false
+        },
+        fnRouterToRecharge() {
+            // router.push({
+            //     uri: '/Recharge',
+            //     params: {
+            //         url: '/Renew',
+            //     }
+            // }) 
+        },
+        // 关闭续费
+        fnCancleRenew() {
+            let that = this
+            if(that.isLoading) {
+                prompt.showToast({
+                    message: '申请解约中，请稍等'
+                })
+                return
+            }
+            that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                ButtonName: '点击申请解约',
+            });
+            that.isLoading = true
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2107',
+                data: {
+                    unSign: 1,
+                },
+                succ: function (res) {  
+                    that.isLoading = false 
+                    if(res.data && res.data.code == 1) {
+                        that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                            ButtonName: '申请解约成功',
+                        });
+                        prompt.showToast({
+                            message: '已成功申请解约'
+                        })
+                        that.isAutoRenew = false
+                        that.$app.isAutoRenewCancle = true
+                        that.isPopShow = false
+                    } else {
+                        prompt.showToast({
+                            message: '申请解约失败'
+                        })
+                    }
+                },
+                error: function (code) {
+                    that.isLoading = false
+                    prompt.showToast({
+                        message: '申请解约失败'
+                    })
+                }
+            })
+        },
+    }
+</script>

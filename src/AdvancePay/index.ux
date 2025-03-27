@@ -1,0 +1,454 @@
+<import name="payLists" src="../Common/sharedComponent/payLists/index"></import>
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+
+<template>
+    <div class="root">
+        <block if="{{beforePayVo || oncePriceVo}}">
+            <stack class="pay-info" if="beforePayVo">
+                <image class="bg" src="https://xsmfdq.kkyd.cn/images/advance-pay-info.png"></image>
+                <div class="info">
+                    <div class="chapter">
+                        <image src="https://xsmfdq.kkyd.cn/images/davance-chapter.png"></image>
+                        <text>第{{beforePayVo.beginChapter}}-{{beforePayVo.endChapter}}章</text>
+                    </div>
+                    <text class="discount">{{beforePayVo.price}}元</text>
+                </div>
+            </stack>
+            <text class="tips" if="beforePayVo">限时特惠价不代表后续章节价格</text>
+            <div class="once-price" if="oncePriceVo">
+                <div class="op-title">
+                    <text class="op-price">{{oncePriceVo.price}}</text>
+                    <text class="op-tag">元</text>
+                </div>
+                <text class="op-desc">{{'《' + oncePriceVo.bookName + '》全本， 含后续更新章节'}}</text>
+            </div>
+            <div class="pay-con">
+                <payLists 
+                    show="{{!isOppoPay&&!isHuaweiPay}}" 
+                    id='payList' 
+                    list-style="{{listStyle}}"
+                    title-name="{{type == 'oncePrice' ? '整本书一口价支付页' : '提前付费支付页'}}"
+                    pay-way-list="{{payWayList}}" 
+                    pay-index="{{payindex}}" 
+                    rece-params="{{receParams}}" 
+                    is-web-pay-alert="{{isWebPayAlert}}"
+                    @fn-change-alert-show="fnChangeAlertShow"
+                    @ready-jump="jumpToPage"
+                ></payLists>
+            </div>
+            <div class="pay-btn" @click="gopay"><text>立即支付</text></div>
+        </block>
+        <retry if="{{isShowBtn}}" is-loading="{{isLoading}}" @retry="retryHandler"></retry>
+    </div>
+</template>
+
+<style lang="less">
+    .root{
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 150px;
+        .once-price {
+            margin-top: 60px;
+            margin-bottom: 90px;
+            flex-direction: column;
+            align-items: center;
+            .op-title {
+                height: 126px;
+                align-items: flex-end;
+                .op-price {
+                    height: 126px;
+                    font-size: 90px;
+                    font-weight: 600;
+                    color: #444444;
+                    line-height: 126px;
+                }
+                .op-tag {
+                    margin-bottom: 18px;
+                    height: 40px;
+                    font-size: 30px;
+                    font-weight: 600;
+                    color: #444444;
+                    line-height: 40px;
+                }
+            }
+            .op-desc {
+                width: 400px;
+                font-size: 30px;
+                font-weight: 400;
+                color: #444444;
+                line-height: 48px;
+                text-align: center;
+            }
+        }
+        .pay-info{
+            width: 336px;
+            height: 200px;
+            .bg{
+                width: 100%;
+                height: 100%;
+            }
+            .info{
+                width: 100%;
+                height: 100%;
+                flex-direction: column;
+                align-items: center;
+                .chapter{
+                    justify-content: center;
+                    align-items: center;
+                    margin-top: 42px;
+                    image{
+                        width: 22px;
+                        height: 24px;
+                        margin-right: 14px;
+                    }
+                    text{
+                        font-size: 26px;
+                        color: #272932;
+                        line-height: 37px;
+                    }
+                }
+                .discount{           
+                    font-size: 68px;
+                    font-weight: bold;
+                    color: #292929;
+                    line-height: 95px;
+                    margin-top: 2px;
+                }
+            }
+        }
+        .tips{           
+            font-size: 26px;
+            margin-top: 14px;
+            color: #272932;
+            line-height: 37px;
+        }
+        .pay-con{
+            width: 100%;
+            padding: 0 50px;
+        }
+        .pay-btn{
+            width: 100%;
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            background-color: #ffffff;
+            justify-content: center;
+            padding: 30px 0px;
+            text{
+                width: 670px;
+                height: 84px;
+                background-color: #F97053;
+                border-radius: 42px;
+                text-align: center;
+                color: #ffffff;
+                font-size: 30px;
+                font-weight: bold;
+            }
+        }
+    }
+</style>
+
+<script>
+    import router from '@system.router'
+    import prompt from '@system.prompt';
+    import wxpay from '@service.wxpay';
+    export default {
+        data: {
+            listStyle: '4',
+            payWayList:[],
+            payindex:0,
+            receParams:{},
+            isWebPayAlert:false,
+            isOppoPay:false,
+            isHuaweiPay:false,
+            bookId:'',
+            chapterId:'',
+            chapterIndex:'',
+            bookName: '',
+            omap:'',
+            callALiPay:false,
+            beforePayVo:'',
+            isShowBtn: false,
+            isLoading: false,
+            reloadNum: 0,
+            oncePriceVo: '',
+            type: 'advancePay', // oncePrice/advancePay
+        },
+        onInit() {
+            this.$page.setTitleBar({ text: '支付' });
+            if(this.omap!='' && typeof(this.omap)=='string'){
+                this.omap = JSON.parse(this.omap)
+            }
+            this.$on('checkPayType',this.changePayType);
+            this.$on('alipay_Event',this.handleALiPay)
+            this.getPayInfo()
+        },
+        onShow() {
+            let that = this
+            that.$app.lastOpenPage = ''
+            that.$app.shenceLog.log(that, 'pageShow' , '', {
+                Title: '提前付费'
+            });
+            that.$app.$def.quickappLog([701,{omap:that.omap}], that);
+            // 支付宝支付回调
+            if (that.isshow) {
+                if(!this.callALiPay){
+                    this.$broadcast('initPaySwitch');
+                }
+            }
+        },
+        onBackPress (e) {
+            let that = this;
+            setTimeout(() => {
+                // 如果打开了支付提示，先关闭
+                if(that.isWebPayAlert) {
+                    that.isWebPayAlert = false
+                    return true
+                }else {
+                    router.back();
+                }
+            }, 0);
+            // 阻止默认行为，等待异步操作
+            return true;
+        },
+        //充值
+        gopay(num) {
+            let that = this;
+            // if(that.goPayClock){
+            //     return;
+            // }
+            // that.goPayClock = true;
+            // that.hidePageTimeout1 = setTimeout(() => {
+            //     that.goPayClock = false;
+            // }, 500);
+            this.$broadcast('initGoPay');      
+            let _payWayList = that.payWayList;
+            let _index = that.payindex;
+            that.payDataJson = {
+                    from: _payWayList[_index].from,
+                    payWay: _payWayList[_index].payWay,
+                    // type: that.plist.products[that.payobj.index].type,
+                    id: that.type == 'oncePrice' ? that.oncePriceVo.id : that.beforePayVo.id,
+                    sourceType: '1',
+                    sourceInfo: that.bookId,
+                    omap:that.omap==''?'':JSON.stringify(that.omap)
+                    // utJson:JSON.stringify(that.payUserTacticsVo)
+                }
+            that.logJson={
+                from: that.payDataJson.from,
+                payWay: that.payDataJson['payWay'],
+                id: that.payDataJson['id'],
+                sourceType: that.payDataJson['sourceType'],
+                sourceInfo: that.payDataJson['sourceInfo'],
+                brand: that.$app.headerJson['brand'],
+                model: that.$app.headerJson['model'],
+                userId: that.$app.headerJson['userId'],
+                omap: that.payDataJson['omap'],
+            };
+            // console.info('datajson',that.payDataJson);
+            
+            // console.info('gopay',_payWayList);
+            switch( _payWayList[that.payindex].payWay ){
+                //oppo支付
+                case 'OPPOPAY':
+                console.info('开始oppozhifu');
+                this.$broadcast('oppoPay',{dataJson:that.payDataJson,logJson:that.logJson});
+                break;
+                //huawei支付
+                case 'HUAWEIPAY':
+                this.$broadcast('huaweiPay',{dataJson:that.payDataJson,logJson:that.logJson});
+                break;
+                // 支付宝支付
+                case 'ALIPAY':
+                this.$broadcast('aLiPay',{ dataJson:that.payDataJson,logJson:that.logJson });
+                break;
+                // 微信APP支付
+                case 'WECHATPAY_APP':
+                this.$broadcast('wxPay',{ payType:'APP', dataJson:that.payDataJson, logJson:that.logJson});
+                break;
+                // 微信WEB支付
+                case 'WECHATPAY_MWEB':
+                this.$broadcast('wxPay',{ payType:'MWEB', dataJson:that.payDataJson, logJson:that.logJson});
+                break;
+                // 现在支付
+                case 'NOWPAY':
+                this.$broadcast('nowPay',{ dataJson:that.payDataJson, logJson:that.logJson });
+                break;
+                default:
+            }
+            // 关闭底部弹层
+            // that.payShow = false; 如果设为false，子组件实例会摧毁
+            if(!_payWayList[that.payindex].payWay){
+                console.info('你点击啦');
+                prompt.showToast({
+                    message: '支付错误,请联系客服',
+                    duration: 0
+                });
+            }
+            if(that.type == 'oncePrice') {
+                that.$app.shenceLog.log(that, 'track','ButtonClick', {
+                    PositionName: '整本书一口价支付页',
+                    ButtonName: '确认支付',
+                    ButtonContent:  _payWayList[that.payindex].showName,
+                    BookID: that.bookId || '',
+                    ChaptersID: that.chapterId || '',
+                    BookName: that.bookName || ''
+                });
+            }else {
+                that.$app.shenceLog.log(that,'track','ButtonClick', {
+                    ButtonName: '点击确认支付',
+                    ButtonContent: '确认支付',
+                    Title: '提前付费支付页',
+                    BookID: that.bookId || '',
+                    ChaptersID: that.chapterId || '',
+                    BookName: that.bookName || ''
+                });
+            }
+        }, 
+        //切换支付方式
+        changePayType(evt) {
+            let that = this;
+            that.payindex = evt.detail.params;
+            if(that.type == 'oncePrice') {
+                that.$app.shenceLog.log(that, 'track','ButtonClick', {
+                    PositionName: '整本书一口价支付页',
+                    ButtonName: '选择支付方式',
+                    ButtonContent: that.payWayList[that.payindex].showName,
+                    BookID: that.bookId || '',
+                    ChaptersID: that.chapterId || '',
+                    BookName: that.bookName || ''
+                });
+            }
+        },
+        getpaylist(json){
+            let that=this;
+            let _payWayList = [];
+            let payType = wxpay.getType();
+            if(json.payWayList && json.payWayList.length){
+                if(json.payWayList[0].payWay=='OPPOPAY'){
+                    json.isOppoPay = true
+                }
+                if(json.payWayList[0].payWay=='HUAWEIPAY'){
+                    json.isHuaweiPay = true
+                }
+                for(let i=0; i<json.payWayList.length; i++){
+                    if (json.payWayList[i].payWay == 'WECHATPAY_APP'){
+                        if(payType == 'APP'){
+                            _payWayList.push(json.payWayList[i]);
+                        }
+                    }
+                    else if (json.payWayList[i].payWay == 'WECHATPAY_MWEB') {
+                        if(payType == 'MWEB'){
+                            _payWayList.push(json.payWayList[i]);
+                        }
+                    }
+                    else if (json.payWayList[i].payWay == 'ALIPAY'){
+                        _payWayList.push(json.payWayList[i]);
+                    }else{
+                        _payWayList.push(json.payWayList[i]);
+                    }
+                }
+                that.payWayList = _payWayList;
+            }
+            let shencePayWayList = [];
+            let shencePayWayStr = '';
+            that.payWayList.forEach((item,index,array) => {
+                shencePayWayList.push(item.showName);
+            })
+            shencePayWayStr = shencePayWayList.join('-')
+            if(that.type == 'oncePrice') {
+                that.$app.shenceLog.log(that,'track','PopupExposure', {
+                    PositionName: '支付方式列表',
+                    PayChannels: shencePayWayStr,
+                    Title:'整本书一口价支付页'
+                });
+            }else {
+                that.$app.shenceLog.log(that,'track','PopupExposure', {
+                    PositionName: '支付方式列表',
+                    PayChannels: shencePayWayStr,
+                    Title:'提前付费支付页'
+                });
+            }
+        },
+        getPayInfo(){
+            let that = this
+            that.$app.$def.requestData(that, {
+                interface: `/glory/fastapp/2155`,
+                data: {
+                    bookId: that.bookId,
+                    chapterId: that.chapterId,
+                    omap:that.omap==''?'':JSON.stringify(that.omap),
+                    type: that.type == 'oncePrice' ? 2 : 1,
+                },
+                succ: function (res) {
+                    let json = res.data
+                    if(that.type == 'oncePrice') {
+                        that.oncePriceVo = json.oncePriceVo
+                    }else {
+                        that.beforePayVo = json.beforePayVo
+                    }
+                    that.getpaylist(json)
+                },
+                error: function(){
+                    that.isShowBtn = true;
+                    that.isLoading = false;
+                    if (that.reloadNum == 0) {
+                        that.reloadNum = 1;
+                        setTimeout(function () {
+                            that.getPayInfo()
+                        }, 1000)
+                    } else {
+                        that.isShowBtn = true;
+                        that.isLoading = true;
+                    }
+                }
+            })
+        },
+        jumpToPage(evt){
+            if(evt.detail.type){
+                this.$broadcast('initQueryParams');
+                this.paysucc()
+            }
+        },
+        paysucc(){
+            if(this.type == 'oncePrice') {
+                this.$app.isOncePrice = 1
+            }else {
+                this.$app.appAdvanceSign = 1
+            }
+            router.back();
+        },
+        // 支付提醒显示切换
+        fnChangeAlertShow(evt) {
+            if(evt && evt.detail && evt.detail.show) {
+                this.isWebPayAlert = true
+            }else {
+                this.isWebPayAlert = false
+            }
+        },
+        handleALiPay(evt){
+            this.callALiPay = evt.detail.callALiPay;
+        },
+        onHide() {
+            clearTimeout(this.hidePageTimeout);            
+        },
+        retryHandler(){
+            let that = this;
+            this.isShowBtn= true;
+            this.isLoading = false;
+            that.hidePageTimeout = setTimeout(() => {
+                router.replace({
+                    uri:'/AdvancePay',
+                    params:{
+                        bookId: that.bookId,
+                        chapterId: that.chapterId,
+                        chapterIndex: that.chapterIndex,
+                        omap: that.omap,
+                        type: that.type == 'oncePrice' ? 'oncePrice' : 'advancePay',
+                        bookName: that.bookName
+                    }
+                })
+            }, 1000);
+        }
+    }
+</script>

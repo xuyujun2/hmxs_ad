@@ -1,0 +1,939 @@
+<template>
+    <div class="read-dashboard">
+        <div class="read-dashboard-title">
+            <image src="../Common/images/left.png" @click="fnPageBackPress"></image>
+            <text>{{bookName}}</text>
+        </div>
+        <div class="read-dashboard-mask" @touchend="fnChangeDashboard"></div>
+        <block if="{{!timeoutshow}}">
+            <stack if="{{!isListen}}" class="read-dashboard-content" @click="vagueClick">
+                <div class='container' style="opacity: {{setupJson['bNight'] ? 0.5 : 1}}">
+                    <div class="bgcolor">
+                        <div class="item item4 {{bgColorIndex==3 ? 'selected' : ''}}" @click="fnChangeBgcolor(3,'rgba(246,230,195,1)')">
+                            <div if="bgColorIndex==3" class="icon"></div>
+                        </div>
+                        <div class="item item1 {{bgColorIndex==0 ? 'selected' : ''}}" @click="fnChangeBgcolor(0,'rgba(238,238,238,1)')">
+                            <div if="bgColorIndex==0" class="icon"></div>
+                        </div>
+                        <div class="item item2 {{bgColorIndex==1 ? 'selected' : ''}}" @click="fnChangeBgcolor(1,'rgba(223,237,214,1)')">
+                            <div if="bgColorIndex==1" class="icon"></div>
+                        </div>
+                        <div class="item item3 {{bgColorIndex==2 ? 'selected' : ''}}" @click="fnChangeBgcolor(2,'rgba(248,206,218,1)')">
+                            <div if="bgColorIndex==2" class="icon"></div>
+                        </div>
+                    </div>
+                    <div class="fontsize">
+                        <div class="{{setupJson.fontSize == '40' ? 'btn-grey' : 'btn'}}" @click="fnChangeFontsize('reduce')">
+                            <text class="{{setupJson.fontSize == '40' ? 'text-grey' : 'text-nol'}}">小字体</text>
+                        </div>
+                        <text class="size">{{setupJson.fontSize}}</text>
+                        <div class="{{setupJson.fontSize == '60' ? 'btn-grey' : 'btn'}}" @click="fnChangeFontsize('plus')">
+                            <text class="{{setupJson.fontSize == '60' ? 'text-grey' : 'text-nol'}}">大字体</text>
+                        </div>
+                    </div>
+                    <div class="setupmenu">
+                        <div class="item" @click="fnPrevClick">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/icon-lastchapter.png"></image>
+                            <text>上一章</text>
+                        </div>
+                        <div class="item" @click="fnRouterDirectory">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/icon-document-i.png"></image>
+                            <text>目录</text>
+                        </div>
+                        <div class="item" if="{{canChangeReadType}}" @click="fnShowReadType">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/chapter-type.png"></image>
+                            <text>翻章方式</text>
+                        </div>
+                        <div class="item" @click="fnNextClick">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/icon-nextchapter.png"></image>
+                            <text>下一章</text>
+                        </div>
+                    </div>
+                </div>
+                <div class="share-ctrl {{canListen && (listenSwitch || extraListenSwitch || listenPayFlag) ? '' : 'share-ctrl-low'}}" if="{{isShare}}">
+                    <image src="https://xsmfdq.kkyd.cn/images/dzmfxs/dashboard-share.png" @click="fnShare"></image>    
+                </div>
+                <div class="change-night">
+                    <image src="../Common/images/read-night.png" @click="fnChangeNight" show="{{!setupJson['bNight']}}"></image>   
+                    <image src="../Common/images/read-sun.png" @click="fnChangeNight" show="{{setupJson['bNight']}}"></image>   
+                </div>
+                <div class="listen-ctrl" if="{{canListen && (listenSwitch || extraListenSwitch || listenPayFlag)}}">
+                    <image src="https://xsmfdq.kkyd.cn/images/listen-book-c.png" @click="fnListenHandle"></image>
+                </div>
+            </stack>
+            <stack else class="listen-dashboard" @click="vagueClick">
+                <div class='container' style="opacity: {{setupJson['bNight'] ? 0.5 : 1}}">
+                    <div class="speedsize">
+                        <div class="{{speedIdx === 0 || curSpeedList.length === 0 ? 'btn-grey' : 'btn'}}" @click="fnChangeSpeed('reduce')">
+                            <text class="{{speedIdx === 0 || curSpeedList.length === 0 ? 'text-grey' : 'text-nol'}}">减慢语速</text>
+                        </div>
+                        <text class="size">{{speedContent}}</text>
+                        <div class="{{speedIdx === (curSpeedList.length - 1) || curSpeedList.length === 0 ? 'btn-grey' : 'btn'}}" @click="fnChangeSpeed('plus')">
+                            <text class="{{speedIdx === (curSpeedList.length - 1) || curSpeedList.length === 0 ? 'text-grey' : 'text-nol'}}">加快语速</text>
+                        </div>
+                    </div>
+                    <div class="timbre">
+                        <div class="cur-timbre">
+                            <text>{{timbreContent}}</text>
+                        </div>
+                        <div class="more-timbre" @click="fnMoreTimbre">
+                            <text>更多声音+</text>
+                        </div>
+                    </div>
+                    <div class="setupmenu">
+                        <div class="item" @click="fnTimeoutListen">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/timeout-i.png"></image>
+                            <text>定时关闭</text>
+                        </div>
+                        <div class="item" @click="fnExitListen">
+                            <image class="icon" src="https://xsmfdq.kkyd.cn/images/listen-out.png"></image>
+                            <text>退出听书</text>
+                        </div>
+                    </div>
+                </div>
+            </stack>   
+        </block>
+        <block else>
+            <div class="timeout-db" @click="vagueClick">
+                <text class="title">定时关闭设置</text>
+                <div class="times" for="{{times}}" @click="fnChangeTime($item.num)">
+                    <text>{{$item.text}}</text>
+                    <div class="{{$item.num == listenTime ? 'selected' : 'select'}}"></div>
+                </div>
+            </div>
+        </block>
+        <div if="!isInBookShelf" class="add-tip" @click="fnAddBookShelf">
+            <text class="add-tip-text">加入书架</text>
+        </div>
+        <div if="{{isReadTypeShow}}" class="chapter-type" @click="vagueClick">
+            <div class="chapter-tit">
+                <text>翻章方式</text>
+                <image @click="fnHideReadType" src="https://xsmfdq.kkyd.cn/images/bg-choose-cancel.png"></image>
+            </div>
+            <div class="chapter-item" @click="fnSelectReadType('page')">
+                <text>左右翻页模式</text>
+                <div class="select {{readType == 'page' ? 'selected' : 'no-select'}}"></div>
+            </div>
+             <div class="chapter-item" @click="fnSelectReadType('list')">
+                <text>点击按钮翻章</text>
+                <div class="select {{readType == 'list' ? 'selected' : 'no-select'}}"></div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    import router from '@system.router';
+    import storage from '@system.storage';
+    import prompt from '@system.prompt'
+    export default {
+        props: [
+            'isInBookShelf',
+            'bookId',
+            'bookName',
+            'chapterId',
+            'canListen',
+            'isListen',
+            'listenSwitch',
+            'listenPayFlag',
+            'listenTime',
+            'speedList',
+            'timbreList',
+            'defaultTimbre',
+            'defaultSpeed',
+            'readType',
+            'canChangeReadType',
+            'bookId',
+            'setupJson',
+            'extraListenSwitch',
+            'listenTask',
+            'isShare'
+        ],
+        data () {
+            return {
+                curSpeedList: [], // 语速列表
+                speedIdx: 0, // 语速索引
+                speed: '', // 语速
+                speedContent: '', // 语速文案
+                timbreContent: '', // 音色文案
+                bgColorIndex: '',
+                timeoutshow: false,
+                times: [
+                    {
+                        num: 15,
+                        text: '15分钟'
+                    },
+                    {
+                        num: 30,
+                        text: '30分钟'
+                    },
+                    {
+                        num: 60,
+                        text: '60分钟'
+                    },
+                    {
+                        num: 90,
+                        text: '90分钟'
+                    },
+                    {
+                        num: 0,
+                        text: '关闭'
+                    }
+                ],
+                isReadTypeShow: false, // 翻章选项展示
+                fontSizeChange: false, // 切换字体间隔
+            }
+        },
+        onInit() {
+            this.bgColorIndex = this.setupJson['bgColorIndex'];
+            this.fnSetTimbre()
+            this.fnChangeSpeed('init')
+            if(this.isListen) {
+                this.$app.$def.quickappLog([702, {
+                    qmap: {
+                        site: '8'
+                    }
+                }, 'listen_book'], this)
+            }
+        },
+        /**
+         * 初始音色配置
+        */ 
+        fnSetTimbre() {
+            if(this.timbreList && this.timbreList.length) {
+                const hasGetId = this.timbreList.findIndex(item => item.id === this.$app.listenJson.timbre)
+                if(hasGetId === -1) {
+                    const timbreInfo = this.timbreList.find(item => item.id === this.defaultTimbre)
+                    this.timbreContent = timbreInfo.name + (timbreInfo.desc ? ' (' + timbreInfo.desc + ')' : '')
+                    this.$app.listenJson.timbre = this.defaultTimbre
+                    storage.set({
+                        key: 'listenSetting',
+                        value: JSON.stringify(this.$app.listenJson)
+                    })
+                } else {
+                    const timbreInfo = this.timbreList[hasGetId]
+                    this.timbreContent = timbreInfo.name + (timbreInfo.desc ? ' (' + timbreInfo.desc + ')' : '')
+                }
+            }
+        },
+        /**
+         * 选择语音速度
+        */ 
+        fnSwitchSpeed() {
+            if(this.curSpeedList && this.curSpeedList.length) {
+                const hasGetDesc = this.curSpeedList.findIndex(item => item.speed === this.$app.listenJson.speed)
+                if(hasGetDesc === -1) {
+                    const speedInfo = this.curSpeedList.find(item => item.speed === this.defaultSpeed)
+                    this.speedContent = speedInfo.desc
+                    this.speed = this.defaultSpeed
+                    this.$app.listenJson.speed = this.defaultSpeed
+                    storage.set({
+                        key: 'listenSetting',
+                        value: JSON.stringify(this.$app.listenJson)
+                    })
+                } else {
+                    const speedInfo = this.curSpeedList[hasGetDesc]
+                    this.speedContent = speedInfo.desc
+                    this.speed = speedInfo.speed
+                }
+            }
+        },
+        fnNextClick() {
+            this.$emit('nextClick')
+        },
+        fnPrevClick() {
+            this.$emit('prevClick')
+        },
+        /**
+         * 切换黑夜模式
+        */ 
+        fnChangeNight() {
+            let that = this;
+            that.$emit('changeSetupJson', {
+                bNight: !that.setupJson['bNight']
+            })
+            if(that.$app && that.$app.headerJson && that.$app.headerJson.pfvc && that.$app.headerJson.pfvc >= 1080 && that.$app.headerJson.brand && (that.$app.headerJson.brand.toLowerCase() == 'oppo' || that.$app.headerJson.brand.toLowerCase() == 'oneplus' || that.$app.headerJson.brand.toLowerCase() == 'realme')) {
+                that.$emit('colorChange')
+            }
+        },
+        /**
+         * 切换背景色
+         * @param   {Number}    index      [索引]
+         * @param   {String}    color      [色值]
+        */ 
+        fnChangeBgcolor(index, color) {
+            let that = this;
+            let colorText = ''
+            let loadImg = ''
+            if(index == 0) {
+                loadImg = '../Common/images/load_gray.gif';
+                colorText = '纯白色'
+            }
+            if(index == 1) {
+                loadImg = '../Common/images/load_green.gif';
+                colorText = '纯绿色'
+            }
+            if(index == 2) {
+                loadImg = '../Common/images/load_pink.gif';
+                colorText = '粉红色'
+            }
+            if(index == 3) {
+                loadImg = '../Common/images/load_yellow.gif';
+                colorText = '原本色'
+            }
+            that.bgColorIndex = index;
+            that.$emit('changeSetupJson', {
+                bgColor: color,
+                bgColorIndex: index,
+                loadImg: loadImg
+            })
+            that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                Title: '阅读页',
+                ButtonName: '选择阅读背景',
+                ButtonContent: colorText,
+                BookID: that.bookId || ''
+            });
+        },
+        /**
+         * 切换字号
+         * @param   {Srting}    str      [增减]
+        */ 
+        fnChangeFontsize(str) {
+            let that = this;
+            if(that.fontSizeChange) {
+                return
+            }
+            that.fontSizeChange = true
+            setTimeout(() => {
+                that.fontSizeChange = false
+            }, 500)
+            let refresh = true
+            let num = that.setupJson['fontSize']
+            if(str == 'reduce') {
+                num -= 2;
+                if(num < 40) {
+                    refresh = false
+                    num = 40;
+                }
+            }
+            if(str == 'plus') {
+                num += 2;
+                if(num > 60) {
+                    refresh = false
+                    num = 60;
+                }
+            }
+            that.$emit('changeSetupJson', {
+                fontSize: num,
+                lineheight: num * 1.8,
+            })
+            if(that.readType === 'page') {
+                that.$emit('refreshReader')
+            }
+            if(that.$app && that.$app.headerJson && that.$app.headerJson.pfvc && that.$app.headerJson.pfvc >= 1080 && that.$app.headerJson.brand && (that.$app.headerJson.brand.toLowerCase() == 'oppo' || that.$app.headerJson.brand.toLowerCase() == 'oneplus' || that.$app.headerJson.brand.toLowerCase() == 'realme') && refresh) {
+                that.$emit('fontsizeChange')
+            }
+        },
+        /**
+         * 切换语音速度
+         * @param   {Srting}    state      [增减]
+        */ 
+        fnChangeSpeed(state) {
+            let that = this
+            if(that.speedList && that.speedList.length) {
+                if(state === 'init') {
+                    that.curSpeedList = that.speedList.sort((p, n) => { return p.speed - n.speed })
+                    that.fnSwitchSpeed()
+                    that.speedIdx = that.curSpeedList.findIndex(item => item.speed === that.speed)
+                    return
+                }
+                if(state === 'reduce') {
+                    if(that.speedIdx <= 0) {
+                        return
+                    }
+                    that.speedIdx--
+                    const speedInfo = that.curSpeedList[that.speedIdx]
+                    that.speedContent = speedInfo.desc
+                    that.speed = speedInfo.speed
+                    that.$app.listenJson.speed = speedInfo.speed
+                }
+                if(state === 'plus') {
+                    if(that.speedIdx >= that.curSpeedList.length - 1) {
+                        return
+                    }
+                    that.speedIdx++
+                    const speedInfo = that.curSpeedList[that.speedIdx]
+                    that.speedContent = speedInfo.desc
+                    that.speed = speedInfo.speed
+                    that.$app.listenJson.speed = speedInfo.speed
+                }
+                that.$app.$def.quickappLog([702, {
+                    qmap: {
+                        site: '2',
+                        type: state,
+                        speed: that.speed
+                    }
+                }, 'listen_book'], that)
+
+                that.$emit('rePlayAudio')
+                
+                storage.set({
+                    key: 'listenSetting',
+                    value: JSON.stringify(that.$app.listenJson),
+                    success() {
+                        that.$emit('changeDashboard')
+                    }
+                })
+            }
+        },
+        fnPageBackPress() {
+            this.$emit('pageBackPress');
+        },
+        /**
+         * 操作面板展示
+        */ 
+        fnChangeDashboard() {
+            this.$emit('changeDashboard')
+            if(this.isListen) {
+                let that = this
+                if(that.timeoutshow) {
+                    that.$app.$def.quickappLog([702, {
+                        qmap: {
+                            site:'10',
+                            
+                        }
+                    }, 'listen_book'], that)
+                } else {
+                    that.$app.$def.quickappLog([702, {
+                        qmap: {
+                            site:'9',
+                            
+                        }
+                    }, 'listen_book'], that)
+                }
+            }
+        },
+        /**
+         * 开启听书
+         * @param   {Srting}    pos      [位置]
+        */ 
+        fnListenStart(pos) {
+            let that = this
+            that.$emit('startListen');
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site:'1',
+                    pos:pos
+                }
+            }, 'listen_book'], that)
+            this.$emit('changeDashboard')
+        },
+        /**
+         * 退出听书
+        */ 
+        fnExitListen() {
+            this.$emit('exitListen');
+            this.$emit('changeDashboard')
+        },
+        /**
+         * 定时听书
+        */ 
+        fnTimeoutListen() {
+            let that = this
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site:'6'
+                }
+            }, 'listen_book'], that)
+            this.timeoutshow = true
+        },
+        /**
+         * 更多音色选择
+        */ 
+        fnMoreTimbre() {
+            let that = this
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site:'3'
+                }
+            }, 'listen_book'], that)
+            that.$emit('moreTimbre');
+            // that.$emit('changeDashboard')
+        },
+        /**
+         * 切换定时时长
+         * @param   {Srting}    num      [时长]
+        */ 
+        fnChangeTime(num) {
+            let that = this
+            that.$app.$def.quickappLog([702, {
+                qmap: {
+                    site: '7',
+                    num: num,
+                    curNum: that.listenTime
+                }
+            }, 'listen_book'], that)
+            if(that.listenTime != num) {
+                if (num == 0) {
+                    that.$emit('closeListenTimeout');
+                } else {
+                    that.$emit('startListenTimeout', { num: num });
+                }
+                that.$emit('changeDashboard')
+            }
+        },
+        fnShowReadType() {
+            this.isReadTypeShow = true
+        },
+        fnHideReadType() {
+            this.isReadTypeShow = false
+        },
+        /**
+         * 切换阅读方式
+         * @param   {Srting}    type      [阅读方式]
+        */ 
+        fnSelectReadType(type) {
+            storage.set({
+                key: 'readType',
+                value: type
+            }) 
+            if(type != this.readType) {
+                this.$emit('changeReadType', { type: type })
+                this.fnHideReadType()
+            }
+            this.$emit('changeDashboard')
+        },
+        vagueClick() {
+            console.log('为了解决部分机型滑动穿透的问题')
+        },
+        /**
+         * 听书功能判断
+        */ 
+        fnListenHandle() {
+            if(this.canListen) {
+                if(this.listenSwitch) {
+                    this.fnListenStart('top')
+                    this.$emit('buttonClick', { isListen: '听书' })
+                    return
+                } 
+                if(this.extraListenSwitch) {
+                    this.fnListenStart('top')
+                    this.$emit('buttonClick', { isListen: '免费听书' })
+                    return
+                }
+                if(this.listenTask.hasFree || this.listenTask.remainTimes) {
+                    this.$emit('showListenPop')
+                    return
+                }
+                if(this.listenPayFlag) {
+                    this.fnRouteToMember()
+                    this.$emit('buttonClick', { isListen: false })
+                    return
+                }
+            }
+        },
+        /**
+         * 跳转会员页面
+        */ 
+        fnRouteToMember() {
+            let that = this
+            router.push({
+                uri: '/Member',
+                params: {
+                    pageFrom: 'read',
+                    bookId: that.bookId,
+                    chapterId: that.chapterId,
+                    choosePay: 'listen',
+                    referrer: '阅读页-听书'
+                }
+            })
+        },
+        fnShare() {
+            this.$emit('share')
+        },
+        /**
+         * 加入书架
+         */
+        fnAddBookShelf() {
+            this.$emit('addBookShelf')
+        },
+        fnRouterDirectory() {
+            this.$emit('routerToDirectory')
+        },
+    }
+</script>
+
+<style lang="less" scoped>
+    .read-dashboard {
+        .read-dashboard-title {
+            align-items: center;
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 150px;
+            background-color: #000000;
+            padding: 0px 40px;
+            image {
+                width: 50px;
+                height: 50px;
+            }
+            text {
+                flex: 1;
+                font-size: 34px;
+                font-weight: bold;
+                color: #FFFFFF;
+                text-align: center;
+                lines: 1;
+                text-overflow: ellipsis;
+            }
+        }
+        .read-dashboard-mask {
+            position: fixed;
+            left: 0px;
+            top: 150px;
+            width: 100%;
+            height: 100%;
+        }
+        .read-dashboard-content {
+            position: fixed;
+            left: 0px;
+            bottom: 0px;
+            width: 100%;
+            height: 418px;
+            background-color: #000000;
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                background-color: #000000;
+                padding: 40px 50px;
+                .bgcolor {
+                    justify-content: space-between;
+                    .item {
+                        width: 140px;
+                        height: 60px;
+                        border-radius: 8px;
+                        border: 4px solid rgba(0, 0, 0, 0);
+                    }
+                    .item1 {
+                        background-color: rgba(238,238,238,1);
+                        border: 4px solid rgba(238,238,238,1);
+                    }
+                    .item2 {
+                        background-color: rgba(223,237,214,1);
+                        border: 4px solid rgba(223,237,214,1);
+                    }
+                    .item3 {
+                        background-color: rgba(248,206,218,1);
+                        border: 4px solid rgba(248,206,218,1); 
+                    }
+                    .item4 {
+                        background-color: rgba(246,230,195,1);
+                        border: 4px solid rgba(246,230,195,1); 
+                    }
+                    .selected {    
+                        border: 4px solid #FF5B60;
+                        justify-content: flex-end;
+                        align-items: flex-end;
+                        .icon {
+                            width: 36px;
+                            height: 37px;
+                            background-image: url('https://xsmfdq.kkyd.cn/images/read-bg-current.png');
+                        }
+                    }
+                }
+                .fontsize {
+                    justify-content: space-between;
+                    margin-top: 45px;
+                    .btn {
+                        width: 192px;
+                        height: 52px;
+                        border: 1px solid #FFFFFF;
+                        border-radius: 4px;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .btn-grey {
+                        width: 192px;
+                        height: 52px;
+                        background-color: rgba(38,38,38,1);
+                        border-radius: 4px;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .text-nol {
+                        font-size: 30px;
+                        color: #FFFFFF;
+                    }
+                    .text-grey {
+                        font-size: 30px;
+                        color: rgba(255, 255, 255, .5);
+                    }
+                    .size {
+                        color: #ffffff;
+                        font-size: 34px;
+                    }
+                }
+                .setupmenu {
+                    justify-content: space-between;
+                    margin-top: 45px;
+                    padding: 0px;
+                    .item {
+                        flex-direction: column;
+                        align-items: center;
+                        flex: 1;
+                        .icon {
+                            width: 48px;
+                            height: 49px;
+                        }
+                        text {
+                            margin-top: 5px;
+                            font-size: 20px;
+                            color: #FFFFFF;
+                            height: 28px;
+                        }
+                    }
+                }
+            }
+            .share-ctrl {
+                position: fixed;
+                right: 20px;
+                bottom: 708px;
+                width: 110px;
+                height: 110px;  
+                image {
+                    width: 110px;
+                    height: 110px;
+                }
+            }
+            .share-ctrl-low {
+                bottom: 573px;
+            }
+            .change-night {
+                position: fixed;
+                right: 20px;
+                bottom: 438px;
+                width: 110px;
+                height: 110px;
+                image {
+                    width: 110px;
+                    height: 110px;
+                }
+            }
+            .listen-ctrl {
+                position: fixed;
+                right: 20px;
+                bottom: 573px;
+                width: 110px;
+                height: 110px;
+                image {
+                    width: 110px;
+                    height: 110px;
+                }
+            }
+        }
+        .listen-dashboard {
+            position: fixed;
+            left: 0px;
+            bottom: 0px;
+            height: 418px;
+            background-color: #000000;
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                background-color: #000000;
+                padding: 40px 50px;
+                .speedsize {
+                    justify-content: space-between;
+                    .btn {
+                        width: 192px;
+                        height: 72px;
+                        border: 1px solid #FFFFFF;
+                        border-radius: 4px;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .btn-grey {
+                        width: 192px;
+                        height: 72px;
+                        background-color: rgba(38, 38, 38, 1);
+                        border-radius: 4px;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .text-nol {
+                        font-size: 30px;
+                        color: #FFFFFF;
+                    }
+                    .text-grey {
+                        font-size: 30px;
+                        color: rgba(255, 255, 255, .5);
+                    }
+                    .size {
+                        color: #FFFFFF;
+                        font-size: 36px;
+                    }
+                }
+                .timbre {
+                    justify-content: space-between;
+                    margin-top: 45px;
+                    align-items: center;
+                    .cur-timbre {
+                        width: 423px;
+                        height: 52px;
+                        border-radius: 4px;
+                        justify-content: center;
+                        align-items: center;
+                        text {
+                            font-size: 30px;
+                            color: #FFFFFF;
+                        }
+                    }
+                    .more-timbre {
+                        width: 192px;
+                        height: 72px;
+                        background-color: rgba(255, 91, 96, 1);
+                        border-radius: 4px;
+                        justify-content: center;
+                        align-items: center;
+                        text {
+                            font-size: 30px;
+                            color: #FFFFFF;
+                        }
+                    }
+                }
+                .setupmenu {
+                    justify-content: space-between;
+                    margin-top: 45px;
+                    padding: 0px 120px;
+                    .item {
+                        flex-direction: column;
+                        align-items: center;
+                        flex: 1;
+                        .icon {
+                            width: 48px;
+                            height: 49px;
+                        }
+                        text {
+                            margin-top: 5px;
+                            font-size: 20px;
+                            color: #FFFFFF;
+                            height: 28px;
+                        }
+                    }
+                }
+            }
+        }
+        .timeout-db {
+            flex-direction: column;
+            position: fixed;
+            left: 0px;
+            bottom: 0px;
+            height: 597px;
+            width: 100%;
+            padding: 20px 40px;
+            background-color: #000000;
+            .title {
+                font-size: 30px;
+                color: rgba(255, 255, 255, .8);
+            }
+            .times {
+                padding: 29px 0px;
+                border-bottom-color: rgba(151, 151, 151, .3);
+                border-bottom-width: 1px;
+                justify-content: space-between;
+                align-items: center;
+                text {
+                    font-size: 34px;
+                    color: #FFFFFF;
+                }
+                .select {
+                    width: 40px;
+                    height: 40px;
+                    background-color: rgba(216, 216, 216, 1);
+                    border-radius: 40px;
+                }
+                .selected {
+                    width: 40px;
+                    height: 40px;
+                    background-color: rgba(255, 255, 255, 1);
+                    border: 10px solid rgba(255, 91, 96, 1);
+                    border-radius: 40px;
+                }
+            }
+        }
+        .add-tip {
+            position: fixed;
+            top: 250px;
+            right: 0px;
+            width: 210px;
+            height: 72px;
+            background-color: rgba(0, 0, 0, .8);
+            border-top-left-radius: 100px;
+            border-bottom-left-radius: 100px;
+            justify-content: center;
+            padding-left: 10px;
+            .add-tip-text {
+                height: 72px;
+                font-size: 30px;
+                line-height: 72px;
+                color: #FFFFFF;
+                text-align: center;
+                lines: 1;
+            }
+        }
+        .chapter-type {
+            flex-direction: column;
+            position: fixed;
+            left: 0px;
+            bottom: 0px;
+            width: 100%;
+            height: 350px;
+            background-color: #000000;
+            padding: 20px 60px 0px 60px;
+            .chapter-tit {
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 45px;
+                text {
+                    font-size: 30px;
+                    font-weight: 400;
+                    color: rgba(255, 255, 255, .6);
+                    height: 42px;
+                    line-height: 42px;
+                }
+                image {
+                    width: 36px;
+                    height: 36px;
+                }
+            }
+            .chapter-item {
+                justify-content: space-between;
+                align-items: center;
+                height: 90px;
+                text {
+                    font-size: 34px;
+                    font-weight: 400;
+                    color: #FFFFFF;
+                    height: 72px;
+                    line-height: 72px;
+                }
+                .select {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 40px;
+                }
+                .selected {
+                    background-color: #FFFFFF;
+                    border: 10px solid #FF5B60;
+                }
+                .no-select {
+                    background-color: #D8D8D8;
+                    border: 1px solid #979797;
+                }
+            }
+        }
+    }
+</style>

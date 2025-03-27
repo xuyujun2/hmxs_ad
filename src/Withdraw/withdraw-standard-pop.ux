@@ -1,0 +1,120 @@
+<style lang="less">
+    .withdraw-standard-dialog {
+			position: fixed;
+			width: 100%;
+			height: 100%;
+			left: 0;
+			top: 0;
+			background-color: rgba(0, 0, 0, 0.7);
+			justify-content: center;
+			align-items: center;
+			.withdraw-standard-box {
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				width: 646px;
+				height: 326px;
+				background-color: #FFFFFF;
+				border-radius: 16px;
+				.withdraw-standard-content {
+					flex: 1;
+					padding: 56px 54px 0 53px;
+					flex-direction: column;
+					align-items: center;
+					.withdraw-standard-title {
+						height: 44px;
+						font-size: 36px;
+						font-weight: bold;
+						color: #333333;
+						line-height: 44px;
+					}
+					.withdraw-standard-text {
+						margin-top: 24px;
+						font-size: 28px;
+						color: #333333;
+						line-height: 34px;
+					}
+				}
+				.withdraw-button {
+                    width: 540px;
+					height: 80px;
+                    margin-bottom: 32px;
+					.withdraw-button-cancel, .withdraw-button-click {
+                        width: 260px;
+                        height: 80px;
+                        background-color: #F6F7F7;
+                        border-radius: 45px;
+                        text-align: center;
+                        margin-right: 20px;
+                        color: #666666;
+					}
+					.withdraw-button-click {
+                        background-color: rgba(255, 99, 28, 1);
+                        color: #fff
+					}
+				}
+			}
+		}
+
+</style>
+
+<template>
+    <!-- 提现门槛弹窗 -->
+		<stack class="withdraw-standard-dialog">
+			<div class="withdraw-standard-box">
+				<div class="withdraw-standard-content">
+					<text class="withdraw-standard-title">{{ standardPopObj.standardPopTitle }}</text>
+					<text class="withdraw-standard-text">{{ standardPopObj.standardPopContent }}</text>
+				</div>
+				<div class="withdraw-button">
+					<text class="withdraw-button-cancel" @click="fnPopClose">关闭</text>
+					<text class="withdraw-button-click" @click="fnClickButton">{{ standardPopObj.standardPopButtonText}}</text>
+				</div>
+			</div>
+		</stack>
+</template>
+
+<script>
+import router from '@system.router';
+export default {
+    props: {
+		// 弹窗文案对象
+        standardPopObj: {                                          
+            type: Object,
+            required: false,
+            default: {}
+        },
+		// 当前门槛类型
+		currentType: {
+            type: Number,
+            required: false,
+            default:  -1
+		}
+    },
+	// 弹窗关闭事件
+	fnPopClose() {
+		this.$emit('closePop')
+	},
+	// 按钮点击事件
+	fnClickButton() {
+		if(this.currentType === 0 || this.currentType === 11) {
+		    router.back()
+		}
+
+		if(this.currentType === 12 || this.currentType === 13) {
+			router.clear()
+			router.replace({
+                uri: '/Index',
+				params:{
+                    isStartToIndex:1
+                }
+            })
+		}
+
+		if(this.currentType === 14) {
+			this.$emit('videoPlay')
+		}
+	    this.fnPopClose()
+	}
+}
+</script>

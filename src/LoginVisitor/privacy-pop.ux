@@ -1,0 +1,115 @@
+<template>
+    <div>
+        <div if="{{isUpa==1}}" class="giveup">
+            <div class="pop">
+                <text class="title">提示</text>
+                <text class="text"><span>欢迎使用{{appName}}！您需要阅读并同意</span><a href="{{url}}/huodong/quickapp/free_agreement/xieyi_free.html?channelCode={{txtName}}" class="colred">《用户协议》</a><span>和</span><a href="{{url}}/huodong/quickapp/free_agreement/yinsi_free.html?channelCode={{txtName}}" class="colred">《隐私策略》</a><span>，方可使用{{appName}}提供的阅读服务，是否同意？</span></text>
+                <div class="btn">
+                    <text class="cancle" @click="clickExit()">不同意并退出</text>
+                    <text class="confirm" @click="clickAgree()">我已阅读并同意</text>
+                </div>
+            </div>
+        </div>
+        <!-- <div if="{{isUpa==2}}" class="giveup">
+            <div class="pop">
+                <text class="title">提示</text>
+                <text class="text"><span>{{appName}}重视用户隐私并严格遵守相关法律法规的要求。请先阅读并同意</span><a href="{{url}}/huodong/quickapp/free_agreement/xieyi.html?channelCode={{txtName}}" class="colred">《用户协议》</a><span>和</span><a href="{{url}}/huodong/quickapp/free_agreement/yinsi.html?channelCode={{txtName}}" class="colred">《隐私策略》</a><span>再继续使用{{appName}}。</span></text>
+                <div class="btn">
+                    <text class="cancle" @click="clickExit()">退出</text>
+                    <text class="confirm" @click="clickAgree()">我已阅读并同意</text>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</template>
+<style scoped lang="less">
+    .giveup{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0,0,0,0.8);;
+        .colred {color:#FF5B60;}
+        .pop{
+            width:560px;
+            /* margin-top: 400px; */
+            background-color:rgba(255,255,255,1);
+            border-radius:24px;
+            flex-direction: column;
+            align-items: center;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(68,68,68,1);
+                margin-top: 30px;
+            }
+            .text{
+                text-indent: 2em;
+                width:480px;
+                font-size:26px;
+                color:rgba(115,115,115,1);
+                margin: 30px 0px 32px;
+                line-height:40px;
+            }
+            span{
+                line-height:40px;
+            }
+            .btn{
+                .cancle{
+                    width:50%;
+                    height:84px;
+                    background-color:rgba(242,242,242,1);
+                    color:rgba(186,186,186,1);
+                    text-align: center;
+                    line-height: 84px;
+                    border-bottom-left-radius: 24px;
+
+                }
+                .confirm{
+                    width:50%;
+                    height:84px;
+                    text-align: center;
+                    line-height: 84px;
+                    color:rgba(255,255,255,1);
+                    background-color:#FD895A;
+                    border-bottom-right-radius: 24px;
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+import router from '@system.router';
+export default {
+    props: [],
+    data: {
+        appName:'',
+        txtName:'',
+        url:'',
+        isUpa:1
+    },
+    onInit() {
+        this.appName=this.$app.$data.name;
+        this.txtName = this.$app.$data.channelCode;
+        this.url = this.$app.api;
+    },
+    clickAgree(){
+        // 阅读并同意
+        let that = this;
+        that.$emit('agreePrivacy')
+    },
+    clickShowIsUpa2(){
+        // 点击再想想按钮
+        this.isUpa = 2;
+    },
+    clickExit(msg){
+        // 退出应用
+        this.$app.exit();
+    }
+}
+</script>

@@ -1,0 +1,61 @@
+<template>
+    <div class="to-sign-wrap"></div>
+</template>
+<style lang="less" scoped>
+    .to-sign-wrap {}
+</style>
+<script>
+    import router from '@system.router';
+    export default {
+        props: [
+            'currentIndex',
+            'indexOnshow',
+        ],
+        data: {
+            oldIndex: 0,
+            hasRoute: false,
+        },
+        onInit() {
+            this.$watch('currentIndex', 'watchCurrentIndex')
+            this.$watch('indexOnshow', 'watchIndexOnshow')
+            if (!this.hasRoute) {
+                this.$dispatch('fnSignToIndex', 0)
+                this.hasRoute = true
+                router.push({
+                    uri: '/Sign',
+                    params: {
+                        sourcePage: '首页-福利入口'
+                    }
+                })
+			}
+        },
+        watchCurrentIndex(newValue, oldValue) {
+            this.oldIndex = oldValue ? oldValue : 0
+            if (newValue == 2 && !this.hasRoute) {
+                this.$dispatch('fnSignToIndex', oldValue)
+                this.hasRoute = true
+                router.push({
+                    uri: '/Sign',
+                    params: {
+                        sourcePage: '首页-福利入口'
+                    }
+                })
+            }
+        },
+        watchIndexOnshow() {
+            if (this.currentIndex != 2) {
+                this.hasRoute = false
+            }
+            if (this.currentIndex == 2 && !this.hasRoute) {
+                this.$dispatch('fnSignToIndex', 0)
+                this.hasRoute = true
+                router.push({
+                    uri: '/Sign',
+                    params: {
+                        sourcePage: '首页-福利入口'
+                    }
+                })
+			}
+        },
+    }
+</script>

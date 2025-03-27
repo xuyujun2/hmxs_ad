@@ -1,0 +1,1772 @@
+<import name="pop-order" src="../Base/pop-order"></import>
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="retry" src="../Common/sharedComponent/retry/index.ux"></import>
+<import name="paid-tag" src="../Component/tag.ux"></import>
+<import name="once-price" src="../Base/once-price"></import>
+
+<style lang="less" scoped>
+    @btn-color: #785AF6;
+    @bottom-btn-height: 128px;
+    .root {
+        flex-direction: column;
+        flex: 1;
+        background-color: #ffffff;
+        .body-detail {
+            flex-direction: column;
+            .book-top {
+                height: 404px;
+                .book-info-wrap {
+                    justify-content: space-between;
+                    width: 100%;
+                    height: 400px;
+                    padding: 0 32px;
+                    background-image: url('https://xsmfdq.kkyd.cn/images/hmxs/book-detail-book-info-bg.png');
+                    background-repeat: no-repeat;
+                    background-size: 100%;
+                    .left {
+                        flex-direction: column;
+                        align-items: flex-start; 
+                        justify-content: space-between;
+                        width: 450px;
+                        height: 264px;
+                        margin-top: 12px;
+                        .top {
+                            flex-direction: column;
+                            .book-name {
+                                width: 405px;
+                                line-height: 56px;
+                                color: #fff;
+                                font-size: 40px;
+                                lines: 2;
+                                text-overflow: ellipsis;
+                            }
+                            .book-author {
+                                width: 405px;
+                                height: 32px;
+                                margin-top: 24px;
+                                color: rgba(255, 255, 255, 0.6);
+                                font-size: 26px;
+                                lines: 1;
+                                text-overflow: ellipsis;
+                            }
+                        }
+                        .book-tag {
+                            height: 48px;
+                            padding: 8px 24px;
+                            color: rgba(255, 255, 255, 0.7);
+                            font-size: 26px;
+                            border-radius: 8px;
+                            background-color: rgba(34, 34, 34, 0.2);
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                    }
+                    .right {
+                        width: 196px;
+                        height: 260px;
+                        margin-top: 16px;
+                        .book-cover {
+                            width: 196px;
+                            height: 260px;
+                            border-radius: 8px;
+                        }
+                    }
+                }
+                .book-score-wrap {
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 686px;
+                    height: 96px;
+                    margin-top: 308px;
+                    margin-left: 32px;
+                    padding: 0 40px;
+                    background-image: url('https://xsmfdq.kkyd.cn/images/hmxs/book-detail-score-bg.png');
+                    background-repeat: no-repeat;
+                    background-size: 100%;
+                    @text-color: #E78F00;
+                    .left {
+                        align-items: center;
+                        height: 100%;
+                        .book-score {
+                            margin-bottom: 5px;
+                            color: @text-color;
+                            font-size: 44px;
+                            font-weight: bold;
+                        }
+                        .score-text {
+                            margin-left: 4px;
+                            color: @text-color;
+                            font-size: 28px;
+                        }
+                    }
+                    .right {
+                        align-items: center;
+                        height: 100%;
+                        .icon {
+                            width: 32px;
+                            height: 32px;
+                            margin-top: 5px;
+                        }
+                        .text {
+                            margin-left: 8px;
+                            color: @text-color;
+                            font-size: 28px;
+                        }
+                    }
+                }
+            }
+            .text-bold {
+                height: 44px;
+                line-height: 44px;
+                margin-top: 48px;
+                color: #222;
+                font-size: 36px;
+                font-weight: bold;
+            }
+            .text-bold-introduction {
+                padding: 0 32px; 
+            }
+            .book-introduction-wrap {
+                justify-content: flex-end;
+                margin-top: 24px;
+                padding: 0 32px;
+                .book-introduction {
+                    line-height: 48px;
+                    color: #5A5A64;
+                    font-size: 28px;
+                }
+                .book-introduction-collapse {
+                    lines: 3;
+                    text-overflow: ellipsis;
+                }
+                .book-introduce-img {
+                    align-self: flex-end;
+                    width: 160px;
+                    height: 48px;
+                }
+            }
+            .line {
+                width: 686px;
+                margin-top: 32px;
+                margin-left: 32px;
+                height: 1px;
+                background-color: rgba(142, 142, 152, 0.2);;
+            }
+            .book-directory {
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                height: 108px;
+                padding: 0 32px;
+                .left {
+                    align-items: center;
+                    .tit {
+                        flex-shrink: 0;
+                        margin-right: 8px;
+                        color: #14212E;
+                        font-size: 36px;
+                        font-weight: bold;
+                    }
+                    .new {
+                        align-items: center;
+                        .update {
+                            flex-shrink: 0;
+                            width: 68px;
+                            height: 32px;
+                            line-height: 32px;
+                            margin-right: 8px;
+                            padding-bottom: 2px;
+                            margin-top: 2px;
+                            color: #fff;
+                            font-size: 22px;
+                            text-align: center;
+                            border-radius: 8px;
+                            background-color: #FF631C;
+                        }
+                        .last-chapter-name {
+                            color: #8E8E98;
+                            font-size: 24px;
+                            lines: 1;
+                            text-overflow: ellipsis;
+                        }
+                    }
+                }
+                .right {
+                    align-items: center;
+                    flex-shrink: 0;
+                    margin-left: 20px;
+                    .time {
+                        line-height: 37px;
+                        margin-right: 4px;
+                        color: #8E8E98;
+                        font-size: 24px;
+                        lines: 1;
+                        text-overflow: ellipsis;
+                    }
+                    .arrow {
+                        width: 16px;
+                        height: 32px;
+                        margin-top: 2px;
+                    }
+                }
+            }
+            .book-content {
+                flex: 1;
+                flex-direction: column;
+                padding: 0 32px;
+                stack {
+                    flex: 1;
+                    align-items: flex-end;
+                    .text {
+                        flex-direction: column;
+                        .book-text {
+                            line-height: 64px;
+                            margin-top: 20px;
+                            color: #222;
+                            font-size: 34px;
+                            text-indent: 2em;
+                        }
+                    }
+                    .vague {
+                        width: 100%;
+                        height: 188px;
+                        background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
+                    }
+                }
+                .goon-read {
+                    align-items: center;
+                    justify-content: center;
+                    height: 80px;
+                    margin-bottom: 24px;
+                    text {
+                        line-height: 32px;
+                        color: @btn-color;
+                        font-size: 32px;
+                    }
+                    image {
+                        width: 32px;
+                        height: 32px;
+                        margin-left: 8px;
+                    }
+                }
+            }
+            .recommend {
+                flex-direction: column;
+                width: 100%;
+                padding: 48px 0 14px 32px;
+                .title {
+                    height: 44px;
+                    line-height: 44px;
+                    padding-right: 32px;
+                    color: #14212E;
+                    font-size: 36px;
+                    font-weight: bold;
+                }
+                .book-box {
+					flex-wrap: wrap;
+					width: 100%;
+                    margin-top: 32px;
+                    @book-wrap-width: 142px;
+					.book-item {
+						flex-direction: column;
+						width: 25%;
+						margin-bottom: 34px;
+						.book-cover {
+							width: @book-wrap-width;
+							height: 186px;
+							border-radius: 8px;
+						    border: 1px solid rgba(234, 234, 239, 0.5);
+						}
+						.book-title {
+							width: @book-wrap-width;
+                            line-height: 40px;
+                            margin-top: 14px;
+							color: #222;
+                            font-size: 28px; 
+							font-weight: bold;
+							text-align: left;
+							lines: 2;
+							text-overflow: ellipsis; 
+						}
+					}
+				}
+            }
+            .copyright {
+                flex-direction: column;
+                padding: 32px 32px 48px;
+                margin-bottom: @bottom-btn-height;
+                background-color: #F5F5F8;
+                text {
+                    line-height: 33px;
+                    color: #B2B2BD;
+                    font-size: 24px;
+                }
+            }
+        }
+        .grey-line {
+            width: 100%;
+            height: 16px;
+            background-color: #F5F5F8;
+        }
+        .read-btn {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            align-items: center;
+            width: 100%;
+            height: @bottom-btn-height;
+            padding: 0 32px;
+            border-top-width: 1px;
+            border-style: solid;
+            border-top-color: rgba(142, 142, 152, 0.2);
+            background-color: #ffffff;
+            .icon-block {
+                flex-direction: column;
+                align-items: center;
+                width: 144px;
+                height: 88px;
+                .icon {
+                    width: 40px;
+                    height: 40px;
+                    margin-top: 5px;
+                }
+                .text {
+                    height: 32px;
+                    line-height: 32px;
+                    margin-top: 6px;
+                    color: #5A5A64;
+                    font-size: 24px;
+                }
+            }
+            .on-book-shelf {
+                .text {
+                    color: #B2B2BD;
+                }
+            }
+            .read-book {
+                flex: 1;
+                height: 88px;
+                line-height: 88px;
+                margin-left: 24px;
+                color: #FFFFFF;
+                font-size: 32px;
+                font-weight: bold;
+                text-align: center;
+                border-radius: 44px;
+                background-color: @btn-color;
+            }
+        }
+    }
+    #video {
+        width: 100%;
+        height: 422px;
+    }
+</style>
+<template>
+    <div class="root">
+        <video id="video" if="{{videoAddress}}" src="{{videoAddress}}" ontimeupdate="timeupdateHandle" onstart="videoStartHandle" onfinish="videoEndHandle"></video>
+        <div class="body-detail" if="book.bookId">
+            <stack class="book-top" @appear="fnBookImgAppear" @disappear="fnBookImgDisappear">
+                <div class="book-info-wrap">
+                    <div class="left">
+                        <div class="top">
+                            <text class="book-name" if="book.bookName">{{ book.bookName }}</text>
+                            <text class="book-author" if="book.author">作者：{{ book.author }}</text>
+                        </div>
+                        <text class="book-tag">
+                            <span if="[0, 1].indexOf(book.status) > -1">{{ ['连载', '完结'][book.status] }}</span>
+                            <span if="book.twoTypeName">{{ ' · ' + book.twoTypeName }}</span>
+                            <span if="book.bookTypeName">{{ ' · ' + book.bookTypeName }}</span>
+                        </text>
+                    </div>
+                    <stack class="right">
+                        <image class="book-cover" src="{{ book.coverWap }}"></image>
+                        <paid-tag if="book.iconType === '10'" tag="{{ book.iconDesc }}"></paid-tag>
+                    </stack>
+                </div>
+                <div class="book-score-wrap">
+                    <div class="left" if="book.bookScore">
+                        <text class="book-score">{{ book.bookScore }}</text>
+                        <text class="score-text">分</text>
+                    </div>
+                    <div class="right" if="book.clickNum">
+                        <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/book-detail-read-count-icon.png"></image>
+                        <text class="text">{{ book.clickNum }}人阅读</text>
+                    </div>
+                </div>
+            </stack>
+            <block if="book.introduction">
+                <text class="text-bold text-bold-introduction">简介</text>
+                <stack class="book-introduction-wrap">
+                    <text class="book-introduction {{ isShowAll ? '' : 'book-introduction-collapse' }}">{{ book.introduction }}</text>
+                    <image if="isShowUp" class="book-introduce-img" src="{{ isShowAll ? 'https://xsmfdq.kkyd.cn/images/hmxs/book-detail-desc-collapse.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/book-detail-desc-open.png' }}" @click="fnIsShowAll"></image>
+                </stack>
+            </block>
+            <div class="line"></div>
+            <div class="book-directory" @click="toDirectory(book.bookId)">
+                <div class="left">
+                    <text class="tit">目录</text>
+                    <div class="new">
+                        <block if="book.status === 0">
+                            <text class="update">更新</text>
+                            <text class="last-chapter-name" if="book.lastChapterName">{{ book.lastChapterName }}</text>
+                        </block>
+                        <text class="last-chapter-name" elif="book.totalChapterNum">共{{ book.totalChapterNum }}章</text>
+                    </div>
+                </div>
+                <div class="right">
+                    <text class="time" if="book.status === 0 && book.lastChapterUtime">{{ book.lastChapterUtime }}更新</text>
+                    <image class="arrow" src="https://xsmfdq.kkyd.cn/images/hmxs/book-detail-right-icon.png"></image>
+                </div>
+            </div>
+            <div class="grey-line"></div>
+            <div class="book-content">
+                <stack>
+                    <div class="text">
+                        <text class="text-bold title" if="chapterName">{{ chapterName }}</text>
+                        <block for="firstContent">
+                            <text class="book-text">{{ $item }}</text>
+                        </block>
+                    </div>
+                    <div class="vague"></div>
+                </stack>
+                <div class="goon-read" @click="readButtonClick(book.bookId,chapterId,chapterName)">
+                    <text>继续阅读</text>
+                    <image src="https://xsmfdq.kkyd.cn/images/hmxs/book-detail-content-open.png"></image>
+                </div>
+            </div>
+            <div class="grey-line"></div>
+            <div class="recommend" if="recommendList && recommendList.length">
+                <text class="title">{{ moreRecoBookTitle }}</text>
+                <div class="book-box">
+                    <block for="recommendList">
+                        <div class="book-item" @appear="fnBookAppear($item, $item.bookId, 'sjxq', moreRecoBookTitle, $item.bookName, $idx)" @click="fnRouteToBookDetail($item, $item.bookId, 'sjxq', moreRecoBookTitle, 0, $item.bookName, $idx, moreRecoBookTitle)">
+                            <stack>
+                                <image class="book-cover" src="{{$item.coverWap}}"></image>
+                                <paid-tag if="$item.iconType === '10'" tag="{{ $item.iconDesc }}"></paid-tag>
+                            </stack>
+                            <text class="book-title">{{$item.bookName}}</text>
+                        </div>
+                    </block>
+                </div>
+            </div>
+            <div class="copyright">
+                <text class="text1" if="book.copyright">版权来源：{{ book.copyright }}</text>
+                <text class="text2" if="book.disclaimer">免责声明：{{ book.disclaimer }}</text>
+            </div>
+            <div class="read-btn">
+                <div class="icon-block" if="!isInBookShelf" @click="fnAddBookShelf">
+                    <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/book-detail-add-book-shelf.png"></image>
+                    <text class="text">加书架</text>
+                </div>
+                <div class="icon-block on-book-shelf" else>
+                    <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/book-detail-on-book-shelf.png"></image>
+                    <text class="text">在书架</text>
+                </div>
+                <div class="icon-block listen-book" if="isSupposeListen && (listenSwitch || listenPayFlag)" @click="fnListenBook">
+                    <image class="icon" src="https://xsmfdq.kkyd.cn/images/hmxs/book-detail-listen.png"></image>
+                    <text class="text">听书</text>
+                </div>
+                <text class="read-book" @click="readButtonClick(book.bookId,chapterId,chapterName)">{{ cacheChapterId ? '继续阅读' : '开始阅读' }}</text>
+            </div>
+        </div>
+        <pop-order if="{{orderShow}}" viptips="{{orderObj.viptips}}" unit="{{orderObj.unit}}" chapter="{{orderObj.chapter}}" price="{{orderObj.price}}" coin="{{orderObj.coin}}" enough="{{orderObj.enough}}" bookid="{{bookId}}" bookname="{{orderObj.bookname}}"  @to-recharge-auto="toRechargeAuto" @close-orderpop="closeOrderpop"></pop-order>
+        <back-baidu></back-baidu>
+        <retry if="{{isShowBtn}}" is-loading="{{isLoading}}" @retry="retryHandler"></retry>
+        <once-price if="{{oncePriceShow}}" book-id="{{bookId}}" chapter-id="{{chapterId}}" chapter-index="{{chapterIndex}}" omap="{{omap}}" give-up-pop-show={{giveUpPopShow}} price-info={{oncePriceInfo}} @close-once-price="fnCloseOncePrice" @give-up-show="fnGiveUpShow" @close-give-up="fnCloseGiveUp" @to-pop-order="fnToPopOrder"></once-price>
+    </div>
+</template>
+<script>
+    import app from '@system.app'
+    import shortcut from '@system.shortcut'
+    import fetch from '@system.fetch'
+    import device from '@system.device';
+    import storage from '@system.storage';
+    import router from '@system.router';
+    import prompt from '@system.prompt';
+    import common from '../Common/js/common.js';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+
+    export default {
+        protected: {
+            config:null,
+            device:{
+                brand: '',
+                model: '',
+                utdid: '',
+                utdidTmp:''
+            },
+            userId:'',
+            ctime:'',
+            t:'',
+            bookAlias: '',
+        },
+        public: {
+            bookId: '',
+            bShow: false,
+            chapters: [],
+            chapterId: '',
+            chapterName: '',
+            readTips: '',
+            book: {
+                coverWap: ''
+            },
+            boolshowAllBookIntro: false,
+            userHeaderJson: {},
+            isLowerShelf:'',
+            isbookde:true,
+            orderObj:{},
+            autoPay:'',
+            confirmPay:1,
+            orderShow:false,
+            videoAddress: '',
+            videoPlaySecond: 0,
+            SourcePosition:'',
+            videoId: '',
+            hasReported: false,
+            videoBookName: '',
+            sourcePage: '',
+            omap:'',
+            firstShow:true,
+            lfTime:''
+        },
+        private: {
+            firstContent:[],
+            fullContent:[],
+            nextChapterId:'',
+            isShowBtn: false,
+            isLoading: false,
+            reloadNum: 0,
+            fpTag: '', // 是否支持整本书购买
+            oncePriceShow: false, // 整本购买弹窗
+            canOncePrice: false, // 整本购买信息
+            oncePriceInfo: '', // 整本购买信息
+            giveUpPopShow: false, // 整本挽留弹窗
+            oncePriceExtraInfo: '', // 2151回调信息
+            isShowAll: false, //是否展示全部简介内容
+            recommendList: [],  //大数据推荐书列表
+            moreRecoBookTitle: '',   //推荐位标题
+            isShowUp: false, //是否显示展开收起箭头图片
+            isInBookShelf: false, // 是否在书架
+            isSupposeListen: false, // 是否支持听书功能
+            listenSwitch: false, // 是否可以听书
+            listenPayFlag: false, // 是否可以购买听书
+            cacheChapterId: '', // 缓存的书籍的章节id
+        },
+        toDirectory(bookId){
+            router.push({
+                uri:'/Directory',
+                params:{
+                    bookId:bookId,
+                    isLowerShelf:this.isLowerShelf,
+                    isbookde:this.isbookde,
+                    SourcePosition:this.SourcePosition,
+                    omap:this.omap,
+                    bookName:this.book.bookName,
+                }
+            })
+        },
+        fnShowAllBookIntro() {
+            this.boolshowAllBookIntro = !this.boolshowAllBookIntro;
+        },
+        routeRead(bookId, chapterId,chapterName) {
+            router.push({
+                uri: '/Read',
+                params: {
+                    bookId: bookId,
+                    chapterId: chapterId,
+                    chapterName:chapterName,
+                    SourcePosition:this.SourcePosition,
+                    omap:this.omap
+                }
+            })
+        },
+        readButtonClick(bookId, chapterId, chapterName){
+            if (this.cacheChapterId) {
+                chapterId = this.cacheChapterId;
+            }
+            let btnText = this.cacheChapterId ? '继续阅读' : '开始阅读';
+            this.$app.shenceLog.log(this,'track','ButtonClick',{
+                ButtonName: btnText,
+                ButtonContent: btnText,
+                Title:'书籍详情页',
+                SourcePage:this.sourcePage || '',
+                BookID: this.bookId || '',
+                BookName: this.book.bookName || ''
+            });
+            this.beforeFnRequestReadData(bookId, chapterId, chapterName)
+        },
+        beforeFnRequestReadData(bookId, chapterId, chapterName){
+           if(this.isLowerShelf=='0'){
+                router.push({
+                    uri: '/ReadEnd',
+                    params: {
+                        bookId: bookId,
+                        bookName:this.book.bookName,
+                        isLowerShelf:this.isLowerShelf
+                    }
+                })
+            }else{
+                this.fnRequestReadData(bookId, chapterId, chapterName)
+            }
+        },
+        fnRequestReadData(bookId, chapterId, chapterName, isAutoListen) {
+            let that = this;
+            that.curChapterId = chapterId?chapterId:''
+            that.curChapterName = chapterName?chapterId:''
+            that.$app.$def.requestData(that,
+                {
+                    interface: '/glory/fastapp/2151',
+                    data:{
+                        isBr: 0,
+                        bookId: bookId,
+                        chapterId: chapterId,
+                        autoPay: that.autoPay,
+                        confirmPay: that.confirmPay,
+                        uuid: that.$app.sourceInfo['uuid'],
+                        pullMode: that.$app.sourceInfo['pullMode'],
+                        omap: JSON.stringify(that.omap),
+                        isUpdate: 1,
+                        hmManualAddFlag: 1, // 670支持手动加书架，此字段服务端用于版本判断
+                    },
+                    //data: { bookId: 11000000036, chapterId: chapterId },
+                    succ: function (res) {
+                        if (res.retCode == 0) {
+                            /** 1.需要付费-扣费成功
+                                2.不需要付费-免费章节 包括限免书籍，包括章节缺失
+                                3.不需要付费-之前已经付费过
+                                4:扣费失败-余额不足去充值**/
+                            console.log(`res.data.status=${res.data.status}`)
+                            if(res.data.fpTip) {
+                                that.canOncePrice = true
+                                that.oncePriceInfo = res.data.oncePriceVo
+                                that.oncePriceExtraInfo = {
+                                    res: res,
+                                    bookId: bookId, 
+                                    chapterId: chapterId, 
+                                    chapterName: chapterName,
+                                }
+                            }else {
+                                that.canOncePrice = false
+                                that.oncePriceInfo = ''
+                                that.oncePriceExtraInfo = ''
+                            }
+                            switch (res.data.status) {
+                                case 1:
+                                case 2:
+                                case 3:
+                                    console.log(res.data.status)
+                                    router.push({
+                                        uri: '/Read',
+                                        params: {
+                                            bookId: bookId,
+                                            chapterId: chapterId,
+                                            chapterName:chapterName,
+                                            pageFrom:'/BookDetail',
+                                            SourcePosition:that.SourcePosition,
+                                            first_reading:res.data.first_reading,
+                                            tips: that.fpTag ? that.fpTag : '',
+                                            omap:that.omap,
+                                            isAutoListen
+                                        }
+                                    })
+                                    break;
+                                case 4:
+                                    if(res.data.orderPage.action==1){
+                                        that.showOrder(res,false)
+                                    }else{
+                                        that.fnGoRecharge(res, bookId, chapterId, chapterName)
+                                    }
+                                    break;
+                                case 5:
+                                    that.showOrder(res,true)
+                                    break;
+                                case 6:
+                                    router.push({
+                                        uri:'/ReadEnd',
+                                        params:{
+                                            bookId:bookId,
+                                            bookName:res.data.bookName
+                                        }
+                                    })
+                                    break;
+                                default:
+                                    router.push({
+                                        uri:'/ReadEnd',
+                                        params:{
+                                            bookId:bookId,
+                                            bookName:res.data.bookName
+                                        }
+                                    })
+                            }
+                        }
+                    },
+                    error: function (code) {
+                        //console.log(code)
+                    }
+                }
+            )
+        },
+        showOrder(res,enough){
+            let that = this  
+            that.orderObj.price = res.data.orderPage.price
+            that.orderObj.coin = res.data.orderPage.totalNum
+            that.orderObj.chapter = res.data.orderPage.chapterName,
+            that.orderObj.unit = res.data.orderPage.unit
+            that.orderObj.bookname = res.data.orderPage.bookName
+            that.orderObj.chapterId = res.data.orderPage.chapterId
+            that.orderObj.viptips = res.data.orderPage.vipTips
+            //余额是否充足
+            that.orderObj.enough = enough
+            if(that.canOncePrice) {
+                that.oncePriceShow = true
+                that.$app.shenceLog.log(that,'track','PopupExposure', {
+                    PositionName: '整本书一口价购买弹窗',
+                    BookID: that.bookId,
+                    BookName: that.orderObj.bookName,
+                    ChaptersNum: that.chapterIndex,
+                    Instruction: that.oncePriceInfo ? (that.oncePriceInfo.price + '元 vs ' + that.oncePriceInfo.totalPrice + '元') : ''
+                });
+            }else {
+                that.orderShow = true
+            }
+        },
+        //页面被切换重新显示时调用
+        onShow(e) {
+            let that = this;
+            if(this.$app.isOncePrice == 1) {
+                let { res, bookId, chapterId, chapterName } = this.oncePriceExtraInfo
+                this.giveUpPopShow = false
+                this.oncePriceShow = false
+                this.$app.isOncePrice = 0
+                router.replace({
+                    uri: '/Read',
+                    params: {
+                        bookId: bookId,
+                        chapterId: chapterId,
+                        chapterName:chapterName,
+                        pageFrom:'/BookDetail',
+                        SourcePosition:that.SourcePosition,
+                        first_reading:res.data.first_reading,
+                        tips: that.fpTag ? that.fpTag : '',
+                        omap:that.omap
+                    }
+                })
+            }
+            // 开屏判断
+            let currentOpenTime = new Date().getTime()
+            if(this.$app.isOpenPageSwitch == 1 && this.$app.lastOpenPage == 'bookDetail' && currentOpenTime - this.$app.lastOpenTime > this.$app.openPageSpace && currentOpenTime - this.$app.leavePageTime > this.$app.leavePageSpace) {
+                this.$app.lastOpenTime = currentOpenTime
+                this.$app.lastOpenPage = ''
+                router.push({
+                    uri: 'Pop',
+                    params: {
+                        fromPage: 'BookDetail',
+                    }
+                })
+                return
+            }
+            this.fnGetReadState();
+            this.$app.lastOpenPage = 'bookDetail'
+            // pageEnter(this.$page.path);
+            new Promise((resolve, reject) => {
+                // storage.get({
+                //     key: 'headerJson',
+                //     success: function (data) {
+                //         resolve(data);
+                //     }
+                // })
+                 that.$app.$def.getStorageFile(that,{
+                    key:'headerJson',
+                    success:function(data){
+                        resolve(data);
+                    }
+                })
+                
+            }).then((res) => {
+                that.userHeaderJson = JSON.parse(res);
+            })
+            if(!this.firstShow) {
+                this.$app.shenceLog.log(this, 'pageShow', '', {
+                    Title: '书籍详情',
+                    SourcePage: this.sourcePage || '',
+                    BookID: this.bookId,
+                    BookName: (this.book && this.book.bookName) ? this.book.bookName : (this.videoBookName || ''),
+                });
+                this.fnLoadData('refresh');
+            }
+            this.firstShow = false
+            if(that.isToRecharge) {
+                 that.giveUpPopShow = false
+            }
+            that.isToRecharge = false
+            this.$app.$def.quickappLog([701,{
+                qmap:{
+                    bookId:that.bookId,
+                    chapterId:that.chapterId,
+                    oaid:that.$app && that.$app.oaid || ''
+                },
+                omap:that.omap
+            }], this);
+        },
+        onHide() {
+            clearTimeout(this.hidePageTimeout);
+            this.$app.leavePageTime = new Date().getTime()
+        },
+        toRank(){
+            router.push({
+                uri:'/SubRank',
+                params:{
+                    rankName:this.book.rankBookVo.rankName,
+                    classifyType:this.book.rankBookVo.classifyType,
+                    classifyId:this.book.rankBookVo.classifyId,
+                    classifyName:this.book.rankBookVo.classifyName
+                }
+            })
+            this.$app.shenceLog.log(this,'track','ButtonClick', {
+                ButtonName: '榜单标签',
+                ButtonContent:`[${this.book.rankBookVo.classifyName}类${this.book.rankBookVo.rankName}] 第${this.book.rankBookVo.sort}名`,
+                Title:'书籍详情页',
+                BookID: this.bookId || ''
+            });
+        },
+        onInit() {
+            if(this.omap!='' && typeof(this.omap)=='string'){
+                this.omap = JSON.parse(this.omap)
+            }
+            this.fnCheckScStart()
+            this.fnGetDeviceInfo();
+            let that = this
+            that.config = that.$app.$data;
+            // this.$page.setTitleBar({ text: '书籍详情' });
+            this.getUserIdLogic()
+            this.getisAutopay()
+            // this.fnLoadData();
+        },
+        onReady: function () {
+            if(this.videoAddress !== ''){
+                let video = this.$element('video')
+                video.start();
+                video.setCurrentTime({currenttime:this.videoPlaySecond || 0})
+            }
+        },
+        fnLoadData(tag = ''){
+            let that = this;
+            that.$app.$def.requestData(that,
+                {
+                    interface: '/glory/fastapp/2111',
+                    data: { bookId: that.bookId },
+                    //data:{bookId:11000000036},
+                    succ: function (res) {
+                        that.isShowBtn = false;
+                        that.isLoading = false;
+                        if (res.retCode == 0) {
+                            that.chapters = res.data.chapters;
+                            that.book = res.data.book;
+                            that.isInBookShelf = !!res.data.isInBookShelf;
+                            const DEFAULT_CHARS_NUMBER = 75;            // 不折叠情况下，能显示的最大字符数
+                            if (that.book.introduction.length > DEFAULT_CHARS_NUMBER) {
+                                that.isShowUp = true;                   // 是否显示折叠展开图标
+                            } else {
+                                that.isShowUp = false;                  // 是否显示折叠展开图标
+                                that.isShowAll = true;
+                            }
+                            that.moreRecoBookTitle = res.data.moreRecoBookTitle;
+                            that.recommendList = res.data.moreRecoBookList;
+                            that.chapterId = res.data.chapterId;
+                            that.chapterName = res.data.chapterName;
+                            if(res.data.nextChapterId){
+                                that.nextChapterId = res.data.nextChapterId
+                            }
+                            that.isLowerShelf=res.data.isLowerShelf;
+                            if(res.data.lfTime){
+                                that.lfTime = res.data.lfTime
+                            }
+                            let content = res.data.content
+                            let length = content.length
+                            that.fullContent = content
+                            that.firstContent = content.slice(0,Math.ceil(length/2))
+                            if(res.data.fpTag) {
+                                that.fpTag = res.data.fpTag
+                            }else {
+                                that.fpTag = ''
+                            }
+                            that.listenSwitch = res.data.headBookTtsName === 'bd';              // 是否可以听书
+                            that.listenPayFlag = !!res.data.listenPayFlag;                      // 是否可以购买听书
+                            that.$app.shenceLog.log(that, 'pageShow', '', {
+                                Title: '书籍详情',
+                                SourcePage: that.sourcePage || '',
+                                BookID: that.bookId,
+                                BookName: (that.book && that.book.bookName) ? that.book.bookName : (that.videoBookName || ''),
+                            });
+                            if (that.$page && that.$page.setMeta) {
+                                that.$page.setMeta({
+                                    title: that.book.bookName, 
+                                    pic: that.book.coverWap,
+                                    description: that.book.introduction,
+                                    keywords: that.book.bookName + ',' + that.book.author + ',' + (that.book.twoTypeName + ',' || '') + that.$app.$data.name,
+                                })
+                            }
+                            if(res.data.scrollSwitch && tag === 'refresh' && that.recommendList && that.recommendList.length && that.$app.bookDetailScroll) {
+                                that.$app.bookDetailScroll = false
+                                setTimeout(() => {
+                                    that.$page.scrollTo && that.$page.scrollTo({
+                                        top: 99999
+                                    })
+                                }, 200)
+                            }
+                        }
+                    },
+                    error: function (code) {
+                        that.isShowBtn = true;
+                        that.isLoading = false;
+                        if (that.reloadNum == 0) {
+                            that.reloadNum = 1;
+                            setTimeout(function () {
+                                that.fnLoadData()
+                            }, 1000)
+                        } else {
+                            that.isShowBtn = true;
+                            that.isLoading = true;
+                        }
+                    }
+                }
+            )
+        },
+        onBackPress() {
+            let that = this
+            setTimeout(function(){
+                if(that.giveUpPopShow) {
+                    that.giveUpPopShow = false
+                    return true
+                }
+                if(that.oncePriceShow) {
+                    that.oncePriceShow = false
+                    return true
+                }
+                if(that.orderShow){
+                    that.orderShow = false
+                    that.$app.$def.quickappLog([702, {
+                        qmap: {
+                            site: '5',
+                            enough:that.orderObj.enough,
+                            unit:that.orderObj.unit,
+                            bookid:that.bookid
+                        }
+                    }, 'autopay'], that)
+                }else{
+                    let routerlen = router.getLength();
+                    console.info(routerlen);
+                    if(routerlen <= 1){
+                        router.replace({
+                            uri:'/Index'
+                        })
+                    }else{
+                        router.back()
+                    }
+                }
+            },0)
+            return true
+            
+        },
+         toRechargeAuto(data){
+            let that = this
+            let auto = data.detail.auto
+            console.log(auto)
+            router.push({
+                uri: '/Recharge',
+                params: {
+                    url: '/Read',
+                    unit: that.orderObj.unit,
+                    amount: that.orderObj.price,
+                    bookId: that.bookId,
+                    chapterId: that.orderObj.chapterId,
+                    pageFrom:that.pageFrom,
+                    auto:auto,
+                    SourcePosition:that.SourcePosition,
+                    omap:that.omap,
+                    bookName: that.book.bookName
+                }
+            })
+        },
+        getisAutopay(){
+            let that = this
+            if(!that.autoPay){
+                storage.get({
+                    key:'booksAutopay',
+                    success:function(res){
+                        if(res){
+                            try{
+                                that.autoPay=1
+                                let arr = JSON.parse(res)
+                                console.log(arr)
+                                arr.forEach((cur,index)=>{
+                                    if(cur.bId==that.bookId){
+                                        that.autoPay=cur.autoPay
+                                    }
+                                })
+                            }catch{
+                                that.autoPay=1
+                            }
+                            
+                        }else{
+                            that.autoPay=1
+                        }
+                    },
+                    fail(){
+                        that.autoPay=1
+                    }
+                })
+            }else{
+                that.autoPay=1
+            }
+
+        },
+        closeOrderpop(){
+            this.giveUpPopShow = false
+            this.orderShow = false
+        },
+        fnNextChapter(confirmPay,autoPay){
+            let that = this
+            if(confirmPay){
+                that.confirmPay = 2
+            }else{
+                that.confirmPay = 1
+            }
+            if(autoPay){
+                that.autoPay = autoPay
+            }
+            that.beforeFnRequestReadData(that.bookId,that.curChapterId,that.curChapterName)
+        },
+        timeupdateHandle(evt){
+            this.playedSecond = evt.currenttime
+            let that = this
+            if(!this.hasReported && this.playedSecond >= 5){
+                this.$app.$def.ajax(this, '2502',{
+                    data: {
+                        videoId: that.videoId,
+                        bookId: that.bookId,
+                    },
+                    succ(res) {
+                        console.log(res)
+                        that.hasReported = true
+                        that.fnLoadData()
+                    },
+                    err(data) {
+                        that.hasReported = true
+                    }
+                })
+            }
+        },
+        videoStartHandle(){
+            let customdata = {
+                source_package_name: this.$app.$data.pname,
+                url_path: 'BookDetail',
+                title: '书籍详情页',
+                VideoID: this.videoId,
+                BookID: this.bookId,
+                BookName: this.videoBookName,
+                Type: '自动播放'
+            }
+            this.$app.shenceLog.log(this,'track','VideoPlay', customdata);
+        },
+        videoEndHandle(){
+            let customdata = {
+                source_package_name: this.$app.$data.pname,
+                url_path: 'BookDetail',
+                title: '书籍详情页',
+                VideoID: this.videoId,
+                BookID: this.bookId,
+                BookName: this.videoBookName,
+            }
+            this.$app.shenceLog.log(this,'track','VideoEnd', customdata);
+        },
+        // 以下为注册新用户 
+        getUserIdLogic(){
+            let that = this;
+            
+            let p = that.getHeaderJson();
+
+            p.then(data=>{ //读取headerJson成功
+
+                if(data){
+                    let headerJson=JSON.parse(data);
+                    that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+                        ChannelCode: headerJson.channelCode || ''
+                    })
+                    headerJson.appStartScene = that.$app.startScene || 'other'
+                    headerJson.sourceChannel = that.$app.sourceInfo && that.$app.sourceInfo.sourceCid || ''
+                    headerJson.sourcePackageName = that.$app.sourcePackageName || ''
+                    shortcut.hasInstalled({
+                        success: function(res) {
+                            if(res){
+                                that.channelCode = headerJson.channelCode;
+                                
+                            }else{
+                                if(headerJson.channelCode && (that.channelCode=='' || that.channelCode==that.$app.$data.channelCode)){
+                                    that.channelCode = headerJson.channelCode;
+                                }
+                            }
+                            if(headerJson.bookshelfStyle&&(that.bookshelfStyle=='')){
+                                that.bookshelfStyle = headerJson.bookshelfStyle;							
+                            }
+                            headerJson.bookshelfStyle = that.bookshelfStyle;                           
+                            headerJson.channelCode = that.channelCode;
+                            that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+                                ChannelCode: headerJson.channelCode || ''
+                            })
+                            that.$app.$def.setStorageFile(that,{
+                                key:'headerJson',
+                                value:headerJson
+                            })
+                            that.$app.headerJson = headerJson
+                            if(headerJson.utdid){
+                                that.device.utdid = headerJson.utdid;
+                                if(headerJson.userId){ //有userId && 有真实的utdid 进入首页
+                                    that.userId = headerJson.userId;
+                                    that.fnLoadData()
+                                    return
+                                }else{  //没有userId，用真实的utdid生成userId
+                                    that.getUserId(that.device.utdid);
+                                }
+                            }else{
+                                if(headerJson.userId){
+                                    that.userId = headerJson.userId;
+                                    if(headerJson.utdidTmp){ //没有真实的utdid && 有userId && 有临时utdid 进入首页
+                                        // that.fnLodeChapterInfo(that.bookId, that.chapterId)
+                                        that.fnLoadData()
+                                        return
+                                    }else{ //没有真实的utdid && 有userId && 没有临时utdid 生成临时的utdid 重新生成userId
+                                        let utdidTmp = that.createUtdidTmp();
+                                        that.getUserId(utdidTmp);
+                                    }
+                                }else{ //没有真实的utdid && 没有userId && 没有真实的utdid 生成临时的utdid 生成userId
+                                    if(headerJson.utdidTmp){
+                                        that.getUserId(headerJson.utdidTmp);
+                                    }else{
+                                        let utdidTmp = that.createUtdidTmp();
+                                        that.getUserId(utdidTmp);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    
+                }else{ //data为空字符串
+                    let utdidTmp = that.createUtdidTmp();
+                    that.getUserId(utdidTmp); //如果缓存没有headerJson数据，则生成临时的utdid去生成userId
+                }
+            },(data)=>{//读取headerJson失败
+                let utdidTmp = that.createUtdidTmp();
+                that.getUserId(utdidTmp); //如果读取headerJson失败，则生成临时的utdid去生成userId
+            })
+        },
+        getHeaderJson(){
+            let that = this;
+            return new Promise((resolve,reject)=>{
+                that.$app.$def.getStorageFile(that,{
+                    key:'headerJson',
+                    success:function(data){
+                        if(!that.$valid){return;}
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                page:'1',
+                                site:'1',
+                                headerJson:data
+                            }
+                        }, 'getHeaderJson'], that)
+                        resolve(data);
+                    },
+                    fail:function(data, code){
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                page:'1',
+                                site:'2',
+                                headerJson:data,
+                                source: 'getStorage_headerJson_fail',
+                                thisUri: that.$page.uri,
+                                thisPage: 'detail',
+                                data,code
+                            }
+                        }, 'catch_error'], that)
+                        reject(code);
+                    }
+                })
+
+            })
+        },
+        createUtdidTmp(){ //生成临时的utdid
+            let utdidTmp = this.getUtdidTmp();
+            this.device.utdidTmp = this.$app.$def.hex_md5(utdidTmp);
+            return utdidTmp;
+        },
+        getUserId(utdidTmp){
+            let that = this;
+            let oGetAndroidId = new Promise((resolve,reject)=>{
+                device.getUserId({
+                    success: function(data) {
+                        that.device.androidId = data.userId
+                        resolve()
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                // id:data.userId,
+                                site:'1'
+                            }
+                        }, 'getAndroidId'], that)
+                    },
+                    fail: function(data, code) {
+                        resolve()
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                code:code,
+                                data:data,
+                                site:'2'
+                            }
+                        }, 'getAndroidId'], that)
+                    }
+                })
+            })
+            let oGetInfo = new Promise((resolve, reject) => {
+                device.getInfo({
+                    success: function (res) {
+                        that.device.brand = res.brand;
+                        that.device.model = res.model;
+                        that.device.osvn = res.osVersionName
+                        that.device.osvc = res.osVersionCode
+                        that.device.scw = res.screenWidth
+                        that.device.sch = res.screenHeight
+                        that.device.pfvn = res.platformVersionName
+                        that.device.pfvc = res.platformVersionCode
+                        resolve(res);
+                        //获取用户信息成功打点
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                page:'10',
+                                site:'1',
+                                channelCode:that.channelCode,
+                                jumpPage:that.jumpPage,
+                                bookId:that.bookId,
+                                chapterId:that.chapterId,
+                                chapterName:that.chapterName,
+                                uuid:that.uuid
+                            }
+                        }, 'device_getinfo'], that)
+                    },
+                    fail:function(data,code){
+                        //获取用户信息失败打点
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                page:'10',
+                                site:'2',
+                                channelCode:that.channelCode,
+                                jumpPage:that.jumpPage,
+                                bookId:that.bookId,
+                                chapterId:that.chapterId,
+                                chapterName:that.chapterName,
+                                uuid:that.uuid,
+                                source:'device_getInfo_fail',
+                                thisUri: that.$page.uri,
+                                thisPage: 'detail',
+                                data,
+                                code
+                            }
+                        }, 'catch_error'], that)
+                    }
+                })
+            })
+            Promise.all([oGetAndroidId,oGetInfo]).then((result) => {
+                let headerJson = {}
+                if(JSON.stringify(that.$app.headerJson) != "{}"&&(that.$app.headerJson.utdidTmp != ''||that.$app.headerJson.utdid != '')){
+                    headerJson = that.$app.headerJson
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            site:'1',
+                            headerJson:headerJson
+                        }
+                    }, 'app_herderJson'], that)
+                }else{
+                    headerJson={
+                        brand:that.device.brand || 'empty',
+                        model:that.device.model || 'empty',
+                        osvn:that.device.osvn || 'empty',
+                        osvc:that.device.osvc || 'empty',
+                        scw:that.device.scw || 'empty',
+                        sch:that.device.sch || 'empty',
+                        pfvn:that.device.pfvn || 'empty',
+                        pfvc:that.device.pfvc || 'empty',
+                        utdidTmp: utdidTmp,
+                        utdid: that.device.utdid,
+                        domain: that.config.domain,
+                        userId: that.userId,
+                        t: that.t,
+                        pname: that.config.pname,
+                        channelCodeFee:that.channelCode, 
+                        channelCode:that.channelCode, //新增和充值都用它标记
+                        uuid:that.uuid,
+                        readPref:'0',
+                        bookshelfStyle:that.bookshelfStyle
+                    }
+                    headerJson.scDistinctId = that.$app.$def.sGetDistinctId()?that.$app.$def.sGetDistinctId():''
+                    headerJson.triggerTime = that.$app.$def.getLogTime()
+                    that.$app.$def.setStorageFile(that,{
+                        key:'headerJson',
+                        value:headerJson
+                    })
+                    headerJson.appStartScene = that.$app.startScene || 'other'
+                    headerJson.sourceChannel = that.$app.sourceInfo && that.$app.sourceInfo.sourceCid || ''
+                    headerJson.sourcePackageName = that.$app.sourcePackageName || ''
+                    that.$app.headerJson = headerJson
+                }
+                that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+                    ChannelCode: headerJson.channelCode || ''
+                })
+                if(that.device.utdid){
+                    headerJson.utdid = that.device.utdid
+                }
+                if(!headerJson.pname){
+                    return false;
+                }	 
+                
+                let dataJson={
+                    ei: that.device.ei,
+                    domain: that.config.domain,
+                    utdid: that.device.utdid || utdidTmp, //上行用utdid接收，有正式的传正式的 没有正式的传临时的
+                    brand: that.device.brand,
+                    model: that.device.model,
+                    channelCode: that.channelCode,
+                    blackList:1,
+                    androidId:that.device.androidId||'',
+                    uuid:that.$app.sourceInfo['uuid'],
+                    pullMode:that.$app.sourceInfo['pullMode'],
+                    isAddBf: 0,
+                };	
+                fetch.fetch({
+                    method: "POST",
+                    url:that.$app.api+"/glory/fastapp/2101?"+that.config.appVer,
+                    header: headerJson,
+                    data: JSON.stringify(dataJson),
+                    success: function (ret) {
+                        if(ret.code==200){
+                            if(!that.$valid){
+                                return;
+                            }
+                            let res=JSON.parse(ret.data);
+                            if(res.retCode==0){
+                                that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+                                    RegisterDate: (res.data && res.data.ctime) || new Date().getTime()
+                                })
+                                res.data && res.data.ctime && that.$app.$def.setStorageFile(that, {
+                                    key: 'createTime',
+                                    value: res.data.ctime,
+                                })
+                                that.$app.isNewUser = !!res.data.isNewUser;                          // 是否新用户
+                                that.userId=res.data.userId;
+                                that.ctime=res.data.ctime;
+                                headerJson.userId=res.data.userId;
+                                headerJson.channelCode=res.data.channelCode||that.$app.$data.channelCode;
+                                that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+                                    ChannelCode: headerJson.channelCode || ''
+                                })
+                                that.$app.sensors.login(headerJson.userId);
+                                that.getUserNum = 0;
+                                if(res.data.isBlack){
+                                    headerJson.utdid = ''
+                                }
+                                let p1 = new Promise((resolve,reject)=>{
+                                    that.$app.$def.setStorageFile(that,{
+                                        key:'headerJson',
+                                        value:headerJson,
+                                        complete:function(){
+                                            resolve();
+                                        }
+                                    })
+                                })
+                                that.$app.headerJson = headerJson
+                                let p2 = new Promise((resolve,reject)=>{
+                                    that.$app.$def.setStorageFile(that,{
+                                        key:'userId',
+                                        value:res.data.userId,
+                                        complete:function(){
+                                            resolve();
+                                        }
+                                    })
+                                })	
+                                let p3 = new Promise((resolve,reject)=>{ //储存用户创建时间
+                                    let oDate = new Date();
+                                    let oTime = oDate.getTime();
+                                    that.$app.$def.setStorageFile(that,{
+                                        key:'installationTime',
+                                        value:oTime,
+                                        complete:function(){
+                                            resolve();
+                                        }
+                                    })
+                                })	
+                                Promise.all([p1,p2,p3]).then(()=>{
+                                    that.fnLoadData()
+                                    let {source} = app.getInfo()
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            is2101:1,
+                                            getUserNum:that.getUserNum,
+                                            sourceType: source.type
+                                        }
+                                    }, 'detail_2101_success'], that)
+                                }).catch((error) => {
+                                    that.$app.$def.quickappLog([703, {
+                                        qmap:{
+                                            error:error,
+                                            m:'Promise'
+                                        }
+                                    }, 'detail_2101_error'], that)
+                                })
+                            }else{
+                                // that.routeIndex('/Preference');
+                                that.$app.$def.quickappLog([703, {
+                                    qmap:{
+                                        retCode:res.retCode,
+                                        getUserNum:that.getUserNum
+                                    }
+                                }, 'detail_2101_retCode'], that)
+                                that.getUserNum = that.getUserNum+1;
+                            }
+                        }else{
+                            // that.routeIndex('/Preference');
+                            that.$app.$def.quickappLog([703, {
+                                qmap:{
+                                    code:ret.code
+                                }
+                            }, 'detail_2101_code'], that)
+                            that.getUserNum = that.getUserNum+1;
+                        }						
+                    },
+                    fail: function (data, code) {
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                fail:1,
+                                getUserNum:that.getUserNum,
+                                source: 'fetch_2101data_fail',
+                                thisUri: that.$page.uri,
+                                thisPage: 'detail',
+                                data,
+                                code
+                            }
+                        }, 'catch_error'], that);
+                        that.getUserNum = that.getUserNum+1;
+
+                        // that.routeIndex('/Preference');
+                    }
+                })
+            },()=>{
+                // that.routeIndex('/Preference');
+            })
+        },
+        getUtdidTmp(){
+            var sChar = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            var aChar = sChar.split('');
+            aChar.sort(function() {
+                return (0.5-Math.random());
+            })
+            sChar = aChar.join('');
+            var oDate = new Date();
+            var r = this.rnd(0,sChar.length-5);
+            var str = sChar.substr(r,5);
+            var utdidTmp = "tmp_"+oDate.getTime()+str;
+            return utdidTmp;        
+        },
+        rnd(n,m){
+            return parseInt(Math.random()*(m-n+1))+n;
+        },
+        retryHandler(){
+            let that = this;
+            this.isShowBtn= true;
+            this.isLoading = false;
+            that.hidePageTimeout = setTimeout(() => {
+                router.replace({
+                    uri:'/BookDetail',
+                    params:{
+                        bookId: that.bookId,
+                        videoAddress: that.videoAddress,
+                        videoPlaySecond: that.videoPlaySecond,
+                        videoId: that.videoId,
+                        videoBookName: that.videoBookName,
+                        sourcePage: that.sourcePage,
+                        SourcePosition:that.SourcePosition,
+                        omap:that.omap
+                    }
+                })
+            }, 1000);
+        },
+        // 关闭整本购买
+        fnCloseOncePrice() {
+            this.giveUpPopShow = false
+            this.oncePriceShow = false
+        },
+        // 展示整本购买挽留
+        fnGiveUpShow() {
+            this.giveUpPopShow = true
+        },
+        // 关闭整本购买挽留
+        fnCloseGiveUp() {
+            this.giveUpPopShow = false
+        },
+        // 放弃整本购买
+        fnToPopOrder() {
+            let { res, bookId, chapterId, chapterName } = this.oncePriceExtraInfo
+            this.oncePriceShow = false
+            if(res.data.status == 5) {
+                this.orderShow = true
+            }
+            if(res.data.status == 4) {
+                if(res.data.orderPage.action == 1) {
+                    this.orderShow = true
+                }else {
+                    this.fnGoRecharge(res, bookId, chapterId, chapterName)
+                }
+            }
+        },
+        fnGoRecharge(res, bookId, chapterId, chapterName) {
+            let that = this
+            that.isToRecharge = true
+            router.push({
+                uri: '/Recharge',
+                params: {
+                    url: '/Read',
+                    bookId: bookId,
+                    chapterId: chapterId,
+                    chapterName:chapterName,
+                    unit: res.data.orderPage.unit,
+                    amount: res.data.orderPage.price,
+                    SourcePosition:that.SourcePosition,
+                    omap:that.omap,
+                    bookName: that.book.bookName
+                }
+            })
+        },
+        //书籍曝光打点
+		fnBookAppear(item, bookId, id, title, bookName, bookIndex) {
+			let that = this
+			let trigger_time = that.$app.$def.getLogTime()
+			let omap = {
+				origin: 'sjxq',
+				action: '1',
+                channel_id: that.bookId,
+                channel_name: that.book && that.book.bookName || '',
+				channel_pos: 0,
+				column_id: id,
+                column_name: title,
+                column_pos: 0,
+				content_id: bookId,
+				content_pos: bookIndex,
+				rec_id: item.recId ? item.recId : '',
+				model_id: item.modelId ? item.modelId : '',
+				log_id:item.logId ? item.logId : '',
+				exp_id:item.expId ? item.expId : '',
+				trigger_time: trigger_time
+			}
+			that.$app.$def.quickappLog([706, {
+                qmap: {
+                    oaid: that.$app && that.$app.oaid || ''
+                },
+				omap: omap
+			}], that)
+        },
+        // 跳转到书籍详情
+        fnRouteToBookDetail(item, bookId, id, title, pos, bookName, bookIndex, position) {
+			let that = this
+			let trigger_time = that.$app.$def.getLogTime()
+			let omap = {
+				origin: 'sjxq',
+				action: '2',
+                channel_id: that.bookId,
+                channel_name: that.book && that.book.bookName || '',
+				channel_pos: 0,
+				column_id: id,
+				column_name: title,
+				column_pos: pos,
+				content_id: bookId,
+				content_pos: bookIndex,
+				rec_id: item.recId ? item.recId : '',
+				model_id: item.modelId ? item.modelId : '',
+				log_id: item.logId ? item.logId : '',
+				exp_id: item.expId ? item.expId : '',
+				content_type: '1',
+				trigger_time: trigger_time
+			}
+			router.push({
+				uri: '/BookDetail',
+				params: {
+					bookId: bookId,
+					SourcePosition: '书籍详情',
+					omap: omap,
+                    sourcePage: '书籍详情-更多好书'
+				}
+			})
+			that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: '书籍详情',
+				OperationName: position,
+				BookName: bookName || '',
+                BookID: bookId || '',
+                RBookID: that.bookId || ''
+            });
+			that.$app.$def.quickappLog([702, {
+                qmap:{
+                    oaid:that.$app && that.$app.oaid || ''
+                },
+				omap: omap
+			}, 'book_click'], that)
+        },
+        // 是否展开全部书籍简介
+        fnIsShowAll(){
+            this.isShowAll = !this.isShowAll;
+        },
+        /**
+         * 获取阅读状态
+         */
+        fnGetReadState() {
+            let that = this;
+            that.cacheChapterId = '';
+            storage.get({
+                key: 'bookHistory',
+                success: function(bookList) {
+                    if (bookList) {
+                        try {
+                            bookList = JSON.parse(bookList);
+                        } catch(err) {
+                            return false;
+                        }
+                        let bookInfo = bookList.find(bookInfo => bookInfo.bookId === that.bookId);
+                        if (bookInfo && bookInfo.chapterId) {
+                            that.cacheChapterId = bookInfo.chapterId;
+                            return false;
+                        }
+                    }
+                }
+            });
+        },
+        /**
+         * 添加书籍到书架
+        */
+        fnAddBookShelf: common.fnThrottle(function() {
+            if (this.isInBookShelf) {
+                return false;
+            }
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                PositionName: '加入书架-书籍详情页',
+                ButtonName: '书籍详情页加入书架',
+                ButtonContent: '加入书架',
+                BookID: this.bookId || ''
+            });
+            let data = {
+                bookId: this.book.bookId,
+                chapterId: this.book.chapterId,
+                omap: this.omap ? JSON.stringify(this.omap) : '',
+                title: '书籍详情页'
+            }
+            let result = common.fnAddBookToBookShelf.call(this, data);          // 请求2822加入书架接口
+            result.then(res => {
+                if (!res) {
+                    prompt.showToast({
+                        message: '加入书架失败'
+                    });
+                    return false;
+                }
+                this.isInBookShelf = true;
+                prompt.showToast({
+                    message: res.data.message || '本书已经加入书架'
+                });
+                this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                    PositionName: '加入书架-书籍详情页',
+                    ButtonName: '书籍详情页加入书架成功',
+                    ButtonContent: '加入书架',
+                    BookID: this.bookId || ''
+                });
+            });
+        }),
+        /**
+         * 听书
+        */
+        fnListenBook: common.fnThrottle(function() {
+            if (!this.isSupposeListen) {
+                return false
+            }
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                PositionName: '听书-书籍详情页',
+                ButtonName: this.listenSwitch ? '书籍详情页自动听书' : '书籍详情页购买听书',
+                ButtonContent: '听书',
+                BookID: this.bookId || ''
+            });
+            if (this.listenSwitch) {
+                this.fnRequestReadData(this.book.bookId, this.book.chapterId, this.book.chapterName, true);
+                return false;
+            }
+            if (this.listenPayFlag) {
+                router.push({
+                    uri: '/Member',
+                    params: {
+                        pageFrom: 'readDetail',
+                        bookId: this.book.bookId,
+                        chapterId: this.book.chapterId,
+                        choosePay: 'listen',
+                        referrer: '书籍详情页-听书'
+                    }
+                });
+                return false;
+            }
+        }),
+        /**
+         * 获取deviceInfo
+         */
+        fnGetDeviceInfo() {
+            let that = this;
+            device.getInfo({
+                success: function(ret) {
+                    if(ret.platformVersionCode >= 1050) {
+                        that.isSupposeListen = true;
+                    }
+                }
+            });
+        },
+        fnBookImgAppear() {
+            this.$page.setTitleBar({
+                text: ' ',
+            });
+        },
+        fnBookImgDisappear() {
+            this.$page.setTitleBar({
+                text: '书籍详情',
+            });
+        },
+        fnCheckScStart() {
+            let that = this
+            if(!that.$app.isScStart) {
+                shortcut.hasInstalled({
+                    success: function(res) {
+                        let fnGetCreateTime = that.$app.$def.fnGetCreateTime.call(that)
+                        let fnGetInstallTime = that.$app.$def.fnGetInstallTime.call(that)
+                        Promise.all([fnGetCreateTime, fnGetInstallTime]).then(result => {
+                            if(result[0] || result[1]) {
+                                that.$app.shenceLog.fnSetCommonArgs({
+                                    RegisterDate: result[0] || result[1] 
+                                })
+                            }
+                            let property = {
+                                StartPath: that.$page.uri,
+                                BookID: that.bookId ? that.bookId : '无',
+                                DesktopState: res ? 'Saved' : 'Notsaved',
+                            }
+                            that.$app.shenceLog.log(that, 'appLaunch', '', property);
+                            that.$app.isScStart = true
+                        })
+                    },
+                    fail: function() {
+                        that.$app.$def.quickappLog([703, {
+                            site: '4',
+                        }, 'get_shortcut_install_fail'], that);
+                    }
+                })
+            }
+        }
+    } 
+</script>

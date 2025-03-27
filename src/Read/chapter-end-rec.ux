@@ -1,0 +1,454 @@
+<template>
+  <div class="rec-wrap">
+    <div
+      class="rec-content  {{setupJson['bNight'] ? 'rec-content-night' : ''}}"
+    >
+      <div class="rec-title">
+        <stack>
+          <image
+            class="title-bac"
+            src="{{setupJson['bNight'] ? 'https://xsmfdq.kkyd.cn/images/hmxs/titke-bac-night-20220725.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/title-bac-20220725.png'}}"
+          ></image>
+          <text
+            style="color: {{setupJson['bNight'] ? 'rgba(250, 88, 5, 0.7)' : 'rgba(250, 88, 5, 1)'}};"
+            >看过本书的人都喜欢</text
+          >
+        </stack>
+      </div>
+      <div class="book-wrap">
+        <block for="{{lastBooklistArr}}">
+          <div
+            class="book"
+            @appear="fnBookAppear($item, $idx)"
+            @click="fnRouteToBookDetail($item, $idx)"
+          >
+            <stack>
+              <image class="cover" src="{{$item.coverWap}}"></image>
+            </stack>
+            <div class="book-detail {{ ($item.twoTypeName || $item.threeTypeName) ? '' : 'book-detail-no-tag' }}">
+              <div class="book-name-btn">
+                <text
+                  class="book-name"
+                  style="color: {{setupJson['bNight'] ? 'rgba(255, 255, 255, 0.6)' : 'rgba(51, 51, 51, 1)'}};"
+                  >{{ $item.bookName }}</text
+                >
+                <text
+                    class="btn {{ $item.inBookshelf && setupJson['bNight'] ? 'btn-night-on-book-shelf' : ($item.inBookshelf && !setupJson['bNight'] ? 'on-book-shelf' : (!$item.inBookshelf && setupJson['bNight'] ? 'btn-night' : '')) }}"
+                    @click="fnAddBookshelf($item, $idx)"
+                >{{ $item.inBookshelf ? '已加书架' : '加入书架' }}</text>
+              </div>
+              <text
+                class="des {{ setupJson['bNight'] ? 'desc-night' : '' }}"
+                >{{ $item.introduction }}</text
+              >
+              <div class="tag" if="$item.twoTypeName || $item.threeTypeName">
+                <text
+                  class="tag1 {{ setupJson['bNight'] ? 'tag-night' : '' }}"
+                  if={{$item.twoTypeName}}
+                  >{{ $item.twoTypeName }}</text
+                >
+                <text
+                  class="tag2 {{ setupJson['bNight'] ? 'tag-night' : '' }}"
+                  if="{{$item.threeTypeName}}"
+                  >{{ $item.threeTypeName }}</text
+                >
+              </div>
+            </div>
+          </div>
+        </block>
+        <div
+          class="change-btn {{setupJson['bNight'] ? 'change-btn-night' : ''}}"
+          @click="fnChangeIt"
+        >
+          <image
+            class="change-image"
+            src="{{setupJson['bNight'] ? 'https://xsmfdq.kkyd.cn/images/hmxs/account-icon-arrow-night.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/account-icon-arrow.png'}}"
+          ></image>
+          <text
+            class="change-text"
+            style="color: {{setupJson['bNight'] ? 'rgba(250, 88, 5, 0.7)' : 'rgba(250, 88, 5, 1)'}};"
+            >换一换</text
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<style scoped lang="less">
+.rec-wrap {
+  width: 686px;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .rec-content {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 910px;
+    .rec-title {
+      width: 686px;
+      height: 130px;
+      .title-bac {
+        width: 686px;
+        height: 130px;
+      }
+      text {
+        font-size: 32px;
+        font-family: PingFangSC-Medium, PingFang SC;
+        font-weight: bold;
+        height: 45px;
+        line-height:45px;
+        margin: 42px auto 43px;
+      }
+    }
+    .book-wrap {
+      flex: 1;
+      padding: 0 24px 22px;
+      flex-direction: column;
+      justify-content: space-between;
+      .book {
+        height: 186px;
+        .cover {
+          width: 140px;
+          height: 186px;
+          border-radius: 8px;
+          object-fit: cover;
+        }
+        .book-detail {
+          padding-left: 24px;
+          flex-direction: column;
+          justify-content: space-between;
+          .book-name-btn {
+            justify-content: space-between;
+            align-items: center;
+            width: 464px;
+            height: 49px;
+            .book-name {
+              width: 272px;
+              height: 48px;
+              line-height: 48px;
+              font-size: 32px;
+              font-weight: bold;
+              lines: 1;
+              text-overflow: ellipsis;
+            }
+            .btn {
+                width: 168px;
+                height: 48px;
+                line-height: 48px;
+                margin-right: 8px;
+                border-radius: 32px;
+                font-size: 26px;
+                text-align: center;
+                color: rgba(250, 88, 5, 1);
+                border: 1px solid #FA5805;
+            }
+            .btn-night-on-book-shelf {
+                color: rgba(255, 255, 255, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+            }
+            .on-book-shelf {
+                color: #aaa;
+                border: 1px solid #aaa;
+            }
+            .btn-night {
+                color: rgba(250, 88, 5, 0.7);
+                border: 1px solid rgba(250, 88, 5, 0.6);
+            }
+          }
+          .des {
+            width: 464px;
+            font-size: 24px;
+            line-height: 33px;
+            lines: 2;
+            color: #666;
+            text-overflow: ellipsis;
+          }
+          .desc-night {
+            color: rgba(255, 255, 255, 0.26);
+          }
+          .tag {
+            justify-content: flex-start;
+            .tag1,
+            .tag2 {
+              padding:0 12px;
+              height: 34px;
+              color: #666;
+              background-color: rgba(102, 102, 102, 0.1);
+              border-radius: 8px;
+              font-size: 24px;
+              line-height: 33px;
+              margin-right: 8px;
+              text-align: center;
+            }
+            .tag-night {
+              color: rgba(255, 255, 255, 0.26);
+              background-color: rgba(102, 102, 102, 0.16);
+            }
+          }
+        }
+        .book-detail-no-tag {
+          justify-content: space-around;
+        }
+      }
+      .change-btn {
+        width: 638px;
+        height: 80px;
+        border: 1px solid #fa5805;
+        background-color: rgba(250, 99, 5, 0.08);
+        border-radius: 44px;
+        justify-content: center;
+        align-items: center;
+        .change-image {
+          width: 32px;
+          height: 32px;
+          margin-right: 8px;
+        }
+        .change-text {
+          font-size: 28px;
+          font-family: PingFangSC-Medium, PingFang SC;
+          font-weight: 500;
+        }
+      }
+      .change-btn-night {
+        background-color: rgba(250, 99, 5, 0.04);
+        border: 1px solid rgba(250, 88, 5, 0.6);
+      }
+    }
+  }
+  .rec-content-night {
+    background-color: rgba(255, 255, 255, 0.04);
+    /* background-color: rgba(29, 29, 31, 1); */
+  }
+}
+</style>
+<script>
+import prompt from '@system.prompt';
+import router from '@system.router';
+import common from '../Common/js/common.js';
+
+export default {
+  data() {
+      return {
+          lastBooklistArr: [],
+          isChangeItClick: false,
+          cacheInfo: {},
+          isAddBookShelf: false, // 加入书架中
+      }
+  },
+  props: {
+    // 阅读页设置
+    setupJson: {
+      type: Object,
+      required: false,
+      default: {}
+    },
+    // 章末推荐数据
+    zmRecObj: {
+      type: Object,
+      required: false,
+      default: {}
+    }
+  },
+  onInit() {
+    let that = this
+    that.lastBooklistArr = that.zmRecObj.books
+    that.cacheInfo = that.zmRecObj
+  },
+  fnLoadRecBook() {
+    let that = this
+    that.$app.$def.requestData(that,
+      {
+        url: '/Read',
+        interface: '/glory/fastapp/2114',
+        data: { bookId: that.zmRecObj.bookId, type: '1', chapterId: that.zmRecObj.chapterId, recoSize: 3 },
+        succ: function (res) {
+          that.isChangeItClick = false
+          if (res.data && res.data.books && res.data.books.length) {
+            that.cacheInfo = res.data
+            that.lastBooklistArr = that.cacheInfo.books
+          }
+
+          that.lastBooklistArr.forEach((item, index) => {
+            that.fnBookAppear(item, index)
+          })
+        },
+        fail: function (code) {
+          that.isChangeItClick = false
+        }
+      }
+    )
+  },
+  fnChangeIt() {
+     if (this.isChangeItClick) {
+      return false
+    }
+    this.isChangeItClick = true
+    this.fnLoadRecBook()
+    this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+      ButtonContent: '换一换',
+      ButtonName: '章末推荐-换一换点击',
+      PositionName: '章末推荐-左右翻章'
+    });
+  },
+  fnRouteToBookDetail(bookInfo, idx) {
+    let that = this
+    if (that.isAddBookShelf && !bookInfo.inBookshelf) {
+        return false
+    }
+    let trigger_time = that.$app.$def.getLogTime()
+    let omap = {
+      origin: 'zmtj',
+      channel_id: 'zmtj',
+      channel_name: '章末推荐',
+      channel_pos: 0,
+      column_id: 'zmtj_zyfz',
+      column_name: '章末推荐左右翻章',
+      column_pos: 0,
+      content_id: bookInfo.bookId,
+      content_pos: idx,
+      rec_id: that.cacheInfo.recId || '',
+      model_id: that.cacheInfo.modelId || '',
+      log_id: that.cacheInfo.logId || '',
+      exp_id: that.cacheInfo.expId || '',
+      cur_bookId: that.zmRecObj.bookId,
+      trigger_time: trigger_time,
+    }
+
+    router.push({
+      uri: '/BookDetail',
+      params: {
+        bookId: bookInfo.bookId,
+        SourcePosition: '章末推荐',
+        omap: omap,
+        sourePage: '阅读页-横版章末推荐'
+      }
+    })
+
+    that.$app.$def.quickappLog([702, {
+      qmap: {
+        oaid: that.$app && that.$app.oaid || ''
+      },
+      omap: omap
+    }, 'book_click'], that)
+
+    that.$app.shenceLog.log(that, 'track', 'OperationClick', {
+      BookID: bookInfo.bookId || '', // 书籍ID  阅读页的
+      BookName: bookInfo.bookName || '', // 书籍名称
+      SourceId: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.sourceId || '',// 策略层id
+      SourceName: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.sourceName || '', // 策略层名称
+      TacticsId: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.tacticsId || '', // 策略id
+      TacticsName: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.tacticsName || '', // 策略名称
+      OperationName: '章末推荐',
+      PositionName: '章末推荐-左右翻章',
+      RBookID: that.zmRecObj.bookId || ''
+    })
+  },
+  /**
+    * 书籍曝光打点
+    */
+  fnBookAppear(bookInfo, idx) {
+    let that = this
+    let trigger_time = that.$app.$def.getLogTime()
+    let omap = {
+      origin: 'zmtj',
+      channel_id: 'zmtj',
+      channel_name: '章末推荐',
+      channel_pos: 0,
+      column_id: 'zmtj_zyfz',
+      column_name: '章末推荐左右翻章',
+      column_pos: 0,
+      content_id: bookInfo.bookId,
+      content_pos: idx,
+      rec_id: that.cacheInfo.recId || '',
+      model_id: that.cacheInfo.modelId || '',
+      log_id: that.cacheInfo.logId || '',
+      exp_id: that.cacheInfo.expId || '',
+      cur_bookId: that.zmRecObj.bookId,
+      trigger_time: trigger_time,
+    }
+    that.$app.$def.quickappLog([706, {
+      qmap: {
+        oaid: that.$app && that.$app.oaid || ''
+      },
+      omap: omap
+    }], that)
+
+    that.$app.shenceLog.log(that, 'track', 'OperationExposure', {
+      BookID: bookInfo.bookId, // 书籍ID  阅读页的
+      BookName: bookInfo.bookName, // 书籍名称
+      SourceId: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.sourceId || '',// 策略层id
+      SourceName: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.sourceName || '', // 策略层名称
+      TacticsId: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.tacticsId || '', // 策略id
+      TacticsName: that.cacheInfo.userTacticsVo && that.cacheInfo.userTacticsVo.tacticsName || '', // 策略名称
+      OperationName: '章末推荐',
+      PositionName: '章末推荐-左右翻章',
+      RBookID: that.zmRecObj.bookId, // 当前 点击 或 曝光 书籍ID
+      ChaptersID: bookInfo.chapterId || '',
+    })
+  },
+  /**
+    * 加入书架
+    */
+  fnAddBookshelf(bookInfo, idx, evt) {
+      if (bookInfo.inBookshelf) {
+          return false;
+      }
+      this.isAddBookShelf = true;
+      let omap = {
+          origin: 'zmtj',
+          channel_id: 'zmtj',
+          channel_name: '章末推荐',
+          channel_pos: 0,
+          column_id: 'zmtj_zyfz',
+          column_name: '章末推荐左右翻章',
+          column_pos: 0,
+          content_id: bookInfo.bookId,
+          content_pos: idx,
+          rec_id: this.cacheInfo.recId || '',
+          model_id: this.cacheInfo.modelId || '',
+          log_id: this.cacheInfo.logId || '',
+          exp_id: this.cacheInfo.expId || '',
+          cur_bookId: this.zmRecObj.bookId,
+          trigger_time: this.$app.$def.getLogTime(),
+      }
+      this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+          PositionName: '加入书架-横板章末推荐',
+          ButtonName: '横板章末推荐加入书架',
+          ButtonContent: '加入书架',
+          BookID: bookInfo.bookId || '',
+          RBookID: this.zmRecObj.bookId || ''
+      });
+      let data = {
+          bookId: bookInfo.bookId,
+          chapterId: bookInfo.chapterId || '',
+          omap: JSON.stringify(omap),
+          title: '横板章末推荐'
+      }
+      let result = common.fnAddBookToBookShelf.call(this, data);
+      result.then(res => {
+          this.isAddBookShelf = false;
+          if (!res) {
+              prompt.showToast({
+                  message: '加入书架失败'
+              });
+              return false;
+          }
+          bookInfo.inBookshelf = true;
+          prompt.showToast({
+              message: '已加至书架，记得去书架看书哦'
+          });
+          this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+              PositionName: '加入书架-横板章末推荐',
+              ButtonName: '横板章末推荐加入书架成功',
+              ButtonContent: '加入书架',
+              BookID: bookInfo.bookId || '',
+              RBookID: this.zmRecObj.bookId || ''
+          });
+      });
+  }
+}
+</script>

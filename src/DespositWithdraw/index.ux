@@ -1,0 +1,395 @@
+<template>
+    <div>
+        <stack class="container">
+            <image src="https://xsmfdq.kkyd.cn/images/install_bg.png" class="bg_img"></image>
+            <text class="title">安装APP后，立即提现到微信</text>
+            <text class="apk_name">西瓜免费小说</text>
+            <text class="btn" @click="fnClickInstall">{{hasInstalled?'立即打开':'立即下载'}}</text>
+            <text class="des">安装并打开APP可立即领取<span class="des_lignt" style="color: #FFE24D">双倍现金红包</span></text>
+            <text class="des_bottom">微信提现，一秒到账</text>
+            <div class="btn_bottom">
+                <a href="http://privacy.zuanqianyi.com/protocol/agreement.html?appname=%E8%A5%BF%E7%93%9C%E5%85%8D%E8%B4%B9%E5%B0%8F%E8%AF%B4&company=%E5%A4%A9%E6%B4%A5%E6%AF%8F%E6%97%A5%E8%B6%A3%E9%98%85%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8&companyl=%E6%AF%8F%E6%97%A5%E8%B6%A3%E9%98%85&pname=com.dzmf.zmfxsdq&time=1628671123676">用户协议</a>
+                <a href="http://privacy.zuanqianyi.com/protocol/privacy_policy.html?appname=%E8%A5%BF%E7%93%9C%E5%85%8D%E8%B4%B9%E5%B0%8F%E8%AF%B4&company=%E5%A4%A9%E6%B4%A5%E6%AF%8F%E6%97%A5%E8%B6%A3%E9%98%85%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8&companyl=%E6%AF%8F%E6%97%A5%E8%B6%A3%E9%98%85&pname=com.dzmf.zmfxsdq&time=1628671150332">隐私政策</a>
+            </div>
+            <div class="install-pop" if="show_pop">
+                <image class="close_img" @click="fnClose" src="https://xsmfdq.kkyd.cn/images/colse_icon.png"></image>
+                <div class="pop-content">
+                    <image class="app_icon" src="https://xsmfdq.kkyd.cn/images/app_icon.png"></image>
+                    <text class="app_name">西瓜免费小说</text>
+                    <div class="btn_install" if="isInstall&&hasInstalled" @click="fnOpenApp">
+                        <text class="open">打开</text>
+                    </div>
+                    <div class="btn_uninstall" else>
+                        <div class="progress" style="width:{{(this.initial/this.terminate)*100}}%"></div>
+                    </div>
+                    <text class="stall" if="!isInstall&&!hasInstalled">正在安装</text>
+                </div>
+            </div>
+        </stack>
+    </div>
+</template>
+
+<style scoped lang="less">
+.container {
+    width: 100%;
+    height: 100%;
+    .bg_img {
+        width: 750px;
+        height: 1495px;
+        object-fit: cover;
+    }
+    .install-pop {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background-color: rgba(0, 0, 0, .7);
+        z-index: 99;
+        .close_img {
+            width: 54px;
+            height: 54px;
+            position: fixed;
+            right: 85px;
+            top: 343px;
+        }
+        .pop-content {
+            width: 580px;
+            height: 524px;
+            background-color: #fff;
+            margin: 421px auto auto; 
+            border-radius: 16px;
+            .app_icon {
+                height: 164px;
+                width: 164px;
+                position: fixed;
+                top: 526px;
+                left: 293px;
+            }
+            .app_name {
+                height: 45px;
+                width: 100%;
+                text-align: center;
+                font-size: 32px;
+                font-weight: 400;
+                color: #444444;
+                line-height: 45px;
+                position: fixed;
+                top: 706px;
+            }
+            .btn_install {
+                position: fixed;
+                top: 823px;
+                left: 133px;
+                height: 90px;
+                width: 484px;
+                border-radius: 44px;
+                background-color: #F97053;
+                .open {
+                    width: 100%;
+                    height: 90px;
+                    font-size: 32px;
+                    text-align: center;
+                    font-weight: 400;
+                    color: #ffffff;
+                    line-height: 90px;
+                }
+            }
+            .btn_uninstall {
+                position: fixed;
+                top: 823px;
+                left: 133px;
+                height: 90px;
+                width: 484px;
+                border-radius: 44px;
+                padding: 2px;
+                border: 2px solid #F97053;
+                .progress {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 44px;
+                    background-color: #FEE2DD
+                }
+             
+            }
+            .stall {
+                width: 100%;
+                height: 45px;
+                font-size: 32px;
+                text-align: center;
+                font-weight: 400;
+                position: fixed;
+                top: 845px;
+                left: 0;
+                color: #F97053;
+                line-height: 45px;
+            }
+        }
+    }
+    .title {
+        height: 56px;
+        width: 100%;
+        text-align: center;
+        font-size: 40px;
+        font-weight: 600;
+        color: #FFF8EA;
+        line-height: 56px;
+        margin-top: 359px;
+    }
+    .apk_name {
+        height: 56px;
+        width: 100%;
+        text-align: center;
+        font-size: 40px;
+        font-weight: 400;
+        color: #FFF8EA;
+        line-height: 56px;
+         margin-top: 671px;
+    }
+    .btn {
+        width: 100%;
+        height: 56px;
+        font-size: 40px;
+        font-weight: 500;
+        color: #E40013;
+        line-height: 56px;
+        margin-top: 809px;
+        text-align: center;
+    }
+    .des {
+        height: 40px;
+        width: 100%;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 400;
+        color: #FFF8EA;
+        line-height: 40px;
+        margin-top: 947px;
+    }
+    .des_bottom {
+        height: 40px;
+        width: 100%;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 400;
+        color: #FFF8EA;
+        line-height: 40px;
+         margin-top: 995px;
+    }
+    .btn_bottom {
+        height: 40px;
+        width: 350px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: 1059px auto auto;
+         a {
+            width: 113px;
+            height: 40px;
+            font-size: 28px;
+            font-weight: 400;
+            color: #FFEECD;
+            line-height: 40px;
+            text-decoration: underline;
+        }
+    }
+}
+</style>
+
+<script>
+import pkg from '@system.package'
+import network from '@system.network'
+import prompt from '@system.prompt'
+import request from '@system.request'
+import router from '@system.router'
+export default {
+    protected: {
+      urlPakVo: '',
+    },
+    private: {
+        searchPackge: null,                      // 查询包名定时任务
+        appkey: 'com.dzmf.zmfxsdq',              // 包名
+        show_pop: false,                         // 下载弹窗
+        hasInstalled: false,                     // 是否已下载
+        isInstall: false,                        // 是否下载中
+        isStore: false,                          // 是否去应用商店下载
+        timer: null,                             // 安装计时任务
+        initial: 5,                              // 安装计时初始值
+        terminate: 30,                           // 安装计时结束值
+        pkgUrl: '',                              // 下载链接
+        openUrl: ''                              // 跳转链接
+    },
+    onInit() {
+        let that = this
+        let withdrawInfo = JSON.parse(that.urlPakVo)
+        that.appkey = withdrawInfo.pkgName
+        that.openUrl = withdrawInfo.deepLinkUrl
+        that.isStore = withdrawInfo.jumpType === '1'?false:true
+        that.pkgUrl = withdrawInfo.url
+        // console.log(withdrawInfo)
+        // that.searchPackge = setInterval(()=>{
+            that.ifInstall()
+    //    },6000)
+    },
+    onShow() {
+        this.fnClose()
+        this.ifInstall()
+        this.$app.lastOpenPage = '';
+        this.$app.$def.quickappLog([701], this);
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            Title: 'APP导量'
+        });
+    },
+    onDestroy() {
+        let that = this
+        clearInterval(that.searchPackge)
+        clearInterval(this.timer)
+    },
+    // 检测app是否下载
+    ifInstall() {
+        let that = this
+        pkg.hasInstalled({
+        package: that.appkey,
+            success: function(data) {
+                console.log(data.result,that.isStore,that.isInstall,that.show_pop)
+                that.hasInstalled = data.result
+                if(data.result&&!that.isStore) {
+                    that.isInstall = true
+                    return
+                    //按钮是立即打开
+                }
+                if(!data.result&&!that.isInstall&&!that.isStore&&that.show_pop) {
+                    console.log('下载',7777777)
+                    that.isInstall = false
+                    let url = that.pkgUrl
+                    that.timer = setInterval(()=>{
+                        if(that.initial<that.terminate) {
+                            that.initial++
+                        }
+                        if(that.initial == that.terminate) {
+                             clearInterval(that.timer)
+                        }
+                    },1000)
+                    that.fnInstallPackage(url)
+                    //按钮是下载中
+                }
+            },
+            fail: function(data, code) {
+                console.log('检测失败')
+            }
+        })
+    },
+
+    //从应用商店下载
+    fnUnderStore() {
+        let that = this
+        pkg.install({
+            package: that.appkey,
+            success: function(data) {
+                console.log(`handling success: ${data.result88888}`)
+            },
+            fail: function(data, code) {
+                console.log(`handling fail, code = ${code}`)
+            }
+        })
+    },
+
+    //点击立即安装
+    fnClickInstall() {
+        let that = this
+        if(that.hasInstalled) {
+            that.fnOpenApp()
+            return
+        }
+        if(!that.isStore) {
+            that.show_pop = true
+            that.ifInstall()
+            that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+                PositionName: '提现页面',
+                ButtonName: 'apk下载',
+                ButtonContent: '立即下载',
+            });
+            return 
+        }
+        // 已安装直接打开
+        if(that.hasInstalled) {
+            that.fnOpenApp()
+            return
+        }
+        // 应用商店安装
+        that.fnUnderStore()
+        that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+            PositionName: '提现页面',
+            ButtonName: '商店安装',
+            ButtonContent: '立即下载',
+        });
+    },
+
+     //关闭下载弹窗
+    fnClose() {
+        this.show_pop = false
+        this.isInstall = false
+        this.initial = 5
+        clearInterval(this.timer)
+    },
+
+     // 安装应用
+    fnInstallPackage(downloadLink) {
+        let that = this
+        if(that.isInstall) {
+            prompt.showToast({
+                message: '应用下载中...'
+            })
+            return
+        }
+        let downloadUrl = downloadLink  //下发的下载地址
+        request.download({
+            url: downloadUrl,
+            description:  '软件包',
+            filename:  '软件包'  + '.apk',
+            success: function(ret) {
+                network.getType({
+                    success: function(data) {
+                        if(data && data.type && data.type != 'wifi') {
+                            prompt.showToast({
+                                message: '当前处在非WiFi环境，注意流量消耗'
+                            })    
+                        }
+                    }
+                })
+                request.onDownloadComplete({
+                    token: ret.token,
+                    success: function(data) {
+                        prompt.showToast({
+                            message: '下载完成，开始安装...'
+                        })
+                        that.isInstall = false
+                        router.push({
+                            uri: data.uri
+                        })
+                    },
+                    fail: function(data, code) {
+                        console.log('-----AdUnion-----下载完成失败-----')
+                    }
+                })
+            },
+            fail: function(data, code) {
+                console.log('-----AdUnion-----启动下载失败-----')
+            }
+        })
+    },
+
+    //打开应用
+    fnOpenApp() {
+        let that = this
+        router.push({
+            uri: this.openUrl
+        })
+        that.$app.shenceLog.log(that, 'track', 'ButtonClick', {
+            PositionName: '提现页面',
+            ButtonName: '点击打开apk',
+            ButtonContent: '立即打开',
+        });
+    }
+}
+</script>

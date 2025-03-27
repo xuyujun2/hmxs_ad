@@ -1,0 +1,72 @@
+<template>
+    <div class="back-gdt-btn">
+        <div if="{{ showBackBtn }}" class="back-gdt" @click="fnBackGdt">
+            <image src="../Common/images/back-gdt.png"></image>
+            <text>{{ backText }}</text>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="less">
+    .back-gdt-btn {
+        width: 0px;
+        height: 0px;
+        .back-gdt {
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            left: 0px;
+            top: 26px;
+            height: 64px;
+            background-color: rgba(0, 0, 0, .6);
+            border-bottom-right-radius: 40px;
+            border-top-right-radius: 40px;
+            padding: 0px 28px 0px 12px;
+            image {
+                margin-right: 14px;
+                width: 30px;
+                height: 30px;
+            }
+            text {
+                font-size: 30px;
+                color: #fff;
+            }
+        }
+    }
+</style>
+
+<script>
+import router from '@system.router';
+export default {
+    props: {
+        // 书籍Id
+        bookId: {
+            type: String,
+            required: false,
+            default: ''
+        }
+    },
+    data: {
+        showBackBtn: false,
+        backText: '',
+        backUrl: '',
+    },
+    onInit() {
+        if(this.$app.isBackGdt) {
+            this.showBackBtn = true
+            this.backText = this.$app.backGdtText
+            this.backUrl = this.$app.backGdtUrl
+        }
+    },
+    fnBackGdt() {
+        this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+            ButtonName: '左上角返回媒体按钮',
+            ButtonContent: this.backText,
+            BookID: this.bookId || ''
+        }); 
+        router.push({
+            uri: this.backUrl
+        })
+    }
+}
+</script>

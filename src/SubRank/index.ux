@@ -1,0 +1,434 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="paid-tag" src="../Component/tag.ux"></import>
+
+<template>
+    <div class="rank-wrap">
+        <list class="rank-list" onscrollbottom="fnLoadMoreData">
+            <list-item type="title">
+                <div class="rank-title">
+                    <stack class="rank-stack">
+                        <image class="rank-title-image" src="https://xsmfdq.kkyd.cn/images/sub-rank-bg.jpg"></image>
+                        <text class="rank-title-text">{{isRecommend && isRecommend == 1 ? '推荐榜' : classifyName + '类' + rankName}}</text>
+                    </stack>
+                </div>
+            </list-item>
+            <list-item type="recommend">
+                <div class="rank-blank {{isRecommend && isRecommend == 1 ? 'rank-blank-extra' : ''}}">
+                    <div if="isRecommend && isRecommend == 1" class="rank-blank-line rank-blank-line-left"></div>
+                    <text if="isRecommend && isRecommend == 1" class="rank-blank-text">根据你的阅读兴趣推荐</text>
+                    <div if="isRecommend && isRecommend == 1" class="rank-blank-line rank-blank-line-right"></div>
+                </div>
+            </list-item>
+            <list-item type="rankList_{{bookList.length}}" class="book-list-wrap">
+                <block for="bookList">
+                    <div class="book-wrap"  @appear="fnBookAppear($item, $idx)" @click="fnRouteBookDetail($item, $idx)">
+                        <stack class="book-stack">
+                            <div class="book-info-wrap">
+                                <stack>
+                                    <image class="book-cover" src="{{$item.coverWap}}"></image>
+                                    <div style="justify-content: flex-end;width: 180px;">
+                                        <paid-tag if="$item.iconType === '10'" tag="{{ $item.iconDesc }}"></paid-tag>
+                                    </div>
+                                </stack>
+                                <div class="book-box">
+                                    <text class="book-title">{{$item.bookName}}</text>
+                                    <text class="book-desc">{{$item.introduction}}</text>
+                                    <div class="book-info">
+                                        <div class="book-tag-wrap">
+                                            <text if="$item.twoTypeName" class="book-tag">{{$item.twoTypeName}}</text>
+                                            <text if="$item.threeTypeName" class="{{$item.twoTypeName ? 'book-tag-extra' : 'book-tag'}}">{{$item.threeTypeName}}</text>
+                                        </div>
+                                        <div class="book-info-other">
+                                            <image class="book-number-image" src="https://xsmfdq.kkyd.cn/images/read-num-icon.png"></image>
+                                            <text class="book-number">{{$item.clickNum}}人阅读</text>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <text class="book-tip {{$idx <= 2 ? ('book-tip' + $idx) : ''}}">{{$idx + 1}}</text>
+                        </stack>
+                    </div>
+                </block>
+            </list-item>
+            <list-item type="loadMore" class="load-more">
+                <progress if="isLoading" type="circular" class="load-more-progress"></progress>
+                <text class="load-more-text" if="isLoading">正在加载中</text>
+                <text class="{{canLoadMore ? 'load-more-text' : 'load-all'}}" if="!isLoading">{{canLoadMore ? '上拉加载更多' : '已经是全部了'}}</text>
+            </list-item>
+        </list>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .rank-wrap {
+        flex-direction: column;
+        width: 100%;
+        background-color: #E6E6DA ;
+        .rank-title {
+            width: 100%;
+            height: 156px;
+            .rank-stack {
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 156px;
+            }
+            .rank-title-image {
+                width: 100%;
+                height: 156px;
+            }
+            .rank-title-text {
+                height: 75px;
+                font-size: 54px;
+                font-weight: bold;
+                color: rgba(148, 120, 98, 0.8);
+                line-height: 75px;
+            }
+        }
+        .rank-blank {
+            width: 100%;
+            height: 40px;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            background-color: #FFFFFF;
+            align-items: center;
+            justify-content: center;
+            .rank-blank-line {
+                width: 72px;
+                height: 1px;
+            }
+            .rank-blank-line-left {
+                background: linear-gradient(to right,#FFFFFF, #8F8F8F);
+            }
+            .rank-blank-line-right {
+                background: linear-gradient(to left, #FFFFFF, #8F8F8F);
+            }
+            .rank-blank-text {
+                margin-left: 16px;
+                margin-right: 16px;
+                height: 37px;
+                font-size: 26px;
+                color: #444444;
+                line-height: 37px;
+            }
+        }
+        .rank-blank-extra {
+            height: 91px;
+        }
+        .rank-list {
+            flex: 1;
+            flex-direction: column;
+            width: 100%;
+            background-color: #ffffff;
+            .book-list-wrap {
+                flex-direction: column;
+                width: 100%;
+                padding: 0px 30px;
+            }
+            .book-wrap {
+                margin-bottom: 48px;
+                height: 252px;
+                .book-stack {
+                    width: 100%;
+                }
+                .book-tip {
+                    width: 44px;
+                    height: 30px;
+                    background-color: #CFB78C;
+                    border-radius: 6px;
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #FFFFFF;
+                    line-height: 30px;
+                    text-align: center;
+                }
+                .book-tip0 {
+                    background-color: #E63107;
+                }
+                .book-tip1 {
+                    background-color: #F5700F;
+                }
+                .book-tip2 {
+                    background-color: #E8B140;
+                }
+                .book-info-wrap {
+                    margin-left: 10px;
+                    margin-top: 10px;
+                    width: 680px;
+                    height: 242px;
+                }
+                .book-cover {
+                    margin-right: 30px;
+                    width: 180px;
+                    height: 242px;
+                    border-radius: 4px;
+                }
+                .book-box {
+                    flex: 1;
+                    flex-direction: column;
+                    height: 242px;
+                    .book-title {
+                        margin-top: 10px;
+                        margin-bottom: 22px;
+                        height: 40px;
+                        font-size: 34px;
+                        font-weight: bold;
+                        color: #333333;
+                        line-height: 40px;
+                        lines: 1;
+                        text-overflow: ellipsis; 
+                    }
+                    .book-desc {
+                        margin-bottom: 50px;
+                        height: 80px;
+                        font-size: 26px;
+                        color: #444444;
+                        line-height: 40px;
+                        lines: 2;
+                        text-overflow: ellipsis;
+                    }
+                    .book-info {
+                        height: 40px;
+                        align-items: center;
+                        justify-content: space-between;
+                        .book-tag-wrap {
+                            flex: 1;
+                        }
+                        .book-tag {
+                            margin-right: 5px;
+                            padding: 0px 4px;
+                            height: 30px;
+                            background-color: rgba(234, 238, 230, .5);
+                            border-radius: 4px;
+                            font-size: 22px;
+                            font-weight: 400;
+                            color: #666666;
+                            line-height: 30px;
+                        }
+                        .book-tag-extra {
+                            margin-right: 5px;
+                            padding: 0px 4px;
+                            height: 30px;
+                            background-color: rgba(230, 235, 242, .5);
+                            border-radius: 4px;
+                            font-size: 22px;
+                            font-weight: 400;
+                            color: #666666;
+                            line-height: 30px;
+                        }
+                        .book-number-image {
+                            margin-right: 4px;
+                            width: 40px;
+                            height: 40px;
+                        }
+                        .book-number {
+                            height: 40px;
+                            font-size: 26px;
+                            color: #ED9E13;
+                            line-height: 40px;
+                        }
+                    }
+                }
+            }
+            .load-more {
+                height: 40px;
+				align-items: center;
+				justify-content: center;
+				margin-bottom: 30px;
+                .load-all {
+					font-size: 22px;
+					color: rgba(0, 0, 0, 0.4);
+					line-height: 40px;
+					text-align: center;
+				}
+				.load-more-progress {
+					margin-right: 18px;
+					color: #F97053;
+				}
+				.load-more-text {
+					font-size: 22px;
+					color: #F97053;
+					line-height: 40px;
+					text-align: center;
+				}
+            }
+        }
+    }
+</style>
+
+<script>
+    import router from '@system.router'
+	export default{
+        protected: {
+            rankName: '', // 排行榜名称
+            classifyType: '', // 分类等级
+            classifyId: '', // 分类ID
+            classifyName: '', // 分类名称
+            isRecommend: false,
+        },
+		private: {
+            bookList: [], // 书籍列表
+            allBookList: [], // 全部书籍
+            isLoading: false, // 数据加载中
+            canLoadMore: false, // 能否加载更多
+		},
+		onInit(){
+			this.$page.setTitleBar({
+                text: this.isRecommend && this.isRecommend == 1 ? '推荐榜' : '分类排行榜',
+                backgroundColor: '#E6E6DA'
+            });
+			this.fnLoadData();
+		},
+		onShow() {
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '子排行榜'
+            });
+            this.$app.$def.quickappLog([701], this);
+        },
+        // 返回键触发
+        onBackPress() {
+            setTimeout(() => {
+                let routerLength = router.getLength()
+                if(routerLength <= 1) {
+                    router.replace({
+                        uri: '/Index'
+                    })
+                }else{
+                    router.back()
+                }
+            }, 0)
+            return true
+        },
+        /**
+         * 加载数据
+         */
+        fnLoadData() {
+            let that = this
+            // that.isLoading = true
+            that.$app.$def.requestData(that,{
+                interface: '/glory/fastapp/2116',
+                data: {
+                    rankName: this.rankName,
+                    classifyType: this.classifyType,
+                    classifyId: this.classifyId,
+                    isRec: this.isRecommend && this.isRecommend == 1 ? 1 : 0,
+                },
+                succ: function (res) {   
+                    console.log(res)
+                    that.isLoading = false
+                    if (res.retCode == 0 && res.data && res.data.bookVoList && res.data.bookVoList.length) {
+                        that.allBookList = res.data.bookVoList
+                        that.bookList = that.allBookList.slice(0, 20)
+                    }
+                },            
+                error(data) {
+                    that.isLoading = false
+                }
+            })
+        },
+        /**
+         * 加载更多数据
+         */
+        fnLoadMoreData() {
+            let that = this
+            if(that.bookList.length >= that.allBookList.length) {
+                that.canLoadMore = false
+            }else {
+                that.canLoadMore = true
+                that.bookList = that.bookList.concat(that.allBookList.slice(that.bookList.length, that.bookList.length + 10))
+            }
+        },
+        fnBookAppear(item, index) {
+            let that = this
+            let trigger_time = that.$app.$def.getLogTime()
+            let omap = {
+                origin:'zphb',
+                action:'1',
+                channel_id:'zphb',
+                channel_name: this.isRecommend && this.isRecommend == 1 ? '推荐榜' : '子排行榜',
+                channel_pos:0,
+                column_id:that.classifyId,
+                column_name:that.rankName,
+                column_pos:0,
+                content_id:item.bookId,
+                content_pos:index,
+                content_type:'1',
+                trigger_time:trigger_time
+            }
+            that.$app.$def.quickappLog([706, {
+				omap: omap
+			}], that)
+        },
+        /**
+         * 跳转阅读页
+         */
+        fnRouteRead(item, index) {
+            let that = this
+            let trigger_time = that.$app.$def.getLogTime()
+            let omap = {
+                origin:'zphb',
+                action:'2',
+                channel_id:'zphb',
+                channel_name: this.isRecommend && this.isRecommend == 1 ? '推荐榜' : '子排行榜',
+                channel_pos:0,
+                column_id:that.classifyId,
+                column_name:that.rankName,
+                column_pos:0,
+                content_id:item.bookId,
+                content_pos:index,
+                content_type:'2',
+                trigger_time:trigger_time
+            }
+            router.replace({
+                uri: '/Read',
+                params: {
+                    bookId: item.bookId,
+                    bookName: item.bookName,
+                    omap:omap
+                }
+            })
+            that.$app.$def.quickappLog([702, {
+				omap: omap
+			}, 'book_click'], that)
+        },
+        fnRouteBookDetail(item, index) {
+            let that = this
+            let trigger_time = that.$app.$def.getLogTime()
+            let omap = {
+                origin:'zphb',
+                action:'2',
+                channel_id:'zphb',
+                channel_name: '子排行榜',
+                channel_pos:0,
+                column_id:that.classifyId,
+                column_name:this.isRecommend && this.isRecommend == 1 ? '推荐榜' : that.rankName,
+                column_pos:0,
+                content_id:item.bookId,
+                content_pos:index,
+                content_type:'1',
+                trigger_time:trigger_time
+            }
+            router.push({
+                uri: '/BookDetail',
+                params: {
+                    bookId: item.bookId,
+                    bookName: item.bookName,
+                    omap:omap,
+                    sourcePage: '子排行榜'
+                }
+            })
+            that.$app.shenceLog.log(that,'track','ButtonClick', {
+				Title: that.isRecommend && that.isRecommend == 1 ? '推荐榜' : ('子排行榜-'+this.classifyName + '类' + this.rankName),
+				ButtonName: '子排行榜-查看书籍',
+				BookID: item.bookId || '',
+				BookName: item.bookName || '',
+                ButtonContent: '子排行榜-查看书籍'
+			});
+            that.$app.$def.quickappLog([702, {
+				omap: omap
+			}, 'book_click'], that)
+        },
+	}
+</script>

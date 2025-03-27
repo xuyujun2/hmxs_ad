@@ -1,0 +1,267 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<import name="paid-tag" src="../Component/tag.ux"></import>
+<style>
+.list1 {
+  margin: 0 40px;
+}
+.list-item {
+  padding: 28px 0;
+  border-bottom-width: 2px;
+  border-bottom-color: rgba(244, 246, 248, 1);
+}
+.list-item .imgdiv {
+  width: 160px;
+  height: 214px;
+  background-color: rgba(242, 242, 242, 1);
+  border-radius: 6px;
+}
+.list-item .imgdiv image {
+  width: 160px;
+  height: 214px;
+  border-radius: 6px;
+}
+.list-item .text-wrap {
+  padding-left: 24px;
+  flex: 1;
+}
+.text-wrap {
+  flex-direction: column;
+}
+.text-name {
+  height: 32px;
+  margin-top: 10px;
+  font-size: 32px;
+  font-weight: 500;
+  color: #333333;
+  line-height: 32px;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+.text-desc {
+  margin-top: 24px;
+  font-size: 28px;
+  color: #8E8E98;
+  line-height: 40px;
+  lines: 2;
+  text-overflow: ellipsis;
+}
+.load-more {
+  justify-content: center;
+  margin: 30px;
+  height: 64px;
+}
+.load-more text {
+  font-size: 28px;
+  color: #59f;
+}
+
+.text-author-status {
+  margin-top: 32px;
+  flex: 1;
+}
+.text-con{
+	flex: 1;
+	lines: 1;
+	text-overflow: ellipsis;
+	align-items: center;
+}
+.text-author-status .text-author {
+  height: 28px;
+  font-size: 26px;
+  color: #8E8E98;
+}
+.text-author-status .text-line {
+  height: 28px;
+  font-size: 26px;
+  color: #8E8E98;
+  margin: 0 10px;
+}
+.text-author-status .text-status {
+  height: 28px;
+  font-size: 26px;
+  color: #6D28F4;
+}
+.text-author-status .text-status-finish {
+  color: #FF631C;
+}
+.text-author-status .zhui {
+  text-align: right;
+  justify-content: flex-end;
+  align-items: center;
+}
+.text-author-status .zhui .text-zhui {
+  height: 28px;
+  font-size: 26px;
+  color: #8E8E98;
+}
+.text-author-status .zhui image {
+  width: 40px;
+  height: 40px;
+}
+</style>
+<template>
+    <div class="root">
+        <list class="list1" onscrollbottom="scrollLoadMoreData">
+            <list-item type="product" class="list-item" for="{{moreList}}" if="{{$item.type=='db'}}" @appear="bookAppear($item.items[0].bookId,$item.items[0].title,$idx)" @click="routeBookDetail($item.items[0].bookId,$item.items[0].title,$idx)">
+                <stack class="imgdiv">
+                    <image class="img" src="{{$item.items[0].imgUrl[0]}}"></image>
+                    <paid-tag if="$item.items[0].iconType === '10'" tag="{{ $item.items[0].iconDesc }}"></paid-tag>
+                </stack>
+                <div class="text-wrap">
+                    <text class="text-name">{{$item.items[0].title}}</text>
+                    <text class="text-desc">{{$item.items[0].desc}}</text>
+                    <div class="text-author-status">
+                        <text class="text-con">
+                          <span class="text-status {{$item.items[0].status==='已完结' ? 'text-status-finish' : ''}}">{{$item.items[0].status}}</span>
+                          <span class="text-line"> | </span>
+                          <span class="text-author">{{$item.items[0].author}}</span>
+                        </text>
+                        <div class="zhui">
+                            <!-- <image class="img" src="https://xsmfdq.kkyd.cn/images/icon-eye.png"></image> -->
+                            <text class="text-zhui">{{$item.items[0].clickNum}}人阅读</text>
+                        </div>
+                    </div>
+
+                </div>
+            </list-item>
+            <!-- 加载更多，type属性自定义命名为loadMore -->
+            <list-item type="loadMore" class="load-more">
+                <div if="{{bLoadingShow}}">
+                    <progress type="circular"></progress>
+                    <text>正在加载中</text>
+                </div>
+                <div else>
+                    <text if="{{streamAll}}" style="color:#A1A3A5;">已经是全部了</text>
+                    <text else>{{bFirstLoad ? '' : '上拉加载更多'}}</text>
+                </div>
+            </list-item>
+        </list>
+        <back-baidu></back-baidu>
+    </div>
+</template>
+<script>
+import device from '@system.device';
+import storage from '@system.storage';
+import router from '@system.router';
+import prompt from '@system.prompt';
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+	export default{
+		protected:{
+			id:'',
+			title:'',
+			bLoadingShow:false,
+			streamAll:false,
+			bFirstLoad:true,
+      curPage:1,
+      channel_id:'',
+      channel_name:'',
+      channel_pos:'',
+      column_pos:''
+		},
+		private:{
+			moreList:[]
+		},
+		onInit(){
+			this.$page.setTitleBar({text:this.title});
+			this.loadMoreData();
+		},
+		onShow(){
+      this.$app.lastOpenPage = ''
+      this.$app.shenceLog.log(this, 'pageShow', '', {
+				Title: '书籍列表'
+      });
+      // pageEnter(this.$page.path);
+      this.$app.$def.quickappLog([701], this);
+			//$umeng_stat.resume(this);
+		},
+		onHide() {
+      // pageLeave(this.$page.path);
+			//$umeng_stat.pause(this);
+		},
+		scrollLoadMoreData(){
+			if(!this.streamAll){
+				this.loadMoreData();
+			}
+		},
+		loadMoreData(){
+			let that = this;
+			that.$app.$def.requestData(that,
+				{
+					interface: '/glory/fastapp/2861',
+					data: { id:that.id,page:that.curPage, readPref:'0'},
+					succ: function (res) {
+						that.bLoadingShow=false;
+						that.bFirstLoad=false;
+						if (res.retCode == 0) {
+							that.moreList=that.moreList.concat(res.data.section);
+							that.curPage = res.data.page;
+							that.streamAll=res.data.page==0?true:false;
+						}
+					},
+					error: function (code) {
+						that.bLoadingShow=false;
+						//console.log(code)
+					}
+				}
+			)
+    },
+    bookAppear(bookId,content_name,content_pos) {
+      let that = this
+      let trigger_time = that.$app.$def.getLogTime()
+      let omap = {
+        origin:'nsc',
+        action:'1',
+        channel_id:that.channel_id,
+        channel_name:that.channel_name,
+        channel_pos:that.channel_pos,
+        column_id:that.id,
+        column_name:that.title,
+        column_pos:that.column_pos,
+        content_id:bookId,
+        content_pos:content_pos,
+        content_type:'1',
+        trigger_time:trigger_time
+      }
+      that.$app.$def.quickappLog([706, {
+        omap:omap
+      }], that)
+		},
+		routeBookDetail(bookId,content_name,content_pos) {
+      let that = this
+      let trigger_time = that.$app.$def.getLogTime()
+      let omap = {
+        origin:'nsc',
+        action:'2',
+        channel_id:that.channel_id,
+        channel_name:that.channel_name,
+        channel_pos:that.channel_pos,
+        column_id:that.id,
+        column_name:that.title,
+        column_pos:that.column_pos,
+        content_id:bookId,
+        content_pos:content_pos,
+        content_type:'1',
+        trigger_time:trigger_time
+      }
+			router.push({
+				uri: '/BookDetail',
+				params:{
+          bookId:bookId,
+          SourcePosition:'书城更多二级页面',
+          omap:omap,
+          sourcePage: '书城更多二级页面'
+				}
+      })
+      that.$app.shenceLog.log(that,'track','ButtonClick', {
+				Title: '人工运营-' +that.channel_name + '-' + that.title,
+				ButtonName: '书籍列表-查看书籍',
+				BookID: bookId || '',
+				BookName: content_name || ''
+			});
+      that.$app.$def.quickappLog([702, {
+        omap:omap
+      }, 'book_click'], that)
+		}
+	}
+</script>

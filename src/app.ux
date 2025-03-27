@@ -1,0 +1,370 @@
+<script>
+/**
+ * 应用级别的配置，供所有页面公用
+ */
+import fetch from '@system.fetch'
+import app from '@system.app'
+import storage from '@system.storage';
+import prompt from '@system.prompt';
+import util from './util';
+import hax from './Common/js/md5.js';
+import common from './Common/js/common.js';
+import login from './Common/js/login.js';
+import log from './Common/js/log.js';
+import shence from './Common/js/shence.js';
+import BAIDU_SDK from 'union-quick-app-ad/app.js';
+import fnSmInit from './Common/js/sm-report.js';
+import fnAdCacheInit from './Common/js/ad-cache.js';
+import fnMisclickControlInit from './Common/js/misclick-control.js';
+import fnApiCacheInit from './Common/js/api-cache.js';
+import fnAdCover from './Common/js/ad-cover.js';
+import AdClickCoordinates from './Common/js/adclick-config.js'
+
+export default {
+    getDeviceInfo: util.getDeviceInfo,
+    getAndroidId: util.getAndroidId,
+    getOaid: util.getOaid,
+    backShortcut: util.backShortcut,
+    showMenu: util.showMenu,
+    createShortcut: util.createShortcut,
+    hex_md5: hax.hex_md5,
+    requestData: common.requestData,
+    setStorageFile:common.setStorageFile,
+    getStorageFile:common.getStorageFile,
+    deleteStorageFile:common.deleteStorageFile,
+    quickappLog: log.quickappLog,
+    kyyerrorlog: log.kyyerrorlog,
+    ajax: common.ajax,
+    appSourceinfoLog: common.appSourceinfoLog,
+    getUserIdLogic:login.getUserIdLogic,
+    changeApi: common.changeApi,
+    sLogout: shence.fnLogout,
+    sGetDistinctId: shence.fnGetDistinctId,
+    getLogTime:util.getLogTime,
+    fnVivoPush: util.fnVivoPush, // vivopush消息
+    fnReportVivoPush: util.fnReportVivoPush, // vivopush消息上报
+    fnVivoPushSupport: util.fnVivoPushSupport, // vivopush消息支持判断
+    fnCheckOnekeycutSup: util.fnCheckOnekeycutSup, //一键加桌判断
+    _base64: util._base64,
+    rsa: util.rsa,
+    fnCreateAd: common.fnCreateAd,
+    fnDestoryAd: common.fnDestoryAd,
+    fnGetCreateTime: util.fnGetCreateTime,
+    fnGetInstallTime: util.fnGetInstallTime,
+    fnGetCurrentDate: util.fnGetCurrentDate,
+    onCreate() {
+        let that = this;
+        shence.fnInit.call(that)
+        that.name = 'app' // 华为没有此属性
+        that.dataCache = {
+            bookTagCache: {
+                needReplace: false,
+                secondTagId: '',
+                thirdTagId: '',
+            },
+            feedbackNum: 0,
+            hasSubmitFeedback: false,
+            feedbackAnswerContent: {
+                feedbackContent: '',
+                answerContent: '',
+            },
+            insertInduceClickIndex: 0
+        } // 全局数据 
+        that.isScStart = false
+        that.headerJson = {}
+        that.dataJson = {}
+        storage.delete({
+            key:'hasShowNote'
+        })
+        that.api = 'https://dzmfxs.kkyd.cn'
+        that.backUpApi = ['https://dzmfxs.kkyd.cn', 'https://kyydzmfxs.ssread.cn','https://kyydzmfxs.dianzhong.com']
+        that.curApiNum = 0
+        that.isFromBaidu = false
+        that.isBaiduOpen = false
+        that.isChangeImei = false
+        // 听书配置
+        that.listenJson = {
+            speed: '',
+            timbre: ''
+        }
+        storage.get({
+            key:'kyy_api',
+            success:function(res){
+                if(res){
+                    that.api = res
+                    // that.api = 'http://192.168.32.74:9090'
+                }else{
+                    that.api = 'https://dzmfxs.kkyd.cn'
+                    // that.api = 'http://192.168.32.74:9090'
+                }
+            },
+            fail:function(data,code){
+                that.api = 'https://dzmfxs.kkyd.cn';
+                // that.api = 'http://192.168.32.74:9090'
+            }
+        })
+        // 广告请求地址
+        that.adRequestUrl  = ''
+        storage.get({
+            key: 'ad_api',
+            success: function(res) {
+                if(res) {
+                    that.adRequestUrl = res
+                }
+            }
+        })
+        that.adWallUrl = 'https://ad-dumbo.ssread.cn/api/v2/adwall/ad'
+        that.adWallReportUrl = 'https://ad-dumbo-log.ssread.cn/log.php'
+        that.adWallData = {}
+        // storage.get({
+        //     key:'isChangeImei',
+        //     success:function(res){
+        //         if(res){
+        //             that.isChangeImei = true
+        //         }
+        //     }
+        // })
+        that.sourceInfo = {
+            brand:'',
+            model:'',
+            channelCode:'',
+            userid:'',
+            infoType:'',
+            sourceCid:'',
+            uuid:'',
+            isRegister:false,
+            osvn:'',
+            pfvn:'',
+            pullMode:'',
+            pullJson: '', // 投放所需上报字段
+            landJson: '', // 落地页携带参数
+        }
+        that.sourceInfoLoged = false
+        that.isFirstLog = true
+        // 加桌成功文案
+        that.shortSuccessText = '';
+        // 设备信息获取
+        that.isGetDeviceInfo = false
+        that.isGetAndroidId = false
+        that.isGetOaid = false
+        that.deviceInfo = {}
+        that.androidId = ''
+        that.oaid = ''
+        that.imei = ''
+        that.getDeviceInfo().then(deviceInfo => {
+            console.log(deviceInfo)
+            that.isGetDeviceInfo = true
+            that.deviceInfo = deviceInfo
+        }).catch(() => {})
+        that.getAndroidId().then(androidId => {
+            that.isGetAndroidId = true
+            that.androidId = androidId
+        }).catch(() => {})
+        // 自动订购已取消
+        that.isAutoRenewCancle = false
+        // 热启动时间
+        that.lastOpenTime = new Date().getTime()
+        // 热启动最后访问记录
+        that.lastOpenPage = ''
+        // 热启动开关
+        that.isOpenPageSwitch = 0
+        // 热启动间隔
+        that.openPageSpace = 5 * 60 * 1000
+        // 离开时间间隔
+        that.leavePageSpace = 30 * 1000
+        // 离开页面记录时间
+        that.leavePageTime = new Date().getTime()
+        //拉起是否弹出过加桌
+        that.hasStartShortcut = false
+        //是否添过桌
+        that.isAddDesktop = ''
+        //本地push
+        that.hasShowNote = false
+        // 阅读器 (Read & ReadEnd) 阅读页挂件点击关闭-开关
+        that.readHangingHolderClose = true
+        // 登录勾选开关
+        that.isCheckAgreeOpen = false
+        //提前支付签到 0不显示 1支付成功，隐藏蒙层
+        that.appAdvanceSign = 0
+        // 是否活动页退出
+        that.isFromWebhuodong = false
+        // 广告信息
+        that.openAdLocalInfo = false
+        that.videoAdLocalInfo = false
+        //启动时是否加桌
+        that.hasAddcut = false
+        // 书架样式
+        that.isLandStyle = false
+        // 华为每次启动增加音频播放
+        that.isNeedHuaweiAudio = true
+        // 广告缓存信息
+        that.adWallCaches = []
+        // 广告墙能否展示
+        that.canAdWallShow = true
+        // 全局倒计时
+        that.fnAdWallTimeout = function(times) {
+            setTimeout(() => {
+                that.canAdWallShow = true
+            }, times * 1000)
+        }
+        // 搜索开关
+        that.isSearchOpen = true
+        //上行手机号是否需要加密 1加密且方式为为base64
+        that.swParam = ''
+        // 整本购买 0不显示 1支付成功
+        that.isOncePrice = 0
+        // 是否支持百度
+        that.isBaiduSDKCreated = false;
+        // 百度SDK初始化
+        that.fnInitBaiduSDK = function () {
+            if (that.isBaiduSDKCreated) {
+                return false;
+            }
+            console.log('---百度SDK初始化---');
+            try {
+                new BAIDU_SDK(that);
+                that.isBaiduSDKCreated = true;
+            } catch (error) {
+                console.log('---百度SDK初始化失败---\n', error);
+            }
+        }
+        that.isNewUser = false;                             // 是否新用户
+        that.brandSlotIds = [];                             // 厂商广告位id列表
+        that.fnInitBrandSlotIds = () => {
+            that.brandSlotIds = [];                         // 厂商广告位id列表
+        }
+        // 金币模式
+        that.isCoin = false
+        // 签到入口
+        that.isSignOpen = true
+        // 阅读页是否展示
+        that.isReadPageShow = false
+        // 底部广告数据
+        that.bannerAdInfo = false
+        // 新版厂商广告数据
+        that.adLists = {}
+        // 启动来源
+        that.startScene = ''
+        // 来源包名
+        that.sourcePackageName = ''
+        try {
+            const sourceType = app.getInfo()
+            let sourcePackageName = sourceType && sourceType.source && sourceType.source.packageName ? sourceType.source.packageName.toLowerCase() : ''
+            let startScene = sourceType && sourceType.source && sourceType.source.type ? sourceType.source.type.toLowerCase() : ''
+            if(startScene != 'shortcut' && startScene != 'push') {
+                startScene = 'url'
+            }
+            that.startScene = startScene
+            that.sourcePackageName = sourcePackageName
+        } catch (err) {}
+        that.readRecord = {}                    // 阅读统计
+        that.autoClickReadTime = -1             // 自动触发所需阅读次数（书籍）
+        that.canAutoClickTime = -1              // 自动触发所需满足时间
+        storage.get({
+            key: 'canAutoClickTime',
+            success: function(res) {
+                if(res) {
+                    that.canAutoClickTime = +res
+                }
+            }
+        })
+        that.bookDetailScroll = false
+        // 存储各页面激励视频播放相关信息
+        that.videoPlayInfo = {
+            videoPlayTimes: 0,
+            currentDate: that.fnGetCurrentDate()
+        }
+        storage.get({
+            key: 'videoPlayInfo',
+            success: function(res) {
+                if(res) {
+                    try {
+                        let cacheInfo = JSON.parse(res)
+                        if(that.videoPlayInfo.currentDate === cacheInfo.currentDate) {
+                            that.videoPlayInfo.videoPlayTimes = cacheInfo.videoPlayTimes
+                        }
+                    } catch(e) {}
+                }
+            }
+        })
+        that.bannerAd = {}                      // 存储各页面厂商banner广告实例
+        that.videoAd = {}                       // 存储各页面厂商激励视频广告实例
+        that.feedAd = {}                        // 存储各页面厂商信息流广告实例
+        that.isBackGdt = false                  // 展示媒体返回按钮
+        that.backGdtText = ''                   // 返回按钮文案
+        that.backGdtUrl = ''                    // 返回按钮URl
+        that.hasInsertEyeAdShow = false         // 点睛插屏加载
+        that.brandAdPreloadSwitch = false       // 厂商广告预加载开关
+        that.adInstances = {}                   // 各页面广告实例的集合
+        fnAdCacheInit.call(that);               // 广告缓存模块初始化
+        fnSmInit.call(that);                    // 数美SDK初始化
+        fnMisclickControlInit.call(that);       // 误触频次控制初始化
+        fnApiCacheInit.call(that);              // 广告缓存模块初始化
+        fnAdCover.call(that);                   // 广告全屏覆盖初始化
+        new AdClickCoordinates(that);           // 广告点击坐标模块初始化
+    },
+    onDestroy(){},
+    onError(err){
+        let that = this
+        storage.get({
+        key:"headerJson",
+        success:function(res){
+            if(res){
+            let data = JSON.parse(res)
+            log.quickappLog([703, {
+                channelCodeFee: data.channelCodeFee,
+                channelCode: data.channelCodeFee,
+                brand: data.brand,
+                model: data.model,
+                utdid: data.utdid,
+                userId: data.userId,
+                uuid:data.uuid,
+                t: data.t,
+                qmap:{
+                    message:err.message,
+                    stack:err.stack
+                }
+            }, 'onError'],that);
+            }else{
+            log.quickappLog([703, {
+                qmap:{
+                    message:err.message,
+                    stack:err.stack
+                }
+            }, 'onError'],that);
+            }
+        },
+        fail:function(data,code){
+            log.quickappLog([703, {
+                qmap:{
+                    message:err.message,
+                    stack:err.stack,
+                    source:'storage_get_headerJson_fail',
+                    thisUri: that.$page.uri,
+                    thisPage: 'app',
+                    data,
+                    code
+                }
+            }, 'catch_error'],that);
+        }
+        })
+        
+    },
+    /**
+     * 获取 app 缓存的数据
+     * @param key
+     */
+    getAppData (key) {
+      return this.dataCache[key]
+    },
+    /**
+     * 设置 app 缓存的数据
+     * @param key
+     * @param val
+     */
+    setAppData (key, val) {
+      this.dataCache[key] = val
+    }
+}
+
+</script>

@@ -1,0 +1,183 @@
+<import name="back-baidu" src="../Base/back-baidu"></import>
+<template>
+    <div class="notfound">
+       <image if="{{isNet}}" src="../Common/images/loading-chapter.png"></image>
+       <text if="{{isNet}}" class="text-mide">正在加载中，请稍后......</text>
+       <image if="{{!isNet}}" src="../Common/images/load-error.png"></image>
+       <text if="{{!isNet}}" class="text-mide">网络加载失败，请重新尝试……</text>
+       <div if="{{!isNet}}" class="confirm-button" @click="reTest"><text>重试</text></div>
+       <back-baidu></back-baidu>
+    </div>
+</template>
+
+<style>
+    .notfound{
+        flex-direction: column;
+        align-items: center;
+        padding: 0 30px;
+    }
+    image{
+        width: 210px;
+        height: 210px;
+        margin-top: 300px;
+    }
+    .text-mide{
+        font-size:26px;
+        color:rgba(79,79,81,1);
+        line-height:44px;
+        text-align: center;
+        margin-top: 30px;
+    }
+    .confirm-button{
+        width: 480px;
+        height: 76px;
+        background-color: #FD895A;
+        justify-content: center;
+        align-items: center;
+        border-radius: 94px;
+        margin-top: 80px;
+    }
+   .confirm-button text{
+       color: #fff;
+       font-size:36px;
+    }
+</style>
+
+<script>
+    import router from '@system.router';
+    import shortcut from '@system.shortcut';
+    import prompt from '@system.prompt'
+    import app from '@system.app'
+    // import { pageEnter } from '../TDSDK/TDSDK.min.js';
+    // import { pageLeave } from '../TDSDK/TDSDK.min.js';
+    export default {
+        private: {
+            packageName:'',
+            isNet:false
+        },
+        protected: {
+           cardIndex:0,
+           apiFailNum:0
+        },
+        onInit() {
+            let that = this
+            this.packageName = this.$app.$data.name
+            this.requestNet()
+            setTimeout(function(){
+                that.addDesk()
+            },3000)
+                 
+        },
+        onShow() {
+            this.$app.lastOpenPage = ''
+            this.$app.shenceLog.log(this, 'pageShow', '', {
+                Title: '404'
+            });
+            // pageEnter(this.$page.path);
+        },
+        onHide() {
+            // pageLeave(this.$page.path);
+        },
+        reTest(){
+            this.requestNet()
+        },
+        onBackPress() {
+            let that = this
+            // that.addDesk()
+            return true
+        },
+        requestNet(){
+            let that = this
+            that.isNet = true
+            setTimeout(function(){
+                that.$app.$def.requestData(that,{
+                    interface: '/glory/fastapp/2820',
+                    data: {isAddBf: 0, page:1,size:15,uuid:that.$app.sourceInfo['uuid'],pullMode:that.$app.sourceInfo['pullMode']},
+                    succ: function (res) {
+                        if(res){
+                            that.$app.$def.quickappLog([703, {
+								qmap:{
+									site: '5', 
+									cardIndex:that.cardIndex
+								}
+							}, 'book_catch'], that)
+                            router.clear()
+                            router.replace({
+                                uri:'Index',
+                                params:{
+                                    cardIndex:that.cardIndex
+                                }
+                            })
+                        }else{
+                            that.isNet = false                            
+                        }
+                    },
+                    fail: function (code) {
+                        that.apiFailNum++
+                        if(that.apiFailNum<3){
+                            that.isNet = false
+                        }else if(that.apiFailNum==3){
+                            that.apiFailNum = 0
+                            that.$app.$def.changeApi(that).then((res)=>{
+                                that.requestNet()
+                            },(err)=>{
+                                that.requestNet()
+                            })
+                        }                                    
+                    },
+                })
+            },3000) 
+        },
+        addDesk(){
+            let that = this
+            let _infotype = that.$app.dataJson.infotype || 'nfind';
+            if(_infotype == 'shortcut'){
+                // console.log('已创建桌面图标')
+            }else{
+                shortcut.hasInstalled({
+                    success: function (ret) {
+                        if (ret) {
+                            // console.log('已创建桌面图标')
+                        }else{
+                            that.fnShortcut();
+                        }
+                    }
+                })
+            }
+            
+        },
+        fnShortcut(){
+            let that = this;
+            shortcut.install({
+                message: `当前无网络，添加【${that.packageName}】到手机桌面，方便您下次阅读（不下载，免安装）`,
+                success: function() {
+                    console.log('shortcut_install success');
+                    //来源写入变量
+                    that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+                    prompt.showToast({
+                        message: '添桌成功，但当前仍无网络，请检查网络后点击桌面图标后阅读',
+                        duration: 1
+                    })
+                    setTimeout(function(){
+                        that.$app.exit()
+                    },4000)
+                },
+                fail: function(data,code) {
+                    prompt.showToast({
+                        message: '创建桌面图标失败'
+                    })
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:"shortcut_install_fail",
+                            thisUri:that.$page.uri,
+                            thisPage:"Notfound",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+
+                }
+            })
+        },
+    }
+</script>

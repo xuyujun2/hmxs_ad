@@ -1,0 +1,474 @@
+<import name="ad-union" src="../AdUnion/index"></import>
+
+<template>
+    <div class="open-screen">
+        <stack class="open-screen-default" if="{{isDefalut || (!isDefalut && popInfo && popInfo.type == 15 && !isGetAd)}}">
+            <image class="kaiping" src="../Common/slogan.png"></image>
+            <div class="verDisplay">
+                <text>Copyright&copy; 2023 {{appName}} | {{' V' + versionName}}</text>
+            </div>
+        </stack>
+        <div class="open-screen-wrap {{popInfo.type == 15 && !isGetAd ? 'open-screen-hide' : ''}}" if="{{!isDefalut}}">
+            <div class="open-screen-ad {{popInfo.type == 15 && !isGetAd ? 'open-screen-hide' : ''}}" if="{{popInfo && popInfo.type == 15}}">
+                <ad-union
+                    ad-unit-id="{{ openAdId }}"
+                    ad-type="open"
+                    ad-alias="openMessage"
+                    is-warm="hot"
+                    onfn-get-ad="fnGetAd"
+                    onfn-ad-click="fnAdHasClick"
+                    onfn-ad-close="fnAdClose"
+                    onstart-count="fnStartCount"
+                    onstop-count="fnStopCount"
+                    other-info="{{ popInfo }}"
+                    from-page="{{ fromPage }}"
+                    request-time="{{ adRequestTime }}"
+                    brand-ad-switch="{{ brandAdSwitch }}"
+                    has-show-time="{{ showTimesCount }}"
+                    skip-time="{{ popInfo.countdown || 5 }}"
+                    count-time="{{ curTimes }}"
+                ></ad-union>
+            </div>
+            <div class="open-screen-content" else @click="fnClickPop">
+                <image class="open-screen-image" src="{{popInfo.imgUrl}}"></image>
+            </div>
+            <text class="open-screen-close {{isBottomCloseBtn ? 'close-btn-bottom' : 'close-btn-top'}}" @click="fnRouterBack" if="showTimesCount && ((popInfo && popInfo.type != 15) || (popInfo && popInfo.type == 15 && isGetAd && !isHideCountdown))">
+                <span>{{curTimes}}</span>
+                <span class="close-text">  跳过</span>
+            </text>
+        </div>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .open-screen {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        /* background-color: rgba(255, 255, 255, 1); */
+        .open-screen-default {
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            .kaiping {
+                width: 238px;
+                margin-bottom: 360px;
+            }
+            .verDisplay {
+                margin-bottom: 60px;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                align-self: flex-end;
+                text {
+                    text-align: center;
+                    font-size: 26px;
+                    color: rgba(0, 0, 0, .5);
+                    line-height: 37px;
+                }
+            }
+        }
+        .open-screen-wrap {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            .open-screen-ad {
+                width: 100%;
+                height: 100%;
+            }
+            .open-screen-content {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;       
+                .open-screen-image {
+                    width: 100%;
+                    height: 100%;
+                    /* resize-mode: stretch;
+                    object-fit: fill; */
+                }
+            }
+        }
+        .open-screen-hide {
+            width: 0px;
+            height: 0px;
+        }
+        .open-screen-close {
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            right: 16px;
+            padding: 0 16px;
+            line-height: 59px;
+            height: 59px;
+            border-radius: 30px;
+            background-color: rgba(0, 0, 0, .2);
+            span {
+                color: #ffffff;
+                font-size: 24px;
+                text-align: center;
+            }
+        }
+        .close-btn-top {
+            top: 120px;
+        }
+        .close-btn-bottom {
+            bottom: 240px;
+        }
+    }
+</style>
+
+<script>
+    import app from '@system.app';
+    import router from '@system.router'
+    export default {
+        protected: {
+            fromPage: '/Index',
+        },
+        private: {
+            appName: '', // 应用名称
+            versionName: '', // 版本名称
+            isDefalut: true, // 是否是默认开屏展示
+            autoCloseTimeout: null, // 自动跳转回原页面
+            autoCloseInterval: null, // 倒计时结束转回原因面
+            canBack: false, // 是否能够直接返回
+            popInfo: {}, // 开屏信息
+            showTimesCount: false, // 是否显示倒计时
+            curTimes: 3, // 倒计时剩余时间
+            countdownTimes: 3,
+            isGetAd: false, // 是否获取广告
+            isAdPopShow: false, // 广告弹窗显示
+            loadLimit: 3000, // 超时时长，默认3000ms
+            adRequestTime: 3000, // 请求时间
+            hasRouteBack: false, // 是否路由返回
+            openAdId: '5001198504', // 开屏广告广告位id
+            brandAdSwitch: false, // 支持新版厂商广告开关
+            isAdClicked: false, // 广告是否已经点击过
+            isBottomCloseBtn: false,   // 关闭按钮是否底部展示
+            isHideCountdown : false    // 是否隐藏倒计时
+        },
+        // 页面初始化
+        onInit() {
+            let that = this
+            that.$app.$def.fnCreateAd.call(that);            // 创建当前页面的广告存储对象
+            let appInfo = app.getInfo();
+            that.appName = appInfo.name;
+            that.versionName = appInfo.versionName;
+            // 自动回退
+            clearTimeout(that.autoCloseTimeout)
+            that.autoCloseTimeout = setTimeout(() => {
+                if(!that.hasRouteBack) {
+                    router.back()
+                }
+            }, 3000)
+            // 获取开屏信息
+            that.fnGetPopInfo()
+        },
+        onDestroy() {
+            this.$app.$def.fnDestoryAd.call(this);           // 销毁当前页面的广告实例
+        },
+        // 判断返回
+        onShow() {
+            let that = this
+            that.$app.lastOpenPage = ''
+            if(that.isGetAd && that.curTimes <= 0) {
+                that.fnRouterBack()
+                return
+            }
+            that.$app.shenceLog.log(that, 'pageShow', '', {
+                Title: '热启动开屏'
+            });
+            // pv打点
+            that.$app.$def.quickappLog([701], that);
+        },
+        onHide() {
+            if (this.isAdClicked) {
+                this.fnAdClick();
+            }
+        },
+        // 返回拦截
+        onBackPress() {
+            let that = this
+            setTimeout(() => {
+                if(that.isAdPopShow) {
+                    that.$broadcast('closeExtra')
+                    that.fnStartCount()
+                    return true
+                }
+                if(!that.canBack) {
+                    return true;
+                }else {
+                    that.fnRouterBack()
+                }
+            }, 0)
+            return true;        
+        },
+        fnStartCount() {
+            let that = this
+            that.isAdPopShow = false
+            that.autoCloseInterval = setInterval(() => {
+                that.fnCountDown();
+            }, 1000);
+        },
+        fnStopCount() {
+            let that = this
+            that.isAdPopShow = true
+            clearInterval(that.autoCloseInterval)
+        },
+        // 获取开屏信息
+        fnGetPopInfo() {
+            let that = this
+            let startRequestTime = new Date().getTime()
+            that.$app.$def.requestData(that, {
+                interface: '/glory/fastapp/2401',
+                data: { 
+                    location: '5',
+                    isWarm: 1,
+                    openAdControl: 1, 
+                },
+                succ: function (res) {
+                    if(res.data && JSON.stringify(res.data) != '{}') {
+                        that.$app.fnSetMisclickConf({                                                       // 设置误触频次控制
+                            misClickTotalFrequency: res.data.misClickTotalFrequency,                        // 误触总频次限制
+                            misClickAdPosition: res.data.misClickAdPosition,                                // 各广告位置误触频次限制
+                            misClickIntervalTime: res.data.misClickIntervalTime,                            // 时间间隔（秒）
+                        });
+                        if(res.data.autoTriggerChapterNum) {
+                            that.$app.autoClickReadTime = res.data.autoTriggerChapterNum
+                        }
+                        if(!res.data.countdown || res.data.countdown < 3) {                                 // 倒计时最小为3s
+                            res.data.countdown = 3;
+                        }
+                        // 广告首先获取数据
+                        // res.data.type = 15
+                        if(res.data.type == 15) {
+                            if(res.data.baiduSDKFlag){
+                                that.$app.fnInitBaiduSDK();                                     // 初始化百度sdk
+                            }
+                            if(res.data.xmDeviation) {
+                                that.$app.setAppData('adClickOffsetConfInfo',res.data.xmDeviation);
+                            }
+                            that.$app.brandAdPreloadSwitch = !!res.data.brandAdPreloadSwitch
+                            // 场景值判断
+                            if(res.data.openScreenStartSceneJudge && !(that.$app && that.$app.startScene && that.$app.startScene === 'shortcut')) {
+                                return
+                            }
+                            if(res.data.brandAdSwitch) {
+                                that.brandAdSwitch = true
+                            }
+                            if(res.data.adPositionId) {
+                                that.openAdId = res.data.adPositionId
+                            }
+                            clearTimeout(that.autoCloseTimeout)
+                            if(res.data.loadTime) {
+                                that.loadLimit = res.data.loadTime
+                            }
+                            let endRequestTime = new Date().getTime()
+                            that.adRequestTime = that.loadLimit - (endRequestTime - startRequestTime)
+                            if(that.adRequestTime < 0) {
+                                router.back()
+                                return
+                            }
+                            setTimeout(() => {
+                                if(!that.isGetAd && !that.hasRouteBack) {
+                                    router.back()
+                                }
+                            }, that.adRequestTime)
+                            that.popInfo = res.data
+                            that.isDefalut = false
+                        }
+                        // 非广告直接渲染
+                        if(res.data.type >= 1 && res.data.type <= 8) {
+                            clearTimeout(that.autoCloseTimeout)
+                            that.popInfo = res.data
+                            that.fnSetTimesCount()
+                            that.isDefalut = false
+                            that.canBack = true
+                        }
+                        if((res.data.type == 15 || res.data.type >= 1 && res.data.type <= 8) && that.popInfo && JSON.stringify(that.popInfo) != '{}') {                         
+                            that.$app.$def.quickappLog([703, {
+                                qmap: {
+                                    type: 'show',
+                                    activity: that.popInfo.id,
+                                    imgType: that.popInfo.type
+                                }
+                            }, 'openscreen'], that)
+                            that.$app.shenceLog.log(that, 'track', 'OperationExposure', {
+                                OperationPosition: '热启动loading页',
+                                OperationID: that.popInfo.operationInfo.id,
+                                OperationName: that.popInfo.operationInfo.name,
+                                OperationType: that.popInfo.type,
+                                BookID: that.popInfo.info || '',
+                                ActID: that.popInfo.actUrl ? that.popInfo.actUrl.split('id=')[1] ? that.popInfo.actUrl.split('id=')[1] : '' : '',
+                                PicURL: that.popInfo.imgUrl || '',
+                                ActURL: that.popInfo.actUrl || '',
+                                Countdown: that.countdownTimes,
+                                StartTime: that.popInfo.operationInfo.startTime,
+                                EndTime: that.popInfo.operationInfo.endTime,
+                                TacticsId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsId ? that.popInfo.userTacticsVo.tacticsId : '',
+                                TacticsName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsName ? that.popInfo.userTacticsVo.tacticsName : '',
+                                SourceId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceId ? that.popInfo.userTacticsVo.sourceId : '',
+                                SourceName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceName ? that.popInfo.userTacticsVo.sourceName : '',
+                                ShuntId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntID ? that.popInfo.userTacticsVo.shuntID : '',
+                                ShuntName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntName ? that.popInfo.userTacticsVo.shuntName : ''
+                            });
+                        }
+                    }
+                },
+                error: function (code) {
+                    that.canBack = true
+                }
+            })
+        },
+        // 广告已获取
+        fnGetAd(event) {
+            let that = this
+            that.isGetAd = true
+            clearTimeout(that.autoCloseTimeout)
+            let chn_type = event && event.detail && event.detail.chn_type;
+            that.isBottomCloseBtn = event && event.detail && event.detail.isBottomCloseBtn;
+            that.isHideCountdown = event && event.detail && event.detail.hasMisClick;
+            if (chn_type !== 'SDK_BAIDU') {                                     // 百度SDK使用百度SDK倒计时，非百度使用快应用倒计时
+                that.fnSetTimesCount()
+            }
+            that.canBack = true
+        },
+        // 页面跳转
+        fnAdClick() {
+            let that = this
+            clearInterval(that.autoCloseInterval)
+            that.curTimes = 0
+        },
+        // 广告点击上报
+        fnClickReport() {
+            let that = this
+            that.$app.shenceLog.log(that,'track','OperationClick', {
+                OperationPosition: '热启动开屏',
+                OperationID: that.popInfo.operationInfo.id || '',
+                OperationName: that.popInfo.operationInfo.name || '',
+                OperationType: that.popInfo.type || '',
+                BookID: that.popInfo.info || '',
+                ActID: that.popInfo.actUrl ? that.popInfo.actUrl.split('id=')[1] ? that.popInfo.actUrl.split('id=')[1] : '' : '',
+                PicURL: that.popInfo.imgUrl || '',
+                ActURL: that.popInfo.actUrl || '',
+                Countdown: that.countdownTimes || '',
+                StartTime: that.popInfo.operationInfo.startTime || '',
+                EndTime: that.popInfo.operationInfo.endTime || '',
+                TacticsId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsId ? that.popInfo.userTacticsVo.tacticsId : '',
+                TacticsName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.tacticsName ? that.popInfo.userTacticsVo.tacticsName : '',
+                SourceId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceId ? that.popInfo.userTacticsVo.sourceId : '',
+                SourceName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.sourceName ? that.popInfo.userTacticsVo.sourceName : '',
+                ShuntId: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntID ? that.popInfo.userTacticsVo.shuntID : '',
+                ShuntName: that.popInfo.userTacticsVo && that.popInfo.userTacticsVo.shuntName ? that.popInfo.userTacticsVo.shuntName : '',
+                BookName: that.popInfo.bookName || '',
+                ChaptersID: that.popInfo.chapterId || ''
+            }); 
+        },
+        // 设置倒计时
+        fnSetTimesCount() {
+            let that = this
+            if(that.popInfo.skip == 1) {
+                that.showTimesCount = true
+            }
+            that.countdownTimes = that.popInfo.countdown
+            that.curTimes = that.popInfo.countdown
+            that.autoCloseInterval = setInterval(() => {
+                that.fnCountDown();
+            }, 1000);
+        },
+        // 倒计时
+        fnCountDown() {
+            let that = this
+            that.curTimes--
+            if(that.curTimes <= 0) {
+                that.fnRouterBack()
+            }
+        },
+        // 回退页面
+        fnRouterBack() {
+            let that = this
+            clearInterval(that.autoCloseInterval)
+            if(!that.hasRouteBack) {
+                that.hasRouteBack = true;
+                router.back()
+            }
+        },
+        // 点击开屏
+        fnClickPop() {
+            let that = this
+            switch(that.popInfo.type) {
+                case 1: // 书籍阅读页
+                    var trigger_time = that.$app.$def.getLogTime()
+                    var omap = {
+                        origin:'kp',
+                        action:'2',
+                        channel_id:'rqd_kp',
+                        channel_name:'热启动开屏',
+                        channel_pos:1,
+                        column_id:that.popInfo.id,
+                        column_name:'热启动开屏',
+                        column_pos:0,
+                        content_id:that.popInfo.info,
+                        content_pos:0,
+                        content_type:'2',
+                        trigger_time:trigger_time
+                    }
+                    that.$app.$def.quickappLog([702, {
+                        omap: omap
+                    }, 'book_click'], that)
+                    router.clear()
+                    router.replace({
+                        uri: '/Read',
+                        params: {
+                            bookId: that.popInfo.info,
+                            activity: that.popInfo.id,
+                            SourcePosition: '开屏页',
+                            omap: omap
+                        }
+                    })
+                    break;
+                case 2: // web
+                    router.replace({
+                        uri: '/Webhuodong',
+                        params: {
+                            webSrc: that.popInfo.actUrl,
+                            activity: that.popInfo.id,
+                            pageFrom: 'pop',
+                            OperationPosition: '开屏页',
+                            OperationID: that.popInfo.operationInfo && that.popInfo.operationInfo.id ? that.popInfo.operationInfo.id : '',
+                            OperationName: that.popInfo.operationInfo && that.popInfo.operationInfo.type ? that.popInfo.operationInfo.type : '',
+                            OperationType: that.popInfo.type || '',
+                            StartTime: that.popInfo.operationInfo && that.popInfo.operationInfo.startTime ? that.popInfo.operationInfo.startTime : '',
+                            EndTime: that.popInfo.operationInfo && that.popInfo.operationInfo.endTime ? that.popInfo.operationInfo.endTime : '',
+                        }
+                    })
+                    break;
+                case 4: // 充值页
+                    router.replace({
+                        uri: '/Recharge',
+                        params:{
+                            activity: that.popInfo.id,
+                        }
+                    })
+                    break;
+                default:
+                    that.fnRouterBack()
+            }
+            that.fnClickReport()
+        },
+        // 广告点击
+        fnAdHasClick() {
+            this.isAdClicked = true;                                        // 标记当前开屏广告点击过
+        },
+        // 开屏关闭
+        fnAdClose() {
+            this.fnRouterBack();
+        },
+    }
+</script>
+
+

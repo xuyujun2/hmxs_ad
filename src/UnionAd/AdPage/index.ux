@@ -1,0 +1,49 @@
+<import name="ad-union" src="../../AdUnion/index"></import>
+<template>
+    <div class="union-ad-wraper">
+        <ad-union
+            ad-type="baiduOpen"
+            from-page="{{ formPage }}"
+            other-info="{{ otherInfoObj }}"
+            @fn-get-ad="fnGetAd"
+        ></ad-union>
+    </div>
+</template>
+<style scoped>
+.union-ad-wraper {
+    width: 100%;
+    height: 100%;
+}
+</style>
+<script>
+import router from '@system.router'
+export default {
+    protected: {
+        formPage: '/Index',
+        otherInfo: {},
+    },
+    private: {
+        adLoaded: false,                            // 广告是否加载成功
+        otherInfoObj: null                          // 传入ad-union组件的数据类型须为object
+    },
+    onInit() {
+        try {
+            this.otherInfo && (this.otherInfoObj = JSON.parse(this.otherInfo));
+        } catch (err) {}
+    },
+    onShow() {
+        this.$app.lastOpenPage = '';
+    },
+    onBackPress() {
+        if (this.adLoaded) {                        // 如果sdk广告成功加载，可以返回
+            this.$broadcast('baiduOpenBack');
+            return true;
+        }
+        return true;
+    },
+    // 广告已获取
+    fnGetAd() {
+        this.adLoaded = true;
+    },
+};
+</script>

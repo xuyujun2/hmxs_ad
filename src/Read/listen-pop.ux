@@ -1,0 +1,157 @@
+<template>
+    <div class="listen-pop-wrap">
+        <div class="listen-pop">
+            <image class="pop-bg" src="{{listenTask.isExpired ? 'https://xsmfdq.kkyd.cn/images/hmxs/listen-pop-bg-end.png' : 'https://xsmfdq.kkyd.cn/images/hmxs/listen-pop-bg.png'}}"></image>
+            <text class="pop-title">{{listenTask.isExpired ? (listenTask.freeEndText || '语音听书时长已用完') : '语音听书'}}</text>
+            <text if="listenTask.hasFree" class="pop-free">{{listenTask.freeText || ('为您开启新用户首日' + (listenTask.freeTimeLast ? listenTask.freeTimeLast + '分钟' : '') + '免费试听')}}</text>
+            <text if="listenTask.hasFree" class="free-btn" @click="fnListenTask">{{listenTask.freeBtnText || '免费试听'}}</text>
+            <text if="!listenTask.hasFree" class="pop-desc pop-desc-first {{listenTask.memberBtnStyle ? 'pop-btn' : ''}} {{listenTask.remainTimes ? '' : 'pop-desc-top'}}" @click="fnRouterToMember">{{listenTask.memberBtnText || ('购买会员畅快听书' + (listenTask.memberBtnStyle ? '' : '>'))}}</text>
+            <text if="listenTask.remainTimes && !listenTask.hasFree" class="pop-desc {{listenTask.videoBtnStyle ? 'pop-btn pop-btn-small' : ''}}" @click="fnListenVideo">{{listenTask.videoBtnText || ('观看视频获取' + (listenTask.taskTimeLast ? listenTask.taskTimeLast + '分钟' : '') + '免费听书' + (listenTask.videoBtnStyle ? '' : '>'))}}</text>
+        </div>
+        <image class="listen-pop-close" src="https://xsmfdq.kkyd.cn/images/hmxs/listen-pop-close.png" @click="fnListenPopClose"></image>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .listen-pop-wrap {
+        flex-direction: column;
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .5);
+        align-items: center;
+        justify-content: center;
+        .listen-pop {
+            flex-direction: column;
+            width: 646px;
+            height: 586px;
+            background-color: #FFFFFF;
+            border-radius: 24px;
+            .pop-bg {
+                width: 646px;
+                height: 254px;
+                border-radius: 24px;
+            }
+            .pop-title {
+                margin-top: 24px;
+                width: 100%;
+                height: 48px;
+                line-height: 48px;
+                font-size: 36px;
+                font-weight: bold;
+                color: #333333;
+                text-align: center;
+            }
+            .pop-free {
+                margin-top: 16px;
+                width: 100%;
+                height: 36px;
+                line-height: 36px;
+                font-size: 28px;
+                color: #FA5805;
+                text-align: center;
+            }
+            .free-btn {
+                margin-top: 88px;
+                margin-left: 53px;
+                width: 540px;
+                height: 80px;
+                line-height: 80px;
+                background-color: #FA5805;
+                border-radius: 44px;
+                text-align: center;
+                font-size: 32px;
+                color: #FFFFFF;
+            }
+            .pop-desc {
+                margin-top: 24px;
+                width: 100%;
+                height: 80px;
+                line-height: 80px;
+                border-radius: 44px;
+                background-color: transparent;
+                font-size: 32px;
+                color: #FA5805;
+                text-align: center;
+            }
+            .pop-desc-first {
+                margin-top: 36px;
+            }
+            .pop-desc-top {
+                margin-top: 80px;
+            }
+            .pop-btn {
+                margin-left: 53px;
+                width: 540px;
+                background-color: #FA5805;
+                font-size: 32px;
+                color: #FFFFFF;
+            }
+            /* .pop-btn-small {
+                font-size: 28px;
+            } */
+        }
+        .listen-pop-close {
+            margin-top: 24px;
+            width: 54px;
+            height: 54px;
+        }
+    }
+</style>
+
+<script>
+    import router from '@system.router';
+    export default {
+        props: {
+            listenTask: {
+                type: Object,
+                required: true,
+            },
+        },
+        /**
+         * 免费试听
+        */        
+        fnListenTask() {
+            this.$emit('listenAward')
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                PositionName: '听书',
+                ButtonName: '免费试听',
+                ButtonContent: this.listenTask.freeBtnText
+            });
+        },
+        /**
+         * 听书弹窗关闭
+        */    
+        fnListenPopClose() {
+            this.$emit('listenPopClose')
+        },
+        /**
+         * 视频解锁听书
+        */  
+        fnListenVideo() {
+            this.$emit('listenVideo')
+            this.$app.shenceLog.log(this, 'track', 'ButtonClick', {
+                PositionName: '听书',
+                ButtonName: '激励视频解锁',
+                ButtonContent: this.listenTask.videoBtnText
+            });
+        },
+        /**
+         * 跳转会员页面
+        */ 
+        fnRouterToMember() {
+            router.push({
+                uri: '/Member',
+                params: {
+                    pageFrom: 'read',
+                    bookId: this.bookId,
+                    chapterId: this.chapterId,
+                    referrer: '阅读页-听书弹窗',
+                    choosePay: 'listen'
+                }
+            })
+        },
+    }
+</script>

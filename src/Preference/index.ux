@@ -1,0 +1,717 @@
+<template>
+    <div class="root">
+        <block if="!isUpa && isPre">
+            <div class="jump" @click="fnSetPreference('0')"><text>跳过</text></div>
+            <text class="p1">精彩小说等你开启</text>
+            <text class="p2">选择性别，进入你的专属小说世界</text>
+            <div class="sexbox">
+                <div class="sex_23" @click="changeSexSelect('1')">
+                    <image src="https://xsmfdq.kkyd.cn/images/sex-boy.png" class="sex_images"></image>
+                    <text>我是男生</text>
+                    <image class="select" if="{{sexSelected=='1'}}" src="https://xsmfdq.kkyd.cn/images/sex-select.png"></image>
+                    <image class="select" else src="https://xsmfdq.kkyd.cn/images/sex-not-select.png"></image>
+                </div>
+                <div class="sex_23" @click="changeSexSelect('2')">
+                    <image src="https://xsmfdq.kkyd.cn/images/sex-girl.png" class="sex_images"></image>
+                    <text>我是女生</text>
+                    <image class="select" if="{{sexSelected=='2'}}" src="https://xsmfdq.kkyd.cn/images/sex-select.png"></image>
+                    <image class="select" else src="https://xsmfdq.kkyd.cn/images/sex-not-select.png"></image>
+                </div>
+            </div>
+            <text @click="fnConfirmPreference" class="sex-confirm">确定</text>
+        </block>
+        <block if="isUpa">
+            <div class="giveup">
+                <div class="pop">
+                    <text class="title">设备信息权限申请</text>
+                    <text class="text"><span>为了识别手机设备，生成您的账户，请允许{{appName}}使用设备信息权限。</span></text>
+                    <div class="btn">
+                        <text class="cancle" @click="clickRefuse()">拒绝</text>
+                        <text class="confirm" @click="clickAgree()">同意</text>
+                    </div>
+                </div>
+            </div>
+        </block>
+    </div>
+</template>
+
+<style lang="less" scoped>
+    .sex-confirm{
+        width:360px;
+        height:90px;
+        background-color:rgba(246,87,92,1);
+        border-radius:45px;
+        margin-left: 195px;
+        margin-top: 66px;
+        font-size:34px;
+        font-weight:bold;
+        color:rgba(255,255,255,1);
+        line-height:48px;
+        text-align: center;
+    }
+    .sex_23{
+        margin-bottom: 40px;
+        width: 606px;
+        background-color: #F7F6FB;
+        padding: 22px 40px;
+        border-radius:24px;
+        align-items: center;
+    }
+    .sex_23 text{
+        flex: 1;
+        padding-left: 40px;
+        font-size:30px;
+        color:rgba(51,51,51,1);
+        line-height:42px;
+    }
+    .sex_23 .select{
+        width: 50px;
+        height: 50px;
+    }
+    .sex_images{
+        width: 156px;
+        height: 156px;
+    }
+    .colred {color:#FF5B60;}
+    .root{flex-direction:column;}
+    .sexbox{
+        margin-top: 85px;
+        margin-left: 71px;
+        flex-direction: column;
+        align-content: center;
+    }
+    .sex{
+        margin-bottom: 60px;
+        height:220px;
+        border-radius:8px;
+        background-color: #FFF1F1;
+        flex:1;
+        align-items: center;
+        padding-left:68px;
+    }
+    .sex .tx image{width:170px;height:180px;}
+    .sex .txt{
+        margin-left:80px;
+        flex-direction: column;
+    }
+    .sex .div1 text{
+        font-size:44px;
+        font-weight:bold;
+        color:rgba(74,74,74,1);    
+    }
+    .sex .div1 .jt{
+        width: 20px;
+        height: 20px;
+        transform: rotate(45deg);
+        border-top-color: rgba(74,74,74,1);
+        border-top-width: 2px;
+        border-right-color: rgba(74,74,74,1);
+        border-right-width: 2px;
+        margin-top: 22px;
+        margin-left: 20px;
+    }
+    .sex .div2 text{
+        margin-top: 19px;
+        font-size:26px;
+        color:rgba(155,155,155,1);
+    }
+    .male{
+        background-color: #F0F7FF;
+    }
+    .jump{
+        align-items: flex-start;
+        justify-content: flex-end;
+        margin-top: 100px;
+        margin-right: 40px;
+    }
+    .jump text{
+        font-size:30px;
+        color:rgba(175,175,175,1);  
+        line-height:42px;
+    }
+    .p1{
+        font-size:48px;
+        font-weight:bold;
+        color:rgba(51,51,51,1);
+        margin-top: 99px;
+        margin-left: 72px;
+        line-height: 67px;
+    }
+    .p2{
+        color:rgba(155,155,155,1);
+        margin-top: 20px;
+        margin-left: 72px;
+        font-size:30px;
+        font-weight:400;
+        color:rgba(102,102,102,1);
+        line-height:42px;
+    }
+
+    .giveup{
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0,0,0,0.8);;
+        .pop{
+            width:560px;
+            /* margin-top: 400px; */
+            background-color:rgba(255,255,255,1);
+            border-radius:24px;
+            flex-direction: column;
+            align-items: center;
+            .title{
+                font-size:36px;
+                font-weight:bold;
+                color:rgba(68,68,68,1);
+                margin-top: 30px;
+            }
+            .text{
+                text-indent: 2em;
+                width:480px;
+                font-size:26px;
+                color:rgba(115,115,115,1);
+                margin: 30px 0px 32px;
+                line-height:40px;
+            }
+            span{
+                line-height:40px;
+            }
+            .btn{
+                .cancle{
+                    width:50%;
+                    height:84px;
+                    background-color:rgba(242,242,242,1);
+                    color:rgba(186,186,186,1);
+                    text-align: center;
+                    line-height: 84px;
+                    border-bottom-left-radius: 24px;
+
+                }
+                .confirm{
+                    width:50%;
+                    height:84px;
+                    text-align: center;
+                    line-height: 84px;
+                    color:rgba(255,255,255,1);
+                    background-color:#FD895A;
+                    border-bottom-right-radius: 24px;
+                }
+            }
+        }
+    }
+
+</style>
+
+<script>
+import device from '@system.device';
+import storage from '@system.storage';
+import router from '@system.router';
+import prompt from '@system.prompt';
+import shortcut from '@system.shortcut';
+// import { pageEnter } from '../TDSDK/TDSDK.min.js';
+// import { pageLeave } from '../TDSDK/TDSDK.min.js';
+export default {
+    data:{
+        appName: '',
+        isPre:false,
+        isUpa:false,
+        thisName:'',
+        url:'',
+        txtName:'',
+        timer:null,
+        isTime1000:false,
+        device:{},
+        sexSelected:'1',
+        authTips:''
+    },
+    onInit() {
+        let that = this;
+        this.appName=this.$app.$data.name;
+        // this.$page.setTitleBar({ text: this.appName });
+        this.url = this.$app.api;
+        this.txtName = this.$app.$data.channelCode;
+        //https://95xsmfdq.kkyd.cn/huodong/quickapp/agreement/loginotice.html
+        that.getAgreement();
+        that.thisName = that.$app.$data.name;
+        clearTimeout(that.timer);
+        that.timer = setTimeout(() => {
+            that.isUpa=true;
+            that.isTime1000 = true;
+            that.$app.$def.quickappLog([703,{
+                qmap:{
+                    site:0,
+                    source:'time1000',
+                    type:'showAgreement'
+                }
+            },'device_pop'], that);
+        }, 1000);
+    },
+    onShow() {
+        this.$app.lastOpenPage = ''
+        this.$app.shenceLog.log(this, 'pageShow', '', {
+            Title: '性别选择'
+        });
+        // pageEnter(this.$page.path);
+        let that = this;
+        that.$app.$def.quickappLog([701], that);
+        //$umeng_stat.resume(that);
+    },
+    onHide() {
+        // pageLeave(this.$page.path);
+       //$umeng_stat.pause(this);
+    },
+    getAgreement(){
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2150',
+                data: {},
+                succ: function (res) {
+                    if(!(res && res.data)) {
+                        return
+                    }
+                    
+                    that.$app.isAddDesktop = !!res.data.isAddDesktop
+                    
+                    if(res.data.crtt){
+                        that.authTips = res.data.crtt
+                    }
+                    clearTimeout(that.timer);
+                    if(that.isTime1000){
+                        return;
+                    }
+                    that.isUpa=true;
+                    that.$app.$def.quickappLog([703,{
+                        qmap:{
+                            site:0,
+                            source:'2150succ',
+                            type:'showAgreement'
+                        }
+                    },'device_pop'], that);
+
+                }
+        })
+    },
+    getImei() {
+        let that = this
+        let oGetAndroidId = new Promise((resolve,reject)=>{
+            device.getUserId({
+                success: function(data) {
+                    that.device.androidId = data.userId
+                    resolve()
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            // id:data.userId,
+                            site:'1'
+                        }
+                    }, 'getAndroidId'], that)
+                    
+                },
+                fail: function(data, code) {
+                    resolve()
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            code:code,
+                            data:data,
+                            site:'2'
+                        }
+                    }, 'getAndroidId'], that)
+                    
+                }
+            })
+        })
+        let getOaid = new Promise((resolve,reject)=>{
+            try {
+                device.getOAID({
+                    success: function(data) {
+                        console.log(`handling success: ${data.oaid}`)
+                        if(data.oaid){
+                            that.device.oaid = data.oaid
+                        }
+                        resolve()
+                    },
+                    fail: function(data, code) {
+                        console.log(`handling fail, code = ${code}`)
+                        resolve()
+                    }
+                })
+            } catch (error) {
+                resolve()
+            }
+        })
+        let oGetId = new Promise((resolve, reject) => {
+            device.getId({
+                type: ['device', 'mac'],
+                success: function (res) {
+                    that.device.ei = res.device;			
+                    that.device.mac = res.mac;
+                    storage.set({
+                        key: 'imei',
+                        value: res.device,
+                    })
+                    resolve(res);
+                    //获取设备信息成功打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            site:'1',
+                        }
+                    }, 'device_getid'], that)
+
+                },
+                fail: function (data, code) {
+                    reject(data)
+                    //获取设备信息失败打点
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            site:'2',
+                            source:'device_getId_fail',
+                            data,
+                            code
+                        }
+                    }, 'catch_error'], that)
+                }
+            })
+        })
+        Promise.all([oGetAndroidId,getOaid,oGetId]).then((result) => {
+            let curHeader = that.$app.headerJson
+            if(curHeader.utdidTmp&&curHeader.userId&&(that.device.oaid||that.device.ei)){
+                that.device.utdid = that.$app.$def.hex_md5(that.device.oaid||that.device.ei + that.device.mac);
+                let data = {
+                    utdid:that.device.utdid,
+                    utdidTmp:curHeader.utdidTmp,
+                    userId:curHeader.userId,
+                    ei:that.device.oaid||that.device.ei,
+                    blackList:1,
+                    androidId:that.device.androidId||'',
+                    uuid:that.$app.sourceInfo['uuid'],
+                    pullMode:that.$app.sourceInfo['pullMode']
+                }
+                that.$app.$def.requestData(that,{
+                    interface: `/glory/fastapp/2108`,
+                    data: data,
+                    succ: function (data) {
+                        if(curHeader.userId != data.data.userId){
+                            that.$app.$def.sLogout()
+                            that.$app.sensors.identify(that.$app.headerJson.scDistinctId+'_older', true)
+                            that.$app.sensors.login(data.data.userId);
+                            that.$app.isNewUser = false
+                        }
+                        curHeader.utdid = that.device.utdid
+                        curHeader.userId = data.data.userId
+                        curHeader.channelCode=data.data.channelCode||that.$app.$data.channelCode;
+                        that.$app.shenceLog && that.$app.shenceLog.fnSetCommonArgs({
+                            RegisterDate: (data.data && data.data.ctime) || new Date().getTime(),
+                            ChannelCode: (data.data && data.data.channelCode) || that.$app.$data.channelCode
+                        })
+                        data.data && data.data.ctime && that.$app.$def.setStorageFile(that, {
+                            key: 'createTime',
+                            value: data.data.ctime,
+                        })
+                        if(data.data.isBlack){
+                            curHeader.utdid = ''
+                        }
+                        that.$app.$def.setStorageFile(that,{
+                            key:'headerJson',
+                            value:curHeader,
+                            success:function(){
+                                // that.$app.$def.appSourceinfoLog(that)        
+                            }
+                        })
+                        that.$app.headerJson = curHeader 
+                        if(!data.data.sex){
+                           that.showShortPre()
+                        }else{
+                            that.fnSetPreference(data.data.sex.toString());
+                        }
+                    },
+                    error: function(){
+                        that.showShortPre()
+                        // if(that.$app.headerJson.userId){
+                        //     that.$app.sensors.login(that.$app.headerJson.userId);
+                        // }
+                    }
+                })
+            }else{
+                that.showShortPre()
+                // if(that.$app.headerJson.userId){
+                //     that.$app.sensors.login(that.$app.headerJson.userId);
+                // }
+            }
+        },()=>{
+            that.showShortPre()
+            // if(that.$app.headerJson.userId){
+            //     that.$app.sensors.login(that.$app.headerJson.userId);
+            // }
+            that.$app.$def.quickappLog([703, {
+                qmap:{
+                    source:'oGetInfo_fail',
+                    thisUri:that.$page.uri
+                }
+            }, 'catch_error'], that)
+        })
+
+    },
+    fnRouter(url){
+        let that = this;
+        // 跳转到首页
+        router.replace({
+            uri:url,
+            params:{
+                isStartToIndex:1
+            }
+        })
+    },
+    clickRefuse(){
+        let that = this
+        that.isUpa = false;
+        that.$app.$def.quickappLog([702,{
+            qmap:{
+                site:2,
+                source:'Preference',
+                event:'hesitate',
+                isUpa:that.isUpa
+            }
+        },'device_pop'], that);
+        that.showShortPre()
+    },
+    clickAgree(){
+        // 阅读并同意
+        let that = this;
+        that.isUpa = false;
+        that.$app.$def.quickappLog([702,{
+            qmap:{
+                site:1,
+                source:'Preference',
+                event:'hesitate',
+                isUpa:that.isUpa
+            }
+        },'device_pop'], that);
+        if(that.$app.$data.channelCode==that.$app.sourceInfo['sourceCid']){
+            that.getImei()
+        }else{
+            that.showShortPre()
+        }
+    },
+    onBackPress(){
+        let that = this;
+        if(!that.isPre){
+            // 有协议弹窗户退出应用 
+            that.$app.exit();
+            that.$app.$def.quickappLog([702,{
+                qmap:{
+                    site:9,
+                    source:'Preference',
+                    event:'onBackPress',
+                    isUpa:that.isUpa
+                }
+            },'agreement'], that);
+        }else{
+            // 无跳转到index
+            that.fnSetPreference('0');
+        }
+
+
+        // 退出应用
+        
+        return true
+    },
+    // clickYinsi(){
+    //     let that = this;
+    //     that.$app.$def.quickappLog([702,{
+    //         qmap:{
+    //             source:'Preference',
+    //             event:'yinsi'
+    //         }
+    //     },'agreement'], that);
+    //     console.log('Webhuodong')
+    //     // 跳转到H5
+    // },
+    // clickXieyi(){
+    //     let that = this;
+    //     that.$app.$def.quickappLog([702,{
+    //         qmap:{
+    //             source:'Preference',
+    //             event:'xieyi'
+    //         }
+    //     },'agreement'], that);
+    //     // 跳转到H5
+    // },
+    changeSexSelect(sex){
+        this.sexSelected = sex
+    },
+    fnConfirmPreference(){
+        this.fnSetPreference(this.sexSelected)
+    },
+    fnSetPreference(readPref){
+        this.$app.$def.quickappLog([702,{
+            qmap:{
+                readPref:readPref
+            }
+        },'setPreference'], this);
+        let that=this;
+        new Promise((resolve,reject)=>{
+            that.$app.$def.requestData(that,
+                {
+                    interface: '/glory/fastapp/2107',
+                    data: {readPref:readPref},
+                    succ: function (res) {
+                        resolve(res);
+                    },
+                    fail: function(){
+                        reject()
+                    }
+                }
+            )
+        }).then((res)=>{
+            that.$app.$def.getStorageFile(that,{
+                key:'headerJson',
+                success: function(data) {
+                    if(data){
+                        if(!that.$valid){return;}
+                        let headerJson=JSON.parse(data);
+                        headerJson.readPref=readPref
+
+                        // 写入性别
+                        that.$app.$def.setStorageFile(that,{
+                            key:'headerJson',
+                            value:headerJson,
+                            success: function(data) {
+                                that.fnRouter('/Index');
+                            }
+                        })
+                        that.$app.headerJson = headerJson;
+                    }
+                },
+                fail: function(data, code) {
+                    that.$app.$def.quickappLog([703, {
+                        qmap:{
+                            source:"getStorage_headerJson_fail",
+                            thisUri:that.$page.uri,
+                            thisPage:"Preference",
+                            data,
+                            code,
+                        }
+                    }, 'catch_error'], that)
+                }
+            })
+ 
+        },(err)=>{
+            that.fnRouter('/Index');
+        })
+    },
+    showShortPre(){
+        this.appStartShortcut()
+        this.isPre = true
+    },
+    appStartShortcut(){
+        let that = this
+        if(!that.authTips){
+			return
+		}
+        if(!that.$app.hasStartShortcut){
+            that.$app.hasStartShortcut = true
+            shortcut.hasInstalled({
+                success: function (ret) {
+                    if (!ret) {
+                        shortcut.install({
+                            message: that.authTips?that.authTips:`添加【${that.appName}】到手机桌面图标`,
+                            success: function () {
+                                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                                    IsSuccess: true,
+                                    PositionName: '性别选择页面授权后添桌',
+                                    Instruction: that.authTips ? that.authTips : `添加【${that.appName}】到手机桌面图标`,
+                                    StateCode: 'return'
+                                }); 
+                                //来源写入变量
+                                that.$app.dataJson = Object.assign({}, {infotype:'shortcut'});
+                                prompt.showToast({
+                                    message: '成功创建桌面图标'
+                                });
+                                that.$app.$def.quickappLog([703, {
+                                    qmap:{
+                                        site: '2',
+                                        page: '3',
+                                        sorce:'afterauth_shortcut'
+                                    }
+                                }, 'shortcut'], that)
+                                that.$app.$def.requestData(that,{
+                                    interface: `/glory/fastapp/2107`,
+                                    data: {
+                                        isas:1
+                                    },
+                                    succ: function (data) {
+                                    },
+                                    error: function (code) {
+                                    }
+                                })
+                                that.fnTellServer(1);
+                            },
+                            fail: function (data, code) {
+                                that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                                    IsSuccess: false,
+                                    PositionName: '性别选择页面授权后添桌',
+                                    Instruction: that.authTips ? that.authTips : `添加【${that.appName}】到手机桌面图标`,
+                                    StateCode: 'return',
+                                    MsgSendCode: code,
+                                    MsgSendContent: data,
+                                }); 
+                                // prompt.showToast({
+                                //     message: '创建桌面图标失败'
+                                // })
+                                that.$app.$def.quickappLog([703, {
+                                    qmap:{
+                                        site: '3',
+                                        page: '3',
+                                        data,
+                                        code,
+                                        sorce:'afterauth_shortcut',
+                                    }
+                                }, 'shortcut'], that)
+                            },
+                            complete(errmsg){
+                                that.$app.$def.quickappLog([703, {
+                                    qmap:{
+                                        site: '5',
+                                        page: '3',
+                                        errmsg:`${errmsg}`,
+                                        sorce:'afterauth_shortcut'
+                                    }
+                                }, 'shortcut'], that)
+                            }
+                        })
+                        that.$app.shenceLog.log(that, 'track', 'SaveToDesktop', {
+                            PositionName: '性别选择页面授权后添桌',
+                            Instruction: that.authTips ? that.authTips : `添加【${that.appName}】到手机桌面图标`,
+                            StateCode: 'submit',
+                            DesktopState: that.$app.isAddDesktop ? 'Deleted' : 'Neversaved'
+                        }); 
+                        that.$app.$def.quickappLog([703, {
+                            qmap:{
+                                site: '1',
+                                page: '3',
+                                sorce:'afterauth_shortcut'
+                            }
+                        }, 'shortcut'], that)
+                    }
+                }
+            }) 
+        }
+    },
+    fnTellServer(taskAction) {
+        let that = this;
+        that.$app.$def.requestData(that,
+            {
+                interface: '/glory/fastapp/2146',
+                data: { action: taskAction },
+                succ: function (res) {
+                }
+            }
+        )
+    }
+}
+</script>
